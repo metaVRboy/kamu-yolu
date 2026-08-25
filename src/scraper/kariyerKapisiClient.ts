@@ -1,10 +1,12 @@
-import { Agent } from "undici";
+import { Agent, request as undiciRequest } from "undici";
 
 const BASE_URL = "https://api.kariyerkapisi.gov.tr/api";
 
-// Bazi barindirma ortamlarindan (ör. Vercel'in bazi bolgelerinden) bu adrese
-// baglanti undici'nin varsayilan 10sn baglanti zaman asimindan daha uzun
-// surebiliyor; bu yuzden ozel bir Agent ile suresi uzatiliyor.
+// Next.js, sunucu bilesenlerinde/route handler'larda global fetch'i kendi
+// onbellekleme katmaniyla sarmalar ve ozel bir "dispatcher" verilse bile
+// bunu yok sayar. Bu yuzden burada global fetch yerine undici'nin dusuk
+// seviyeli request() fonksiyonu dogrudan kullanilir; boylece ozel Agent
+// (uzatilmis baglanti zaman asimi) gercekten devreye girer.
 const dispatcher = new Agent({ connectTimeout: 30_000 });
 
 // Kariyer Kapisi resmi kamu ise alim portalinin herkese acik (girissiz)
@@ -23,17 +25,16 @@ function sleep(ms: number) {
 async function post<T>(path: string, body: unknown, retries = 3): Promise<T> {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
-      const res = await fetch(`${BASE_URL}${path}`, {
+      const res = await undiciRequest(`${BASE_URL}${path}`, {
         method: "POST",
         headers: HEADERS,
         body: JSON.stringify(body),
-        // @ts-expect-error - Node/undici destekli, standart fetch tipinde yok
         dispatcher,
       });
-      if (!res.ok) {
-        throw new Error(`Kariyer Kapisi API hatasi: ${path} -> ${res.status}`);
+      if (res.statusCode < 200 || res.statusCode >= 300) {
+        throw new Error(`Kariyer Kapisi API hatasi: ${path} -> ${res.statusCode}`);
       }
-      return (await res.json()) as T;
+      return (await res.body.json()) as T;
     } catch (err) {
       if (attempt === retries) throw err;
       await sleep(1000 * attempt);
