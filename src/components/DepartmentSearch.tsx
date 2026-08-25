@@ -48,20 +48,20 @@ export function DepartmentSearch({
           onFocus={() => setIsOpen(true)}
           onBlur={() => setTimeout(() => setIsOpen(false), 150)}
           placeholder="Bölümünü yaz (ör. Bilgisayar Mühendisliği)"
-          className="h-12 rounded-xl border-border/70 bg-white pl-11 text-base shadow-sm"
+          className="h-12 rounded-2xl border-primary/20 bg-white pl-11 text-base shadow-sm"
         />
       </div>
       {isOpen && filtered.length > 0 && (
-        <ul className="absolute z-10 mt-2 max-h-80 w-full overflow-auto rounded-xl border border-border bg-white p-1 shadow-lg">
+        <ul className="absolute z-10 mt-2 max-h-80 w-full overflow-auto rounded-2xl border border-primary/15 bg-white/95 p-1 shadow-lg backdrop-blur-xl">
           {filtered.map((d) => (
             <li key={d.slug}>
               <button
                 type="button"
                 onMouseDown={() => goToDepartment(d.slug)}
-                className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm hover:bg-primary/5"
+                className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm hover:bg-primary/10"
               >
                 <span>{d.name}</span>
-                <Badge variant="secondary" className="font-normal">
+                <Badge className="border-primary/15 bg-primary/10 font-normal text-primary">
                   {LEVEL_LABEL[d.level] ?? d.level}
                 </Badge>
               </button>
@@ -70,7 +70,7 @@ export function DepartmentSearch({
         </ul>
       )}
       {isOpen && query && filtered.length === 0 && (
-        <div className="absolute z-10 mt-2 w-full rounded-xl border border-border bg-white px-4 py-3 text-sm text-muted-foreground shadow-lg">
+        <div className="absolute z-10 mt-2 w-full rounded-2xl border border-primary/15 bg-white/95 px-4 py-3 text-sm text-muted-foreground shadow-lg backdrop-blur-xl">
           Bölüm bulunamadı. Farklı bir isimle deneyin.
         </div>
       )}

@@ -64,7 +64,7 @@ export default async function DepartmentResultsPage({
 
       <div className="mt-8 space-y-4">
         {postings.length === 0 && (
-          <div className="rounded-xl border border-dashed border-border bg-white/50 p-8 text-center text-sm text-muted-foreground">
+          <div className="rounded-2xl border border-dashed border-primary/25 bg-primary/5 p-8 text-center text-sm text-muted-foreground">
             Seçtiğin kriterlere uyan aktif bir ilan bulunmuyor. Filtreleri
             değiştirmeyi veya daha sonra tekrar kontrol etmeyi deneyebilirsin.
           </div>

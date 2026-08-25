@@ -30,22 +30,22 @@ export function PostingCard({ posting }: { posting: PostingCardData }) {
   const illerLabel = posting.iller.length > 0 ? posting.iller.join(", ") : null;
 
   return (
-    <Card className="group gap-3 border-border/70 bg-white/70 p-5 shadow-sm backdrop-blur-sm transition-shadow hover:shadow-md">
+    <Card className="group gap-3 border-primary/15 bg-white/70 p-5 shadow-sm backdrop-blur-md transition-shadow hover:shadow-md">
       <div className="flex flex-wrap items-center gap-1.5 text-xs">
-        <Badge variant="secondary" className="gap-1 font-normal">
+        <Badge className="gap-1 border-primary/15 bg-primary/10 font-normal text-primary">
           <Building2 className="h-3 w-3" />
           {INSTITUTION_TYPE_LABEL[posting.institutionType] ?? posting.institutionType}
         </Badge>
-        <Badge variant="secondary" className="font-normal">
+        <Badge className="border-primary/15 bg-primary/10 font-normal text-primary">
           {levels}
         </Badge>
         {posting.ilanTuru && (
-          <Badge variant="secondary" className="font-normal">
+          <Badge className="border-primary/15 bg-primary/10 font-normal text-primary">
             {posting.ilanTuru}
           </Badge>
         )}
         {illerLabel && (
-          <Badge variant="secondary" className="gap-1 font-normal">
+          <Badge className="gap-1 border-primary/15 bg-primary/10 font-normal text-primary">
             <MapPin className="h-3 w-3" />
             {illerLabel}
           </Badge>

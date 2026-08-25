@@ -21,27 +21,26 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
 
   return (
     <html lang="tr" className={cn("h-full antialiased", inter.variable, "font-sans")}>
-      <body className="flex min-h-full flex-col bg-background text-foreground">
-        <div className="h-1 w-full bg-gradient-to-r from-primary via-chart-2 to-primary" />
-        <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md">
-          <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
+      <body className="flex min-h-full flex-col bg-blue-50 text-foreground">
+        <header className="sticky top-3 z-40 px-3 sm:top-4 sm:px-4">
+          <div className="mx-auto flex max-w-6xl items-center justify-between rounded-2xl border border-primary/25 bg-primary/15 px-4 py-3 shadow-lg shadow-primary/10 backdrop-blur-xl sm:px-6">
             <Link href="/" className="flex items-center gap-2.5">
-              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
                 <Landmark className="h-5 w-5" strokeWidth={2} />
               </span>
-              <span className="text-lg font-semibold tracking-tight">
+              <span className="text-lg font-semibold tracking-tight text-slate-900">
                 Kamu Yolu
               </span>
             </Link>
-            <nav className="flex items-center gap-6 text-sm font-medium text-muted-foreground">
-              <Link href="/" className="transition-colors hover:text-foreground">
+            <nav className="flex items-center gap-6 text-sm font-medium text-slate-700">
+              <Link href="/" className="transition-colors hover:text-slate-900">
                 Bölüme Göre Ara
               </Link>
             </nav>
           </div>
         </header>
 
-        <main className="flex-1 bg-gradient-to-b from-primary/5 via-background to-background">
+        <main className="flex-1 bg-gradient-to-b from-blue-100 via-blue-50 to-white">
           {children}
         </main>
 

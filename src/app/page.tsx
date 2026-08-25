@@ -29,18 +29,15 @@ export default async function Home() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
-      <section className="mx-auto max-w-3xl rounded-2xl border border-white/60 bg-white/60 p-8 text-center shadow-xl shadow-primary/5 backdrop-blur-xl sm:p-12">
-        <Badge
-          variant="outline"
-          className="border-primary/30 bg-primary/5 text-primary"
-        >
+      <section className="mx-auto max-w-3xl rounded-3xl border border-primary/20 bg-primary/10 p-8 text-center shadow-xl shadow-primary/10 backdrop-blur-xl sm:p-12">
+        <Badge className="border-transparent bg-primary/90 text-primary-foreground">
           Kamu personeli & memur ilanları
         </Badge>
 
-        <h1 className="mt-5 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+        <h1 className="mt-5 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
           Mezun olduğun bölüme uygun kamu ilanlarını bul
         </h1>
-        <p className="mx-auto mt-3 max-w-2xl text-balance text-muted-foreground">
+        <p className="mx-auto mt-3 max-w-2xl text-balance text-slate-600">
           Bölümünü seç; bakanlık, üniversite, hastane, müze ve diğer kamu
           kurumlarının o bölüme uygun veya bölüm şartı olmayan güncel
           sözleşmeli personel/memur ilanlarını listeleyelim.
@@ -49,11 +46,14 @@ export default async function Home() {
           <DepartmentSearch departments={departments} />
         </div>
 
-        <Separator className="mx-auto mt-8 max-w-sm bg-border/60" />
+        <Separator className="mx-auto mt-8 max-w-sm bg-primary/20" />
 
         <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
           {INSTITUTION_TAGS.map((tag) => (
-            <Badge key={tag} variant="secondary" className="font-normal">
+            <Badge
+              key={tag}
+              className="border-primary/20 bg-white/70 font-normal text-primary"
+            >
               {tag}
             </Badge>
           ))}

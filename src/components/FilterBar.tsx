@@ -56,13 +56,13 @@ export function FilterBar({ options }: { options: FilterOptions }) {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border/60 bg-white/60 p-3 backdrop-blur-sm">
+    <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-primary/20 bg-primary/10 p-3 backdrop-blur-xl">
       {options.institutionTypes.length > 1 && (
         <Select
           value={searchParams.get(PARAM_KEYS.institutionType) ?? ALL}
           onValueChange={(v) => updateParam(PARAM_KEYS.institutionType, v)}
         >
-          <SelectTrigger className="w-[180px] bg-white">
+          <SelectTrigger className="w-[180px] border-primary/20 bg-white/80">
             <SelectValue>
               {(v: string) =>
                 v === ALL || !v
@@ -87,7 +87,7 @@ export function FilterBar({ options }: { options: FilterOptions }) {
           value={searchParams.get(PARAM_KEYS.ilanTuru) ?? ALL}
           onValueChange={(v) => updateParam(PARAM_KEYS.ilanTuru, v)}
         >
-          <SelectTrigger className="w-[200px] bg-white">
+          <SelectTrigger className="w-[200px] border-primary/20 bg-white/80">
             <SelectValue>
               {(v: string) => (v === ALL || !v ? "Tüm ilan türleri" : v)}
             </SelectValue>
@@ -108,7 +108,7 @@ export function FilterBar({ options }: { options: FilterOptions }) {
           value={searchParams.get(PARAM_KEYS.il) ?? ALL}
           onValueChange={(v) => updateParam(PARAM_KEYS.il, v)}
         >
-          <SelectTrigger className="w-[160px] bg-white">
+          <SelectTrigger className="w-[160px] border-primary/20 bg-white/80">
             <SelectValue>
               {(v: string) => (v === ALL || !v ? "Tüm iller" : v)}
             </SelectValue>
