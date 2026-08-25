@@ -1,4 +1,9 @@
+import Link from "next/link";
+import { ArrowUpRight, Building2, CalendarClock, MapPin } from "lucide-react";
 import { INSTITUTION_TYPE_LABEL, LEVEL_LABEL } from "@/lib/labels";
+import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 export type PostingCardData = {
   id: string;
@@ -25,60 +30,69 @@ export function PostingCard({ posting }: { posting: PostingCardData }) {
   const illerLabel = posting.iller.length > 0 ? posting.iller.join(", ") : null;
 
   return (
-    <div className="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm">
-      <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-500">
-        <span className="rounded-full bg-neutral-100 px-2 py-1">
+    <Card className="group gap-3 border-border/70 bg-white/70 p-5 shadow-sm backdrop-blur-sm transition-shadow hover:shadow-md">
+      <div className="flex flex-wrap items-center gap-1.5 text-xs">
+        <Badge variant="secondary" className="gap-1 font-normal">
+          <Building2 className="h-3 w-3" />
           {INSTITUTION_TYPE_LABEL[posting.institutionType] ?? posting.institutionType}
-        </span>
-        <span className="rounded-full bg-neutral-100 px-2 py-1">{levels}</span>
+        </Badge>
+        <Badge variant="secondary" className="font-normal">
+          {levels}
+        </Badge>
         {posting.ilanTuru && (
-          <span className="rounded-full bg-neutral-100 px-2 py-1">
+          <Badge variant="secondary" className="font-normal">
             {posting.ilanTuru}
-          </span>
+          </Badge>
         )}
         {illerLabel && (
-          <span className="rounded-full bg-neutral-100 px-2 py-1">{illerLabel}</span>
+          <Badge variant="secondary" className="gap-1 font-normal">
+            <MapPin className="h-3 w-3" />
+            {illerLabel}
+          </Badge>
         )}
         {!posting.isDepartmentRestricted && (
-          <span className="rounded-full bg-emerald-100 px-2 py-1 text-emerald-700">
+          <Badge className="border-transparent bg-emerald-100 font-normal text-emerald-700 hover:bg-emerald-100">
             Bölüm şartı yok
-          </span>
+          </Badge>
         )}
         {posting.isDemo && (
-          <span className="rounded-full bg-amber-100 px-2 py-1 font-medium text-amber-800">
+          <Badge className="border-transparent bg-amber-100 font-medium text-amber-800 hover:bg-amber-100">
             ÖRNEK VERİ — gerçek ilan değildir
-          </span>
+          </Badge>
         )}
       </div>
 
-      <h3 className="mt-3 text-lg font-semibold text-neutral-900">
+      <h3 className="text-lg font-semibold leading-snug text-foreground">
         {posting.title}
       </h3>
-      <p className="text-sm text-neutral-600">{posting.institutionName}</p>
+      <p className="-mt-2 text-sm text-muted-foreground">{posting.institutionName}</p>
 
       {posting.departmentRequirementRaw && (
-        <p className="mt-2 line-clamp-3 text-sm text-neutral-500">
+        <p className="line-clamp-3 text-sm text-muted-foreground">
           {posting.departmentRequirementRaw}
         </p>
       )}
 
-      <div className="mt-4 flex items-center justify-between">
-        <div className="text-xs text-neutral-500">
-          {posting.applicationEnd
-            ? `Son başvuru: ${posting.applicationEnd.toLocaleDateString("tr-TR")}`
-            : "Son başvuru tarihi belirtilmemiş"}
-          <span className="mx-1">·</span>
-          Kaynak: {posting.sourceName}
+      <div className="mt-1 flex items-center justify-between gap-3 border-t border-border/60 pt-4">
+        <div className="flex flex-col gap-0.5 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <CalendarClock className="h-3.5 w-3.5" />
+            {posting.applicationEnd
+              ? `Son başvuru: ${posting.applicationEnd.toLocaleDateString("tr-TR")}`
+              : "Son başvuru tarihi belirtilmemiş"}
+          </span>
+          <span>Kaynak: {posting.sourceName}</span>
         </div>
-        <a
+        <Link
           href={posting.sourceUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-700"
+          className={buttonVariants({ size: "sm", className: "shrink-0" })}
         >
           İlana Git
-        </a>
+          <ArrowUpRight className="h-3.5 w-3.5" />
+        </Link>
       </div>
-    </div>
+    </Card>
   );
 }

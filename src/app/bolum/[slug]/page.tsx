@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import {
   getAvailableFiltersForDepartment,
@@ -7,6 +8,8 @@ import {
 } from "@/lib/matching";
 import { PostingCard } from "@/components/PostingCard";
 import { FilterBar } from "@/components/FilterBar";
+import { Badge } from "@/components/ui/badge";
+import { LEVEL_LABEL } from "@/lib/labels";
 
 export const revalidate = 300;
 
@@ -33,27 +36,38 @@ export default async function DepartmentResultsPage({
   ]);
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10">
-      <Link href="/" className="text-sm text-neutral-500 hover:text-neutral-800">
-        ← Farklı bir bölüm ara
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+      <Link
+        href="/"
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+      >
+        <ArrowLeft className="h-3.5 w-3.5" />
+        Farklı bir bölüm ara
       </Link>
 
-      <h1 className="mt-3 text-2xl font-bold text-neutral-900">
-        {department.name} mezunları için ilanlar
-      </h1>
-      <p className="mt-1 text-sm text-neutral-500">
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          {department.name} mezunları için ilanlar
+        </h1>
+        <Badge variant="outline" className="border-primary/30 text-primary">
+          {LEVEL_LABEL[department.level] ?? department.level}
+        </Badge>
+      </div>
+      <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
         Bu bölüme özel şart koşan ilanlar ile bölüm şartı olmayan, öğrenim
         derecesine göre açılan ilanlar birlikte listelenir.
       </p>
 
-      <FilterBar options={filterOptions} />
+      <div className="mt-6">
+        <FilterBar options={filterOptions} />
+      </div>
 
       <div className="mt-8 space-y-4">
         {postings.length === 0 && (
-          <p className="text-sm text-neutral-500">
+          <div className="rounded-xl border border-dashed border-border bg-white/50 p-8 text-center text-sm text-muted-foreground">
             Seçtiğin kriterlere uyan aktif bir ilan bulunmuyor. Filtreleri
             değiştirmeyi veya daha sonra tekrar kontrol etmeyi deneyebilirsin.
-          </p>
+          </div>
         )}
         {postings.map((posting) => (
           <PostingCard key={posting.id} posting={posting} />

@@ -2,7 +2,10 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Search } from "lucide-react";
 import { LEVEL_LABEL } from "@/lib/labels";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 
 type DepartmentOption = {
   slug: string;
@@ -32,39 +35,42 @@ export function DepartmentSearch({
   }
 
   return (
-    <div className="relative w-full max-w-xl">
-      <input
-        type="text"
-        value={query}
-        onChange={(e) => {
-          setQuery(e.target.value);
-          setIsOpen(true);
-        }}
-        onFocus={() => setIsOpen(true)}
-        onBlur={() => setTimeout(() => setIsOpen(false), 150)}
-        placeholder="Bölümünü yaz (ör. Bilgisayar Mühendisliği)"
-        className="w-full rounded-lg border border-neutral-300 bg-white px-4 py-3 text-base shadow-sm outline-none focus:border-neutral-500"
-      />
+    <div className="relative mx-auto w-full max-w-xl">
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          type="text"
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setIsOpen(true);
+          }}
+          onFocus={() => setIsOpen(true)}
+          onBlur={() => setTimeout(() => setIsOpen(false), 150)}
+          placeholder="Bölümünü yaz (ör. Bilgisayar Mühendisliği)"
+          className="h-12 rounded-xl border-border/70 bg-white pl-11 text-base shadow-sm"
+        />
+      </div>
       {isOpen && filtered.length > 0 && (
-        <ul className="absolute z-10 mt-1 max-h-80 w-full overflow-auto rounded-lg border border-neutral-200 bg-white shadow-lg">
+        <ul className="absolute z-10 mt-2 max-h-80 w-full overflow-auto rounded-xl border border-border bg-white p-1 shadow-lg">
           {filtered.map((d) => (
             <li key={d.slug}>
               <button
                 type="button"
                 onMouseDown={() => goToDepartment(d.slug)}
-                className="flex w-full items-center justify-between px-4 py-2 text-left hover:bg-neutral-100"
+                className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm hover:bg-primary/5"
               >
                 <span>{d.name}</span>
-                <span className="text-xs text-neutral-500">
+                <Badge variant="secondary" className="font-normal">
                   {LEVEL_LABEL[d.level] ?? d.level}
-                </span>
+                </Badge>
               </button>
             </li>
           ))}
         </ul>
       )}
       {isOpen && query && filtered.length === 0 && (
-        <div className="absolute z-10 mt-1 w-full rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-500 shadow-lg">
+        <div className="absolute z-10 mt-2 w-full rounded-xl border border-border bg-white px-4 py-3 text-sm text-muted-foreground shadow-lg">
           Bölüm bulunamadı. Farklı bir isimle deneyin.
         </div>
       )}

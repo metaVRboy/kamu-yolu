@@ -1,13 +1,24 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { X } from "lucide-react";
 import { INSTITUTION_TYPE_LABEL } from "@/lib/labels";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 
 export type FilterOptions = {
   institutionTypes: string[];
   ilanTurleri: string[];
   iller: string[];
 };
+
+const ALL = "__all__";
 
 const PARAM_KEYS = {
   institutionType: "kurum",
@@ -20,9 +31,9 @@ export function FilterBar({ options }: { options: FilterOptions }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  function updateParam(key: string, value: string) {
+  function updateParam(key: string, value: string | null) {
     const params = new URLSearchParams(searchParams.toString());
-    if (value) {
+    if (value && value !== ALL) {
       params.set(key, value);
     } else {
       params.delete(key);
@@ -45,60 +56,85 @@ export function FilterBar({ options }: { options: FilterOptions }) {
   }
 
   return (
-    <div className="mt-6 flex flex-wrap items-center gap-3">
+    <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border/60 bg-white/60 p-3 backdrop-blur-sm">
       {options.institutionTypes.length > 1 && (
-        <select
-          className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm"
-          value={searchParams.get(PARAM_KEYS.institutionType) ?? ""}
-          onChange={(e) => updateParam(PARAM_KEYS.institutionType, e.target.value)}
+        <Select
+          value={searchParams.get(PARAM_KEYS.institutionType) ?? ALL}
+          onValueChange={(v) => updateParam(PARAM_KEYS.institutionType, v)}
         >
-          <option value="">Tüm kurum türleri</option>
-          {options.institutionTypes.map((type) => (
-            <option key={type} value={type}>
-              {INSTITUTION_TYPE_LABEL[type] ?? type}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger className="w-[180px] bg-white">
+            <SelectValue>
+              {(v: string) =>
+                v === ALL || !v
+                  ? "Tüm kurum türleri"
+                  : (INSTITUTION_TYPE_LABEL[v] ?? v)
+              }
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>Tüm kurum türleri</SelectItem>
+            {options.institutionTypes.map((type) => (
+              <SelectItem key={type} value={type}>
+                {INSTITUTION_TYPE_LABEL[type] ?? type}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       )}
 
       {options.ilanTurleri.length > 1 && (
-        <select
-          className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm"
-          value={searchParams.get(PARAM_KEYS.ilanTuru) ?? ""}
-          onChange={(e) => updateParam(PARAM_KEYS.ilanTuru, e.target.value)}
+        <Select
+          value={searchParams.get(PARAM_KEYS.ilanTuru) ?? ALL}
+          onValueChange={(v) => updateParam(PARAM_KEYS.ilanTuru, v)}
         >
-          <option value="">Tüm ilan türleri</option>
-          {options.ilanTurleri.map((tur) => (
-            <option key={tur} value={tur}>
-              {tur}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger className="w-[200px] bg-white">
+            <SelectValue>
+              {(v: string) => (v === ALL || !v ? "Tüm ilan türleri" : v)}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>Tüm ilan türleri</SelectItem>
+            {options.ilanTurleri.map((tur) => (
+              <SelectItem key={tur} value={tur}>
+                {tur}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       )}
 
       {options.iller.length > 1 && (
-        <select
-          className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm"
-          value={searchParams.get(PARAM_KEYS.il) ?? ""}
-          onChange={(e) => updateParam(PARAM_KEYS.il, e.target.value)}
+        <Select
+          value={searchParams.get(PARAM_KEYS.il) ?? ALL}
+          onValueChange={(v) => updateParam(PARAM_KEYS.il, v)}
         >
-          <option value="">Tüm iller</option>
-          {options.iller.map((il) => (
-            <option key={il} value={il}>
-              {il}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger className="w-[160px] bg-white">
+            <SelectValue>
+              {(v: string) => (v === ALL || !v ? "Tüm iller" : v)}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>Tüm iller</SelectItem>
+            {options.iller.map((il) => (
+              <SelectItem key={il} value={il}>
+                {il}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       )}
 
       {hasActiveFilters && (
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="sm"
           onClick={() => router.push(pathname)}
-          className="text-sm text-neutral-500 underline hover:text-neutral-800"
+          className="text-muted-foreground"
         >
+          <X className="h-3.5 w-3.5" />
           Filtreleri temizle
-        </button>
+        </Button>
       )}
     </div>
   );

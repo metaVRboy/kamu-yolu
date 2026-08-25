@@ -1,19 +1,14 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
+import Link from "next/link";
+import { Landmark } from "lucide-react";
 import { getLastSuccessfulScrapeAt } from "@/lib/matching";
+import { cn } from "@/lib/utils";
 import "./globals.css";
 
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+
 export const revalidate = 300;
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "Kamu Yolu — Bölümüne Göre Kamu İlanları",
@@ -25,34 +20,47 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const lastScrapeAt = await getLastSuccessfulScrapeAt();
 
   return (
-    <html
-      lang="tr"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col bg-neutral-50 text-neutral-900">
-        <header className="border-b border-neutral-200 bg-white">
-          <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-            <a href="/" className="text-lg font-semibold tracking-tight">
-              Kamu Yolu
-            </a>
-            <nav className="text-sm text-neutral-600">
-              <a href="/" className="hover:text-neutral-900">
+    <html lang="tr" className={cn("h-full antialiased", inter.variable, "font-sans")}>
+      <body className="flex min-h-full flex-col bg-background text-foreground">
+        <div className="h-1 w-full bg-gradient-to-r from-primary via-chart-2 to-primary" />
+        <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md">
+          <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
+            <Link href="/" className="flex items-center gap-2.5">
+              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
+                <Landmark className="h-5 w-5" strokeWidth={2} />
+              </span>
+              <span className="text-lg font-semibold tracking-tight">
+                Kamu Yolu
+              </span>
+            </Link>
+            <nav className="flex items-center gap-6 text-sm font-medium text-muted-foreground">
+              <Link href="/" className="transition-colors hover:text-foreground">
                 Bölüme Göre Ara
-              </a>
+              </Link>
             </nav>
           </div>
         </header>
-        <main className="flex-1">{children}</main>
-        <footer className="border-t border-neutral-200 bg-white py-6 text-center text-xs text-neutral-500">
-          <p>
-            Kamu Yolu — veriler otomatik ve periyodik olarak güncellenir. İlan
-            detayları için lütfen kaynak kurumun ilan sayfasını esas alın.
-          </p>
-          <p className="mt-1">
-            {lastScrapeAt
-              ? `Veriler en son ${lastScrapeAt.toLocaleString("tr-TR", { dateStyle: "medium", timeStyle: "short" })} tarihinde güncellendi.`
-              : "Veriler henüz otomatik güncelleme almadı."}
-          </p>
+
+        <main className="flex-1 bg-gradient-to-b from-primary/5 via-background to-background">
+          {children}
+        </main>
+
+        <footer className="border-t border-border bg-slate-900 py-8 text-slate-300">
+          <div className="mx-auto max-w-6xl px-4 text-center text-xs sm:px-6">
+            <p className="flex items-center justify-center gap-2 text-sm font-medium text-white">
+              <Landmark className="h-4 w-4" />
+              Kamu Yolu
+            </p>
+            <p className="mt-3">
+              Veriler otomatik ve periyodik olarak güncellenir. İlan
+              detayları için lütfen kaynak kurumun ilan sayfasını esas alın.
+            </p>
+            <p className="mt-1 text-slate-400">
+              {lastScrapeAt
+                ? `Veriler en son ${lastScrapeAt.toLocaleString("tr-TR", { dateStyle: "medium", timeStyle: "short" })} tarihinde güncellendi.`
+                : "Veriler henüz otomatik güncelleme almadı."}
+            </p>
+          </div>
         </footer>
       </body>
     </html>
