@@ -1,4 +1,11 @@
+import { Agent } from "undici";
+
 const BASE_URL = "https://api.kariyerkapisi.gov.tr/api";
+
+// Bazi barindirma ortamlarindan (ör. Vercel'in bazi bolgelerinden) bu adrese
+// baglanti undici'nin varsayilan 10sn baglanti zaman asimindan daha uzun
+// surebiliyor; bu yuzden ozel bir Agent ile suresi uzatiliyor.
+const dispatcher = new Agent({ connectTimeout: 30_000 });
 
 // Kariyer Kapisi resmi kamu ise alim portalinin herkese acik (girissiz)
 // JSON API'leri. Bu uc noktalar tarayicidan devtools ile tespit edilmistir;
@@ -20,6 +27,8 @@ async function post<T>(path: string, body: unknown, retries = 3): Promise<T> {
         method: "POST",
         headers: HEADERS,
         body: JSON.stringify(body),
+        // @ts-expect-error - Node/undici destekli, standart fetch tipinde yok
+        dispatcher,
       });
       if (!res.ok) {
         throw new Error(`Kariyer Kapisi API hatasi: ${path} -> ${res.status}`);
