@@ -29,10 +29,14 @@ async function runScrape(req: NextRequest) {
     const summary = await scrapeKariyerKapisi(prisma);
     return NextResponse.json({ ok: true, summary });
   } catch (err) {
-    return NextResponse.json(
-      { ok: false, error: err instanceof Error ? err.message : String(err) },
-      { status: 500 },
-    );
+    const message = err instanceof Error ? err.message : String(err);
+    const cause =
+      err instanceof Error && err.cause instanceof Error
+        ? err.cause.message
+        : err instanceof Error
+          ? err.cause
+          : undefined;
+    return NextResponse.json({ ok: false, error: message, cause }, { status: 500 });
   }
 }
 
