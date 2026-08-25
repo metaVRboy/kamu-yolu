@@ -1,0 +1,111 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum EducationLevel {
+  ILKOGRETIM
+  LISE
+  ONLISANS
+  LISANS
+  YUKSEK_LISANS
+}
+
+enum InstitutionType {
+  BAKANLIK
+  UNIVERSITE
+  HASTANE
+  BELEDIYE
+  MUZE
+  KIT
+  DIGER
+}
+
+model Department {
+  id        String           @id @default(cuid())
+  name      String           @unique
+  slug      String           @unique
+  level     EducationLevel   // bu bolumun hangi ogrenim derecesine ait oldugu (onlisans/lisans vb.)
+  aliases   DepartmentAlias[]
+  postings  PostingDepartment[]
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+}
+
+model DepartmentAlias {
+  id           String     @id @default(cuid())
+  alias        String
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  departmentId String
+
+  @@unique([departmentId, alias])
+  @@index([alias])
+}
+
+model Posting {
+  id                       String           @id @default(cuid())
+  externalId               String           @unique // kaynak sitedeki benzersiz ilan id/url hash'i, dedupe icin
+  title                    String
+  institutionName          String
+  institutionType          InstitutionType  @default(DIGER)
+  ilanTuru                 String?          // kaynaktaki ham ilan turu (ör. "Sözleşmeli Personel İlanları", "İşçi İlanları")
+  iller                    String[]         @default([]) // kontenjanin acildigi il/iller
+  sourceName               String           // ör. "Kariyer Kapısı"
+  sourceUrl                String
+  educationLevels          EducationLevel[] @default([])
+  departmentRequirementRaw String?          // ilanın ham "aranan nitelikler" metni
+  isDepartmentRestricted   Boolean          @default(false)
+  applicationStart         DateTime?
+  applicationEnd           DateTime?
+  publishedAt              DateTime?
+  isActive                 Boolean          @default(true)
+  isDemo                   Boolean          @default(false) // gercek scraper verisi gelene kadar arayuzu gostermek icin ornek kayit
+  scrapedAt                DateTime         @default(now())
+  createdAt                DateTime         @default(now())
+  updatedAt                DateTime         @updatedAt
+
+  departments PostingDepartment[]
+
+  @@index([isActive])
+  @@index([isDepartmentRestricted])
+  @@index([applicationEnd])
+  @@index([institutionType])
+  @@index([ilanTuru])
+}
+
+enum ScrapeStatus {
+  RUNNING
+  SUCCESS
+  FAILED
+}
+
+model ScrapeRun {
+  id                 String       @id @default(cuid())
+  sourceName         String
+  status             ScrapeStatus @default(RUNNING)
+  startedAt          DateTime     @default(now())
+  finishedAt         DateTime?
+  postingsFound      Int?
+  positionsProcessed Int?
+  unmatchedCount     Int?
+  staleDeactivated   Int?
+  errorMessage       String?
+}
+
+model PostingDepartment {
+  id           String     @id @default(cuid())
+  posting      Posting    @relation(fields: [postingId], references: [id], onDelete: Cascade)
+  postingId    String
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  departmentId String
+  matchedAlias String?    // eşleşmeyi tetikleyen alias/terim (denetim ve hata ayıklama için)
+
+  @@unique([postingId, departmentId])
+}
