@@ -3,20 +3,10 @@ import { getLatestPostings } from "@/lib/matching";
 import { DepartmentSearch } from "@/components/DepartmentSearch";
 import { PostingCard } from "@/components/PostingCard";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 
 // Ilan verileri periyodik olarak degistigi icin sayfa build-time'da
 // dondurulmamali; her birkac dakikada bir yeniden olusturulur.
 export const revalidate = 300;
-
-const INSTITUTION_TAGS = [
-  "Bakanlıklar",
-  "Üniversiteler",
-  "Hastaneler",
-  "Müzeler",
-  "Belediyeler",
-  "KİT'ler",
-];
 
 export default async function Home() {
   const [departments, latestPostings] = await Promise.all([
@@ -38,25 +28,10 @@ export default async function Home() {
           Mezun olduğun bölüme uygun kamu ilanlarını bul
         </h1>
         <p className="mx-auto mt-3 max-w-2xl text-balance text-slate-600">
-          Bölümünü seç; bakanlık, üniversite, hastane, müze ve diğer kamu
-          kurumlarının o bölüme uygun veya bölüm şartı olmayan güncel
-          sözleşmeli personel/memur ilanlarını listeleyelim.
+          Bölümünü seç, sana uygun güncel kamu ilanlarını hemen listeleyelim.
         </p>
         <div className="mt-6 flex justify-center">
           <DepartmentSearch departments={departments} />
-        </div>
-
-        <Separator className="mx-auto mt-8 max-w-sm bg-primary/20" />
-
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
-          {INSTITUTION_TAGS.map((tag) => (
-            <Badge
-              key={tag}
-              className="border-primary/20 bg-white/70 font-normal text-primary"
-            >
-              {tag}
-            </Badge>
-          ))}
         </div>
       </section>
 

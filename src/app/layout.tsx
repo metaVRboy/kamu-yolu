@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Landmark } from "lucide-react";
 import { getLastSuccessfulScrapeAt } from "@/lib/matching";
 import { cn } from "@/lib/utils";
+import { SiteMenu } from "@/components/SiteMenu";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
@@ -24,19 +25,17 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col bg-blue-50 text-foreground">
         <header className="sticky top-3 z-40 px-3 sm:top-4 sm:px-4">
           <div className="mx-auto flex max-w-6xl items-center justify-between rounded-2xl border border-primary/25 bg-primary/15 px-4 py-3 shadow-lg shadow-primary/10 backdrop-blur-xl sm:px-6">
-            <Link href="/" className="flex items-center gap-2.5">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-                <Landmark className="h-5 w-5" strokeWidth={2} />
-              </span>
-              <span className="text-lg font-semibold tracking-tight text-slate-900">
-                Kamu Yolu
-              </span>
-            </Link>
-            <nav className="flex items-center gap-6 text-sm font-medium text-slate-700">
-              <Link href="/" className="transition-colors hover:text-slate-900">
-                Bölüme Göre Ara
+            <div className="flex items-center gap-1.5">
+              <SiteMenu />
+              <Link href="/" className="flex items-center gap-2.5 pl-1">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+                  <Landmark className="h-5 w-5" strokeWidth={2} />
+                </span>
+                <span className="text-lg font-semibold tracking-tight text-slate-900">
+                  Kamu Yolu
+                </span>
               </Link>
-            </nav>
+            </div>
           </div>
         </header>
 
