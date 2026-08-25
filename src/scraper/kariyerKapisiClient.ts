@@ -3,11 +3,16 @@ import { Agent, request as undiciRequest } from "undici";
 const BASE_URL = "https://api.kariyerkapisi.gov.tr/api";
 
 // Next.js, sunucu bilesenlerinde/route handler'larda global fetch'i kendi
-// onbellekleme katmaniyla sarmalar ve ozel bir "dispatcher" verilse bile
-// bunu yok sayar. Bu yuzden burada global fetch yerine undici'nin dusuk
-// seviyeli request() fonksiyonu dogrudan kullanilir; boylece ozel Agent
-// (uzatilmis baglanti zaman asimi) gercekten devreye girer.
-const dispatcher = new Agent({ connectTimeout: 30_000 });
+// onbellekleme katmaniyla sarmalar; bu yuzden global fetch yerine undici'nin
+// dusuk seviyeli request() fonksiyonu dogrudan kullanilir.
+//
+// NOT: Bu API, Vercel'in (ve muhtemelen diger bulut saglayicilarinin)
+// veri merkezi IP araliklarindan gelen baglantilari engelliyor gibi
+// gorunuyor - yerelden calisirken sorunsuz, Vercel'den denendiginde
+// baglanti asamasinda hicbir yanit donmeden takiliyor (30sn+ bekletildi).
+// Bu yuzden zaman asimi kisa tutulup hizli basarisiz olmasi saglaniyor;
+// otomatik tarama bu ortamda calistirilmamali, bkz. scripts/run-scrape.cmd.
+const dispatcher = new Agent({ connectTimeout: 8_000 });
 
 // Kariyer Kapisi resmi kamu ise alim portalinin herkese acik (girissiz)
 // JSON API'leri. Bu uc noktalar tarayicidan devtools ile tespit edilmistir;
