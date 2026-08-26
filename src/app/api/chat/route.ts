@@ -10,6 +10,7 @@ import {
 } from "@/lib/matching";
 import { researchDepartment } from "@/lib/departmentResearch";
 import { prisma } from "@/lib/prisma";
+import type { EducationLevel } from "@/generated/prisma/enums";
 import { LEVEL_ENUM_TO_SLUG } from "@/lib/levels";
 import { LEVEL_LABEL } from "@/lib/labels";
 
@@ -94,7 +95,7 @@ type Action = { label: string; href: string };
 
 async function resolveDepartmentAction(
   departmentQuery: string,
-): Promise<{ action: Action; note: string | null } | null> {
+): Promise<{ action: Action; note: string | null; level: EducationLevel } | null> {
   let match = await matchDepartmentForQuery(departmentQuery);
   let note: string | null = null;
 
@@ -121,13 +122,14 @@ async function resolveDepartmentAction(
 
   const dept = await prisma.department.findUnique({
     where: { id: match.departmentId },
-    select: { slug: true, name: true },
+    select: { slug: true, name: true, level: true },
   });
   if (!dept) return null;
 
   return {
     action: { label: `${dept.name} ilanlarını gör`, href: `/bolum/${dept.slug}` },
     note,
+    level: dept.level,
   };
 }
 
@@ -172,7 +174,13 @@ export async function POST(req: NextRequest) {
 
     if (parsed.departmentQuery) {
       const resolved = await resolveDepartmentAction(parsed.departmentQuery);
-      if (resolved) {
+      // Kullanicinin acikca belirttigi ogrenim duzeyi, bulunan bolumun
+      // duzeyiyle CELISIYORSA (ör. kullanici "lise" dedi ama eslesen/
+      // arastirilan bolum onlisans cikti) bu eslesmeye guvenilmez; kullanicinin
+      // kendi beyani daha guvenilir oldugu icin duzey bazli yedege dusulur.
+      const levelConflict =
+        resolved && parsed.educationLevel && resolved.level !== parsed.educationLevel;
+      if (resolved && !levelConflict) {
         action = resolved.action;
         if (resolved.note) reply = resolved.note;
       }

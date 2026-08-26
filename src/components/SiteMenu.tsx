@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Menu, Landmark, Home, GraduationCap, Search, Calculator } from "lucide-react";
 import {
@@ -22,8 +23,10 @@ const MENU_ITEMS = [
 ];
 
 export function SiteMenu() {
+  const [open, setOpen] = useState(false);
+
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger
         render={
           <Button
@@ -50,6 +53,7 @@ export function SiteMenu() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={() => setOpen(false)}
               className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-primary/10 hover:text-slate-900"
             >
               <item.icon className="h-4 w-4" />

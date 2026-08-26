@@ -164,9 +164,9 @@ export function ChatBot() {
       <div
         ref={inputGlow.ref}
         onMouseMove={inputGlow.onMouseMove}
-        className="group/input relative mt-3 rounded-2xl bg-[radial-gradient(180px_circle_at_var(--mx,50%)_var(--my,50%),rgba(96,165,250,0.9),rgba(59,130,246,0.35)_45%,transparent_70%)] p-[2px] opacity-90 transition-opacity duration-200 focus-within:opacity-100 hover:opacity-100"
+        className="group/input relative mt-3 rounded-2xl bg-[radial-gradient(180px_circle_at_var(--mx,50%)_var(--my,50%),rgba(96,165,250,0.9),rgba(59,130,246,0.35)_45%,transparent_70%)] p-[2px] opacity-0 transition-opacity duration-300 hover:opacity-100 focus-within:opacity-100"
       >
-        <div className="flex items-center rounded-[calc(1rem-1px)] bg-gradient-to-r from-white via-blue-50/80 to-white pr-1.5">
+        <div className="flex items-center rounded-[calc(1rem-1px)] bg-gradient-to-r from-white via-blue-50/80 to-white pr-1.5 ring-1 ring-primary/15 group-hover/input:ring-0">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
