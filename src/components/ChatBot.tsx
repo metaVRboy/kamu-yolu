@@ -140,11 +140,10 @@ export function ChatBot() {
               {m.action && (
                 <Link
                   href={m.action.href}
-                  className={buttonVariants({
-                    size: "sm",
-                    variant: "outline",
-                    className: "w-fit border-primary/30 bg-white/90 text-primary",
-                  })}
+                  className={cn(
+                    buttonVariants({ size: "sm", variant: "outline" }),
+                    "w-fit border-primary/30 bg-white/90 text-primary",
+                  )}
                 >
                   {m.action.label}
                   <ArrowRight className="h-3.5 w-3.5" />

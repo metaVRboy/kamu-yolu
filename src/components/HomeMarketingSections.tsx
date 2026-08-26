@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
@@ -187,10 +188,10 @@ export function ClosingCtaSection() {
       </p>
       <Link
         href="/bolum-ara"
-        className={buttonVariants({
-          size: "lg",
-          className: "mt-6 bg-white text-primary! hover:bg-blue-50",
-        })}
+        className={cn(
+          buttonVariants({ size: "lg" }),
+          "mt-6 bg-white text-primary hover:bg-blue-50",
+        )}
       >
         Bölüme Göre Ara
         <ArrowUpRight className="h-4 w-4" />
