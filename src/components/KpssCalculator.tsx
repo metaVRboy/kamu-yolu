@@ -42,11 +42,36 @@ export function KpssCalculator() {
     setShowResults(false);
   }
 
-  function updateField(key: string, patch: Partial<{ correct: string; wrong: string }>) {
-    setValues((prev) => ({
-      ...prev,
-      [key]: { correct: prev[key]?.correct ?? "", wrong: prev[key]?.wrong ?? "", ...patch },
-    }));
+  function updateField(
+    key: string,
+    totalQuestions: number,
+    patch: Partial<{ correct: string; wrong: string }>,
+  ) {
+    setValues((prev) => {
+      const current = { correct: prev[key]?.correct ?? "", wrong: prev[key]?.wrong ?? "" };
+      const merged = { ...current, ...patch };
+
+      const clamp = (raw: string) => {
+        if (raw.trim() === "") return "";
+        const n = Number(raw);
+        if (Number.isNaN(n)) return "";
+        return String(Math.min(Math.max(Math.round(n), 0), totalQuestions));
+      };
+
+      let correct = clamp(merged.correct);
+      let wrong = clamp(merged.wrong);
+
+      // Dogru + yanlis toplami soru sayisini asamaz.
+      if ((Number(correct) || 0) + (Number(wrong) || 0) > totalQuestions) {
+        if (patch.correct !== undefined) {
+          wrong = String(Math.max(totalQuestions - (Number(correct) || 0), 0));
+        } else {
+          correct = String(Math.max(totalQuestions - (Number(wrong) || 0), 0));
+        }
+      }
+
+      return { ...prev, [key]: { correct, wrong } };
+    });
   }
 
   function handleClear() {
@@ -183,7 +208,7 @@ export function KpssCalculator() {
                 max={f.totalQuestions}
                 inputMode="numeric"
                 value={values[f.key]?.correct ?? ""}
-                onChange={(e) => updateField(f.key, { correct: e.target.value })}
+                onChange={(e) => updateField(f.key, f.totalQuestions, { correct: e.target.value })}
                 className="w-16 border-primary/20 bg-white text-center"
               />
               <Input
@@ -192,7 +217,7 @@ export function KpssCalculator() {
                 max={f.totalQuestions}
                 inputMode="numeric"
                 value={values[f.key]?.wrong ?? ""}
-                onChange={(e) => updateField(f.key, { wrong: e.target.value })}
+                onChange={(e) => updateField(f.key, f.totalQuestions, { wrong: e.target.value })}
                 className="w-16 border-primary/20 bg-white text-center"
               />
             </div>
