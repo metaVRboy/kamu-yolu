@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, Landmark, Home } from "lucide-react";
+import { Menu, Landmark, Home, GraduationCap } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -12,7 +12,12 @@ import {
 import { Button } from "@/components/ui/button";
 
 // Sitedeki sayfalar arttikca buraya yeni girdiler eklenecek.
-const MENU_ITEMS = [{ href: "/", label: "Ana Sayfa", icon: Home }];
+const MENU_ITEMS = [
+  { href: "/", label: "Ana Sayfa", icon: Home },
+  { href: "/seviye/lise", label: "Lise Mezunları İçin İlanlar", icon: GraduationCap },
+  { href: "/seviye/onlisans", label: "Önlisans Mezunları İçin İlanlar", icon: GraduationCap },
+  { href: "/seviye/lisans", label: "Lisans Mezunları İçin İlanlar", icon: GraduationCap },
+];
 
 export function SiteMenu() {
   return (

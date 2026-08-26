@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 type ChatMessage = {
   role: "user" | "assistant";
   content: string;
-  department?: { slug: string; name: string } | null;
+  action?: { label: string; href: string } | null;
 };
 
 const GREETING: ChatMessage = {
@@ -58,7 +58,7 @@ export function ChatBot() {
       const data = await res.json();
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: data.reply, department: data.department },
+        { role: "assistant", content: data.reply, action: data.action },
       ]);
     } catch {
       setMessages((prev) => [
@@ -123,16 +123,16 @@ export function ChatBot() {
               >
                 {m.content}
               </div>
-              {m.department && (
+              {m.action && (
                 <Link
-                  href={`/bolum/${m.department.slug}`}
+                  href={m.action.href}
                   className={buttonVariants({
                     size: "sm",
                     variant: "outline",
                     className: "w-fit border-primary/30 bg-white text-primary",
                   })}
                 >
-                  {m.department.name} ilanlarını gör
+                  {m.action.label}
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               )}

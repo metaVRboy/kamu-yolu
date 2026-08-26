@@ -1,4 +1,5 @@
 import { Prisma } from "@/generated/prisma/client";
+import type { EducationLevel } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 
 export type PostingWithDepartments = Awaited<
@@ -78,6 +79,12 @@ export async function getAvailableFiltersForDepartment(departmentId: string) {
     select: { institutionType: true, ilanTuru: true, iller: true },
   });
 
+  return summarizeFilters(postings);
+}
+
+function summarizeFilters(
+  postings: { institutionType: string; ilanTuru: string | null; iller: string[] }[],
+) {
   const institutionTypes = new Set<string>();
   const ilanTurleri = new Set<string>();
   const iller = new Set<string>();
@@ -95,6 +102,39 @@ export async function getAvailableFiltersForDepartment(departmentId: string) {
     ilanTurleri: Array.from(ilanTurleri).sort(),
     iller: Array.from(iller).sort(),
   };
+}
+
+/**
+ * Bolum sarti olmayan, sadece ogrenim derecesine gore acilan "genel"
+ * ilanlari getirir (ör. lise mezunu olmak yeterli olan bir kadro).
+ * Sohbet asistaninin ve /seviye/[level] sayfasinin ortak kaynagi.
+ */
+export async function getPostingsForLevel(
+  level: EducationLevel,
+  filters?: PostingFilters,
+) {
+  return prisma.posting.findMany({
+    where: {
+      isActive: true,
+      isDepartmentRestricted: false,
+      educationLevels: { has: level },
+      ...buildFilterWhere(filters),
+    },
+    orderBy: [{ applicationEnd: "asc" }, { publishedAt: "desc" }],
+  });
+}
+
+export async function getAvailableFiltersForLevel(level: EducationLevel) {
+  const postings = await prisma.posting.findMany({
+    where: {
+      isActive: true,
+      isDepartmentRestricted: false,
+      educationLevels: { has: level },
+    },
+    select: { institutionType: true, ilanTuru: true, iller: true },
+  });
+
+  return summarizeFilters(postings);
 }
 
 export async function getLastSuccessfulScrapeAt(): Promise<Date | null> {

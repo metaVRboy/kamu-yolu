@@ -5,8 +5,18 @@ import type Anthropic from "@anthropic-ai/sdk";
 import { anthropic } from "@/lib/anthropic";
 import { matchDepartmentsForText } from "@/lib/matching";
 import { prisma } from "@/lib/prisma";
+import { LEVEL_ENUM_TO_SLUG } from "@/lib/levels";
+import { LEVEL_LABEL } from "@/lib/labels";
 
 export const maxDuration = 30;
+
+const EDUCATION_LEVELS = [
+  "ILKOGRETIM",
+  "LISE",
+  "ONLISANS",
+  "LISANS",
+  "YUKSEK_LISANS",
+] as const;
 
 const ChatResponseSchema = z.object({
   reply: z
@@ -18,7 +28,13 @@ const ChatResponseSchema = z.object({
     .string()
     .nullable()
     .describe(
-      "Kullanıcının bahsettiği bölüm/meslek alanının yaygın Türkçe akademik adı (ör. 'Bilgisayar Mühendisliği'). Belirsizse veya bölümle ilgisiz bir soruysa null.",
+      "Kullanıcının bahsettiği SPESİFİK bölüm/meslek alanının yaygın Türkçe akademik adı (ör. 'Bilgisayar Mühendisliği'). Belirli bir bölüm anlaşılmıyorsa null.",
+    ),
+  educationLevel: z
+    .enum(EDUCATION_LEVELS)
+    .nullable()
+    .describe(
+      "Kullanıcının öğrenim derecesi/mezuniyet seviyesi belli oluyorsa (lise/önlisans/lisans/yüksek lisans/ilköğretim) bunu yaz; bölüm bilgisinden bağımsız olarak, 'lise düzeyinde ilanlar', 'X mezunuyum' gibi ifadelerden de çıkarılabilir. Anlaşılmıyorsa null.",
     ),
 });
 
@@ -26,16 +42,29 @@ const SYSTEM_PROMPT = `Sen "Kamu Yolu" adlı bir web sitesinin karşılama asist
 
 Site şunu yapar: kullanıcı mezun olduğu bölümü ya da ilgilendiği alanı söyler,
 site de o bölüme uygun (veya bölüm şartı olmayan) güncel kamu personeli/memur
-ilanlarını listeler.
+ilanlarını listeler. Sitede iki tür sonuç sayfası var:
+1. Belirli bir bölüme özel sayfa (ör. "Bilgisayar Mühendisliği" sayfası)
+2. Bölüm şartı olmayan, sadece öğrenim derecesine göre (lise/önlisans/lisans/
+   yüksek lisans) genel ilanları gösteren bir sayfa
 
-Görevin: kullanıcının mesajından bahsettiği bölümü/meslek alanını anlamak.
-- Eğer bir bölüm/alan anlaşılıyorsa, bunu yaygın Türkçe akademik bölüm adıyla
-  (ör. "Bilgisayar Mühendisliği", "Hemşirelik", "Kamu Yönetimi") departmentQuery
-  alanına yaz ve reply alanında kısaca "sana X bölümü ilanlarını gösteriyorum"
-  gibi bir şey söyle.
-- Eğer kullanıcı belirsiz konuşuyorsa, bölümden bağımsız genel bir soru
-  soruyorsa (site nasıl çalışır, KPSS nedir vb.) departmentQuery'yi null
-  bırak ve reply alanında kısaca yanıtla veya nazikçe bölümünü sormasını iste.
+Görevin, kullanıcının mesajından iki şeyi ayrı ayrı çıkarmak:
+- departmentQuery: Kullanıcı SPESİFİK bir bölümden/meslekten bahsediyorsa
+  (ör. "Bilgisayar Mühendisliği", "Hemşirelik") yaygın Türkçe akademik adıyla
+  yaz. Belirsizse veya bölümden bağımsızsa null bırak.
+- educationLevel: Kullanıcının öğrenim derecesi anlaşılıyorsa (lise, önlisans,
+  lisans, yüksek lisans, ilköğretim) bunu yaz. Bu, departmentQuery'den BAĞIMSIZ
+  bir alandır — kullanıcı sadece "lise düzeyinde ilanlar var mı", "lise
+  mezunuyum" gibi bölüm belirtmeden düzey söylediğinde de doldur; ayrıca
+  kullanıcı bir bölüm VE mezuniyet düzeyini birlikte söylerse ikisini de
+  doldur (böylece bölüm sayfası bulunamazsa düzeye göre genel ilanlara
+  yönlendirebiliriz).
+
+Kurallar:
+- Kullanıcı "lise düzeyinde ilanları getir/göster" gibi net bir istek
+  yaptığında, reply alanında "tamam, X düzeyi ilanlarını gösteriyorum" gibi
+  DOĞRUDAN bir cevap ver; "arama kutusuna X yaz" gibi yönlendirme yapma —
+  bunun yerine educationLevel alanını doldur, sistem otomatik olarak ilgili
+  sayfaya yönlendiren bir buton gösterecek.
 - Asla var olmayan bilgi uydurma. Emin değilsen bunu belirt.
 - Yanıtların her zaman kısa, samimi ve Türkçe olsun.`;
 
@@ -52,6 +81,8 @@ const bodySchema = z.object({
     .optional()
     .default([]),
 });
+
+type Action = { label: string; href: string };
 
 export async function POST(req: NextRequest) {
   if (!process.env.ANTHROPIC_API_KEY) {
@@ -84,12 +115,13 @@ export async function POST(req: NextRequest) {
     const parsed = response.parsed_output;
     if (!parsed) {
       return NextResponse.json(
-        { reply: "Üzgünüm, isteğini anlayamadım. Tekrar dener misin?", department: null },
+        { reply: "Üzgünüm, isteğini anlayamadım. Tekrar dener misin?", action: null },
         { status: 200 },
       );
     }
 
-    let department: { slug: string; name: string } | null = null;
+    let action: Action | null = null;
+
     if (parsed.departmentQuery) {
       const matches = await matchDepartmentsForText(parsed.departmentQuery);
       if (matches.length > 0) {
@@ -97,19 +129,31 @@ export async function POST(req: NextRequest) {
           where: { id: matches[0].departmentId },
           select: { slug: true, name: true },
         });
-        department = dept;
+        if (dept) {
+          action = { label: `${dept.name} ilanlarını gör`, href: `/bolum/${dept.slug}` };
+        }
       }
     }
 
-    // Model bir bolum tespit etti ama veritabanimizda karsiligi bulunamadi:
-    // modelin "listeliyorum" gibi yanlis bir izlenim vermesini onlemek icin
-    // yaniti burada, gercek durumu yansitacak sekilde yeniden yaziyoruz.
-    const reply =
-      parsed.departmentQuery && !department
-        ? `"${parsed.departmentQuery}" için şu anda elimizde ayrı bir bölüm sayfası yok, bu yüzden sana özel bir ilan listesi gösteremiyorum. Yukarıdaki arama kutusundan yakın bir bölüm adı deneyebilir ya da öğrenim derecene (lise/önlisans/lisans) uygun genel ilanlara bakabilirsin.`
-        : parsed.reply;
+    // Bolume ozel sayfa bulunamadi ama ogrenim duzeyi belli: duzeye gore
+    // genel ilanlar sayfasina yonlendiren bir buton sun (yaniti da buna gore
+    // durustce guncelle).
+    let reply = parsed.reply;
+    if (!action && parsed.educationLevel) {
+      const levelSlug = LEVEL_ENUM_TO_SLUG[parsed.educationLevel];
+      const levelLabel = LEVEL_LABEL[parsed.educationLevel] ?? parsed.educationLevel;
+      action = {
+        label: `${levelLabel} düzeyi ilanlarını gör`,
+        href: `/seviye/${levelSlug}`,
+      };
+      if (parsed.departmentQuery) {
+        reply = `"${parsed.departmentQuery}" için ayrı bir bölüm sayfamız yok, ama ${levelLabel.toLocaleLowerCase("tr-TR")} düzeyinde bölüm şartı olmayan güncel ilanları senin için gösterebilirim.`;
+      }
+    } else if (!action && parsed.departmentQuery) {
+      reply = `"${parsed.departmentQuery}" için şu anda elimizde ayrı bir bölüm sayfası yok. Mezuniyet düzeyini (lise/önlisans/lisans) söylersen, o düzeydeki genel ilanları gösterebilirim.`;
+    }
 
-    return NextResponse.json({ reply, department });
+    return NextResponse.json({ reply, action });
   } catch (err) {
     console.error("Chat API hatası:", err);
     return NextResponse.json(
