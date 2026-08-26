@@ -1,6 +1,7 @@
 import { Prisma } from "@/generated/prisma/client";
 import type { EducationLevel } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
+import { slugify } from "@/lib/slug";
 
 export type PostingWithDepartments = Awaited<
   ReturnType<typeof getPostingsForDepartment>
@@ -186,9 +187,132 @@ export async function matchDepartmentsForText(rawText: string) {
   return Array.from(matches.values());
 }
 
-function normalize(text: string): string {
+/**
+ * Chatbot'un net (Claude tarafindan zaten temizlenmis, tek bir bolum adi
+ * gibi kisa) bir sorguyu bizim bolum listemizle eslestirmesi icin kullanilir.
+ * matchDepartmentsForText'ten farkli olarak burada TEK bir en iyi eslesme
+ * arandigi ve girdi zaten kisa/net oldugu icin daha siki bir kural uygulanir:
+ * kisa/genel bir bolum adinin (ör. "İşletme"), aslinda FARKLI ve daha
+ * spesifik bir alanin (ör. "Gemi Makineleri İşletme Mühendisliği") icinde
+ * sirf bir kelimesi ustuste geldigi icin yanlislikla eslesmesini onlemek
+ * icin, eslesen terimin sorgunun buyuk kismini kapsamasi sart kosulur.
+ */
+export async function matchDepartmentForQuery(
+  query: string,
+): Promise<{ departmentId: string; matchedAlias: string } | null> {
+  const normalizedQuery = normalize(query);
+  if (!normalizedQuery) return null;
+
+  const allDepartments = await prisma.department.findMany();
+  const allAliases = await prisma.departmentAlias.findMany();
+
+  for (const dept of allDepartments) {
+    if (normalize(dept.name) === normalizedQuery) {
+      return { departmentId: dept.id, matchedAlias: dept.name };
+    }
+  }
+  for (const alias of allAliases) {
+    if (normalize(alias.alias) === normalizedQuery) {
+      return { departmentId: alias.departmentId, matchedAlias: alias.alias };
+    }
+  }
+
+  const MIN_COVERAGE_RATIO = 0.6;
+  const candidates = [
+    ...allDepartments.map((d) => ({ departmentId: d.id, term: d.name })),
+    ...allAliases.map((a) => ({ departmentId: a.departmentId, term: a.alias })),
+  ];
+
+  let best: { departmentId: string; matchedAlias: string; ratio: number } | null = null;
+  for (const c of candidates) {
+    const normTerm = normalize(c.term);
+    if (!normTerm || !normalizedQuery.includes(normTerm)) continue;
+    const ratio = normTerm.length / normalizedQuery.length;
+    if (ratio < MIN_COVERAGE_RATIO) continue;
+    if (!best || ratio > best.ratio) {
+      best = { departmentId: c.departmentId, matchedAlias: c.term, ratio };
+    }
+  }
+
+  return best ? { departmentId: best.departmentId, matchedAlias: best.matchedAlias } : null;
+}
+
+export function normalize(text: string): string {
   return text
     .toLocaleLowerCase("tr-TR")
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "");
+}
+
+/**
+ * Sohbet asistani, veritabaninda karsiligi olmayan bir bolumu internetten
+ * arastirip ogrendiginde bunu kalici olarak eklemek icin kullanilir.
+ * Ayni isimde bolum zaten varsa (ör. baska bir kullanicinin aninda once
+ * eklemis olmasi) onu dondurur, ikinci kez olusturmaz.
+ */
+export async function createDepartmentFromResearch(input: {
+  name: string;
+  level: EducationLevel;
+  aliases: string[];
+}) {
+  const slug = slugify(input.name);
+  const existing = await prisma.department.findUnique({ where: { slug } });
+  if (existing) return existing;
+
+  const uniqueAliases = Array.from(
+    new Set(
+      input.aliases
+        .map((a) => a.trim())
+        .filter((a) => a && normalize(a) !== normalize(input.name)),
+    ),
+  );
+
+  return prisma.department.create({
+    data: {
+      name: input.name,
+      slug,
+      level: input.level,
+      aliases: { create: uniqueAliases.map((alias) => ({ alias })) },
+    },
+  });
+}
+
+/**
+ * Yeni eklenen bir bolumu, mevcut aktif ilanlarin ham nitelik metinleriyle
+ * geriye donuk olarak karsilastirip eslesenleri baglar. Boylece bolum
+ * sohbet sirasinda "kesfedildiginde" halihazirda sistemde olan uygun
+ * ilanlar da hemen gorunur hale gelir.
+ */
+export async function linkDepartmentToExistingPostings(
+  departmentId: string,
+): Promise<number> {
+  const department = await prisma.department.findUniqueOrThrow({
+    where: { id: departmentId },
+    include: { aliases: true },
+  });
+  const terms = [department.name, ...department.aliases.map((a) => a.alias)];
+
+  const postings = await prisma.posting.findMany({
+    where: { isActive: true, departmentRequirementRaw: { not: null } },
+    select: { id: true, departmentRequirementRaw: true },
+  });
+
+  let linked = 0;
+  for (const posting of postings) {
+    if (!posting.departmentRequirementRaw) continue;
+    const normalizedText = normalize(posting.departmentRequirementRaw);
+    const matchedTerm = terms.find((t) => normalizedText.includes(normalize(t)));
+    if (!matchedTerm) continue;
+
+    await prisma.postingDepartment.upsert({
+      where: {
+        postingId_departmentId: { postingId: posting.id, departmentId },
+      },
+      update: {},
+      create: { postingId: posting.id, departmentId, matchedAlias: matchedTerm },
+    });
+    linked++;
+  }
+
+  return linked;
 }

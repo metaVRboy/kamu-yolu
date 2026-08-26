@@ -2,10 +2,11 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
-import { Bot, Send, User, ArrowRight, Loader2 } from "lucide-react";
+import { Bot, Send, User, ArrowRight, Loader2, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useMouseGlow } from "@/hooks/useMouseGlow";
 
 type ChatMessage = {
   role: "user" | "assistant";
@@ -24,6 +25,9 @@ export function ChatBot() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
+
+  const panelGlow = useMouseGlow<HTMLDivElement>();
+  const inputGlow = useMouseGlow<HTMLDivElement>();
 
   function scrollToBottom() {
     requestAnimationFrame(() => {
@@ -75,20 +79,30 @@ export function ChatBot() {
   }
 
   return (
-    <section className="mx-auto max-w-3xl rounded-3xl border border-primary/20 bg-primary/10 p-5 shadow-xl shadow-primary/10 backdrop-blur-xl sm:p-6">
-      <div className="flex items-center gap-2.5">
-        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-          <Bot className="h-5 w-5" />
+    <section
+      ref={panelGlow.ref}
+      onMouseMove={panelGlow.onMouseMove}
+      className="group/panel relative mx-auto max-w-3xl overflow-hidden rounded-3xl border border-primary/30 bg-gradient-to-br from-blue-600/15 via-indigo-500/10 to-sky-400/10 p-5 shadow-2xl shadow-blue-500/15 backdrop-blur-2xl sm:p-6"
+    >
+      {/* Mouse'u takip eden yumusak isik */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover/panel:opacity-100 bg-[radial-gradient(500px_circle_at_var(--mx,50%)_var(--my,50%),rgba(255,255,255,0.4),transparent_70%)]"
+      />
+
+      <div className="relative flex items-center gap-2.5">
+        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-md shadow-blue-500/30">
+          <Sparkles className="h-4 w-4" />
         </span>
         <div>
           <p className="text-sm font-semibold text-slate-900">Kamu Yolu Asistanı</p>
-          <p className="text-xs text-slate-500">Sana uygun ilanları birlikte bulalım</p>
+          <p className="text-xs text-slate-600">Sana uygun ilanları birlikte bulalım</p>
         </div>
       </div>
 
       <div
         ref={listRef}
-        className="mt-4 flex max-h-80 flex-col gap-3 overflow-y-auto rounded-2xl bg-white/50 p-4"
+        className="relative mt-4 flex max-h-80 flex-col gap-3 overflow-y-auto rounded-2xl bg-white/40 p-4 backdrop-blur-sm"
       >
         {messages.map((m, i) => (
           <div
@@ -102,7 +116,7 @@ export function ChatBot() {
               className={cn(
                 "flex h-6 w-6 shrink-0 items-center justify-center rounded-full",
                 m.role === "assistant"
-                  ? "bg-primary text-primary-foreground"
+                  ? "bg-gradient-to-br from-blue-500 to-indigo-600 text-white"
                   : "bg-slate-200 text-slate-600",
               )}
             >
@@ -117,8 +131,8 @@ export function ChatBot() {
                 className={cn(
                   "rounded-2xl px-3.5 py-2 text-sm",
                   m.role === "assistant"
-                    ? "bg-white text-slate-800 shadow-sm"
-                    : "ml-auto bg-primary text-primary-foreground",
+                    ? "bg-white/90 text-slate-800 shadow-sm"
+                    : "ml-auto bg-gradient-to-br from-blue-600 to-indigo-600 text-white",
                 )}
               >
                 {m.content}
@@ -129,7 +143,7 @@ export function ChatBot() {
                   className={buttonVariants({
                     size: "sm",
                     variant: "outline",
-                    className: "w-fit border-primary/30 bg-white text-primary",
+                    className: "w-fit border-primary/30 bg-white/90 text-primary",
                   })}
                 >
                   {m.action.label}
@@ -147,29 +161,39 @@ export function ChatBot() {
         )}
       </div>
 
-      <div className="mt-3 flex items-center gap-2">
-        <Input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              sendMessage();
-            }
-          }}
-          placeholder="Örn: Hemşirelik mezunuyum, bana uygun ilan var mı?"
-          disabled={isLoading}
-          className="h-11 rounded-xl border-primary/20 bg-white"
-        />
-        <button
-          type="button"
-          onClick={sendMessage}
-          disabled={isLoading || !input.trim()}
-          aria-label="Gönder"
-          className={buttonVariants({ size: "icon", className: "h-11 w-11 shrink-0" })}
-        >
-          <Send className="h-4 w-4" />
-        </button>
+      <div
+        ref={inputGlow.ref}
+        onMouseMove={inputGlow.onMouseMove}
+        className="group/input relative mt-3 rounded-2xl bg-[radial-gradient(180px_circle_at_var(--mx,50%)_var(--my,50%),rgba(96,165,250,0.9),rgba(59,130,246,0.35)_45%,transparent_70%)] p-[2px] opacity-90 transition-opacity duration-200 focus-within:opacity-100 hover:opacity-100"
+      >
+        <div className="flex items-center rounded-[calc(1rem-1px)] bg-gradient-to-r from-white via-blue-50/80 to-white pr-1.5">
+          <Input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+              }
+            }}
+            placeholder="Örn: Hemşirelik mezunuyum, bana uygun ilan var mı?"
+            disabled={isLoading}
+            className="h-12 flex-1 rounded-[calc(1rem-1px)] border-none bg-transparent shadow-none focus-visible:ring-0"
+          />
+          <button
+            type="button"
+            onClick={sendMessage}
+            disabled={isLoading || !input.trim()}
+            aria-label="Gönder"
+            className={buttonVariants({
+              size: "icon",
+              className:
+                "h-9 w-9 shrink-0 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 shadow-md shadow-blue-500/30",
+            })}
+          >
+            <Send className="h-4 w-4" />
+          </button>
+        </div>
       </div>
     </section>
   );

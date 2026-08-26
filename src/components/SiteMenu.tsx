@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, Landmark, Home, GraduationCap } from "lucide-react";
+import { Menu, Landmark, Home, GraduationCap, Search, Calculator } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -14,6 +14,8 @@ import { Button } from "@/components/ui/button";
 // Sitedeki sayfalar arttikca buraya yeni girdiler eklenecek.
 const MENU_ITEMS = [
   { href: "/", label: "Ana Sayfa", icon: Home },
+  { href: "/bolum-ara", label: "Bölüme Göre Ara", icon: Search },
+  { href: "/kpss-net-hesaplama", label: "KPSS Net Hesaplama", icon: Calculator },
   { href: "/seviye/lise", label: "Lise Mezunları İçin İlanlar", icon: GraduationCap },
   { href: "/seviye/onlisans", label: "Önlisans Mezunları İçin İlanlar", icon: GraduationCap },
   { href: "/seviye/lisans", label: "Lisans Mezunları İçin İlanlar", icon: GraduationCap },

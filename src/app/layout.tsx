@@ -5,6 +5,7 @@ import { Landmark } from "lucide-react";
 import { getLastSuccessfulScrapeAt } from "@/lib/matching";
 import { cn } from "@/lib/utils";
 import { SiteMenu } from "@/components/SiteMenu";
+import { AdSlot } from "@/components/AdSlot";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
@@ -22,7 +23,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
 
   return (
     <html lang="tr" className={cn("h-full antialiased", inter.variable, "font-sans")}>
-      <body className="flex min-h-full flex-col bg-blue-50 text-foreground">
+      <body className="flex min-h-full flex-col bg-white text-foreground">
         <header className="sticky top-3 z-40 px-3 sm:top-4 sm:px-4">
           <div className="mx-auto flex max-w-6xl items-center justify-between rounded-2xl border border-primary/25 bg-primary/15 px-4 py-3 shadow-lg shadow-primary/10 backdrop-blur-xl sm:px-6">
             <div className="flex items-center gap-1.5">
@@ -39,9 +40,11 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           </div>
         </header>
 
-        <main className="flex-1 bg-gradient-to-b from-blue-100 via-blue-50 to-white">
-          {children}
-        </main>
+        <div className="mx-auto flex w-full max-w-[1600px] flex-1 items-start justify-center gap-4 px-2">
+          <AdSlot side="left" />
+          <main className="min-w-0 flex-1">{children}</main>
+          <AdSlot side="right" />
+        </div>
 
         <footer className="border-t border-border bg-slate-900 py-8 text-slate-300">
           <div className="mx-auto max-w-6xl px-4 text-center text-xs sm:px-6">

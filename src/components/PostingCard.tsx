@@ -30,7 +30,7 @@ export function PostingCard({ posting }: { posting: PostingCardData }) {
   const illerLabel = posting.iller.length > 0 ? posting.iller.join(", ") : null;
 
   return (
-    <Card className="group gap-3 border-primary/15 bg-white/70 p-5 shadow-sm backdrop-blur-md transition-shadow hover:shadow-md">
+    <Card className="group gap-3 border-primary/20 bg-gradient-to-br from-primary/8 via-white/60 to-primary/5 p-5 shadow-sm shadow-primary/5 backdrop-blur-md transition-shadow hover:shadow-md hover:shadow-primary/10">
       <div className="flex flex-wrap items-center gap-1.5 text-xs">
         <Badge className="gap-1 border-primary/15 bg-primary/10 font-normal text-primary">
           <Building2 className="h-3 w-3" />

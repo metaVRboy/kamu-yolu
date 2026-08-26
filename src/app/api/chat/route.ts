@@ -3,12 +3,20 @@ import { z } from "zod";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import type Anthropic from "@anthropic-ai/sdk";
 import { anthropic } from "@/lib/anthropic";
-import { matchDepartmentsForText } from "@/lib/matching";
+import {
+  createDepartmentFromResearch,
+  linkDepartmentToExistingPostings,
+  matchDepartmentForQuery,
+} from "@/lib/matching";
+import { researchDepartment } from "@/lib/departmentResearch";
 import { prisma } from "@/lib/prisma";
 import { LEVEL_ENUM_TO_SLUG } from "@/lib/levels";
 import { LEVEL_LABEL } from "@/lib/labels";
 
-export const maxDuration = 30;
+// Bilinmeyen bir bolum sorulduğunda internet arastirmasi (2 ekstra Claude
+// cagrisi) gerekebilir; bu yuzden normal bir chat cevabindan daha uzun
+// surebilir.
+export const maxDuration = 60;
 
 const EDUCATION_LEVELS = [
   "ILKOGRETIM",
@@ -84,6 +92,45 @@ const bodySchema = z.object({
 
 type Action = { label: string; href: string };
 
+async function resolveDepartmentAction(
+  departmentQuery: string,
+): Promise<{ action: Action; note: string | null } | null> {
+  let match = await matchDepartmentForQuery(departmentQuery);
+  let note: string | null = null;
+
+  if (!match) {
+    // Veritabanimizda yok: internetten arastir, gercek bir alan/bolumse
+    // kalici olarak ekle ve mevcut ilanlarla geriye donuk eslestir.
+    const research = await researchDepartment(departmentQuery);
+    if (research?.isRealField && research.canonicalName && research.level) {
+      const dept = await createDepartmentFromResearch({
+        name: research.canonicalName,
+        level: research.level,
+        aliases: research.aliases,
+      });
+      const linkedCount = await linkDepartmentToExistingPostings(dept.id);
+      match = { departmentId: dept.id, matchedAlias: dept.name };
+      note =
+        linkedCount > 0
+          ? `"${dept.name}" bölümünü sistemimize yeni ekledim ve sana uygun ${linkedCount} ilan buldum!`
+          : `"${dept.name}" bölümünü sistemimize yeni ekledim. Şu anda bu bölüme özel açık bir ilan yok ama bundan sonra takipte olacağız; bu arada aynı öğrenim düzeyindeki (bölüm şartı olmayan) genel ilanları da aşağıda görebilirsin.`;
+    }
+  }
+
+  if (!match) return null;
+
+  const dept = await prisma.department.findUnique({
+    where: { id: match.departmentId },
+    select: { slug: true, name: true },
+  });
+  if (!dept) return null;
+
+  return {
+    action: { label: `${dept.name} ilanlarını gör`, href: `/bolum/${dept.slug}` },
+    note,
+  };
+}
+
 export async function POST(req: NextRequest) {
   if (!process.env.ANTHROPIC_API_KEY) {
     return NextResponse.json(
@@ -109,7 +156,7 @@ export async function POST(req: NextRequest) {
       max_tokens: 1024,
       system: SYSTEM_PROMPT,
       messages,
-      output_config: { format: zodOutputFormat(ChatResponseSchema) },
+      output_config: { format: zodOutputFormat(ChatResponseSchema), effort: "low" },
     });
 
     const parsed = response.parsed_output;
@@ -121,24 +168,19 @@ export async function POST(req: NextRequest) {
     }
 
     let action: Action | null = null;
+    let reply = parsed.reply;
 
     if (parsed.departmentQuery) {
-      const matches = await matchDepartmentsForText(parsed.departmentQuery);
-      if (matches.length > 0) {
-        const dept = await prisma.department.findUnique({
-          where: { id: matches[0].departmentId },
-          select: { slug: true, name: true },
-        });
-        if (dept) {
-          action = { label: `${dept.name} ilanlarını gör`, href: `/bolum/${dept.slug}` };
-        }
+      const resolved = await resolveDepartmentAction(parsed.departmentQuery);
+      if (resolved) {
+        action = resolved.action;
+        if (resolved.note) reply = resolved.note;
       }
     }
 
-    // Bolume ozel sayfa bulunamadi ama ogrenim duzeyi belli: duzeye gore
-    // genel ilanlar sayfasina yonlendiren bir buton sun (yaniti da buna gore
-    // durustce guncelle).
-    let reply = parsed.reply;
+    // Bolume ozel sayfa bulunamadi (arastirma da basarisiz oldu) ama
+    // ogrenim duzeyi belli: kullaniciyi asla elini bos birakmayip duzeye
+    // gore genel ilanlar sayfasina yonlendiren bir buton sun.
     if (!action && parsed.educationLevel) {
       const levelSlug = LEVEL_ENUM_TO_SLUG[parsed.educationLevel];
       const levelLabel = LEVEL_LABEL[parsed.educationLevel] ?? parsed.educationLevel;
@@ -147,10 +189,10 @@ export async function POST(req: NextRequest) {
         href: `/seviye/${levelSlug}`,
       };
       if (parsed.departmentQuery) {
-        reply = `"${parsed.departmentQuery}" için ayrı bir bölüm sayfamız yok, ama ${levelLabel.toLocaleLowerCase("tr-TR")} düzeyinde bölüm şartı olmayan güncel ilanları senin için gösterebilirim.`;
+        reply = `"${parsed.departmentQuery}" için özel bir bölüm bulamadım, ama ${levelLabel.toLocaleLowerCase("tr-TR")} düzeyinde bölüm şartı olmayan güncel ilanları senin için gösterebilirim.`;
       }
     } else if (!action && parsed.departmentQuery) {
-      reply = `"${parsed.departmentQuery}" için şu anda elimizde ayrı bir bölüm sayfası yok. Mezuniyet düzeyini (lise/önlisans/lisans) söylersen, o düzeydeki genel ilanları gösterebilirim.`;
+      reply = `"${parsed.departmentQuery}" için şu anda elimizde bir bilgi bulamadım. Mezuniyet düzeyini (lise/önlisans/lisans) söylersen, o düzeydeki genel ilanları hemen gösterebilirim.`;
     }
 
     return NextResponse.json({ reply, action });
