@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 const MENU_ITEMS = [
   { href: "/", label: "Ana Sayfa", icon: Home },
   { href: "/bolum-ara", label: "Bölüme Göre Ara", icon: Search },
-  { href: "/kpss-net-hesaplama", label: "KPSS Net Hesaplama", icon: Calculator },
+  { href: "/kpss-puan-hesaplama", label: "KPSS Puan Hesaplama", icon: Calculator },
   { href: "/seviye/lise", label: "Lise Mezunları İçin İlanlar", icon: GraduationCap },
   { href: "/seviye/onlisans", label: "Önlisans Mezunları İçin İlanlar", icon: GraduationCap },
   { href: "/seviye/lisans", label: "Lisans Mezunları İçin İlanlar", icon: GraduationCap },
