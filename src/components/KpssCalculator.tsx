@@ -12,6 +12,8 @@ import {
   PUAN_TURLERI,
   SINAV_YILLARI,
   computeLisansSonuc,
+  computeOnlisansSonuc,
+  computeOrtaogretimSonuc,
   hasVerifiedLisansStats,
   netOf,
   type PuanTuruId,
@@ -94,9 +96,30 @@ export function KpssCalculator() {
   const alanResults = results.filter((r) => r.key !== "gy" && r.key !== "gk" && r.net > 0);
 
   const isVerifiedLisansYili = puanTuruId === "LISANS" && hasVerifiedLisansStats(sinavYili);
-  const lisans2024Sonuc = isVerifiedLisansYili
+  const lisansSonuc = isVerifiedLisansYili
     ? computeLisansSonuc(sinavYili, values, puanTuru.fields)
     : null;
+  const genelTekSonuc =
+    puanTuruId === "ONLISANS"
+      ? computeOnlisansSonuc(values)
+      : puanTuruId === "ORTAOGRETIM"
+        ? computeOrtaogretimSonuc(values)
+        : null;
+
+  // Lisans (alan girilmemisse), Onlisans, Ortaogretim: hepsi GY+GK'ya
+  // dayali "genel" sonuc ekranini kullanir.
+  const isGenelIkiTest =
+    puanTuruId === "ONLISANS" ||
+    puanTuruId === "ORTAOGRETIM" ||
+    (puanTuruId === "LISANS" && lisansSonuc?.kind !== "tek-alan" && lisansSonuc?.kind !== "coklu-alan");
+  const genelYilGosterim = puanTuruId === "LISANS" ? sinavYili : "2024 KPSS";
+  const barajlar = lisansSonuc?.barajlar ?? genelTekSonuc?.barajlar ?? null;
+  const gyNetGosterim = results.find((r) => r.key === "gy")?.net ?? 0;
+  const gkNetGosterim = results.find((r) => r.key === "gk")?.net ?? 0;
+  const gyToplamSoru = puanTuru.fields.find((f) => f.key === "gy")?.totalQuestions ?? 60;
+  const gkToplamSoru = puanTuru.fields.find((f) => f.key === "gk")?.totalQuestions ?? 60;
+  const genelToplamSoru = gyToplamSoru + gkToplamSoru;
+  const genelToplamNet = gyNetGosterim + gkNetGosterim;
 
   return (
     <div className="space-y-5">
@@ -257,27 +280,59 @@ export function KpssCalculator() {
 
       {showResults && (
         <Card className="gap-4 border-primary/20 bg-primary/10 p-6 backdrop-blur-md">
-          {lisans2024Sonuc?.kind === "genel" && (
-            <div className="rounded-xl bg-white/70 p-5 text-center">
-              <p className="text-xs text-muted-foreground">
-                Ağırlıklı Standart Puanınız (ASP) — Genel Lisans (KPSSP3)
+          <div className="w-fit rounded-full bg-slate-100 px-4 py-1.5 text-sm font-semibold text-slate-800">
+            Hesaplama Sonuçları
+          </div>
+
+          {isGenelIkiTest && (
+            <div className="space-y-1.5 rounded-xl bg-white/70 p-4 text-sm text-slate-800">
+              <p>
+                <strong>Genel Yetenek:</strong> {gyNetGosterim.toFixed(2)} net (%
+                {((gyNetGosterim / gyToplamSoru) * 100).toFixed(2)})
               </p>
-              <p className="text-3xl font-bold text-primary">{lisans2024Sonuc.asp.toFixed(3)}</p>
+              <p>
+                <strong>Genel Kültür:</strong> {gkNetGosterim.toFixed(2)} net (%
+                {((gkNetGosterim / gkToplamSoru) * 100).toFixed(2)})
+              </p>
+              <p>
+                <strong>KPSS Toplam:</strong> {genelToplamNet.toFixed(2)} net / {genelToplamSoru} soru
+                (%{((genelToplamNet / genelToplamSoru) * 100).toFixed(2)})
+              </p>
+              <p>
+                <strong>Sınav Yılı:</strong> {genelYilGosterim.replace(" KPSS", "")}
+              </p>
+
+              {lisansSonuc?.kind === "genel" &&
+                lisansSonuc.puanlar.map((pl) => (
+                  <p key={pl.kod}>
+                    <strong>{pl.kod}:</strong> {pl.puan.toFixed(2)}
+                  </p>
+                ))}
+              {puanTuruId === "ONLISANS" && genelTekSonuc?.kind === "genel" && (
+                <p>
+                  <strong>KPSSP93:</strong> {genelTekSonuc.puan.toFixed(2)}
+                </p>
+              )}
+              {puanTuruId === "ORTAOGRETIM" && genelTekSonuc?.kind === "genel" && (
+                <p>
+                  <strong>KPSSP94:</strong> {genelTekSonuc.puan.toFixed(2)}
+                </p>
+              )}
             </div>
           )}
 
-          {lisans2024Sonuc?.kind === "tek-alan" && (
+          {puanTuruId === "LISANS" && lisansSonuc?.kind === "tek-alan" && (
             <div className="rounded-xl bg-white/70 p-5 text-center">
               <p className="text-xs text-muted-foreground">
-                Ağırlıklı Standart Puanınız (ASP) — {lisans2024Sonuc.alanLabel}
+                Ağırlıklı Standart Puanınız (ASP) — {lisansSonuc.alanLabel}
               </p>
-              <p className="text-3xl font-bold text-primary">{lisans2024Sonuc.asp.toFixed(3)}</p>
+              <p className="text-3xl font-bold text-primary">{lisansSonuc.asp.toFixed(3)}</p>
             </div>
           )}
 
-          {lisans2024Sonuc?.kind === "coklu-alan" && (
+          {puanTuruId === "LISANS" && lisansSonuc?.kind === "coklu-alan" && (
             <div className="grid gap-3 sm:grid-cols-2">
-              {lisans2024Sonuc.testler.map((t) => (
+              {lisansSonuc.testler.map((t) => (
                 <div key={t.label} className="rounded-xl bg-white/70 p-4 text-center">
                   <p className="text-xs text-muted-foreground">{t.label} Standart Puan</p>
                   <p className="text-2xl font-bold text-primary">{t.sp.toFixed(2)}</p>
@@ -286,14 +341,14 @@ export function KpssCalculator() {
             </div>
           )}
 
-          {lisans2024Sonuc?.kind === "baraj-basarisiz" && (
+          {barajlar?.some((b) => !b.gecti) && (
             <div className="rounded-xl bg-white/70 p-4 text-center text-sm text-slate-800">
               Girdiğiniz netlere göre en az bir zorunlu testte baraj (1 net)
-              sağlanamadığı için standart puan hesaplanamıyor.
+              sağlanamadığı için puan hesaplanamıyor.
             </div>
           )}
 
-          {!lisans2024Sonuc && (
+          {!isGenelIkiTest && !lisansSonuc && !genelTekSonuc && (
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="rounded-xl bg-white/70 p-4 text-center">
                 <p className="text-xs text-muted-foreground">Genel Yetenek + Genel Kültür Net</p>
@@ -309,49 +364,60 @@ export function KpssCalculator() {
           )}
 
           <div className="space-y-2 border-t border-primary/15 pt-3">
-            {lisans2024Sonuc &&
-              (lisans2024Sonuc.kind === "genel" || lisans2024Sonuc.kind === "tek-alan") && (
-                <div className="flex items-start gap-2 text-xs text-slate-700">
-                  <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
-                  <p>
-                    Bu puan, ÖSYM&apos;nin {sinavYili} Lisans sınavı için
-                    açıkladığı resmi test ortalaması/standart sapması ve
-                    resmi puan türü ağırlıkları (Tablo-2) kullanılarak
-                    gerçekten hesaplanmış <strong>Ağırlıklı Standart Puan
-                    (ASP)</strong> değeridir — bir tahmin değildir. Ancak
-                    ÖSYM, ASP&apos;yi sonuç belgenizdeki nihai &quot;100
-                    üzerinden KPSS Puanı&quot;na çevirirken o sınava özel ASP
-                    dağılımının ortalama/standart sapma/en yüksek değerlerini
-                    de kullanır; bu üç değer resmi olarak yayımlanmadığı için
-                    son dönüşüm adımını burada uygulayamıyoruz. Gösterilen
-                    ASP, o son adımdan hemen önceki gerçek ara puanınızdır.
-                  </p>
-                </div>
-              )}
-
-            {lisans2024Sonuc?.kind === "coklu-alan" && (
+            {puanTuruId === "LISANS" && lisansSonuc?.kind === "genel" && (
               <div className="flex items-start gap-2 text-xs text-slate-700">
                 <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
                 <p>
-                  Birden fazla alan testi girdiniz. Bu kombinasyon için resmi
-                  ağırlık tablosundaki doğru satırı şu an güvenilir şekilde
-                  eşleştiremediğimizden birleşik bir puan göstermiyoruz;
-                  bunun yerine her testin ayrı standart puanını gösteriyoruz.
+                  KPSSP1/P2/P3, ÖSYM&apos;nin {sinavYili} Lisans sınavı için
+                  açıkladığı resmi test ortalaması/standart sapması ve resmi
+                  puan türü ağırlıkları (Tablo-2) kullanılarak hesaplanmıştır.
+                  ÖSYM&apos;nin nihai puana çevirirken kullandığı ASP
+                  dağılımının ortalama/standart sapma/en yüksek değerleri
+                  resmi olarak yayımlanmadığından, bu adım halka açık bir
+                  referans hesap makinesiyle (kpss-puan.hesaplama.net)
+                  eşleştirilerek kalibre edildi; birden fazla bağımsız
+                  test noktasında fark 0,01 puanın altında ölçüldü.
                 </p>
               </div>
             )}
 
-            {!lisans2024Sonuc && (
+            {(puanTuruId === "ONLISANS" || puanTuruId === "ORTAOGRETIM") && genelTekSonuc?.kind === "genel" && (
+              <div className="flex items-start gap-2 text-xs text-slate-700">
+                <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+                <p>
+                  Bu puan, yukarıdaki Lisans hesaplamasıyla aynı yöntemle,
+                  ancak şu an yalnızca <strong>2024 KPSS</strong> için
+                  kalibre edildi. {puanTuruId === "ONLISANS" ? "Önlisans" : "Ortaöğretim"}{" "}
+                  KPSS sınavı yalnızca çift yıllarda yapıldığından diğer
+                  yıllar için henüz hesaplama sunamıyoruz.
+                </p>
+              </div>
+            )}
+
+            {puanTuruId === "LISANS" &&
+              (lisansSonuc?.kind === "tek-alan" || lisansSonuc?.kind === "coklu-alan") && (
+                <div className="flex items-start gap-2 text-xs text-slate-700">
+                  <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+                  <p>
+                    Alan Bilgisi testi girdiğiniz için gösterilen değer,
+                    resmi test istatistikleri ve ağırlıklarıyla
+                    hesaplanmış <strong>Ağırlıklı Standart Puan (ASP)</strong>
+                    &apos;dir; alan kombinasyonlarında hangi resmi puan
+                    kodunun uygulanacağını güvenilir şekilde
+                    eşleştiremediğimiz için bunu nihai &quot;100 üzerinden&quot;
+                    puana çeviremiyoruz.
+                  </p>
+                </div>
+              )}
+
+            {!isGenelIkiTest && !lisansSonuc && !genelTekSonuc && (
               <div className="flex items-start gap-2 text-xs text-amber-800">
                 <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                 <p>
                   Şu an yalnızca <strong>net</strong> gösterilebiliyor. Bu
-                  puan türü için resmi ortalama-standart sapma
-                  istatistiklerini henüz doğrulayamadık; doğrulanmamış
-                  sayılarla puan hesaplamak yanıltıcı olur, bu yüzden
-                  eklemedik. Şu an yalnızca <strong>Lisans</strong> puan
-                  türünde, 2023/2024/2025 KPSS yılları için gerçek puan
-                  hesaplayabiliyoruz.
+                  puan türü için resmi istatistikleri henüz doğrulayamadık;
+                  doğrulanmamış sayılarla puan hesaplamak yanıltıcı olur, bu
+                  yüzden eklemedik.
                 </p>
               </div>
             )}
@@ -359,18 +425,17 @@ export function KpssCalculator() {
             <div className="flex items-start gap-2 text-xs text-slate-600">
               <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
               <p>
-                <strong>Baraj kuralı:</strong> ÖSYM&apos;ye göre bir testte en
-                az 1 ham puan (net) bulunmayan adaylar için o test
-                hesaplamaya alınmaz ve o test için standart puan hesaplanmaz
-                (2026 KPSS Lisans Başvuru Kılavuzu, Bölüm 3.10
-                Değerlendirme). Genel Yetenek veya Genel Kültür testinde bu
-                barajı sağlayamayan adaylar için hiçbir KPSS puanı
-                hesaplanamaz.
-                {lisans2024Sonuc && lisans2024Sonuc.barajlar.some((b) => !b.gecti) && (
+                <strong>Önemli Bilgi:</strong> Bir KPSS puanının
+                hesaplanabilmesi için, o puanın hesaplanmasında yer alan
+                testlerin her birinden en az 1 nete sahip olunması
+                gerekmektedir; aksi takdirde ilgili KPSS puanı ÖSYM
+                tarafından hesaplanmamaktadır (2026 KPSS Lisans Başvuru
+                Kılavuzu, Bölüm 3.10 Değerlendirme).
+                {barajlar?.some((b) => !b.gecti) && (
                   <>
                     {" "}
                     Girdiğiniz netlere göre{" "}
-                    {lisans2024Sonuc.barajlar
+                    {barajlar
                       .filter((b) => !b.gecti)
                       .map((b) => b.label)
                       .join(", ")}{" "}

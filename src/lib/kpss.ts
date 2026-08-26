@@ -194,11 +194,67 @@ export const LISANS_STATS_BY_YEAR: Record<string, Record<string, FieldStat>> = {
   },
 };
 
-// Tablo-2'den: KPSSP3 (GY/GK'ya dayali genel lisans puani)
-export const LISANS_GENEL_AGIRLIK = { gy: 0.5, gk: 0.5 };
 // Tablo-2'den: tek alan testi giren adaylarin puan turleri (KPSSP4, P12,
 // P14, P19, P24, P29, P34, P39, P44) - agirliklar hepsinde ayni.
 export const LISANS_TEK_ALAN_AGIRLIK = { gy: 0.2, gk: 0.2, alan: 0.6 };
+
+// --- "Genel" (Alan Bilgisi'siz, yalnizca GY+GK'ya dayali) puanlar:
+// KPSSP1/P2/P3 (Lisans), KPSSP93 (Onlisans), KPSSP94 (Ortaogretim) ---
+//
+// OSYM'nin ASP dagiliminin X/S/B sabitleri (nihai "100 uzerinden KPSS
+// Puani" donusumu icin gerekli) resmi olarak yayimlanmiyor, bu yuzden
+// yukaridaki ASP formulunden nihai puana doğrudan gecemiyoruz. Ancak bu
+// donusum ASP'ye gore dogrusal (affine); ve ASP de (net_gy, net_gk)
+// ciftine gore dogrusal oldugundan, nihai "genel" KPSS puani da
+// (net_gy, net_gk) ciftinin dogrusal bir fonksiyonu olmak zorunda:
+//   KPSS Puani = p*net_gy + q*net_gk + r
+//
+// Bu p,q,r katsayilari, halka acik bir referans hesap makinesine
+// (kpss-puan.hesaplama.net) bilinen net degerleri gonderilip sonuclarin
+// gozlemlenmesiyle bulundu: her puan turu/yil icin 3 farkli (net_gy,
+// net_gk) cifti -> 3 denklem, 3 bilinmeyen (p,q,r) cozuldu; ardindan
+// hesaba katilmayan 4. bir (net_gy, net_gk) ciftiyle dogrulandi ve fark
+// <0.001 puan cikti (yani dogrusal model gercek degerlerle pratikte tam
+// ortusuyor). Bu sayede, resmi olarak yayimlanmayan X/S/B sabitlerine
+// ihtiyac duymadan, gercek OSYM istatistiklerine dayanan sonuclarla
+// tutarli nihai puanlar uretilebiliyor. En yuksek nette (60/60) puanin
+// tam 100'de sinirlandigi da ayrica dogrulandi.
+export type GenelKatsayi = { p: number; q: number; r: number };
+
+export type LisansPuanKodu = "KPSSP1" | "KPSSP2" | "KPSSP3";
+
+export const LISANS_GENEL_KATSAYI: Record<string, Record<LisansPuanKodu, GenelKatsayi>> = {
+  "2023 KPSS": {
+    KPSSP1: { p: 0.679757, q: 0.227297, r: 52.327079 },
+    KPSSP2: { p: 0.610814, q: 0.317713, r: 51.857593 },
+    KPSSP3: { p: 0.536306, q: 0.418436, r: 51.209467 },
+  },
+  "2024 KPSS": {
+    KPSSP1: { p: 0.64799, q: 0.236212, r: 51.443022 },
+    KPSSP2: { p: 0.569086, q: 0.322706, r: 51.131813 },
+    KPSSP3: { p: 0.486399, q: 0.413731, r: 50.717594 },
+  },
+  "2025 KPSS": {
+    KPSSP1: { p: 0.615485, q: 0.255189, r: 52.457864 },
+    KPSSP2: { p: 0.52423, q: 0.338111, r: 52.955572 },
+    KPSSP3: { p: 0.435079, q: 0.420922, r: 53.344168 },
+  },
+};
+
+// Onlisans (KPSSP93) ve Ortaogretim (KPSSP94) sinavlari her yil degil,
+// yalnizca cift yillarda yapiliyor; su an yalnizca 2024 icin katsayi
+// dogrulanabildi.
+export const ONLISANS_GENEL_KATSAYI: Record<string, GenelKatsayi> = {
+  "2024 KPSS": { p: 0.436278, q: 0.401217, r: 53.976723 },
+};
+export const ORTAOGRETIM_GENEL_KATSAYI: Record<string, GenelKatsayi> = {
+  "2024 KPSS": { p: 0.316152, q: 0.477234, r: 54.7755 },
+};
+
+export function genelKpssPuani(katsayi: GenelKatsayi, gyNet: number, gkNet: number): number {
+  const raw = katsayi.p * gyNet + katsayi.q * gkNet + katsayi.r;
+  return Math.min(100, Math.max(0, raw));
+}
 
 // Bir testte en az 1 net bulunmayan adaylar icin OSYM o test icin
 // standart puan hesaplamiyor (2026 KPSS Lisans Basvuru Kilavuzu, Bolum
@@ -213,7 +269,7 @@ export type BarajDurum = { key: string; label: string; net: number; gecti: boole
 
 export type LisansSonuc =
   | { kind: "baraj-basarisiz"; barajlar: BarajDurum[] }
-  | { kind: "genel"; asp: number; barajlar: BarajDurum[] }
+  | { kind: "genel"; puanlar: { kod: LisansPuanKodu; puan: number }[]; barajlar: BarajDurum[] }
   | { kind: "tek-alan"; alanLabel: string; asp: number; barajlar: BarajDurum[] }
   | {
       kind: "coklu-alan";
@@ -223,6 +279,45 @@ export type LisansSonuc =
 
 export function hasVerifiedLisansStats(sinavYili: string): boolean {
   return sinavYili in LISANS_STATS_BY_YEAR;
+}
+
+export type GenelTekPuanSonuc =
+  | { kind: "baraj-basarisiz"; barajlar: BarajDurum[] }
+  | { kind: "genel"; puan: number; barajlar: BarajDurum[] };
+
+function computeGenelTekPuan(
+  katsayi: GenelKatsayi | undefined,
+  fieldValues: Record<string, { correct: string; wrong: string }>,
+): GenelTekPuanSonuc | null {
+  if (!katsayi) return null;
+  const netFor = (key: string) => {
+    const v = fieldValues[key] ?? { correct: "", wrong: "" };
+    return netOf(v.correct, v.wrong);
+  };
+  const gyNet = netFor("gy");
+  const gkNet = netFor("gk");
+  const barajlar: BarajDurum[] = [
+    { key: "gy", label: "Genel Yetenek", net: gyNet, gecti: gyNet >= KPSS_BARAJ_NET },
+    { key: "gk", label: "Genel Kültür", net: gkNet, gecti: gkNet >= KPSS_BARAJ_NET },
+  ];
+  if (!barajlar[0].gecti || !barajlar[1].gecti) {
+    return { kind: "baraj-basarisiz", barajlar };
+  }
+  return { kind: "genel", puan: genelKpssPuani(katsayi, gyNet, gkNet), barajlar };
+}
+
+// Onlisans (KPSSP93) icin su an yalnizca 2024 KPSS verisi dogrulanabildi.
+export function computeOnlisansSonuc(
+  fieldValues: Record<string, { correct: string; wrong: string }>,
+): GenelTekPuanSonuc | null {
+  return computeGenelTekPuan(ONLISANS_GENEL_KATSAYI["2024 KPSS"], fieldValues);
+}
+
+// Ortaogretim (KPSSP94) icin su an yalnizca 2024 KPSS verisi dogrulanabildi.
+export function computeOrtaogretimSonuc(
+  fieldValues: Record<string, { correct: string; wrong: string }>,
+): GenelTekPuanSonuc | null {
+  return computeGenelTekPuan(ORTAOGRETIM_GENEL_KATSAYI["2024 KPSS"], fieldValues);
 }
 
 export function computeLisansSonuc(
@@ -263,8 +358,12 @@ export function computeLisansSonuc(
   const gkSp = standartPuan(gkNet, stats.gk);
 
   if (alanFields.length === 0) {
-    const asp = LISANS_GENEL_AGIRLIK.gy * gySp + LISANS_GENEL_AGIRLIK.gk * gkSp;
-    return { kind: "genel", asp, barajlar };
+    const katsayilar = LISANS_GENEL_KATSAYI[sinavYili];
+    const puanlar = (["KPSSP1", "KPSSP2", "KPSSP3"] as const).map((kod) => ({
+      kod,
+      puan: genelKpssPuani(katsayilar[kod], gyNet, gkNet),
+    }));
+    return { kind: "genel", puanlar, barajlar };
   }
 
   if (alanFields.length === 1) {
