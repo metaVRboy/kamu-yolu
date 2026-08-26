@@ -10,23 +10,13 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
-
-function Eyebrow({ children }: { children: React.ReactNode }) {
-  return (
-    <Badge className="mb-4 border-primary/20 bg-primary/10 font-medium text-primary">
-      {children}
-    </Badge>
-  );
-}
 
 export function ProblemSection() {
   return (
     <section className="rounded-3xl border border-primary/15 bg-gradient-to-br from-slate-900 via-slate-900 to-primary/40 px-6 py-14 text-center text-white shadow-xl sm:py-20">
       <div className="mx-auto max-w-2xl">
-        <Eyebrow>Sorun</Eyebrow>
         <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
           Kamu ilanları onlarca farklı yerde yayınlanıyor.
           <br className="hidden sm:block" /> Sana uygun olanı bulmak zaman
@@ -89,7 +79,6 @@ export function HowItWorksSection() {
   return (
     <section className="py-14 sm:py-20">
       <div className="mx-auto max-w-2xl text-center">
-        <Eyebrow>Nasıl Çalışır</Eyebrow>
         <h2 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
           Bölümünü söyle, gerisini biz halledelim.
         </h2>
@@ -148,7 +137,6 @@ export function TrustSection({
   return (
     <section className="rounded-3xl border border-primary/15 bg-gradient-to-br from-primary/8 via-white to-blue-50 px-6 py-14 sm:py-20">
       <div className="mx-auto max-w-2xl text-center">
-        <Eyebrow>Güvenilir Kaynak</Eyebrow>
         <h2 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
           Veriler resmi kaynaktan, otomatik olarak güncelleniyor.
         </h2>
