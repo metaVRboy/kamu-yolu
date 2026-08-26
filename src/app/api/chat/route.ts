@@ -101,7 +101,15 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ reply: parsed.reply, department });
+    // Model bir bolum tespit etti ama veritabanimizda karsiligi bulunamadi:
+    // modelin "listeliyorum" gibi yanlis bir izlenim vermesini onlemek icin
+    // yaniti burada, gercek durumu yansitacak sekilde yeniden yaziyoruz.
+    const reply =
+      parsed.departmentQuery && !department
+        ? `"${parsed.departmentQuery}" için şu anda elimizde ayrı bir bölüm sayfası yok, bu yüzden sana özel bir ilan listesi gösteremiyorum. Yukarıdaki arama kutusundan yakın bir bölüm adı deneyebilir ya da öğrenim derecene (lise/önlisans/lisans) uygun genel ilanlara bakabilirsin.`
+        : parsed.reply;
+
+    return NextResponse.json({ reply, department });
   } catch (err) {
     console.error("Chat API hatası:", err);
     return NextResponse.json(

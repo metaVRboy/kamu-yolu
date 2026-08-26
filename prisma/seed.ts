@@ -158,6 +158,9 @@ const departments: DeptSeed[] = [
   { name: "Tesisat Teknolojisi ve İklimlendirme", level: "LISE", aliases: ["İklimlendirme"] },
   { name: "Muhasebe ve Finansman", level: "LISE", aliases: [] },
   { name: "Bilişim Teknolojileri", level: "LISE", aliases: [] },
+  { name: "Sağlık Bakım Teknisyenliği", level: "LISE", aliases: ["Klinik Destek Elemanlığı", "Klinik Destek", "Hemşire Yardımcılığı"] },
+  { name: "Hasta ve Yaşlı Bakım Hizmetleri", level: "LISE", aliases: [] },
+  { name: "Acil Sağlık Hizmetleri", level: "LISE", aliases: [] },
 ];
 
 async function main() {
