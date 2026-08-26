@@ -161,12 +161,13 @@ export function ChatBot() {
         )}
       </div>
 
-      <div
-        ref={inputGlow.ref}
-        onMouseMove={inputGlow.onMouseMove}
-        className="group/input relative mt-3 rounded-2xl bg-[radial-gradient(180px_circle_at_var(--mx,50%)_var(--my,50%),rgba(96,165,250,0.9),rgba(59,130,246,0.35)_45%,transparent_70%)] p-[2px] opacity-0 transition-opacity duration-300 hover:opacity-100 focus-within:opacity-100"
-      >
-        <div className="flex items-center rounded-[calc(1rem-1px)] bg-gradient-to-r from-white via-blue-50/80 to-white pr-1.5 ring-1 ring-primary/15 group-hover/input:ring-0">
+      <div ref={inputGlow.ref} onMouseMove={inputGlow.onMouseMove} className="group/input relative mt-3">
+        {/* Mouse'u takip eden, yalnizca cerceve renginde beliren isik - kutuyu gizlemez */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -inset-[2px] rounded-2xl bg-[radial-gradient(180px_circle_at_var(--mx,50%)_var(--my,50%),rgba(96,165,250,0.9),rgba(59,130,246,0.35)_45%,transparent_70%)] opacity-0 transition-opacity duration-300 group-hover/input:opacity-100 group-focus-within/input:opacity-100"
+        />
+        <div className="relative flex items-center rounded-2xl border border-primary/15 bg-gradient-to-r from-white via-blue-50/80 to-white pr-1.5">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -178,7 +179,7 @@ export function ChatBot() {
             }}
             placeholder="Örn: Hemşirelik mezunuyum, bana uygun ilan var mı?"
             disabled={isLoading}
-            className="h-12 flex-1 rounded-[calc(1rem-1px)] border-none bg-transparent shadow-none focus-visible:ring-0"
+            className="h-12 flex-1 rounded-2xl border-none bg-transparent shadow-none focus-visible:ring-0"
           />
           <button
             type="button"

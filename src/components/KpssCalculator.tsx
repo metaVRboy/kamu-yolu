@@ -11,6 +11,8 @@ import {
   OABT_ALAN_SECENEKLERI,
   PUAN_TURLERI,
   SINAV_YILLARI,
+  computeLisansSonuc,
+  hasVerifiedLisansStats,
   netOf,
   type PuanTuruId,
 } from "@/lib/kpss";
@@ -65,6 +67,11 @@ export function KpssCalculator() {
     .filter((r) => r.key === "gy" || r.key === "gk")
     .reduce((sum, r) => sum + r.net, 0);
   const alanResults = results.filter((r) => r.key !== "gy" && r.key !== "gk" && r.net > 0);
+
+  const isVerifiedLisansYili = puanTuruId === "LISANS" && hasVerifiedLisansStats(sinavYili);
+  const lisans2024Sonuc = isVerifiedLisansYili
+    ? computeLisansSonuc(sinavYili, values, puanTuru.fields)
+    : null;
 
   return (
     <div className="space-y-5">
@@ -224,29 +231,129 @@ export function KpssCalculator() {
       </Card>
 
       {showResults && (
-        <Card className="gap-3 border-primary/20 bg-primary/10 p-6 backdrop-blur-md">
-          <div className="flex items-start gap-2 text-xs text-amber-800">
-            <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-            <p>
-              Şu an yalnızca <strong>net</strong> gösterilebiliyor. Kesin KPSS
-              puanı, ÖSYM&apos;nin o sınav dönemine özel ortalama/standart
-              sapma değerlerine göre hesaplanır; bu resmi istatistikleri
-              doğrulamadan bir puan tahmini göstermek yanıltıcı olur, bu
-              yüzden bilerek eklemedik.
-            </p>
-          </div>
-
-          <div className="mt-2 grid gap-3 sm:grid-cols-2">
-            <div className="rounded-xl bg-white/70 p-4 text-center">
-              <p className="text-xs text-muted-foreground">Genel Yetenek + Genel Kültür Net</p>
-              <p className="text-2xl font-bold text-primary">{gyGkNet.toFixed(2)}</p>
+        <Card className="gap-4 border-primary/20 bg-primary/10 p-6 backdrop-blur-md">
+          {lisans2024Sonuc?.kind === "genel" && (
+            <div className="rounded-xl bg-white/70 p-5 text-center">
+              <p className="text-xs text-muted-foreground">
+                Ağırlıklı Standart Puanınız (ASP) — Genel Lisans (KPSSP3)
+              </p>
+              <p className="text-3xl font-bold text-primary">{lisans2024Sonuc.asp.toFixed(3)}</p>
             </div>
-            {alanResults.map((r) => (
-              <div key={r.key} className="rounded-xl bg-white/70 p-4 text-center">
-                <p className="text-xs text-muted-foreground">{r.label} Net</p>
-                <p className="text-2xl font-bold text-primary">{r.net.toFixed(2)}</p>
+          )}
+
+          {lisans2024Sonuc?.kind === "tek-alan" && (
+            <div className="rounded-xl bg-white/70 p-5 text-center">
+              <p className="text-xs text-muted-foreground">
+                Ağırlıklı Standart Puanınız (ASP) — {lisans2024Sonuc.alanLabel}
+              </p>
+              <p className="text-3xl font-bold text-primary">{lisans2024Sonuc.asp.toFixed(3)}</p>
+            </div>
+          )}
+
+          {lisans2024Sonuc?.kind === "coklu-alan" && (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {lisans2024Sonuc.testler.map((t) => (
+                <div key={t.label} className="rounded-xl bg-white/70 p-4 text-center">
+                  <p className="text-xs text-muted-foreground">{t.label} Standart Puan</p>
+                  <p className="text-2xl font-bold text-primary">{t.sp.toFixed(2)}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {lisans2024Sonuc?.kind === "baraj-basarisiz" && (
+            <div className="rounded-xl bg-white/70 p-4 text-center text-sm text-slate-800">
+              Girdiğiniz netlere göre en az bir zorunlu testte baraj (1 net)
+              sağlanamadığı için standart puan hesaplanamıyor.
+            </div>
+          )}
+
+          {!lisans2024Sonuc && (
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="rounded-xl bg-white/70 p-4 text-center">
+                <p className="text-xs text-muted-foreground">Genel Yetenek + Genel Kültür Net</p>
+                <p className="text-2xl font-bold text-primary">{gyGkNet.toFixed(2)}</p>
               </div>
-            ))}
+              {alanResults.map((r) => (
+                <div key={r.key} className="rounded-xl bg-white/70 p-4 text-center">
+                  <p className="text-xs text-muted-foreground">{r.label} Net</p>
+                  <p className="text-2xl font-bold text-primary">{r.net.toFixed(2)}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="space-y-2 border-t border-primary/15 pt-3">
+            {lisans2024Sonuc &&
+              (lisans2024Sonuc.kind === "genel" || lisans2024Sonuc.kind === "tek-alan") && (
+                <div className="flex items-start gap-2 text-xs text-slate-700">
+                  <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+                  <p>
+                    Bu puan, ÖSYM&apos;nin {sinavYili} Lisans sınavı için
+                    açıkladığı resmi test ortalaması/standart sapması ve
+                    resmi puan türü ağırlıkları (Tablo-2) kullanılarak
+                    gerçekten hesaplanmış <strong>Ağırlıklı Standart Puan
+                    (ASP)</strong> değeridir — bir tahmin değildir. Ancak
+                    ÖSYM, ASP&apos;yi sonuç belgenizdeki nihai &quot;100
+                    üzerinden KPSS Puanı&quot;na çevirirken o sınava özel ASP
+                    dağılımının ortalama/standart sapma/en yüksek değerlerini
+                    de kullanır; bu üç değer resmi olarak yayımlanmadığı için
+                    son dönüşüm adımını burada uygulayamıyoruz. Gösterilen
+                    ASP, o son adımdan hemen önceki gerçek ara puanınızdır.
+                  </p>
+                </div>
+              )}
+
+            {lisans2024Sonuc?.kind === "coklu-alan" && (
+              <div className="flex items-start gap-2 text-xs text-slate-700">
+                <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+                <p>
+                  Birden fazla alan testi girdiniz. Bu kombinasyon için resmi
+                  ağırlık tablosundaki doğru satırı şu an güvenilir şekilde
+                  eşleştiremediğimizden birleşik bir puan göstermiyoruz;
+                  bunun yerine her testin ayrı standart puanını gösteriyoruz.
+                </p>
+              </div>
+            )}
+
+            {!lisans2024Sonuc && (
+              <div className="flex items-start gap-2 text-xs text-amber-800">
+                <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                <p>
+                  Şu an yalnızca <strong>net</strong> gösterilebiliyor. Bu
+                  puan türü için resmi ortalama-standart sapma
+                  istatistiklerini henüz doğrulayamadık; doğrulanmamış
+                  sayılarla puan hesaplamak yanıltıcı olur, bu yüzden
+                  eklemedik. Şu an yalnızca <strong>Lisans</strong> puan
+                  türünde, 2023/2024/2025 KPSS yılları için gerçek puan
+                  hesaplayabiliyoruz.
+                </p>
+              </div>
+            )}
+
+            <div className="flex items-start gap-2 text-xs text-slate-600">
+              <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+              <p>
+                <strong>Baraj kuralı:</strong> ÖSYM&apos;ye göre bir testte en
+                az 1 ham puan (net) bulunmayan adaylar için o test
+                hesaplamaya alınmaz ve o test için standart puan hesaplanmaz
+                (2026 KPSS Lisans Başvuru Kılavuzu, Bölüm 3.10
+                Değerlendirme). Genel Yetenek veya Genel Kültür testinde bu
+                barajı sağlayamayan adaylar için hiçbir KPSS puanı
+                hesaplanamaz.
+                {lisans2024Sonuc && lisans2024Sonuc.barajlar.some((b) => !b.gecti) && (
+                  <>
+                    {" "}
+                    Girdiğiniz netlere göre{" "}
+                    {lisans2024Sonuc.barajlar
+                      .filter((b) => !b.gecti)
+                      .map((b) => b.label)
+                      .join(", ")}{" "}
+                    testinde/testlerinde bu baraj sağlanamıyor.
+                  </>
+                )}
+              </p>
+            </div>
           </div>
         </Card>
       )}
