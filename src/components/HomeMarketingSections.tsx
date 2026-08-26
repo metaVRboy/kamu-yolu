@@ -189,7 +189,7 @@ export function ClosingCtaSection() {
         href="/bolum-ara"
         className={buttonVariants({
           size: "lg",
-          className: "mt-6 bg-white text-primary hover:bg-blue-50",
+          className: "mt-6 bg-white text-primary! hover:bg-blue-50",
         })}
       >
         Bölüme Göre Ara
