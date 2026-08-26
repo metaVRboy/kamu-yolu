@@ -154,6 +154,17 @@ export async function getLatestPostings(limit = 12) {
   });
 }
 
+export async function getHomepageStats() {
+  const [postingCount, institutionCount, departmentCount] = await Promise.all([
+    prisma.posting.count({ where: { isActive: true } }),
+    prisma.posting
+      .findMany({ where: { isActive: true }, select: { institutionName: true }, distinct: ["institutionName"] })
+      .then((rows) => rows.length),
+    prisma.department.count(),
+  ]);
+  return { postingCount, institutionCount, departmentCount };
+}
+
 /**
  * Bir ilanin ham "aranan nitelikler" metnini, bilinen bolum adi/alias'lariyla
  * karsilastirip eslesen bolumleri dondurur. Scraper pipeline'i tarafindan

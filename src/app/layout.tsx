@@ -46,17 +46,49 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <AdSlot side="right" />
         </div>
 
-        <footer className="border-t border-border bg-slate-900 py-8 text-slate-300">
-          <div className="mx-auto max-w-6xl px-4 text-center text-xs sm:px-6">
-            <p className="flex items-center justify-center gap-2 text-sm font-medium text-white">
-              <Landmark className="h-4 w-4" />
-              Kamu Yolu
-            </p>
-            <p className="mt-3">
+        <footer className="border-t border-border bg-slate-900 pt-12 pb-8 text-slate-300">
+          <div className="mx-auto grid max-w-6xl gap-10 px-4 sm:grid-cols-[1.3fr_1fr_1fr] sm:px-6">
+            <div>
+              <p className="flex items-center gap-2 text-sm font-semibold text-white">
+                <Landmark className="h-4 w-4" />
+                Kamu Yolu
+              </p>
+              <p className="mt-3 max-w-sm text-sm text-slate-400">
+                Mezun olduğun bölümü söyle, bakanlık, üniversite, hastane,
+                belediye ve daha fazlasından bölümüne uygun ya da bölüm
+                şartı olmayan güncel kamu ilanlarını bul.
+              </p>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold tracking-wide text-slate-200 uppercase">
+                Sayfalar
+              </p>
+              <ul className="mt-3 space-y-2 text-sm text-slate-400">
+                <li><Link href="/" className="hover:text-white">Ana Sayfa</Link></li>
+                <li><Link href="/bolum-ara" className="hover:text-white">Bölüme Göre Ara</Link></li>
+                <li><Link href="/kpss-puan-hesaplama" className="hover:text-white">KPSS Puan Hesaplama</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold tracking-wide text-slate-200 uppercase">
+                Öğrenim Düzeyine Göre
+              </p>
+              <ul className="mt-3 space-y-2 text-sm text-slate-400">
+                <li><Link href="/seviye/lise" className="hover:text-white">Lise Mezunları</Link></li>
+                <li><Link href="/seviye/onlisans" className="hover:text-white">Önlisans Mezunları</Link></li>
+                <li><Link href="/seviye/lisans" className="hover:text-white">Lisans Mezunları</Link></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="mx-auto mt-10 max-w-6xl border-t border-white/10 px-4 pt-6 text-xs text-slate-500 sm:px-6">
+            <p>
               Veriler otomatik ve periyodik olarak güncellenir. İlan
               detayları için lütfen kaynak kurumun ilan sayfasını esas alın.
             </p>
-            <p className="mt-1 text-slate-400">
+            <p className="mt-1">
               {lastScrapeAt
                 ? `Veriler en son ${lastScrapeAt.toLocaleString("tr-TR", { dateStyle: "medium", timeStyle: "short" })} tarihinde güncellendi.`
                 : "Veriler henüz otomatik güncelleme almadı."}
