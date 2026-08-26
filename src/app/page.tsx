@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { getLatestPostings } from "@/lib/matching";
 import { DepartmentSearch } from "@/components/DepartmentSearch";
 import { PostingCard } from "@/components/PostingCard";
+import { ChatBot } from "@/components/ChatBot";
 import { Badge } from "@/components/ui/badge";
 
 // Ilan verileri periyodik olarak degistigi icin sayfa build-time'da
@@ -19,7 +20,9 @@ export default async function Home() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
-      <section className="mx-auto max-w-3xl rounded-3xl border border-primary/20 bg-primary/10 p-8 text-center shadow-xl shadow-primary/10 backdrop-blur-xl sm:p-12">
+      <ChatBot />
+
+      <section className="mx-auto mt-8 max-w-3xl rounded-3xl border border-primary/20 bg-primary/10 p-8 text-center shadow-xl shadow-primary/10 backdrop-blur-xl sm:p-12">
         <Badge className="border-transparent bg-primary/90 text-primary-foreground">
           Kamu personeli & memur ilanları
         </Badge>
