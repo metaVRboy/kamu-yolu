@@ -154,11 +154,11 @@ export async function POST(req: NextRequest) {
 
   try {
     const response = await anthropic.messages.parse({
-      model: "claude-opus-5",
+      model: "claude-haiku-4-5-20251001",
       max_tokens: 1024,
       system: SYSTEM_PROMPT,
       messages,
-      output_config: { format: zodOutputFormat(ChatResponseSchema), effort: "low" },
+      output_config: { format: zodOutputFormat(ChatResponseSchema) },
     });
 
     const parsed = response.parsed_output;

@@ -56,11 +56,17 @@ export async function researchDepartment(
 ): Promise<DepartmentResearch | null> {
   try {
     const res = await anthropic.messages.create({
-      model: "claude-opus-5",
+      model: "claude-haiku-4-5-20251001",
       max_tokens: 1024,
-      output_config: { effort: "low" },
       system: RESEARCH_SYSTEM_PROMPT,
-      tools: [{ type: "web_search_20260209", name: "web_search", max_uses: 2 }],
+      tools: [
+        {
+          type: "web_search_20260209",
+          name: "web_search",
+          max_uses: 2,
+          allowed_callers: ["direct"],
+        },
+      ],
       messages: [
         {
           role: "user",
