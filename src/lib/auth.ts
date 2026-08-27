@@ -12,6 +12,10 @@ function getSecretKey() {
   return new TextEncoder().encode(secret);
 }
 
+export function isSessionConfigured(): boolean {
+  return !!process.env.SESSION_SECRET;
+}
+
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 10);
 }

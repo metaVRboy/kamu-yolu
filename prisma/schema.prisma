@@ -123,11 +123,27 @@ model User {
   department     Department?     @relation(fields: [departmentId], references: [id])
   educationLevel EducationLevel?
   isAdmin        Boolean         @default(false)
+  // Kayit formundaki KVKK onay kutucugu isaretlendiginde doldurulur; bu
+  // ozellikten once kayit olmus hesaplarda bos olabilir.
+  kvkkOnayTarihi DateTime?
   createdAt      DateTime        @default(now())
 
   becayisTalepleri BecayisTalep[]
   gonderdigiMesajlar BecayisMesaj[] @relation("MesajGonderen")
   bildirimler      Bildirim[]
+  sifreSifirlamaTokenlari PasswordResetToken[]
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  token     String    @unique
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
 }
 
 model BecayisTalep {
