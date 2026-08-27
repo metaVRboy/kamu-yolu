@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
 import { createTalep } from "@/lib/becayis";
 import { TURKIYE_ILLERI } from "@/lib/iller";
+import { ilceSecenekleri } from "@/lib/ilceler";
 import { KURUM_TURLERI, meslekSecenekleri } from "@/lib/kurumMeslek";
 
 const bodySchema = z
@@ -17,7 +18,14 @@ const bodySchema = z
   .refine((data) => meslekSecenekleri(data.kurumTuru).includes(data.meslek), {
     message: "Seçilen meslek, seçilen kurum türüyle uyuşmuyor.",
     path: ["meslek"],
-  });
+  })
+  .refine(
+    (data) => !data.mevcutIlce || ilceSecenekleri(data.mevcutIl).includes(data.mevcutIlce),
+    {
+      message: "Seçilen ilçe, seçilen ile ait değil.",
+      path: ["mevcutIlce"],
+    },
+  );
 
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser();

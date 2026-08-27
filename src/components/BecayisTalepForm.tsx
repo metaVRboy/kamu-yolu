@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TURKIYE_ILLERI } from "@/lib/iller";
+import { ilceSecenekleri } from "@/lib/ilceler";
 import { KURUM_TURLERI, meslekSecenekleri } from "@/lib/kurumMeslek";
 
 export function BecayisTalepForm() {
@@ -21,10 +21,16 @@ export function BecayisTalepForm() {
   const [loading, setLoading] = useState(false);
 
   const meslekler = kurumTuru ? meslekSecenekleri(kurumTuru) : [];
+  const ilceler = mevcutIl ? ilceSecenekleri(mevcutIl) : [];
 
   function handleKurumTuruChange(value: string) {
     setKurumTuru(value);
     setMeslek("");
+  }
+
+  function handleMevcutIlChange(value: string) {
+    setMevcutIl(value);
+    setMevcutIlce("");
   }
 
   function toggleIstenenIl(il: string) {
@@ -99,7 +105,7 @@ export function BecayisTalepForm() {
             <Label className="mb-1.5"><span className="text-destructive">*</span> Mevcut İl</Label>
             <select
               value={mevcutIl}
-              onChange={(e) => setMevcutIl(e.target.value)}
+              onChange={(e) => handleMevcutIlChange(e.target.value)}
               className="h-10 w-full rounded-xl border border-primary/20 bg-white px-3 text-sm"
             >
               <option value="">Seçiniz</option>
@@ -110,11 +116,17 @@ export function BecayisTalepForm() {
           </div>
           <div>
             <Label className="mb-1.5">Mevcut İlçe</Label>
-            <Input
+            <select
               value={mevcutIlce}
               onChange={(e) => setMevcutIlce(e.target.value)}
-              className="border-primary/20 bg-white"
-            />
+              disabled={!mevcutIl}
+              className="h-10 w-full rounded-xl border border-primary/20 bg-white px-3 text-sm disabled:opacity-50"
+            >
+              <option value="">{mevcutIl ? "Seçiniz" : "Önce il seçin"}</option>
+              {ilceler.map((ilce) => (
+                <option key={ilce} value={ilce}>{ilce}</option>
+              ))}
+            </select>
           </div>
         </div>
         <div>
