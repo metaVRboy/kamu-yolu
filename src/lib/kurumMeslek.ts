@@ -8,6 +8,13 @@
 // bir meslek listesi (GENEL_MESLEKLER) kullanilir.
 
 const DIGER = "Diğer";
+const ISCI = "İşçi";
+
+// Her kurumda mutlaka bulunabilecek, ozel listelerde tekrar yazilmasina
+// gerek olmayan meslekler.
+function herKurumdaBulunanlar(meslekler: string[]): string[] {
+  return Array.from(new Set([...meslekler, ISCI, DIGER]));
+}
 
 const GENEL_MESLEKLER = [
   "Memur",
@@ -215,9 +222,12 @@ export const KURUM_TURLERI: string[] = [
 ];
 
 export const KURUM_TURU_MESLEKLERI: Record<string, string[]> = Object.fromEntries(
-  KURUM_TURLERI.map((kurum) => [kurum, [...(OZEL_MESLEKLER[kurum] ?? GENEL_MESLEKLER), DIGER]]),
+  KURUM_TURLERI.map((kurum) => [
+    kurum,
+    herKurumdaBulunanlar(OZEL_MESLEKLER[kurum] ?? GENEL_MESLEKLER),
+  ]),
 );
 
 export function meslekSecenekleri(kurumTuru: string): string[] {
-  return KURUM_TURU_MESLEKLERI[kurumTuru] ?? [...GENEL_MESLEKLER, DIGER];
+  return KURUM_TURU_MESLEKLERI[kurumTuru] ?? herKurumdaBulunanlar(GENEL_MESLEKLER);
 }
