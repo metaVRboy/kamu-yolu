@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { getTaleplerim } from "@/lib/becayis";
 import { TaleplerimList } from "@/components/TaleplerimList";
+import { ProfilLayout } from "@/components/ProfilLayout";
 
 export const metadata = { title: "Mevcut Taleplerim — Kamu Yolu" };
 
@@ -10,9 +11,13 @@ export default async function TaleplerimPage() {
   if (!user) redirect("/giris");
 
   const talepler = await getTaleplerim(user.id);
+  const okunmamisSayisi = talepler.reduce(
+    (sum, t) => sum + t.threads.reduce((s, th) => s + th.okunmamisSayisi, 0),
+    0,
+  );
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-14 sm:px-6 sm:py-20">
+    <ProfilLayout okunmamisMesajSayisi={okunmamisSayisi}>
       <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
         Mevcut Taleplerim
       </h1>
@@ -31,6 +36,6 @@ export default async function TaleplerimPage() {
           currentUserId={user.id}
         />
       </div>
-    </div>
+    </ProfilLayout>
   );
 }

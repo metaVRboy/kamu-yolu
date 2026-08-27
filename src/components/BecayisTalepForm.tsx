@@ -7,17 +7,25 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TURKIYE_ILLERI } from "@/lib/iller";
+import { KURUM_TURLERI, meslekSecenekleri } from "@/lib/kurumMeslek";
 
 export function BecayisTalepForm() {
   const router = useRouter();
-  const [meslek, setMeslek] = useState("");
   const [kurumTuru, setKurumTuru] = useState("");
+  const [meslek, setMeslek] = useState("");
   const [mevcutIl, setMevcutIl] = useState("");
   const [mevcutIlce, setMevcutIlce] = useState("");
   const [istenenIller, setIstenenIller] = useState<string[]>([]);
   const [aciklama, setAciklama] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const meslekler = kurumTuru ? meslekSecenekleri(kurumTuru) : [];
+
+  function handleKurumTuruChange(value: string) {
+    setKurumTuru(value);
+    setMeslek("");
+  }
 
   function toggleIstenenIl(il: string) {
     setIstenenIller((prev) => (prev.includes(il) ? prev.filter((i) => i !== il) : [...prev, il]));
@@ -26,8 +34,8 @@ export function BecayisTalepForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    if (!mevcutIl || istenenIller.length === 0 || !meslek.trim()) {
-      setError("Meslek, mevcut il ve en az bir istenen il zorunludur.");
+    if (!kurumTuru || !meslek || !mevcutIl || istenenIller.length === 0) {
+      setError("Kurum türü, meslek, mevcut il ve en az bir istenen il zorunludur.");
       return;
     }
     setLoading(true);
@@ -36,8 +44,8 @@ export function BecayisTalepForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          kurumTuru,
           meslek,
-          kurumTuru: kurumTuru || undefined,
           mevcutIl,
           mevcutIlce: mevcutIlce || undefined,
           istenenIller,
@@ -60,22 +68,31 @@ export function BecayisTalepForm() {
     <Card className="gap-4 border-primary/20 bg-white/70 p-6 backdrop-blur-md">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <Label className="mb-1.5"><span className="text-destructive">*</span> Meslek / Unvan</Label>
-          <Input
-            value={meslek}
-            onChange={(e) => setMeslek(e.target.value)}
-            placeholder="Örn: Öğretmen, Hemşire, Zabıta Memuru"
-            className="border-primary/20 bg-white"
-          />
+          <Label className="mb-1.5"><span className="text-destructive">*</span> Kurum Türü</Label>
+          <select
+            value={kurumTuru}
+            onChange={(e) => handleKurumTuruChange(e.target.value)}
+            className="h-10 w-full rounded-xl border border-primary/20 bg-white px-3 text-sm"
+          >
+            <option value="">Seçiniz</option>
+            {KURUM_TURLERI.map((k) => (
+              <option key={k} value={k}>{k}</option>
+            ))}
+          </select>
         </div>
         <div>
-          <Label className="mb-1.5">Kurum Türü</Label>
-          <Input
-            value={kurumTuru}
-            onChange={(e) => setKurumTuru(e.target.value)}
-            placeholder="Örn: Milli Eğitim Bakanlığı"
-            className="border-primary/20 bg-white"
-          />
+          <Label className="mb-1.5"><span className="text-destructive">*</span> Meslek / Unvan</Label>
+          <select
+            value={meslek}
+            onChange={(e) => setMeslek(e.target.value)}
+            disabled={!kurumTuru}
+            className="h-10 w-full rounded-xl border border-primary/20 bg-white px-3 text-sm disabled:opacity-50"
+          >
+            <option value="">{kurumTuru ? "Seçiniz" : "Önce kurum türü seçin"}</option>
+            {meslekler.map((m) => (
+              <option key={m} value={m}>{m}</option>
+            ))}
+          </select>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>

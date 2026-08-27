@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
+import { getOkunmamisMesajSayisi } from "@/lib/becayis";
 import { BecayisTalepForm } from "@/components/BecayisTalepForm";
+import { ProfilLayout } from "@/components/ProfilLayout";
 
 export const metadata = { title: "Becayiş Talebi Oluştur — Kamu Yolu" };
 
@@ -8,8 +10,10 @@ export default async function BecayisTalepOlusturPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/giris");
 
+  const okunmamisSayisi = await getOkunmamisMesajSayisi(user.id);
+
   return (
-    <div className="mx-auto max-w-2xl px-4 py-14 sm:px-6 sm:py-20">
+    <ProfilLayout okunmamisMesajSayisi={okunmamisSayisi}>
       <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
         Becayiş Talebi Oluştur
       </h1>
@@ -20,6 +24,6 @@ export default async function BecayisTalepOlusturPage() {
       <div className="mt-6">
         <BecayisTalepForm />
       </div>
-    </div>
+    </ProfilLayout>
   );
 }

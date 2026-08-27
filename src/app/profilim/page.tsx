@@ -3,7 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getOkunmamisMesajSayisi } from "@/lib/becayis";
 import { ProfilForm } from "@/components/ProfilForm";
-import { ProfilBecayisMenu } from "@/components/ProfilBecayisMenu";
+import { ProfilLayout } from "@/components/ProfilLayout";
 import { LogoutButton } from "@/components/LogoutButton";
 import { Card } from "@/components/ui/card";
 
@@ -19,17 +19,13 @@ export default async function ProfilimPage() {
   ]);
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-14 sm:px-6 sm:py-20">
+    <ProfilLayout okunmamisMesajSayisi={okunmamisSayisi}>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">Profilim</h1>
           <p className="mt-1 text-sm text-muted-foreground">{user.adSoyad} — {user.email}</p>
         </div>
         <LogoutButton />
-      </div>
-
-      <div className="mt-6">
-        <ProfilBecayisMenu okunmamisSayisi={okunmamisSayisi} />
       </div>
 
       <Card className="mt-6 border-primary/20 bg-white/70 p-6 backdrop-blur-md">
@@ -45,6 +41,6 @@ export default async function ProfilimPage() {
           }}
         />
       </Card>
-    </div>
+    </ProfilLayout>
   );
 }
