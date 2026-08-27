@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Link from "next/link";
-import { Landmark } from "lucide-react";
+import { Landmark, UserRound } from "lucide-react";
 import { getLastSuccessfulScrapeAt } from "@/lib/matching";
 import { cn } from "@/lib/utils";
+import { getCurrentUser } from "@/lib/auth";
 import { SiteMenu } from "@/components/SiteMenu";
 import { AdSlot } from "@/components/AdSlot";
+import { NotificationBell } from "@/components/NotificationBell";
+import { buttonVariants } from "@/components/ui/button";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
@@ -19,7 +22,7 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const lastScrapeAt = await getLastSuccessfulScrapeAt();
+  const [lastScrapeAt, user] = await Promise.all([getLastSuccessfulScrapeAt(), getCurrentUser()]);
 
   return (
     <html lang="tr" className={cn("h-full antialiased", inter.variable, "font-sans")}>
@@ -36,6 +39,23 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                   Kamu Yolu
                 </span>
               </Link>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <NotificationBell isLoggedIn={!!user} />
+              {user ? (
+                <Link
+                  href="/profilim"
+                  className="flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-sm font-medium text-slate-700 hover:bg-primary/10 hover:text-slate-900"
+                >
+                  <UserRound className="h-4 w-4" />
+                  <span className="hidden sm:inline">{user.adSoyad.split(" ")[0]}</span>
+                </Link>
+              ) : (
+                <Link href="/giris" className={buttonVariants({ size: "sm" })}>
+                  Giriş Yap
+                </Link>
+              )}
             </div>
           </div>
         </header>

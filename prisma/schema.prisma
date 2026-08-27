@@ -35,6 +35,7 @@ model Department {
   level     EducationLevel   // bu bolumun hangi ogrenim derecesine ait oldugu (onlisans/lisans vb.)
   aliases   DepartmentAlias[]
   postings  PostingDepartment[]
+  users     User[]
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt
 }
@@ -108,4 +109,84 @@ model PostingDepartment {
   matchedAlias String?    // eşleşmeyi tetikleyen alias/terim (denetim ve hata ayıklama için)
 
   @@unique([postingId, departmentId])
+}
+
+model User {
+  id             String          @id @default(cuid())
+  email          String          @unique
+  passwordHash   String
+  adSoyad        String
+  telefon        String?
+  meslek         String?
+  kurumTuru      String?
+  departmentId   String?
+  department     Department?     @relation(fields: [departmentId], references: [id])
+  educationLevel EducationLevel?
+  isAdmin        Boolean         @default(false)
+  createdAt      DateTime        @default(now())
+
+  becayisTalepleri BecayisTalep[]
+  gonderdigiMesajlar BecayisMesaj[] @relation("MesajGonderen")
+  bildirimler      Bildirim[]
+}
+
+model BecayisTalep {
+  id           String   @id @default(cuid())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  meslek       String
+  kurumTuru    String?
+  mevcutIl     String
+  mevcutIlce   String?
+  istenenIller String[] @default([])
+  aciklama     String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  mesajlar BecayisMesaj[]
+
+  @@index([isActive])
+  @@index([mevcutIl])
+}
+
+// Bir talebe birden fazla farkli kullanici ilgi gosterip mesaj birakabilir;
+// konusmaKarsiId, talep sahibi disindaki tarafin userId'sini tutarak ayni
+// talep altindaki farkli konusma "thread"lerini birbirinden ayirir.
+model BecayisMesaj {
+  id             String       @id @default(cuid())
+  talep          BecayisTalep @relation(fields: [talepId], references: [id], onDelete: Cascade)
+  talepId        String
+  gonderen       User         @relation("MesajGonderen", fields: [gonderenId], references: [id], onDelete: Cascade)
+  gonderenId     String
+  konusmaKarsiId String
+  mesaj          String
+  okundu         Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+
+  @@index([talepId, konusmaKarsiId])
+}
+
+// Site yoneticisinin (admin panelden) yayimladigi, tum kullanicilarin
+// gordugu genel duyurular.
+model Duyuru {
+  id        String   @id @default(cuid())
+  baslik    String
+  icerik    String
+  createdAt DateTime @default(now())
+}
+
+// Kullaniciya ozel bildirimler: gelen becayis mesaji, mezun oldugu
+// bolume/seviyeye uygun yeni ilan vb.
+model Bildirim {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  tur       String
+  baslik    String
+  icerik    String?
+  link      String?
+  okundu    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, okundu])
 }

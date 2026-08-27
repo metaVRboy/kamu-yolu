@@ -12,6 +12,7 @@ import {
   stripBbCode,
 } from "./parseRequirements";
 import { matchDepartmentsForText } from "@/lib/matching";
+import { notifyUsersForMatchedPosting } from "@/lib/notifications";
 
 export const SOURCE_NAME = "Kariyer Kapısı";
 
@@ -81,6 +82,11 @@ export async function scrapeKariyerKapisi(
           new Set((alt.kontenjanList ?? []).map((k) => k.il.trim()).filter(Boolean)),
         );
 
+        const existing = await prisma.posting.findUnique({
+          where: { externalId },
+          select: { id: true },
+        });
+
         const posting = await prisma.posting.upsert({
           where: { externalId },
           update: {
@@ -127,6 +133,19 @@ export async function scrapeKariyerKapisi(
               departmentId: match.departmentId,
               matchedAlias: match.matchedAlias,
             },
+          });
+        }
+
+        // Sadece yeni eklenen ilanlar icin bildirim gonder; her taramada
+        // ayni aktif ilan icin tekrar tekrar bildirim gitmesin.
+        if (!existing && matches.length > 0) {
+          const departments = await prisma.department.findMany({
+            where: { id: { in: matches.map((m) => m.departmentId) } },
+            select: { id: true, slug: true },
+          });
+          await notifyUsersForMatchedPosting({
+            postingTitle: title,
+            departments: departments.map((d) => ({ departmentId: d.id, slug: d.slug })),
           });
         }
       }
