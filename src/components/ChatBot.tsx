@@ -127,8 +127,7 @@ export function ChatBot() {
         <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
         <p>
           Bu asistan yalnızca kamu ilanları içindir: mesleğini/bölümünü söyle, sana uygun
-          ilanları bulalım. Konu dışı mesajlarda (ör. hava durumu) erişim kademeli olarak
-          kısıtlanır.
+          ilanları bulalım. Konu dışı mesajlarda erişim kademeli olarak kısıtlanır.
         </p>
       </div>
 

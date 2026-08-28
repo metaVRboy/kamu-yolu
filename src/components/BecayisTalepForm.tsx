@@ -106,9 +106,10 @@ export function BecayisTalepForm() {
             <select
               value={mevcutIl}
               onChange={(e) => handleMevcutIlChange(e.target.value)}
-              className="h-10 w-full rounded-xl border border-primary/20 bg-white px-3 text-sm"
+              disabled={!meslek}
+              className="h-10 w-full rounded-xl border border-primary/20 bg-white px-3 text-sm disabled:opacity-50"
             >
-              <option value="">Seçiniz</option>
+              <option value="">{meslek ? "Seçiniz" : "Önce meslek seçin"}</option>
               {TURKIYE_ILLERI.map((il) => (
                 <option key={il} value={il}>{il}</option>
               ))}
@@ -131,23 +132,31 @@ export function BecayisTalepForm() {
         </div>
         <div>
           <Label className="mb-1.5"><span className="text-destructive">*</span> İstenen İl(ler)</Label>
-          <div className="max-h-48 overflow-y-auto rounded-xl border border-primary/20 bg-white p-3">
-            <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
-              {TURKIYE_ILLERI.map((il) => (
-                <label key={il} className="flex items-center gap-1.5 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={istenenIller.includes(il)}
-                    onChange={() => toggleIstenenIl(il)}
-                    className="h-3.5 w-3.5 accent-primary"
-                  />
-                  {il}
-                </label>
-              ))}
+          {mevcutIl ? (
+            <>
+              <div className="max-h-48 overflow-y-auto rounded-xl border border-primary/20 bg-white p-3">
+                <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
+                  {TURKIYE_ILLERI.map((il) => (
+                    <label key={il} className="flex items-center gap-1.5 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={istenenIller.includes(il)}
+                        onChange={() => toggleIstenenIl(il)}
+                        className="h-3.5 w-3.5 accent-primary"
+                      />
+                      {il}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              {istenenIller.length > 0 && (
+                <p className="mt-1.5 text-xs text-muted-foreground">Seçilenler: {istenenIller.join(", ")}</p>
+              )}
+            </>
+          ) : (
+            <div className="rounded-xl border border-primary/20 bg-white/50 p-3 text-sm text-muted-foreground">
+              Önce mevcut il seçin
             </div>
-          </div>
-          {istenenIller.length > 0 && (
-            <p className="mt-1.5 text-xs text-muted-foreground">Seçilenler: {istenenIller.join(", ")}</p>
           )}
         </div>
         <div>
