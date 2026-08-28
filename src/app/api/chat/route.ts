@@ -132,7 +132,7 @@ async function resolveDepartmentAction(
       note =
         linkedCount > 0
           ? `"${dept.name}" bölümünü sistemimize yeni ekledim ve sana uygun ${linkedCount} ilan buldum!`
-          : `"${dept.name}" bölümünü sistemimize yeni ekledim. Şu anda bu bölüme özel açık bir ilan yok ama bundan sonra takipte olacağız; bu arada aynı öğrenim düzeyindeki (bölüm şartı olmayan) genel ilanları da aşağıda görebilirsin.`;
+          : `"${dept.name}" bölümünü sistemimize yeni ekledim. Şu anda bu bölüme özel açık bir ilan yok ama bundan sonra takipte olacağız; bu arada aynı öğrenim düzeyindeki güncel ilanları da aşağıda görebilirsin.`;
     }
   }
 
@@ -234,7 +234,7 @@ export async function POST(req: NextRequest) {
         href: `/seviye/${levelSlug}`,
       };
       if (parsed.departmentQuery) {
-        reply = `"${parsed.departmentQuery}" için özel bir bölüm bulamadım, ama ${levelLabel.toLocaleLowerCase("tr-TR")} düzeyinde bölüm şartı olmayan güncel ilanları senin için gösterebilirim.`;
+        reply = `"${parsed.departmentQuery}" için özel bir bölüm bulamadım, ama ${levelLabel.toLocaleLowerCase("tr-TR")} düzeyindeki güncel ilanları senin için gösterebilirim.`;
       }
     } else if (!action && parsed.departmentQuery) {
       reply = `"${parsed.departmentQuery}" için şu anda elimizde bir bilgi bulamadım. Mezuniyet düzeyini (lise/önlisans/lisans) söylersen, o düzeydeki genel ilanları hemen gösterebilirim.`;

@@ -43,16 +43,16 @@ export default async function LevelResultsPage({
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
         <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-          {LEVEL_LABEL[level] ?? level} düzeyinde, bölüm şartı olmayan ilanlar
+          {LEVEL_LABEL[level] ?? level} Mezunları İçin İlanlar
         </h1>
         <Badge variant="outline" className="border-primary/30 text-primary">
           {LEVEL_LABEL[level] ?? level}
         </Badge>
       </div>
       <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-        Herhangi bir bölümden mezun olmayı şart koşmayan, sadece{" "}
-        {(LEVEL_LABEL[level] ?? level).toLocaleLowerCase("tr-TR")} mezunu
-        olmayı yeterli gören güncel kamu ilanları.
+        {(LEVEL_LABEL[level] ?? level)} mezunlarının başvurabileceği güncel kamu
+        ilanları. Bazı ilanlar belirli bir bölüm mezunu olmayı şart koşar, bazıları
+        koşmaz — her ilan kartında bunu ayrıca görebilirsin.
       </p>
 
       <div className="mt-6">
@@ -62,7 +62,7 @@ export default async function LevelResultsPage({
       <div className="mt-8 space-y-4">
         {postings.length === 0 && (
           <div className="rounded-2xl border border-dashed border-primary/25 bg-primary/5 p-8 text-center text-sm text-muted-foreground">
-            Şu anda bu düzeyde, bölüm şartı olmayan aktif bir ilan bulunmuyor.
+            Şu anda bu düzeyde aktif bir ilan bulunmuyor.
             Daha sonra tekrar kontrol edebilirsin.
           </div>
         )}

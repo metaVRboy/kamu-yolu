@@ -106,9 +106,10 @@ function summarizeFilters(
 }
 
 /**
- * Bolum sarti olmayan, sadece ogrenim derecesine gore acilan "genel"
- * ilanlari getirir (ör. lise mezunu olmak yeterli olan bir kadro).
- * Sohbet asistaninin ve /seviye/[level] sayfasinin ortak kaynagi.
+ * Belirli bir ogrenim derecesindeki TUM aktif ilanlari getirir (bolum
+ * sarti olan/olmayan farketmez - PostingCard her ilanda bunu zaten ayrica
+ * gosterir). Sohbet asistaninin ve /seviye/[level] sayfasinin ortak
+ * kaynagi.
  */
 export async function getPostingsForLevel(
   level: EducationLevel,
@@ -117,7 +118,6 @@ export async function getPostingsForLevel(
   return prisma.posting.findMany({
     where: {
       isActive: true,
-      isDepartmentRestricted: false,
       educationLevels: { has: level },
       ...buildFilterWhere(filters),
     },
@@ -129,9 +129,28 @@ export async function getAvailableFiltersForLevel(level: EducationLevel) {
   const postings = await prisma.posting.findMany({
     where: {
       isActive: true,
-      isDepartmentRestricted: false,
       educationLevels: { has: level },
     },
+    select: { institutionType: true, ilanTuru: true, iller: true },
+  });
+
+  return summarizeFilters(postings);
+}
+
+/** Sistemdeki TUM aktif ilanlar - "Tum Ilanlar" sayfasinin kaynagi. */
+export async function getAllActivePostings(filters?: PostingFilters) {
+  return prisma.posting.findMany({
+    where: {
+      isActive: true,
+      ...buildFilterWhere(filters),
+    },
+    orderBy: [{ applicationEnd: "asc" }, { publishedAt: "desc" }],
+  });
+}
+
+export async function getAvailableFiltersForAll() {
+  const postings = await prisma.posting.findMany({
+    where: { isActive: true },
     select: { institutionType: true, ilanTuru: true, iller: true },
   });
 
