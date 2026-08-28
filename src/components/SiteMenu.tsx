@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, Landmark, Home, GraduationCap, Search, Calculator, Repeat } from "lucide-react";
+import { Menu, Landmark, Home, GraduationCap, Search, Calculator, Repeat, Target } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 // Sitedeki sayfalar arttikca buraya yeni girdiler eklenecek.
 const MENU_ITEMS = [
   { href: "/", label: "Ana Sayfa", icon: Home },
+  { href: "/amacimiz", label: "Amacımız", icon: Target },
   { href: "/bolum-ara", label: "Bölüme Göre Ara", icon: Search },
   { href: "/kpss-puan-hesaplama", label: "KPSS Puan Hesaplama", icon: Calculator },
   { href: "/becayis", label: "Becayiş İlanları", icon: Repeat },
