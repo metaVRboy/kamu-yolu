@@ -191,6 +191,20 @@ model Duyuru {
   createdAt DateTime @default(now())
 }
 
+// Kamu personel alimlariyla ilgili haberler (toplu alim duyurulari,
+// sendika haberleri, gundemdeki konular vb.) - admin panelden yayimlanir,
+// ana sayfada "Haberler" bolumunde gosterilir.
+model Haber {
+  id          String   @id @default(cuid())
+  baslik      String
+  ozet        String
+  kaynakUrl   String?
+  yayinTarihi DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  @@index([yayinTarihi])
+}
+
 // Kullaniciya ozel bildirimler: gelen becayis mesaji, mezun oldugu
 // bolume/seviyeye uygun yeni ilan vb.
 model Bildirim {

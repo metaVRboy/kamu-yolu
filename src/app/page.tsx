@@ -1,7 +1,9 @@
 import { getLatestPostings } from "@/lib/matching";
+import { getLatestHaberler } from "@/lib/haberler";
 import { PostingCard } from "@/components/PostingCard";
 import { PostingTicker } from "@/components/PostingTicker";
 import { ChatBot } from "@/components/ChatBot";
+import { HaberlerSection } from "@/components/HaberlerSection";
 import { ClosingCtaSection } from "@/components/HomeMarketingSections";
 
 // Ilan verileri periyodik olarak degistigi icin sayfa build-time'da
@@ -9,7 +11,10 @@ import { ClosingCtaSection } from "@/components/HomeMarketingSections";
 export const revalidate = 300;
 
 export default async function Home() {
-  const latestPostings = await getLatestPostings(6);
+  const [latestPostings, haberler] = await Promise.all([
+    getLatestPostings(6),
+    getLatestHaberler(5),
+  ]);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
@@ -22,6 +27,12 @@ export default async function Home() {
             title: p.title,
             institutionName: p.institutionName,
           }))}
+        />
+      </div>
+
+      <div className="mt-16">
+        <HaberlerSection
+          haberler={haberler.map((h) => ({ ...h, yayinTarihi: h.yayinTarihi.toISOString() }))}
         />
       </div>
 
