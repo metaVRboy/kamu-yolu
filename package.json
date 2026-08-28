@@ -9,8 +9,7 @@
     "start": "next start",
     "lint": "eslint",
     "db:seed": "tsx prisma/seed.ts",
-    "scrape:kariyerkapisi": "tsx src/scraper/run.ts",
-    "scrape:isinolsa": "tsx src/scraper/runIsinolsa.ts"
+    "scrape:kariyerkapisi": "tsx src/scraper/run.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

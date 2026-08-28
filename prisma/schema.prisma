@@ -205,6 +205,18 @@ model Haber {
   @@index([yayinTarihi])
 }
 
+// isinolsa.com yalnizca "boyle bir alim var" sinyali olarak kullanilir -
+// icerigi asla dogrudan sitede gosterilmez. Her "lead" icin resmi bir
+// kaynaktan (Resmi Gazete, kurum/bakanlik sitesi) bagimsiz arastirma
+// yapilip yapilmadigini takip eder ki ayni lead tekrar tekrar (bosuna
+// token harcayarak) arastirilmasin.
+model IsinolsaLeadIslendi {
+  id            String   @id @default(cuid())
+  externalId    String   @unique
+  bulundu       Boolean
+  islenmeTarihi DateTime @default(now())
+}
+
 // Kullaniciya ozel bildirimler: gelen becayis mesaji, mezun oldugu
 // bolume/seviyeye uygun yeni ilan vb.
 model Bildirim {

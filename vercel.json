@@ -5,7 +5,7 @@
       "schedule": "0 7 * * *"
     },
     {
-      "path": "/api/scrape-isinolsa",
+      "path": "/api/isinolsa-haber-arastir",
       "schedule": "0 6 * * *"
     }
   ]
