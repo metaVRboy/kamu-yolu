@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Bot, Send, User, ArrowRight, Loader2, Sparkles } from "lucide-react";
+import { Bot, Info, Send, User, ArrowRight, Loader2, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -20,14 +20,33 @@ const GREETING: ChatMessage = {
     "Merhaba! Ben Kamu Yolu asistanıyım. Hangi bölümden mezunsun ya da ne tür bir kamu ilanı arıyorsun, bana yazman yeterli.",
 };
 
+function formatKalanSure(ms: number): string {
+  const saniye = Math.max(0, Math.ceil(ms / 1000));
+  const dakika = Math.ceil(saniye / 60);
+  if (dakika < 60) return `${dakika} dk`;
+  const saat = Math.ceil(dakika / 60);
+  if (saat < 24) return `${saat} sa`;
+  return `${Math.ceil(saat / 24)} gün`;
+}
+
 export function ChatBot() {
   const [messages, setMessages] = useState<ChatMessage[]>([GREETING]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [lockedUntil, setLockedUntil] = useState<number | null>(null);
+  const [now, setNow] = useState(() => Date.now());
   const listRef = useRef<HTMLDivElement>(null);
 
   const panelGlow = useMouseGlow<HTMLDivElement>();
   const inputGlow = useMouseGlow<HTMLDivElement>();
+
+  const isLocked = !!lockedUntil && lockedUntil > now;
+
+  useEffect(() => {
+    if (!lockedUntil) return;
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, [lockedUntil]);
 
   function scrollToBottom() {
     requestAnimationFrame(() => {
@@ -37,7 +56,7 @@ export function ChatBot() {
 
   async function sendMessage() {
     const text = input.trim();
-    if (!text || isLoading) return;
+    if (!text || isLoading || isLocked) return;
 
     const nextMessages: ChatMessage[] = [...messages, { role: "user", content: text }];
     setMessages(nextMessages);
@@ -64,6 +83,10 @@ export function ChatBot() {
         ...prev,
         { role: "assistant", content: data.reply, action: data.action },
       ]);
+      if (data.lockedUntil) {
+        setLockedUntil(new Date(data.lockedUntil).getTime());
+        setNow(Date.now());
+      }
     } catch {
       setMessages((prev) => [
         ...prev,
@@ -100,9 +123,18 @@ export function ChatBot() {
         </div>
       </div>
 
+      <div className="relative mt-3 flex items-start gap-1.5 rounded-xl bg-white/50 px-3 py-2 text-xs text-slate-600">
+        <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+        <p>
+          Bu asistan yalnızca kamu ilanları içindir: mesleğini/bölümünü söyle, sana uygun
+          ilanları bulalım. Konu dışı mesajlarda (ör. hava durumu) erişim kademeli olarak
+          kısıtlanır.
+        </p>
+      </div>
+
       <div
         ref={listRef}
-        className="relative mt-4 flex max-h-80 flex-col gap-3 overflow-y-auto rounded-2xl bg-white/40 p-4 backdrop-blur-sm"
+        className="relative mt-3 flex max-h-80 flex-col gap-3 overflow-y-auto rounded-2xl bg-white/40 p-4 backdrop-blur-sm"
       >
         {messages.map((m, i) => (
           <div
@@ -176,14 +208,18 @@ export function ChatBot() {
                 sendMessage();
               }
             }}
-            placeholder="Örn: Hemşirelik mezunuyum, bana uygun ilan var mı?"
-            disabled={isLoading}
+            placeholder={
+              isLocked
+                ? `Konu dışı mesaj nedeniyle ${formatKalanSure(lockedUntil! - now)} bekleniyor...`
+                : "Örn: Hemşirelik mezunuyum, bana uygun ilan var mı?"
+            }
+            disabled={isLoading || isLocked}
             className="h-12 flex-1 rounded-2xl border-none bg-transparent shadow-none focus-visible:ring-0"
           />
           <button
             type="button"
             onClick={sendMessage}
-            disabled={isLoading || !input.trim()}
+            disabled={isLoading || isLocked || !input.trim()}
             aria-label="Gönder"
             className={buttonVariants({
               size: "icon",

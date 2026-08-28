@@ -206,3 +206,16 @@ model Bildirim {
 
   @@index([userId, okundu])
 }
+
+// Chatbot'un konu disi mesajlarini takip eder; kademeli bekleme suresi
+// icin kullanilir. visitorId, giris yapmamis ziyaretciler icin de
+// calisabilmesi adina cerez tabanli anonim bir kimliktir (kullanici
+// hesabina degil tarayiciya baglidir).
+model ChatAbuse {
+  id              String    @id @default(cuid())
+  visitorId       String    @unique
+  violationCount  Int       @default(0)
+  lockedUntil     DateTime?
+  lastViolationAt DateTime?
+  createdAt       DateTime  @default(now())
+}

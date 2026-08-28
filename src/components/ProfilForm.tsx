@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { KURUM_TURLERI, meslekSecenekleri } from "@/lib/kurumMeslek";
 
 type DepartmentOption = { id: string; name: string };
 
@@ -38,6 +39,13 @@ export function ProfilForm({
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const meslekler = kurumTuru ? meslekSecenekleri(kurumTuru) : [];
+
+  function handleKurumTuruChange(value: string) {
+    setKurumTuru(value);
+    setMeslek("");
+  }
+
   async function handleSave() {
     setLoading(true);
     setSaved(false);
@@ -67,22 +75,31 @@ export function ProfilForm({
         <Input value={telefon} onChange={(e) => setTelefon(e.target.value)} className="border-primary/20 bg-white" />
       </div>
       <div>
-        <Label className="mb-1.5">Meslek / Unvan</Label>
-        <Input
-          value={meslek}
-          onChange={(e) => setMeslek(e.target.value)}
-          placeholder="Örn: Öğretmen, Hemşire, Memur"
-          className="border-primary/20 bg-white"
-        />
+        <Label className="mb-1.5">Çalıştığın Kurum Türü</Label>
+        <select
+          value={kurumTuru}
+          onChange={(e) => handleKurumTuruChange(e.target.value)}
+          className="h-10 w-full rounded-xl border border-primary/20 bg-white px-3 text-sm"
+        >
+          <option value="">Seçilmedi</option>
+          {KURUM_TURLERI.map((k) => (
+            <option key={k} value={k}>{k}</option>
+          ))}
+        </select>
       </div>
       <div>
-        <Label className="mb-1.5">Çalıştığın Kurum Türü</Label>
-        <Input
-          value={kurumTuru}
-          onChange={(e) => setKurumTuru(e.target.value)}
-          placeholder="Örn: Milli Eğitim Bakanlığı"
-          className="border-primary/20 bg-white"
-        />
+        <Label className="mb-1.5">Meslek / Unvan</Label>
+        <select
+          value={meslek}
+          onChange={(e) => setMeslek(e.target.value)}
+          disabled={!kurumTuru}
+          className="h-10 w-full rounded-xl border border-primary/20 bg-white px-3 text-sm disabled:opacity-50"
+        >
+          <option value="">{kurumTuru ? "Seçilmedi" : "Önce kurum türü seçin"}</option>
+          {meslekler.map((m) => (
+            <option key={m} value={m}>{m}</option>
+          ))}
+        </select>
       </div>
       <div>
         <Label className="mb-1.5">Mezun Olduğun Bölüm</Label>

@@ -13,6 +13,7 @@ import { prisma } from "@/lib/prisma";
 import type { EducationLevel } from "@/generated/prisma/enums";
 import { LEVEL_ENUM_TO_SLUG } from "@/lib/levels";
 import { LEVEL_LABEL } from "@/lib/labels";
+import { getLockoutState, getOrCreateVisitorId, recordViolation } from "@/lib/chatAbuse";
 
 // Bilinmeyen bir bolum sorulduğunda internet arastirmasi (2 ekstra Claude
 // cagrisi) gerekebilir; bu yuzden normal bir chat cevabindan daha uzun
@@ -45,6 +46,11 @@ const ChatResponseSchema = z.object({
     .describe(
       "Kullanıcının öğrenim derecesi/mezuniyet seviyesi belli oluyorsa (lise/önlisans/lisans/yüksek lisans/ilköğretim) bunu yaz; bölüm bilgisinden bağımsız olarak, 'lise düzeyinde ilanlar', 'X mezunuyum' gibi ifadelerden de çıkarılabilir. Anlaşılmıyorsa null.",
     ),
+  isOnTopic: z
+    .boolean()
+    .describe(
+      "Kullanıcının mesajı bu sitenin konusuyla (kamu ilanları, meslek/bölüm beyanı, öğrenim düzeyi, KPSS, becayiş, sitenin kendisi hakkında soru) ilgili mi, ya da basit bir selamlama/teşekkür mü? Öyleyse true. Hava durumu, spor, genel sohbet, kod yazma isteği gibi siteyle tamamen alakasız bir istekse false.",
+    ),
 });
 
 const SYSTEM_PROMPT = `Sen "Kamu Yolu" adlı bir web sitesinin karşılama asistanısın.
@@ -75,7 +81,11 @@ Kurallar:
   bunun yerine educationLevel alanını doldur, sistem otomatik olarak ilgili
   sayfaya yönlendiren bir buton gösterecek.
 - Asla var olmayan bilgi uydurma. Emin değilsen bunu belirt.
-- Yanıtların her zaman kısa, samimi ve Türkçe olsun.`;
+- Yanıtların her zaman kısa, samimi ve Türkçe olsun.
+- Bu asistan yalnızca kamu ilanları/meslek-bölüm eşleştirmesi için var;
+  siteyle alakasız bir istek (hava durumu, genel sohbet, kod yazma vb.)
+  gelirse isOnTopic'i false yap ve reply'de kısaca konunun dışına
+  çıkıldığını belirt.`;
 
 const bodySchema = z.object({
   message: z.string().min(1).max(500),
@@ -92,6 +102,14 @@ const bodySchema = z.object({
 });
 
 type Action = { label: string; href: string };
+
+function formatKalanSure(lockedUntil: Date): string {
+  const ms = lockedUntil.getTime() - Date.now();
+  const dakika = Math.max(1, Math.ceil(ms / 60000));
+  if (dakika < 60) return `${dakika} dakika`;
+  if (dakika < 24 * 60) return `${Math.ceil(dakika / 60)} saat`;
+  return `${Math.ceil(dakika / (24 * 60))} gün`;
+}
 
 async function resolveDepartmentAction(
   departmentQuery: string,
@@ -147,6 +165,16 @@ export async function POST(req: NextRequest) {
   }
   const { message, history } = parsedBody.data;
 
+  const visitorId = await getOrCreateVisitorId();
+  const lockout = await getLockoutState(visitorId);
+  if (lockout.locked && lockout.lockedUntil) {
+    return NextResponse.json({
+      reply: `Bu asistan yalnızca kamu ilanları ve meslek/bölüm eşleştirmesi için kullanılabiliyor. Konu dışı bir mesaj gönderdiğin için ${formatKalanSure(lockout.lockedUntil)} sonra tekrar deneyebilirsin.`,
+      action: null,
+      lockedUntil: lockout.lockedUntil.toISOString(),
+    });
+  }
+
   const messages: Anthropic.MessageParam[] = [
     ...history.map((h) => ({ role: h.role, content: h.content })),
     { role: "user" as const, content: message },
@@ -164,9 +192,18 @@ export async function POST(req: NextRequest) {
     const parsed = response.parsed_output;
     if (!parsed) {
       return NextResponse.json(
-        { reply: "Üzgünüm, isteğini anlayamadım. Tekrar dener misin?", action: null },
+        { reply: "Üzgünüm, isteğini anlayamadım. Tekrar dener misin?", action: null, lockedUntil: null },
         { status: 200 },
       );
+    }
+
+    if (!parsed.isOnTopic) {
+      const lockout = await recordViolation(visitorId);
+      return NextResponse.json({
+        reply: `Bu asistan yalnızca kamu ilanları ve meslek/bölüm eşleştirmesi için kullanılabiliyor. Konu dışı bir mesaj gönderdiğin için ${formatKalanSure(lockout.lockedUntil!)} boyunca erişimin kısıtlandı.`,
+        action: null,
+        lockedUntil: lockout.lockedUntil!.toISOString(),
+      });
     }
 
     let action: Action | null = null;
@@ -203,7 +240,7 @@ export async function POST(req: NextRequest) {
       reply = `"${parsed.departmentQuery}" için şu anda elimizde bir bilgi bulamadım. Mezuniyet düzeyini (lise/önlisans/lisans) söylersen, o düzeydeki genel ilanları hemen gösterebilirim.`;
     }
 
-    return NextResponse.json({ reply, action });
+    return NextResponse.json({ reply, action, lockedUntil: null });
   } catch (err) {
     console.error("Chat API hatası:", err);
     return NextResponse.json(
