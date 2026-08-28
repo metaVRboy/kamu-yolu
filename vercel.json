@@ -3,6 +3,10 @@
     {
       "path": "/api/haber-arastir",
       "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/scrape-isinolsa",
+      "schedule": "0 6 * * *"
     }
   ]
 }
