@@ -8,13 +8,14 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
-type Haber = { id: string; baslik: string; ozet: string; kaynakUrl: string | null; yayinTarihi: string };
+type Haber = { id: string; baslik: string; ozet: string; kaynakUrl: string | null; gorselUrl: string | null; yayinTarihi: string };
 
 export function AdminHaberPanel({ haberler }: { haberler: Haber[] }) {
   const router = useRouter();
   const [baslik, setBaslik] = useState("");
   const [ozet, setOzet] = useState("");
   const [kaynakUrl, setKaynakUrl] = useState("");
+  const [gorselUrl, setGorselUrl] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -26,7 +27,7 @@ export function AdminHaberPanel({ haberler }: { haberler: Haber[] }) {
       const res = await fetch("/api/admin/haberler", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ baslik, ozet, kaynakUrl: kaynakUrl || undefined }),
+        body: JSON.stringify({ baslik, ozet, kaynakUrl: kaynakUrl || undefined, gorselUrl: gorselUrl || undefined }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -36,6 +37,7 @@ export function AdminHaberPanel({ haberler }: { haberler: Haber[] }) {
       setBaslik("");
       setOzet("");
       setKaynakUrl("");
+      setGorselUrl("");
       router.refresh();
     } finally {
       setLoading(false);
@@ -75,6 +77,15 @@ export function AdminHaberPanel({ haberler }: { haberler: Haber[] }) {
             <Input
               value={kaynakUrl}
               onChange={(e) => setKaynakUrl(e.target.value)}
+              placeholder="https://..."
+              className="border-primary/20 bg-white"
+            />
+          </div>
+          <div>
+            <Label className="mb-1.5">Görsel Bağlantısı (opsiyonel)</Label>
+            <Input
+              value={gorselUrl}
+              onChange={(e) => setGorselUrl(e.target.value)}
               placeholder="https://..."
               className="border-primary/20 bg-white"
             />

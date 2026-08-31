@@ -199,6 +199,10 @@ model Haber {
   baslik      String
   ozet        String
   kaynakUrl   String?
+  // Kaynak makalenin og:image/twitter:image meta etiketinden alinan gorsel
+  // URL'si - kurumun/haberin kendi yayinladigi kucuk onizleme gorseli,
+  // bulunamazsa null (arayuzde yerine bir simge/gradyan gosterilir).
+  gorselUrl   String?
   yayinTarihi DateTime @default(now())
   createdAt   DateTime @default(now())
 

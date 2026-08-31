@@ -2,6 +2,7 @@ import { z } from "zod";
 import { gemini, GEMINI_MODEL } from "@/lib/gemini";
 import { toGeminiSchema, parseGeminiJson } from "@/lib/geminiSchema";
 import { resolveGroundingUrl } from "@/lib/resolveGroundingUrl";
+import { extractOgImage } from "@/lib/extractOgImage";
 
 export type IsinolsaLead = {
   externalId: string;
@@ -32,6 +33,7 @@ export type IsinolsaHaberSonuc = {
   baslik: string | null;
   ozet: string | null;
   resmiKaynakUrl: string | null;
+  gorselUrl: string | null;
 };
 
 const SYSTEM_PROMPT = `Sana bir kurum adi ve kisa bir konu basligi listesi verilecek. Bu
@@ -104,19 +106,19 @@ export async function researchIsinolsaLeads(
       if (!parsed.success) throw new Error("Gemini yaniti semaya uymuyor.");
 
       return Promise.all(
-        leads.map(async (lead, i) => {
+        leads.map(async (lead, i): Promise<IsinolsaHaberSonuc> => {
+          const bos = { externalId: lead.externalId, dogrulandi: false, baslik: null, ozet: null, resmiKaynakUrl: null, gorselUrl: null };
+
           const sonuc = parsed.data.sonuclar.find((s) => s.index === i);
-          if (!sonuc || !sonuc.dogrulandi || !sonuc.resmiKaynakUrl) {
-            return { externalId: lead.externalId, dogrulandi: false, baslik: null, ozet: null, resmiKaynakUrl: null };
-          }
+          if (!sonuc || !sonuc.dogrulandi || !sonuc.resmiKaynakUrl) return bos;
 
           // resmiKaynakUrl, Gemini'nin grounding yonlendirme linki - gercek
           // kaynak alan adini ancak coz(er)sek gorebiliriz. isinolsa.com
           // disleme kontrolu de bu yuzden COZULMUS url uzerinde yapilmali.
           const cozulmusUrl = await resolveGroundingUrl(sonuc.resmiKaynakUrl);
-          if (!cozulmusUrl || cozulmusUrl.includes("isinolsa.com")) {
-            return { externalId: lead.externalId, dogrulandi: false, baslik: null, ozet: null, resmiKaynakUrl: null };
-          }
+          if (!cozulmusUrl || cozulmusUrl.includes("isinolsa.com")) return bos;
+
+          const gorselUrl = await extractOgImage(cozulmusUrl);
 
           return {
             externalId: lead.externalId,
@@ -124,6 +126,7 @@ export async function researchIsinolsaLeads(
             baslik: sonuc.baslik,
             ozet: sonuc.ozet,
             resmiKaynakUrl: cozulmusUrl,
+            gorselUrl,
           };
         }),
       );

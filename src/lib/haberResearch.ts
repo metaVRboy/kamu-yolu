@@ -2,6 +2,7 @@ import { z } from "zod";
 import { gemini, GEMINI_MODEL } from "@/lib/gemini";
 import { toGeminiSchema, parseGeminiJson } from "@/lib/geminiSchema";
 import { resolveGroundingUrl } from "@/lib/resolveGroundingUrl";
+import { extractOgImage } from "@/lib/extractOgImage";
 
 const HaberSchema = z.object({
   haberler: z
@@ -20,7 +21,9 @@ const HaberSchema = z.object({
     .describe("Bulunan gerçek, doğrulanabilir haberlerin listesi. Hiçbir şey bulunamadıysa boş dizi."),
 });
 
-export type HaberResearchItem = z.infer<typeof HaberSchema>["haberler"][number];
+export type HaberResearchItem = z.infer<typeof HaberSchema>["haberler"][number] & {
+  gorselUrl: string | null;
+};
 
 const SYSTEM_PROMPT = `Turkiye'de kamu personeli/memur alimlariyla ilgili GUNCEL (son birkac
 gun icindeki, en fazla son 1 hafta) haberleri Google Search ile arastir.
@@ -68,19 +71,19 @@ export async function researchHaberler(): Promise<HaberResearchItem[]> {
 
     // kaynakUrl, Gemini'nin grounding yonlendirme linki - kalici saklamadan
     // once gercek/nihai kaynak URL'sine cozuyoruz. Cozulemeyen (linkin
-    // olmedigi/gecersiz oldugu) haberler atlanir.
+    // olmedigi/gecersiz oldugu) haberler atlanir. Prompt talimati tek
+    // basina yeterli olmayabilir (model yine de isinolsa.com'u kaynak
+    // gosterebilir) - kod seviyesinde de kesin olarak eliyoruz.
     const cozulmus = await Promise.all(
-      result.data.haberler.map(async (h) => ({
-        ...h,
-        kaynakUrl: await resolveGroundingUrl(h.kaynakUrl),
-      })),
+      result.data.haberler.map(async (h): Promise<HaberResearchItem | null> => {
+        const kaynakUrl = await resolveGroundingUrl(h.kaynakUrl);
+        if (!kaynakUrl || kaynakUrl.includes("isinolsa.com")) return null;
+        const gorselUrl = await extractOgImage(kaynakUrl);
+        return { baslik: h.baslik, ozet: h.ozet, kaynakUrl, gorselUrl };
+      }),
     );
 
-    // Prompt talimati yeterli olmayabilir (model yine de isinolsa.com'u
-    // kaynak gosterebilir) - kod seviyesinde de kesin olarak eliyoruz.
-    return cozulmus.filter(
-      (h): h is HaberResearchItem => !!h.kaynakUrl && !h.kaynakUrl.includes("isinolsa.com"),
-    );
+    return cozulmus.filter((h): h is HaberResearchItem => !!h);
   } catch (err) {
     console.error("Haber araştırması başarısız:", err);
     return [];

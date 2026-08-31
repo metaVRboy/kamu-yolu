@@ -38,6 +38,7 @@ async function runHaberArastir(req: NextRequest) {
           baslik: h.baslik,
           ozet: h.ozet,
           kaynakUrl: h.kaynakUrl,
+          gorselUrl: h.gorselUrl,
         })),
       });
     }

@@ -71,6 +71,7 @@ async function runIsinolsaHaberArastir(req: NextRequest) {
           baslik: s.baslik!,
           ozet: s.ozet!,
           kaynakUrl: s.resmiKaynakUrl!,
+          gorselUrl: s.gorselUrl,
         })),
       });
     }

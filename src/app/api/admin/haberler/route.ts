@@ -7,6 +7,7 @@ const bodySchema = z.object({
   baslik: z.string().trim().min(2).max(160),
   ozet: z.string().trim().min(2).max(2000),
   kaynakUrl: z.string().trim().url().max(500).optional().or(z.literal("")),
+  gorselUrl: z.string().trim().url().max(500).optional().or(z.literal("")),
 });
 
 export async function POST(req: NextRequest) {
@@ -28,6 +29,7 @@ export async function POST(req: NextRequest) {
       baslik: parsed.data.baslik,
       ozet: parsed.data.ozet,
       kaynakUrl: parsed.data.kaynakUrl || null,
+      gorselUrl: parsed.data.gorselUrl || null,
     },
   });
   return NextResponse.json({ id: haber.id });
