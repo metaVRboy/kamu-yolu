@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { researchHaberler } from "@/lib/haberResearch";
 
-export const maxDuration = 120;
+export const maxDuration = 290;
 
 function isAuthorized(req: NextRequest): boolean {
   const secret = process.env.SCRAPE_SECRET;

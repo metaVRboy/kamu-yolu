@@ -79,9 +79,9 @@ export async function researchIsinolsaLeads(
     .map((l, i) => `${i}. Kurum: "${l.kurumAdi}" | Konu: "${l.baslik}"`)
     .join("\n");
 
-  // maxDuration (120s) icinde kalmak icin en fazla 2 deneme: tek basarisiz
+  // maxDuration (290s) icinde kalmak icin en fazla 3 deneme: tek basarisiz
   // cagri bile ~50-100s surebiliyor.
-  const DENEME_SAYISI = 2;
+  const DENEME_SAYISI = 3;
   let sonHata: unknown;
 
   for (let deneme = 1; deneme <= DENEME_SAYISI; deneme++) {

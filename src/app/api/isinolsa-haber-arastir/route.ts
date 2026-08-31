@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { fetchIsinolsaIlanlari } from "@/scraper/isinolsaClient";
 import { researchIsinolsaLeads } from "@/lib/isinolsaHaberResearch";
 
-export const maxDuration = 120;
+export const maxDuration = 290;
 
 // Tek calistirmada arastirilacak en fazla yeni lead sayisi - Claude'a tek
 // seferde asiri buyuk bir liste vermemek ve maxDuration icinde kalmak icin.

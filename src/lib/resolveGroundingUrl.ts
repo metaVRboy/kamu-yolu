@@ -9,7 +9,9 @@
  */
 export async function resolveGroundingUrl(redirectUrl: string): Promise<string | null> {
   try {
-    const res = await fetch(redirectUrl, { redirect: "follow" });
+    // Bilinmeyen/yavas ucuncu taraf siteler tum istegi bekletmesin diye
+    // sinirli bir sure veriyoruz.
+    const res = await fetch(redirectUrl, { redirect: "follow", signal: AbortSignal.timeout(8000) });
     res.body?.cancel?.().catch(() => {});
     return res.url && /^https?:\/\//.test(res.url) ? res.url : null;
   } catch {
