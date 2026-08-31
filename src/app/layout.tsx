@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Link from "next/link";
-import { Landmark, UserRound } from "lucide-react";
+import { Landmark, UserRound, Repeat, Calculator, ListChecks } from "lucide-react";
 import { getLastSuccessfulScrapeAt } from "@/lib/matching";
 import { cn } from "@/lib/utils";
 import { getCurrentUser } from "@/lib/auth";
@@ -40,6 +40,30 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                 </span>
               </Link>
             </div>
+
+            <nav className="hidden items-center gap-1 md:flex">
+              <Link
+                href="/becayis"
+                className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-primary/10 hover:text-slate-900"
+              >
+                <Repeat className="h-4 w-4" />
+                Becayiş İlanları
+              </Link>
+              <Link
+                href="/kpss-puan-hesaplama"
+                className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-primary/10 hover:text-slate-900"
+              >
+                <Calculator className="h-4 w-4" />
+                KPSS Puan Hesaplama
+              </Link>
+              <Link
+                href="/ilanlar"
+                className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-primary/10 hover:text-slate-900"
+              >
+                <ListChecks className="h-4 w-4" />
+                Aktif İlanlar
+              </Link>
+            </nav>
 
             <div className="flex items-center gap-2">
               <NotificationBell isLoggedIn={!!user} />
