@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { anthropic } from "@/lib/anthropic";
+import { gemini, GEMINI_MODEL } from "@/lib/gemini";
+import { toGeminiSchema, parseGeminiJson } from "@/lib/geminiSchema";
 
 const EDUCATION_LEVELS = [
   "ILKOGRETIM",
@@ -32,11 +33,7 @@ const ResearchSchema = z.object({
 export type DepartmentResearch = z.infer<typeof ResearchSchema>;
 
 const RESEARCH_SYSTEM_PROMPT = `Turkiye'deki egitim sistemi baglaminda verilen ifadeyi arastir
-(gerekirse web aramasi kullan). Ardindan SADECE asagidaki JSON semasina uyan
-TEK bir JSON nesnesiyle cevap ver - baska hicbir aciklama, yorum veya metin
-ekleme, sadece JSON:
-
-{"isRealField": boolean, "canonicalName": string|null, "level": "ILKOGRETIM"|"LISE"|"ONLISANS"|"LISANS"|"YUKSEK_LISANS"|null, "aliases": string[]}
+(gerekirse Google Search kullan).
 
 - isRealField: ifade Turkiye'de gercekten var olan, taninan bir egitim
   programi/bolum mu (lise alani, onlisans, lisans veya yuksek lisans olabilir)?
@@ -55,35 +52,21 @@ export async function researchDepartment(
   query: string,
 ): Promise<DepartmentResearch | null> {
   try {
-    const res = await anthropic.messages.create({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 1024,
-      system: RESEARCH_SYSTEM_PROMPT,
-      tools: [
-        {
-          type: "web_search_20260209",
-          name: "web_search",
-          max_uses: 2,
-          allowed_callers: ["direct"],
-        },
-      ],
-      messages: [
-        {
-          role: "user",
-          content: `"${query}" ifadesini araştır ve JSON ile cevap ver.`,
-        },
-      ],
+    const res = await gemini.models.generateContent({
+      model: GEMINI_MODEL,
+      contents: `"${query}" ifadesini araştır ve JSON ile cevap ver.`,
+      config: {
+        systemInstruction: RESEARCH_SYSTEM_PROMPT,
+        tools: [{ googleSearch: {} }],
+        responseMimeType: "application/json",
+        responseJsonSchema: toGeminiSchema(ResearchSchema),
+      },
     });
 
-    let text = "";
-    for (const block of res.content) {
-      if (block.type === "text") text += block.text;
-    }
+    const parsedJson = parseGeminiJson(res.text);
+    if (!parsedJson) return null;
 
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) return null;
-
-    const result = ResearchSchema.safeParse(JSON.parse(jsonMatch[0]));
+    const result = ResearchSchema.safeParse(parsedJson);
     return result.success ? result.data : null;
   } catch (err) {
     console.error("Bölüm araştırması başarısız:", err);

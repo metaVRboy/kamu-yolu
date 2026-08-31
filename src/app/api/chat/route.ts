@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
-import type Anthropic from "@anthropic-ai/sdk";
-import { anthropic } from "@/lib/anthropic";
+import { gemini, GEMINI_MODEL } from "@/lib/gemini";
+import { toGeminiSchema, parseGeminiJson } from "@/lib/geminiSchema";
 import {
   createDepartmentFromResearch,
   linkDepartmentToExistingPostings,
@@ -152,7 +151,7 @@ async function resolveDepartmentAction(
 }
 
 export async function POST(req: NextRequest) {
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!process.env.GEMINI_API_KEY) {
     return NextResponse.json(
       { error: "Chatbot şu anda kullanılamıyor." },
       { status: 503 },
@@ -175,21 +174,29 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const messages: Anthropic.MessageParam[] = [
-    ...history.map((h) => ({ role: h.role, content: h.content })),
-    { role: "user" as const, content: message },
+  const contents = [
+    ...history.map((h) => ({
+      role: h.role === "assistant" ? ("model" as const) : ("user" as const),
+      parts: [{ text: h.content }],
+    })),
+    { role: "user" as const, parts: [{ text: message }] },
   ];
 
   try {
-    const response = await anthropic.messages.parse({
-      model: "claude-sonnet-5",
-      max_tokens: 1024,
-      system: SYSTEM_PROMPT,
-      messages,
-      output_config: { format: zodOutputFormat(ChatResponseSchema) },
+    const response = await gemini.models.generateContent({
+      model: GEMINI_MODEL,
+      contents,
+      config: {
+        systemInstruction: SYSTEM_PROMPT,
+        maxOutputTokens: 1024,
+        responseMimeType: "application/json",
+        responseJsonSchema: toGeminiSchema(ChatResponseSchema),
+      },
     });
 
-    const parsed = response.parsed_output;
+    const parsedJson = parseGeminiJson(response.text);
+    const parsedResult = parsedJson ? ChatResponseSchema.safeParse(parsedJson) : null;
+    const parsed = parsedResult?.success ? parsedResult.data : null;
     if (!parsed) {
       return NextResponse.json(
         { reply: "Üzgünüm, isteğini anlayamadım. Tekrar dener misin?", action: null, lockedUntil: null },

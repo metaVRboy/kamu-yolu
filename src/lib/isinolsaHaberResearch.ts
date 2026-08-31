@@ -1,5 +1,7 @@
 import { z } from "zod";
-import { anthropic } from "@/lib/anthropic";
+import { gemini, GEMINI_MODEL } from "@/lib/gemini";
+import { toGeminiSchema, parseGeminiJson } from "@/lib/geminiSchema";
+import { resolveGroundingUrl } from "@/lib/resolveGroundingUrl";
 
 export type IsinolsaLead = {
   externalId: string;
@@ -34,7 +36,7 @@ export type IsinolsaHaberSonuc = {
 
 const SYSTEM_PROMPT = `Sana bir kurum adi ve kisa bir konu basligi listesi verilecek. Bu
 listedeki HER BIR madde icin, o kurumun gercekten boyle bir personel/memur
-alimi yaptigini/yapacagini web aramasi kullanarak BAGIMSIZ OLARAK
+alimi yaptigini/yapacagini Google Search kullanarak BAGIMSIZ OLARAK
 dogrulamaya calis.
 
 KRITIK KURALLAR:
@@ -50,17 +52,23 @@ KRITIK KURALLAR:
   alanlarini null birak. Hicbir bilgiyi UYDURMA veya tahmin etme.
 - Ozet, SADECE bulunan resmi kaynaktaki gercek bilgiye dayanmali.
 
-Arastirmayi bitirdiginde bulgularini "sonuclari_bildir" aracini
-cagirarak bildir. Girdi listesindeki HER madde icin (atlamadan) bir
-sonuc satiri uret.`;
+Girdi listesindeki HER madde icin (atlamadan) bir sonuc satiri uret.`;
 
-const RAPOR_TOOL_NAME = "sonuclari_bildir";
+function beklet(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 /**
  * isinolsa.com'dan gelen "lead"leri (sadece kurum adi + kisa konu)
  * BAGIMSIZ olarak resmi kaynaklardan arastirip dogrular. isinolsa.com'un
  * kendi sayfasina veya URL'sine asla referans vermez/donmez - sadece
  * "boyle bir alim var mi" sinyali olarak kullanilir.
+ *
+ * Gercek bir sonuc alinamazsa (API hatasi, gecici asiri yuk, model semaya
+ * uymayan cikti uretmesi vb.) hata firlatir - "arastirilamadi" durumunu
+ * "resmi kaynaktan dogrulanamadi" ile KARISTIRMAMAK icin. Cagiran taraf
+ * (route), bu leadleri IsinolsaLeadIslendi'ye ISLENMEMIS olarak birakip bir
+ * sonraki calistirmada tekrar denemeli.
  */
 export async function researchIsinolsaLeads(
   leads: IsinolsaLead[],
@@ -71,97 +79,60 @@ export async function researchIsinolsaLeads(
     .map((l, i) => `${i}. Kurum: "${l.kurumAdi}" | Konu: "${l.baslik}"`)
     .join("\n");
 
-  try {
-    const res = await anthropic.messages.create({
-      model: "claude-sonnet-5",
-      max_tokens: 8192,
-      system: SYSTEM_PROMPT,
-      tools: [
-        {
-          type: "web_search_20260209",
-          name: "web_search",
-          max_uses: Math.min(30, leads.length * 2),
-          allowed_callers: ["direct"],
+  // maxDuration (120s) icinde kalmak icin en fazla 2 deneme: tek basarisiz
+  // cagri bile ~50-100s surebiliyor.
+  const DENEME_SAYISI = 2;
+  let sonHata: unknown;
+
+  for (let deneme = 1; deneme <= DENEME_SAYISI; deneme++) {
+    try {
+      const res = await gemini.models.generateContent({
+        model: GEMINI_MODEL,
+        contents: girdiListesi,
+        config: {
+          systemInstruction: SYSTEM_PROMPT,
+          tools: [{ googleSearch: {} }],
+          responseMimeType: "application/json",
+          responseJsonSchema: toGeminiSchema(SonucSchema),
         },
-        {
-          name: RAPOR_TOOL_NAME,
-          description: "Her lead icin arastirma sonucunu bildirir.",
-          input_schema: {
-            type: "object",
-            properties: {
-              sonuclar: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: {
-                    index: { type: "integer" },
-                    dogrulandi: { type: "boolean" },
-                    baslik: { type: ["string", "null"] },
-                    ozet: { type: ["string", "null"] },
-                    resmiKaynakUrl: { type: ["string", "null"] },
-                  },
-                  required: ["index", "dogrulandi", "baslik", "ozet", "resmiKaynakUrl"],
-                },
-              },
-            },
-            required: ["sonuclar"],
-          },
-        },
-      ],
-      messages: [{ role: "user", content: girdiListesi }],
-    });
+      });
 
-    const toolUse = res.content.find(
-      (block): block is Extract<typeof block, { type: "tool_use" }> =>
-        block.type === "tool_use" && block.name === RAPOR_TOOL_NAME,
-    );
-    if (!toolUse) {
-      return leads.map((l) => ({
-        externalId: l.externalId,
-        dogrulandi: false,
-        baslik: null,
-        ozet: null,
-        resmiKaynakUrl: null,
-      }));
+      const parsedJson = parseGeminiJson(res.text);
+      if (!parsedJson) throw new Error("Gemini yanitindan JSON cikarilamadi.");
+
+      const parsed = SonucSchema.safeParse(parsedJson);
+      if (!parsed.success) throw new Error("Gemini yaniti semaya uymuyor.");
+
+      return Promise.all(
+        leads.map(async (lead, i) => {
+          const sonuc = parsed.data.sonuclar.find((s) => s.index === i);
+          if (!sonuc || !sonuc.dogrulandi || !sonuc.resmiKaynakUrl) {
+            return { externalId: lead.externalId, dogrulandi: false, baslik: null, ozet: null, resmiKaynakUrl: null };
+          }
+
+          // resmiKaynakUrl, Gemini'nin grounding yonlendirme linki - gercek
+          // kaynak alan adini ancak coz(er)sek gorebiliriz. isinolsa.com
+          // disleme kontrolu de bu yuzden COZULMUS url uzerinde yapilmali.
+          const cozulmusUrl = await resolveGroundingUrl(sonuc.resmiKaynakUrl);
+          if (!cozulmusUrl || cozulmusUrl.includes("isinolsa.com")) {
+            return { externalId: lead.externalId, dogrulandi: false, baslik: null, ozet: null, resmiKaynakUrl: null };
+          }
+
+          return {
+            externalId: lead.externalId,
+            dogrulandi: true,
+            baslik: sonuc.baslik,
+            ozet: sonuc.ozet,
+            resmiKaynakUrl: cozulmusUrl,
+          };
+        }),
+      );
+    } catch (err) {
+      sonHata = err;
+      console.error(`İşin Olsa lead araştırması denemesi ${deneme}/${DENEME_SAYISI} başarısız:`, err);
+      if (deneme < DENEME_SAYISI) await beklet(deneme * 3000);
     }
-
-    const parsed = SonucSchema.safeParse(toolUse.input);
-    if (!parsed.success) {
-      return leads.map((l) => ({
-        externalId: l.externalId,
-        dogrulandi: false,
-        baslik: null,
-        ozet: null,
-        resmiKaynakUrl: null,
-      }));
-    }
-
-    return leads.map((lead, i) => {
-      const sonuc = parsed.data.sonuclar.find((s) => s.index === i);
-      const gecerliKaynak =
-        sonuc?.resmiKaynakUrl && /^https?:\/\//.test(sonuc.resmiKaynakUrl) &&
-        !sonuc.resmiKaynakUrl.includes("isinolsa.com");
-
-      if (!sonuc || !sonuc.dogrulandi || !gecerliKaynak) {
-        return { externalId: lead.externalId, dogrulandi: false, baslik: null, ozet: null, resmiKaynakUrl: null };
-      }
-
-      return {
-        externalId: lead.externalId,
-        dogrulandi: true,
-        baslik: sonuc.baslik,
-        ozet: sonuc.ozet,
-        resmiKaynakUrl: sonuc.resmiKaynakUrl,
-      };
-    });
-  } catch (err) {
-    console.error("İşin Olsa lead araştırması başarısız:", err);
-    return leads.map((l) => ({
-      externalId: l.externalId,
-      dogrulandi: false,
-      baslik: null,
-      ozet: null,
-      resmiKaynakUrl: null,
-    }));
   }
+
+  throw sonHata;
 }
