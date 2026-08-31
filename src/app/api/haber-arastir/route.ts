@@ -39,6 +39,7 @@ async function runHaberArastir(req: NextRequest) {
           ozet: h.ozet,
           kaynakUrl: h.kaynakUrl,
           gorselUrl: h.gorselUrl,
+          gorselLogoMu: h.gorselLogoMu,
         })),
       });
     }

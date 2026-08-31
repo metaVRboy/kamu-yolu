@@ -3,6 +3,7 @@ import { gemini, GEMINI_MODEL } from "@/lib/gemini";
 import { toGeminiSchema, parseGeminiJson } from "@/lib/geminiSchema";
 import { resolveGroundingUrl } from "@/lib/resolveGroundingUrl";
 import { extractOgImage } from "@/lib/extractOgImage";
+import { findInstitutionImage } from "@/lib/findInstitutionImage";
 
 export type IsinolsaLead = {
   externalId: string;
@@ -34,6 +35,7 @@ export type IsinolsaHaberSonuc = {
   ozet: string | null;
   resmiKaynakUrl: string | null;
   gorselUrl: string | null;
+  gorselLogoMu: boolean;
 };
 
 const SYSTEM_PROMPT = `Sana bir kurum adi ve kisa bir konu basligi listesi verilecek. Bu
@@ -107,7 +109,15 @@ export async function researchIsinolsaLeads(
 
       return Promise.all(
         leads.map(async (lead, i): Promise<IsinolsaHaberSonuc> => {
-          const bos = { externalId: lead.externalId, dogrulandi: false, baslik: null, ozet: null, resmiKaynakUrl: null, gorselUrl: null };
+          const bos = {
+            externalId: lead.externalId,
+            dogrulandi: false,
+            baslik: null,
+            ozet: null,
+            resmiKaynakUrl: null,
+            gorselUrl: null,
+            gorselLogoMu: false,
+          };
 
           const sonuc = parsed.data.sonuclar.find((s) => s.index === i);
           if (!sonuc || !sonuc.dogrulandi || !sonuc.resmiKaynakUrl) return bos;
@@ -118,7 +128,10 @@ export async function researchIsinolsaLeads(
           const cozulmusUrl = await resolveGroundingUrl(sonuc.resmiKaynakUrl);
           if (!cozulmusUrl || cozulmusUrl.includes("isinolsa.com")) return bos;
 
-          const gorselUrl = await extractOgImage(cozulmusUrl);
+          // Once haberin kendi kaynagindan gercek bir gorsel dene; yoksa
+          // kurumun Wikipedia'daki (acik lisansli) logosuna dus.
+          const ogGorsel = await extractOgImage(cozulmusUrl);
+          const kurumGorseli = ogGorsel ? null : await findInstitutionImage(lead.kurumAdi);
 
           return {
             externalId: lead.externalId,
@@ -126,7 +139,8 @@ export async function researchIsinolsaLeads(
             baslik: sonuc.baslik,
             ozet: sonuc.ozet,
             resmiKaynakUrl: cozulmusUrl,
-            gorselUrl,
+            gorselUrl: ogGorsel ?? kurumGorseli,
+            gorselLogoMu: !ogGorsel && !!kurumGorseli,
           };
         }),
       );

@@ -3,6 +3,7 @@ import { gemini, GEMINI_MODEL } from "@/lib/gemini";
 import { toGeminiSchema, parseGeminiJson } from "@/lib/geminiSchema";
 import { resolveGroundingUrl } from "@/lib/resolveGroundingUrl";
 import { extractOgImage } from "@/lib/extractOgImage";
+import { findInstitutionImage } from "@/lib/findInstitutionImage";
 
 const HaberSchema = z.object({
   haberler: z
@@ -15,14 +16,21 @@ const HaberSchema = z.object({
         kaynakUrl: z
           .string()
           .describe("Bu haberin bulunduğu GERÇEK, arama sonucundan alınmış kaynak URL'si."),
+        kurumAdi: z
+          .string()
+          .describe("Haberin ilgili olduğu kurumun/kuruluşun tam, resmi adı (ör. \"Adalet Bakanlığı\", \"Pamukkale Üniversitesi\")."),
       }),
     )
     .max(6)
     .describe("Bulunan gerçek, doğrulanabilir haberlerin listesi. Hiçbir şey bulunamadıysa boş dizi."),
 });
 
-export type HaberResearchItem = z.infer<typeof HaberSchema>["haberler"][number] & {
+export type HaberResearchItem = {
+  baslik: string;
+  ozet: string;
+  kaynakUrl: string;
   gorselUrl: string | null;
+  gorselLogoMu: boolean;
 };
 
 const SYSTEM_PROMPT = `Turkiye'de kamu personeli/memur alimlariyla ilgili GUNCEL (son birkac
@@ -78,8 +86,20 @@ export async function researchHaberler(): Promise<HaberResearchItem[]> {
       result.data.haberler.map(async (h): Promise<HaberResearchItem | null> => {
         const kaynakUrl = await resolveGroundingUrl(h.kaynakUrl);
         if (!kaynakUrl || kaynakUrl.includes("isinolsa.com")) return null;
-        const gorselUrl = await extractOgImage(kaynakUrl);
-        return { baslik: h.baslik, ozet: h.ozet, kaynakUrl, gorselUrl };
+
+        // Once haberin kendi kaynagindan gercek bir gorsel dene; yoksa
+        // kurumun Wikipedia'daki (acik lisansli) logosuna dus.
+        const ogGorsel = await extractOgImage(kaynakUrl);
+        if (ogGorsel) return { baslik: h.baslik, ozet: h.ozet, kaynakUrl, gorselUrl: ogGorsel, gorselLogoMu: false };
+
+        const kurumGorseli = await findInstitutionImage(h.kurumAdi);
+        return {
+          baslik: h.baslik,
+          ozet: h.ozet,
+          kaynakUrl,
+          gorselUrl: kurumGorseli,
+          gorselLogoMu: !!kurumGorseli,
+        };
       }),
     );
 

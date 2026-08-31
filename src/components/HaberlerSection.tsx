@@ -12,6 +12,7 @@ export type HaberItem = {
   ozet: string;
   kaynakUrl: string | null;
   gorselUrl: string | null;
+  gorselLogoMu: boolean;
   yayinTarihi: string;
 };
 
@@ -52,7 +53,7 @@ export function HaberlerSection({ haberler, showAllLink = true }: { haberler: Ha
             className="gap-3 overflow-hidden border-primary/20 bg-white/70 p-3 shadow-sm shadow-primary/5 backdrop-blur-md"
           >
             <div className="relative">
-              <HaberGorsel src={h.gorselUrl} alt={h.baslik} />
+              <HaberGorsel src={h.gorselUrl} alt={h.baslik} logoMu={h.gorselLogoMu} />
               {isYeni(h.yayinTarihi) && (
                 <Badge className="absolute right-2 top-2 border-transparent bg-red-600 text-white shadow">
                   YENİ

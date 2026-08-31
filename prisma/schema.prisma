@@ -203,6 +203,10 @@ model Haber {
   // URL'si - kurumun/haberin kendi yayinladigi kucuk onizleme gorseli,
   // bulunamazsa null (arayuzde yerine bir simge/gradyan gosterilir).
   gorselUrl   String?
+  // gorselUrl bir kurum logosu ise true (Wikimedia'dan gelen kurum
+  // logolari kucuk/kare oldugu icin arayuzde farkli gosterilir - tam
+  // kaplama yerine ortalanmis/dolgu ile).
+  gorselLogoMu Boolean @default(false)
   yayinTarihi DateTime @default(now())
   createdAt   DateTime @default(now())
 

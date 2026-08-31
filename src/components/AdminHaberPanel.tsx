@@ -8,7 +8,15 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
-type Haber = { id: string; baslik: string; ozet: string; kaynakUrl: string | null; gorselUrl: string | null; yayinTarihi: string };
+type Haber = {
+  id: string;
+  baslik: string;
+  ozet: string;
+  kaynakUrl: string | null;
+  gorselUrl: string | null;
+  gorselLogoMu: boolean;
+  yayinTarihi: string;
+};
 
 export function AdminHaberPanel({ haberler }: { haberler: Haber[] }) {
   const router = useRouter();
