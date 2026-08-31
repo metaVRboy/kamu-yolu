@@ -15,6 +15,7 @@ const bodySchema = z.object({
   telefon: z.string().trim().max(30).optional().nullable(),
   meslek: z.string().trim().max(80).optional().nullable(),
   kurumTuru: z.string().trim().max(80).optional().nullable(),
+  kamuCalisaniDegil: z.boolean().optional(),
   departmentId: z.string().min(1).optional().nullable(),
   educationLevel: z.enum(EDUCATION_LEVELS).optional().nullable(),
 });
@@ -28,15 +29,24 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "Geçersiz bilgiler." }, { status: 400 });
   }
 
+  // "Kamu çalışanı değilim" işaretliyse kurumTuru/meslek istemciden ne
+  // gelirse gelsin gecersiz sayilir.
+  const data = { ...parsed.data };
+  if (data.kamuCalisaniDegil) {
+    data.kurumTuru = null;
+    data.meslek = null;
+  }
+
   const updated = await prisma.user.update({
     where: { id: user.id },
-    data: parsed.data,
+    data,
   });
 
   return NextResponse.json({
     telefon: updated.telefon,
     meslek: updated.meslek,
     kurumTuru: updated.kurumTuru,
+    kamuCalisaniDegil: updated.kamuCalisaniDegil,
     departmentId: updated.departmentId,
     educationLevel: updated.educationLevel,
   });

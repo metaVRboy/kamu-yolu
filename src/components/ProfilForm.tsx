@@ -26,6 +26,7 @@ export function ProfilForm({
     telefon: string | null;
     meslek: string | null;
     kurumTuru: string | null;
+    kamuCalisaniDegil: boolean;
     departmentId: string | null;
     educationLevel: string | null;
   };
@@ -34,6 +35,7 @@ export function ProfilForm({
   const [telefon, setTelefon] = useState(initial.telefon ?? "");
   const [meslek, setMeslek] = useState(initial.meslek ?? "");
   const [kurumTuru, setKurumTuru] = useState(initial.kurumTuru ?? "");
+  const [kamuCalisaniDegil, setKamuCalisaniDegil] = useState(initial.kamuCalisaniDegil);
   const [departmentId, setDepartmentId] = useState(initial.departmentId ?? "");
   const [educationLevel, setEducationLevel] = useState(initial.educationLevel ?? "");
   const [saved, setSaved] = useState(false);
@@ -44,6 +46,14 @@ export function ProfilForm({
   function handleKurumTuruChange(value: string) {
     setKurumTuru(value);
     setMeslek("");
+  }
+
+  function handleKamuCalisaniDegilChange(checked: boolean) {
+    setKamuCalisaniDegil(checked);
+    if (checked) {
+      setKurumTuru("");
+      setMeslek("");
+    }
   }
 
   async function handleSave() {
@@ -57,6 +67,7 @@ export function ProfilForm({
           telefon: telefon || null,
           meslek: meslek || null,
           kurumTuru: kurumTuru || null,
+          kamuCalisaniDegil,
           departmentId: departmentId || null,
           educationLevel: educationLevel || null,
         }),
@@ -75,11 +86,23 @@ export function ProfilForm({
         <Input value={telefon} onChange={(e) => setTelefon(e.target.value)} className="border-primary/20 bg-white" />
       </div>
       <div>
-        <Label className="mb-1.5">Çalıştığın Kurum Türü</Label>
+        <div className="mb-1.5 flex items-center justify-between">
+          <Label>Çalıştığın Kurum Türü</Label>
+          <label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+            <input
+              type="checkbox"
+              checked={kamuCalisaniDegil}
+              onChange={(e) => handleKamuCalisaniDegilChange(e.target.checked)}
+              className="h-3.5 w-3.5 rounded border-primary/30"
+            />
+            Kamu çalışanı değilim
+          </label>
+        </div>
         <select
           value={kurumTuru}
           onChange={(e) => handleKurumTuruChange(e.target.value)}
-          className="h-10 w-full rounded-xl border border-primary/20 bg-white px-3 text-sm"
+          disabled={kamuCalisaniDegil}
+          className="h-10 w-full rounded-xl border border-primary/20 bg-white px-3 text-sm disabled:opacity-50"
         >
           <option value="">Seçilmedi</option>
           {KURUM_TURLERI.map((k) => (
@@ -92,7 +115,7 @@ export function ProfilForm({
         <select
           value={meslek}
           onChange={(e) => setMeslek(e.target.value)}
-          disabled={!kurumTuru}
+          disabled={kamuCalisaniDegil || !kurumTuru}
           className="h-10 w-full rounded-xl border border-primary/20 bg-white px-3 text-sm disabled:opacity-50"
         >
           <option value="">{kurumTuru ? "Seçilmedi" : "Önce kurum türü seçin"}</option>

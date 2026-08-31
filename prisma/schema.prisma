@@ -119,6 +119,11 @@ model User {
   telefon        String?
   meslek         String?
   kurumTuru      String?
+  // Isaretliyse kullanici acikca "kamu calisani degilim" demistir; bu
+  // durumda kurumTuru/meslek alanlari gecersiz sayilir (arayuzde de
+  // tiklanamaz olur). "Henuz cevaplanmadi" (null alanlar) ile bu ikisini
+  // ayirt etmek icin ayri bir alan.
+  kamuCalisaniDegil Boolean @default(false)
   departmentId   String?
   department     Department?     @relation(fields: [departmentId], references: [id])
   educationLevel EducationLevel?

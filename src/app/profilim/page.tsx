@@ -36,6 +36,7 @@ export default async function ProfilimPage() {
             telefon: user.telefon,
             meslek: user.meslek,
             kurumTuru: user.kurumTuru,
+            kamuCalisaniDegil: user.kamuCalisaniDegil,
             departmentId: user.departmentId,
             educationLevel: user.educationLevel,
           }}
