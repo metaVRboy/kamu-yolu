@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { ThinkingLevel } from "@google/genai";
 import { gemini, GEMINI_MODEL } from "@/lib/gemini";
 import { toGeminiSchema, parseGeminiJson } from "@/lib/geminiSchema";
 import {
@@ -191,6 +192,10 @@ export async function POST(req: NextRequest) {
         maxOutputTokens: 1024,
         responseMimeType: "application/json",
         responseJsonSchema: toGeminiSchema(ChatResponseSchema),
+        // Basit bir siniflandirma gorevi - derin muhakemeye gerek yok.
+        // Sinirlanmamis "thinking" gecikmeyi ~1 dakikaya kadar cikarip
+        // route'un maxDuration'ini asabiliyordu.
+        thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL },
       },
     });
 
