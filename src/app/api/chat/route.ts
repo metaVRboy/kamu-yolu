@@ -49,7 +49,7 @@ const ChatResponseSchema = z.object({
   isOnTopic: z
     .boolean()
     .describe(
-      "Kullanıcının mesajı bu sitenin konusuyla (kamu ilanları, meslek/bölüm beyanı, öğrenim düzeyi, KPSS, becayiş, sitenin kendisi hakkında soru) ilgili mi, ya da basit bir selamlama/teşekkür mü? Öyleyse true. Hava durumu, spor, genel sohbet, kod yazma isteği gibi siteyle tamamen alakasız bir istekse false.",
+      "Kullanıcının mesajı bu sitenin konusuyla (kamu ilanları, meslek/bölüm beyanı, öğrenim düzeyi, KPSS, becayiş, sitenin kendisi hakkında soru) doğrudan ilgili mi? Öyleyse true. 'Naber', 'merhaba', 'nasılsın' gibi gündelik sohbet/selamlaşma dahil, hava durumu, spor, genel sohbet, kod yazma isteği gibi siteyle alakasız HER TÜRLÜ mesaj false olmalı - istisna yok.",
     ),
 });
 
@@ -83,9 +83,10 @@ Kurallar:
 - Asla var olmayan bilgi uydurma. Emin değilsen bunu belirt.
 - Yanıtların her zaman kısa, samimi ve Türkçe olsun.
 - Bu asistan yalnızca kamu ilanları/meslek-bölüm eşleştirmesi için var;
-  siteyle alakasız bir istek (hava durumu, genel sohbet, kod yazma vb.)
-  gelirse isOnTopic'i false yap ve reply'de kısaca konunun dışına
-  çıkıldığını belirt.`;
+  siteyle alakasız bir istek (hava durumu, genel sohbet, kod yazma,
+  "naber"/"merhaba"/"nasılsın" gibi gündelik sohbet/selamlaşma dahil,
+  İSTİSNASIZ) gelirse isOnTopic'i false yap ve reply'de kısaca konunun
+  dışına çıkıldığını belirt.`;
 
 const bodySchema = z.object({
   message: z.string().min(1).max(500),
