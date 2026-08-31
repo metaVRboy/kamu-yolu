@@ -32,10 +32,16 @@ Aradigin haber turleri:
   sendika aciklamalari/haberleri
 - Kamuda yeni kadro, atama, ozluk haklariyla ilgili resmi/gazete haberleri
 
-KRITIK KURAL: SADECE gercekten arama sonuclarinda bulup okudugun, gercek bir
-kaynagi (URL) olan haberleri raporla. Hicbir haberi uydurma, tahmin etme veya
-genellemeyle doldurma. Yeterli sayida gercek/guncel haber bulamazsan, bulduklarinla
-yetin veya bos liste don - eksik sayida gercek haber, uydurma haberden iyidir.`;
+KRITIK KURALLAR:
+- SADECE gercekten arama sonuclarinda bulup okudugun, gercek bir kaynagi
+  (URL) olan haberleri raporla. Hicbir haberi uydurma, tahmin etme veya
+  genellemeyle doldurma. Yeterli sayida gercek/guncel haber bulamazsan,
+  bulduklarinla yetin veya bos liste don - eksik sayida gercek haber,
+  uydurma haberden iyidir.
+- isinolsa.com sitesini kaynak olarak ASLA kullanma/gosterme - bu site
+  sadece diger sitelerin ilanlarini topluyor, orijinal kaynak degil. O
+  siteyi bulursan, ayni haberin resmi/orijinal haber kaynagini (bakanlik,
+  kurum sitesi, Resmi Gazete, buyuk bir haber ajansi/gazete vb.) ara.`;
 
 /**
  * Kamu personel alimlariyla ilgili guncel haberleri web aramasiyla arastirir.
@@ -70,7 +76,11 @@ export async function researchHaberler(): Promise<HaberResearchItem[]> {
       })),
     );
 
-    return cozulmus.filter((h): h is HaberResearchItem => !!h.kaynakUrl);
+    // Prompt talimati yeterli olmayabilir (model yine de isinolsa.com'u
+    // kaynak gosterebilir) - kod seviyesinde de kesin olarak eliyoruz.
+    return cozulmus.filter(
+      (h): h is HaberResearchItem => !!h.kaynakUrl && !h.kaynakUrl.includes("isinolsa.com"),
+    );
   } catch (err) {
     console.error("Haber araştırması başarısız:", err);
     return [];
