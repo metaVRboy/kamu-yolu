@@ -42,13 +42,32 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             </div>
 
             <nav className="hidden items-center gap-1 md:flex">
-              <Link
-                href="/becayis"
-                className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-primary/10 hover:text-slate-900"
-              >
-                <Repeat className="h-4 w-4" />
-                Becayiş İlanları
-              </Link>
+              <div className="group relative">
+                <Link
+                  href="/becayis"
+                  className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-primary/10 hover:text-slate-900"
+                >
+                  <Repeat className="h-4 w-4" />
+                  Becayiş İlanları
+                </Link>
+                <div className="absolute left-0 top-full z-50 w-48 pt-1 opacity-0 pointer-events-none transition-opacity group-hover:opacity-100 group-hover:pointer-events-auto">
+                  <div className="overflow-hidden rounded-xl border border-primary/20 bg-white py-1.5 shadow-xl shadow-primary/10">
+                    <Link
+                      href="/becayis/talep-olustur"
+                      className="block px-4 py-2 text-sm font-medium text-slate-700 hover:bg-primary/10 hover:text-slate-900"
+                    >
+                      Talep Oluştur
+                    </Link>
+                    <Link
+                      href="/becayis/taleplerim"
+                      className="block px-4 py-2 text-sm font-medium text-slate-700 hover:bg-primary/10 hover:text-slate-900"
+                    >
+                      Mevcut Taleplerim
+                    </Link>
+                  </div>
+                </div>
+              </div>
+
               <Link
                 href="/kpss-puan-hesaplama"
                 className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-primary/10 hover:text-slate-900"
@@ -56,13 +75,38 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                 <Calculator className="h-4 w-4" />
                 KPSS Puan Hesaplama
               </Link>
-              <Link
-                href="/ilanlar"
-                className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-primary/10 hover:text-slate-900"
-              >
-                <ListChecks className="h-4 w-4" />
-                Aktif İlanlar
-              </Link>
+
+              <div className="group relative">
+                <Link
+                  href="/ilanlar"
+                  className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-primary/10 hover:text-slate-900"
+                >
+                  <ListChecks className="h-4 w-4" />
+                  Aktif İlanlar
+                </Link>
+                <div className="absolute left-0 top-full z-50 w-56 pt-1 opacity-0 pointer-events-none transition-opacity group-hover:opacity-100 group-hover:pointer-events-auto">
+                  <div className="overflow-hidden rounded-xl border border-primary/20 bg-white py-1.5 shadow-xl shadow-primary/10">
+                    <Link
+                      href="/seviye/lise"
+                      className="block px-4 py-2 text-sm font-medium text-slate-700 hover:bg-primary/10 hover:text-slate-900"
+                    >
+                      Lise Mezunları İçin İlanlar
+                    </Link>
+                    <Link
+                      href="/seviye/onlisans"
+                      className="block px-4 py-2 text-sm font-medium text-slate-700 hover:bg-primary/10 hover:text-slate-900"
+                    >
+                      Önlisans Mezunları İçin İlanlar
+                    </Link>
+                    <Link
+                      href="/seviye/lisans"
+                      className="block px-4 py-2 text-sm font-medium text-slate-700 hover:bg-primary/10 hover:text-slate-900"
+                    >
+                      Lisans Mezunları İçin İlanlar
+                    </Link>
+                  </div>
+                </div>
+              </div>
             </nav>
 
             <div className="flex items-center gap-2">
