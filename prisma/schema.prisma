@@ -18,6 +18,12 @@ enum EducationLevel {
   YUKSEK_LISANS
 }
 
+enum AbonelikPlani {
+  UCRETSIZ
+  PRO
+  PRO_PLUS
+}
+
 enum InstitutionType {
   BAKANLIK
   UNIVERSITE
@@ -124,6 +130,10 @@ model User {
   // tiklanamaz olur). "Henuz cevaplanmadi" (null alanlar) ile bu ikisini
   // ayirt etmek icin ayri bir alan.
   kamuCalisaniDegil Boolean @default(false)
+  // Odeme altyapisi henuz yok - bu alan simdilik elle/ileride kurulacak
+  // odeme sistemiyle guncellenecek. "Pro" rozeti ve premium ozellik
+  // kilitleri bu alana gore calisir.
+  abonelikPlani  AbonelikPlani   @default(UCRETSIZ)
   departmentId   String?
   department     Department?     @relation(fields: [departmentId], references: [id])
   educationLevel EducationLevel?

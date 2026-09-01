@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, FilePlus2, Inbox, Repeat, UserRound } from "lucide-react";
+import { ChevronDown, FilePlus2, Inbox, Repeat, UserRound, Settings, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type SidebarSection = {
@@ -47,6 +47,28 @@ export function ProfilSidebar({ okunmamisMesajSayisi }: { okunmamisMesajSayisi: 
       >
         <UserRound className="h-4 w-4" />
         Profilim
+      </Link>
+
+      <Link
+        href="/profilim/ayarlar"
+        className={cn(
+          "flex items-center gap-2.5 rounded-xl border border-primary/15 bg-white/70 px-3.5 py-2.5 text-sm font-semibold backdrop-blur-md transition-colors",
+          pathname === "/profilim/ayarlar" ? "text-primary" : "text-slate-800 hover:text-primary",
+        )}
+      >
+        <Settings className="h-4 w-4" />
+        Ayarlar
+      </Link>
+
+      <Link
+        href="/profilim/abonelik"
+        className={cn(
+          "flex items-center gap-2.5 rounded-xl border border-primary/15 bg-white/70 px-3.5 py-2.5 text-sm font-semibold backdrop-blur-md transition-colors",
+          pathname === "/profilim/abonelik" ? "text-primary" : "text-slate-800 hover:text-primary",
+        )}
+      >
+        <Crown className="h-4 w-4" />
+        Aboneliğim
       </Link>
 
       {sections.map((section) => {
