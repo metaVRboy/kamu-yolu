@@ -21,7 +21,7 @@ export default async function Home() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
-      <section className="relative z-20 mx-auto max-w-3xl text-center">
+      <section className="relative z-20 mx-auto max-w-3xl rounded-3xl border border-primary/10 bg-primary/[0.04] p-8 text-center shadow-sm backdrop-blur-xl sm:p-12">
         <Badge className="border-transparent bg-primary text-primary-foreground">
           Kamu personeli & memur ilanları
         </Badge>
