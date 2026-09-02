@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   Menu,
-  Landmark,
   Home,
   GraduationCap,
   Calculator,
@@ -72,10 +72,8 @@ export function SiteMenu() {
       </SheetTrigger>
       <SheetContent side="left" className="w-72">
         <SheetHeader>
-          <SheetTitle className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Landmark className="h-4 w-4" />
-            </span>
+          <SheetTitle className="flex items-center gap-2">
+            <Image src="/brand/kamu-yolu-emblem.png" alt="" width={32} height={32} className="h-8 w-8" />
             Kamu Yolu
           </SheetTitle>
         </SheetHeader>

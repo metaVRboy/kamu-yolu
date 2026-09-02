@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, Source_Serif_4 } from "next/font/google";
+import Image from "next/image";
 import Link from "next/link";
-import { Landmark, Repeat, Calculator, ListChecks } from "lucide-react";
+import { Repeat, Calculator, ListChecks } from "lucide-react";
 import { getLastSuccessfulScrapeAt } from "@/lib/matching";
 import { cn } from "@/lib/utils";
 import { getCurrentUser } from "@/lib/auth";
@@ -37,10 +38,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <div className="mx-auto flex max-w-6xl items-center justify-between rounded-2xl border border-primary/25 bg-primary/15 px-4 py-3 shadow-lg shadow-primary/10 backdrop-blur-xl sm:px-6">
             <div className="flex items-center gap-1.5">
               <SiteMenu />
-              <Link href="/" className="flex items-center gap-2.5 pl-1">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-                  <Landmark className="h-5 w-5" strokeWidth={2} />
-                </span>
+              <Link href="/" className="flex items-center gap-2 pl-1">
+                <Image src="/brand/kamu-yolu-emblem.png" alt="" width={36} height={36} className="h-9 w-9" priority />
                 <span className="text-lg font-semibold tracking-tight text-slate-900">
                   Kamu Yolu
                 </span>
@@ -138,7 +137,13 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <div className="mx-auto grid max-w-6xl gap-10 px-4 sm:grid-cols-[1.3fr_1fr_1fr] sm:px-6">
             <div>
               <p className="flex items-center gap-2 text-sm font-semibold text-white">
-                <Landmark className="h-4 w-4" />
+                <Image
+                  src="/brand/kamu-yolu-emblem.png"
+                  alt=""
+                  width={16}
+                  height={16}
+                  className="h-4 w-4 brightness-0 invert"
+                />
                 Kamu Yolu
               </p>
               <p className="mt-3 max-w-sm text-sm text-slate-400">

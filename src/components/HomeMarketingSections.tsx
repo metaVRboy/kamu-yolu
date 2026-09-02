@@ -1,7 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowUpRight,
-  Landmark,
   ListChecks,
   MessageCircle,
   RefreshCw,
@@ -168,7 +168,13 @@ export function ClosingCtaSection() {
   return (
     <section className="rounded-2xl bg-primary px-6 py-14 text-center text-primary-foreground sm:py-16">
       <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-white/10">
-        <Landmark className="h-5 w-5" />
+        <Image
+          src="/brand/kamu-yolu-emblem.png"
+          alt=""
+          width={20}
+          height={20}
+          className="h-5 w-5 brightness-0 invert"
+        />
       </span>
       <h2 className="mt-4 text-2xl font-bold tracking-tight sm:text-3xl">
         Bölümünü söyle, ilanını bul.
