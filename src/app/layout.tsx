@@ -35,18 +35,10 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="tr" className={cn("h-full antialiased", inter.variable, sourceSerif.variable, "font-sans")}>
       <body className="flex min-h-full flex-col bg-white text-foreground">
         <header className="sticky top-3 z-40 px-3 sm:top-4 sm:px-4">
-          <div className="mx-auto flex max-w-6xl items-center justify-between rounded-2xl border border-primary/25 bg-primary/15 px-4 py-3 shadow-lg shadow-primary/10 backdrop-blur-xl sm:px-6">
+          <div className="relative mx-auto flex max-w-6xl items-center justify-between rounded-2xl border border-primary/25 bg-primary/15 px-4 py-3 shadow-lg shadow-primary/10 backdrop-blur-xl sm:px-6">
             <div className="flex items-center gap-1.5">
               <SiteMenu />
-              <Link href="/" className="flex items-center gap-2 pl-1">
-                <Image src="/brand/kamu-yolu-emblem.png" alt="" width={36} height={36} className="h-9 w-9" priority />
-                <span className="text-lg font-semibold tracking-tight text-slate-900">
-                  Kamu Yolu
-                </span>
-              </Link>
-            </div>
-
-            <nav className="hidden items-center gap-1 md:flex">
+              <nav className="hidden items-center gap-1 xl:flex">
               <div className="group relative">
                 <Link
                   href="/becayis"
@@ -112,7 +104,22 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                   </div>
                 </div>
               </div>
-            </nav>
+              </nav>
+            </div>
+
+            <Link
+              href="/"
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+            >
+              <Image
+                src="/brand/kamu-yolu-logo.png"
+                alt="Kamu Yolu"
+                width={716}
+                height={537}
+                className="h-11 w-auto sm:h-12"
+                priority
+              />
+            </Link>
 
             <div className="flex items-center gap-2">
               <NotificationBell isLoggedIn={!!user} />
