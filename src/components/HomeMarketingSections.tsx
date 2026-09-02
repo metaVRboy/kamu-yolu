@@ -177,7 +177,7 @@ export function ClosingCtaSection() {
         Kamu Yolu tamamen ücretsizdir; kayıt gerektirmez.
       </p>
       <Link
-        href="/bolum-ara"
+        href="/"
         className={cn(
           buttonVariants({ size: "lg" }),
           "mt-6 bg-white text-primary hover:bg-white/90",

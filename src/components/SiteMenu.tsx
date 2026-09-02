@@ -7,7 +7,6 @@ import {
   Landmark,
   Home,
   GraduationCap,
-  Search,
   Calculator,
   Repeat,
   Target,
@@ -38,7 +37,6 @@ const MENU_ITEMS: (FlatItem | GroupItem)[] = [
   { type: "link", href: "/", label: "Ana Sayfa", icon: Home },
   { type: "link", href: "/amacimiz", label: "Amacımız", icon: Target },
   { type: "link", href: "/haberler", label: "Haberler", icon: Newspaper },
-  { type: "link", href: "/bolum-ara", label: "Bölüme Göre Ara", icon: Search },
   { type: "link", href: "/kpss-puan-hesaplama", label: "KPSS Puan Hesaplama", icon: Calculator },
   { type: "link", href: "/becayis", label: "Becayiş İlanları", icon: Repeat },
   {

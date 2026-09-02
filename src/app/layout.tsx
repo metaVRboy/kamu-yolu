@@ -156,7 +156,6 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                 <li><Link href="/" className="hover:text-white">Ana Sayfa</Link></li>
                 <li><Link href="/amacimiz" className="hover:text-white">Amacımız</Link></li>
                 <li><Link href="/haberler" className="hover:text-white">Haberler</Link></li>
-                <li><Link href="/bolum-ara" className="hover:text-white">Bölüme Göre Ara</Link></li>
                 <li><Link href="/kpss-puan-hesaplama" className="hover:text-white">KPSS Puan Hesaplama</Link></li>
                 <li><Link href="/becayis" className="hover:text-white">Becayiş İlanları</Link></li>
                 <li><Link href="/kvkk" className="hover:text-white">KVKK ve Kullanım Şartları</Link></li>

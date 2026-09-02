@@ -38,7 +38,7 @@ export default async function DepartmentResultsPage({
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <Link
-        href="/bolum-ara"
+        href="/"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
