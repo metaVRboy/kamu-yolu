@@ -90,7 +90,7 @@ export function HowItWorksSection() {
             key={step.title}
             className="flex items-start gap-4 rounded-2xl border border-primary/15 bg-white/70 p-5 shadow-sm shadow-primary/5 backdrop-blur-md sm:items-center sm:gap-6 sm:p-6"
           >
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-md shadow-blue-500/25">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md shadow-primary/25">
               <step.icon className="h-5 w-5" />
             </span>
             <div>
@@ -135,7 +135,7 @@ export function TrustSection({
   institutionCount: number;
 }) {
   return (
-    <section className="rounded-3xl border border-primary/15 bg-gradient-to-br from-primary/8 via-white to-blue-50 px-6 py-14 sm:py-20">
+    <section className="rounded-3xl border border-primary/15 bg-primary/5 px-6 py-14 sm:py-20">
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
           Veriler resmi kaynaktan, otomatik olarak güncelleniyor.

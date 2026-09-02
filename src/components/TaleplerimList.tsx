@@ -93,7 +93,7 @@ function ThreadPanel({ talepId, thread, currentUserId }: { talepId: string; thre
               className={cn(
                 "max-w-[85%] rounded-2xl px-3 py-2 text-sm",
                 m.gonderenId === currentUserId
-                  ? "ml-auto bg-gradient-to-br from-blue-600 to-indigo-600 text-white"
+                  ? "ml-auto bg-primary text-primary-foreground"
                   : "bg-slate-100 text-slate-800",
               )}
             >

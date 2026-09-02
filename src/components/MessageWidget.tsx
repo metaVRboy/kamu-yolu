@@ -60,7 +60,7 @@ export function MessageWidget({
 
       {open && (
         <div className="fixed right-4 bottom-4 z-50 w-[calc(100%-2rem)] max-w-sm overflow-hidden rounded-2xl border border-primary/20 bg-white shadow-2xl shadow-primary/20 sm:right-6 sm:bottom-6">
-          <div className="flex items-center justify-between bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 text-white">
+          <div className="flex items-center justify-between bg-primary px-4 py-3 text-primary-foreground">
             <p className="line-clamp-1 text-sm font-semibold">{talepBaslik}</p>
             <button type="button" onClick={() => setOpen(false)} aria-label="Kapat">
               <X className="h-4 w-4" />

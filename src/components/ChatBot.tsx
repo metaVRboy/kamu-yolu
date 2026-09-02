@@ -105,7 +105,7 @@ export function ChatBot() {
     <section
       ref={panelGlow.ref}
       onMouseMove={panelGlow.onMouseMove}
-      className="group/panel relative mx-auto max-w-3xl overflow-hidden rounded-3xl border border-primary/30 bg-gradient-to-br from-blue-600/15 via-indigo-500/10 to-sky-400/10 p-5 shadow-2xl shadow-blue-500/15 backdrop-blur-2xl sm:p-6"
+      className="group/panel relative mx-auto max-w-3xl overflow-hidden rounded-3xl border border-primary/30 bg-primary/10 p-5 shadow-2xl shadow-primary/15 backdrop-blur-2xl sm:p-6"
     >
       {/* Mouse'u takip eden yumusak isik */}
       <div
@@ -114,7 +114,7 @@ export function ChatBot() {
       />
 
       <div className="relative flex items-center gap-2.5">
-        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-md shadow-blue-500/30">
+        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md shadow-primary/30">
           <Sparkles className="h-4 w-4" />
         </span>
         <div>
@@ -147,7 +147,7 @@ export function ChatBot() {
               className={cn(
                 "flex h-6 w-6 shrink-0 items-center justify-center rounded-full",
                 m.role === "assistant"
-                  ? "bg-gradient-to-br from-blue-500 to-indigo-600 text-white"
+                  ? "bg-primary text-primary-foreground"
                   : "bg-slate-200 text-slate-600",
               )}
             >
@@ -163,7 +163,7 @@ export function ChatBot() {
                   "rounded-2xl px-3.5 py-2 text-sm",
                   m.role === "assistant"
                     ? "bg-white/90 text-slate-800 shadow-sm"
-                    : "ml-auto bg-gradient-to-br from-blue-600 to-indigo-600 text-white",
+                    : "ml-auto bg-primary text-primary-foreground",
                 )}
               >
                 {m.content}
@@ -195,9 +195,9 @@ export function ChatBot() {
         {/* Mouse'u takip eden, yalnizca cerceve renginde beliren isik - kutuyu gizlemez */}
         <div
           aria-hidden
-          className="pointer-events-none absolute -inset-[2px] rounded-2xl bg-[radial-gradient(180px_circle_at_var(--mx,50%)_var(--my,50%),rgba(96,165,250,0.9),rgba(59,130,246,0.35)_45%,transparent_70%)] opacity-0 transition-opacity duration-300 group-hover/input:opacity-100 group-focus-within/input:opacity-100"
+          className="pointer-events-none absolute -inset-[2px] rounded-2xl bg-[radial-gradient(180px_circle_at_var(--mx,50%)_var(--my,50%),oklch(0.52_0.16_258_/_0.9),oklch(0.52_0.16_258_/_0.35)_45%,transparent_70%)] opacity-0 transition-opacity duration-300 group-hover/input:opacity-100 group-focus-within/input:opacity-100"
         />
-        <div className="relative flex items-center rounded-2xl border border-primary/15 bg-gradient-to-r from-white via-blue-50/80 to-white pr-1.5">
+        <div className="relative flex items-center rounded-2xl border border-primary/15 bg-white pr-1.5">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -223,7 +223,7 @@ export function ChatBot() {
             className={buttonVariants({
               size: "icon",
               className:
-                "h-9 w-9 shrink-0 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 shadow-md shadow-blue-500/30",
+                "h-9 w-9 shrink-0 rounded-full bg-primary text-primary-foreground shadow-md shadow-primary/30",
             })}
           >
             <Send className="h-4 w-4" />
