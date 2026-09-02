@@ -34,15 +34,15 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="tr" className={cn("h-full antialiased", inter.variable, sourceSerif.variable, "font-sans")}>
       <body className="flex min-h-full flex-col bg-white text-foreground">
-        <header className="sticky top-3 z-40 px-3 sm:top-4 sm:px-4">
-          <div className="relative mx-auto flex max-w-6xl items-center justify-between rounded-2xl border border-primary/25 bg-primary/15 px-4 py-3 shadow-lg shadow-primary/10 backdrop-blur-xl sm:px-6">
-            <div className="flex items-center gap-1.5">
+        <header className="sticky top-0 z-40 border-b border-primary/20 bg-primary/15 backdrop-blur-xl">
+          <div className="relative mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
+            <div className="flex items-center gap-4">
               <SiteMenu />
-              <nav className="hidden items-center gap-1 xl:flex">
+              <nav className="hidden items-center gap-2 xl:flex">
               <div className="group relative">
                 <Link
                   href="/becayis"
-                  className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-primary/10 hover:text-slate-900"
+                  className="flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-sm font-medium text-slate-700 hover:bg-primary hover:text-primary-foreground"
                 >
                   <Repeat className="h-4 w-4" />
                   Becayiş İlanları
@@ -67,7 +67,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
 
               <Link
                 href="/kpss-puan-hesaplama"
-                className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-primary/10 hover:text-slate-900"
+                className="flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-sm font-medium text-slate-700 hover:bg-primary hover:text-primary-foreground"
               >
                 <Calculator className="h-4 w-4" />
                 KPSS Puan Hesaplama
@@ -76,7 +76,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               <div className="group relative">
                 <Link
                   href="/ilanlar"
-                  className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-primary/10 hover:text-slate-900"
+                  className="flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-sm font-medium text-slate-700 hover:bg-primary hover:text-primary-foreground"
                 >
                   <ListChecks className="h-4 w-4" />
                   Aktif İlanlar
