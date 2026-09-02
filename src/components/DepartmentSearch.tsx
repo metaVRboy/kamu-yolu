@@ -115,7 +115,7 @@ export function DepartmentSearch({
             <ul
               id="department-search-list"
               ref={listRef}
-              className="absolute z-10 mt-2 max-h-80 w-full overflow-y-auto rounded-2xl border border-primary/15 bg-white/95 p-1 shadow-lg backdrop-blur-xl"
+              className="absolute z-50 mt-2 max-h-80 w-full overflow-y-auto rounded-2xl border border-primary/15 bg-white/95 p-1 shadow-lg backdrop-blur-xl"
             >
               {filtered.map((d, i) => (
                 <li key={d.slug}>
@@ -141,7 +141,7 @@ export function DepartmentSearch({
             </ul>
           )}
           {isOpen && query && filtered.length === 0 && (
-            <div className="absolute z-10 mt-2 w-full rounded-2xl border border-primary/15 bg-white/95 px-4 py-3 text-sm text-muted-foreground shadow-lg backdrop-blur-xl">
+            <div className="absolute z-50 mt-2 w-full rounded-2xl border border-primary/15 bg-white/95 px-4 py-3 text-sm text-muted-foreground shadow-lg backdrop-blur-xl">
               Bölüm bulunamadı. Farklı bir isimle deneyin.
             </div>
           )}
