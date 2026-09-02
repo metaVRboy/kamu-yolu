@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Source_Serif_4 } from "next/font/google";
 import Link from "next/link";
 import { Landmark, Repeat, Calculator, ListChecks } from "lucide-react";
 import { getLastSuccessfulScrapeAt } from "@/lib/matching";
@@ -13,6 +13,11 @@ import { buttonVariants } from "@/components/ui/button";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const sourceSerif = Source_Serif_4({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-heading",
+  weight: ["600", "700"],
+});
 
 export const revalidate = 300;
 
@@ -26,7 +31,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const [lastScrapeAt, user] = await Promise.all([getLastSuccessfulScrapeAt(), getCurrentUser()]);
 
   return (
-    <html lang="tr" className={cn("h-full antialiased", inter.variable, "font-sans")}>
+    <html lang="tr" className={cn("h-full antialiased", inter.variable, sourceSerif.variable, "font-sans")}>
       <body className="flex min-h-full flex-col bg-white text-foreground">
         <header className="sticky top-3 z-40 px-3 sm:top-4 sm:px-4">
           <div className="mx-auto flex max-w-6xl items-center justify-between rounded-2xl border border-primary/25 bg-primary/15 px-4 py-3 shadow-lg shadow-primary/10 backdrop-blur-xl sm:px-6">
