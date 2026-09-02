@@ -98,59 +98,59 @@ export function AbonelikPlanlari({ mevcutPlan }: { mevcutPlan: PlanKey }) {
         {PLANLAR.map((plan) => {
           const buPlanMevcut = plan.key === mevcutPlan;
           return (
-            <Card
-              key={plan.key}
-              className={cn(
-                "relative gap-4 border-primary/20 bg-white/70 p-6 backdrop-blur-md",
-                plan.populer && "border-primary shadow-lg shadow-primary/20",
-              )}
-            >
+            <div key={plan.key} className="relative">
               {plan.populer && (
-                <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 border-transparent bg-primary text-primary-foreground">
+                <Badge className="absolute -top-3 left-1/2 z-10 -translate-x-1/2 border-transparent bg-primary text-primary-foreground">
                   En Popüler
                 </Badge>
               )}
-
-              <div>
-                <h3 className="font-semibold text-slate-900">{plan.ad}</h3>
-                <p className="mt-0.5 text-sm text-muted-foreground">{plan.aciklama}</p>
-              </div>
-
-              <div>
-                <span className="text-2xl font-bold text-slate-900">
-                  {donem === "aylik" ? plan.aylikFiyat : plan.yillikFiyat}
-                </span>
-                {plan.key !== "UCRETSIZ" && (
-                  <span className="text-sm text-muted-foreground">
-                    {" "}
-                    / {donem === "aylik" ? "ay" : "yıl"}
-                  </span>
+              <Card
+                className={cn(
+                  "h-full gap-4 border-primary/20 bg-white/70 p-6 backdrop-blur-md",
+                  plan.populer && "border-primary shadow-lg shadow-primary/20",
                 )}
-              </div>
-
-              <ul className="space-y-2 text-sm text-slate-700">
-                {plan.ozellikler.map((o) => (
-                  <li key={o} className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                    {o}
-                  </li>
-                ))}
-              </ul>
-
-              {buPlanMevcut ? (
-                <div className="mt-auto rounded-xl border border-primary/25 bg-primary/10 px-4 py-2 text-center text-sm font-semibold text-primary">
-                  Mevcut Planın
+              >
+                <div>
+                  <h3 className="font-semibold text-slate-900">{plan.ad}</h3>
+                  <p className="mt-0.5 text-sm text-muted-foreground">{plan.aciklama}</p>
                 </div>
-              ) : (
-                <button
-                  type="button"
-                  disabled
-                  className="mt-auto w-full cursor-not-allowed rounded-xl bg-slate-200 px-4 py-2 text-sm font-semibold text-slate-500"
-                >
-                  {plan.key === "UCRETSIZ" ? "İndirgeme Yakında" : `${PLAN_ETIKET[plan.key]}'e Yükselt`}
-                </button>
-              )}
-            </Card>
+
+                <div>
+                  <span className="text-2xl font-bold text-slate-900">
+                    {donem === "aylik" ? plan.aylikFiyat : plan.yillikFiyat}
+                  </span>
+                  {plan.key !== "UCRETSIZ" && (
+                    <span className="text-sm text-muted-foreground">
+                      {" "}
+                      / {donem === "aylik" ? "ay" : "yıl"}
+                    </span>
+                  )}
+                </div>
+
+                <ul className="space-y-2 text-sm text-slate-700">
+                  {plan.ozellikler.map((o) => (
+                    <li key={o} className="flex items-start gap-2">
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                      {o}
+                    </li>
+                  ))}
+                </ul>
+
+                {buPlanMevcut ? (
+                  <div className="mt-auto rounded-xl border border-primary/25 bg-primary/10 px-4 py-2 text-center text-sm font-semibold text-primary">
+                    Mevcut Planın
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    disabled
+                    className="mt-auto w-full cursor-not-allowed rounded-xl bg-slate-200 px-4 py-2 text-sm font-semibold text-slate-500"
+                  >
+                    {plan.key === "UCRETSIZ" ? "İndirgeme Yakında" : `${PLAN_ETIKET[plan.key]}'e Yükselt`}
+                  </button>
+                )}
+              </Card>
+            </div>
           );
         })}
       </div>
