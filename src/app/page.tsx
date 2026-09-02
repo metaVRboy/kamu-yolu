@@ -1,4 +1,4 @@
-import { getLatestPostings } from "@/lib/matching";
+import { getLatestPostings, getHomepageStats } from "@/lib/matching";
 import { getLatestHaberler } from "@/lib/haberler";
 import { prisma } from "@/lib/prisma";
 import { PostingCard } from "@/components/PostingCard";
@@ -12,16 +12,17 @@ import { Badge } from "@/components/ui/badge";
 export const revalidate = 300;
 
 export default async function Home() {
-  const [latestPostings, haberler, departments] = await Promise.all([
+  const [latestPostings, haberler, departments, stats] = await Promise.all([
     getLatestPostings(6),
     getLatestHaberler(5),
     prisma.department.findMany({ select: { slug: true, name: true, level: true }, orderBy: { name: "asc" } }),
+    getHomepageStats(),
   ]);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
-      <section className="relative z-20 mx-auto max-w-3xl rounded-3xl border border-primary/20 bg-primary/10 p-8 text-center shadow-xl shadow-primary/10 backdrop-blur-xl sm:p-12">
-        <Badge className="border-transparent bg-primary/90 text-primary-foreground">
+      <section className="relative z-20 mx-auto max-w-3xl text-center">
+        <Badge className="border-transparent bg-primary text-primary-foreground">
           Kamu personeli & memur ilanları
         </Badge>
 
@@ -33,6 +34,21 @@ export default async function Home() {
         </p>
         <div className="mt-6 flex justify-center">
           <DepartmentSearch departments={departments} />
+        </div>
+
+        <div className="mx-auto mt-10 grid max-w-lg grid-cols-3 divide-x divide-border border-t border-border pt-6">
+          {[
+            { label: "Aktif İlan", value: stats.postingCount },
+            { label: "Kurum", value: stats.institutionCount },
+            { label: "Bölüm", value: stats.departmentCount },
+          ].map((stat) => (
+            <div key={stat.label}>
+              <p className="text-2xl font-bold text-primary sm:text-3xl">
+                {stat.value.toLocaleString("tr-TR")}
+              </p>
+              <p className="mt-0.5 text-xs font-medium text-muted-foreground">{stat.label}</p>
+            </div>
+          ))}
         </div>
       </section>
 
