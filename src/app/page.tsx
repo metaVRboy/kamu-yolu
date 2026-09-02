@@ -2,7 +2,6 @@ import { getLatestPostings } from "@/lib/matching";
 import { getLatestHaberler } from "@/lib/haberler";
 import { prisma } from "@/lib/prisma";
 import { PostingCard } from "@/components/PostingCard";
-import { PostingTicker } from "@/components/PostingTicker";
 import { DepartmentSearch } from "@/components/DepartmentSearch";
 import { HaberlerSection } from "@/components/HaberlerSection";
 import { ClosingCtaSection } from "@/components/HomeMarketingSections";
@@ -36,16 +35,6 @@ export default async function Home() {
           <DepartmentSearch departments={departments} />
         </div>
       </section>
-
-      <div className="mt-8">
-        <PostingTicker
-          items={latestPostings.map((p) => ({
-            id: p.id,
-            title: p.title,
-            institutionName: p.institutionName,
-          }))}
-        />
-      </div>
 
       <div className="mt-16">
         <HaberlerSection
