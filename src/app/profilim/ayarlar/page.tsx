@@ -25,7 +25,7 @@ export default async function ProfilAyarlarPage() {
         Hesap ve profil bilgilerini buradan yönetebilirsin.
       </p>
 
-      <Card className="mt-6 border-primary/20 bg-white/70 p-6 backdrop-blur-md">
+      <Card className="mt-6 border-primary/20 bg-white p-6 shadow-sm">
         <h2 className="mb-4 font-semibold text-slate-900">Bilgilerim</h2>
         <ProfilForm
           departments={departments}
@@ -40,7 +40,7 @@ export default async function ProfilAyarlarPage() {
         />
       </Card>
 
-      <Card className="mt-6 border-primary/20 bg-white/70 p-6 backdrop-blur-md">
+      <Card className="mt-6 border-primary/20 bg-white p-6 shadow-sm">
         <h2 className="mb-4 font-semibold text-slate-900">Şifre Değiştir</h2>
         <SifreDegistirForm />
       </Card>

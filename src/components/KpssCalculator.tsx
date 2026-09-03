@@ -123,7 +123,7 @@ export function KpssCalculator() {
 
   return (
     <div className="space-y-5">
-      <Card className="gap-4 border-primary/20 bg-white/70 p-5 backdrop-blur-md">
+      <Card className="gap-4 border-primary/20 bg-white p-5 shadow-sm">
         <div>
           <p className="mb-2 text-sm font-semibold text-slate-900">
             <span className="text-destructive">*</span> Puan Türü
@@ -279,13 +279,13 @@ export function KpssCalculator() {
       </Card>
 
       {showResults && (
-        <Card className="gap-4 border-primary/20 bg-primary/10 p-6 backdrop-blur-md">
+        <Card className="gap-4 border-primary/20 bg-primary/5 p-6">
           <div className="w-fit rounded-full bg-slate-100 px-4 py-1.5 text-sm font-semibold text-slate-800">
             Hesaplama Sonuçları
           </div>
 
           {isGenelIkiTest && (
-            <div className="space-y-1.5 rounded-xl bg-white/70 p-4 text-sm text-slate-800">
+            <div className="space-y-1.5 rounded-xl bg-white p-4 text-sm text-slate-800">
               <p>
                 <strong>Genel Yetenek:</strong> {gyNetGosterim.toFixed(2)} net (%
                 {((gyNetGosterim / gyToplamSoru) * 100).toFixed(2)})
@@ -322,7 +322,7 @@ export function KpssCalculator() {
           )}
 
           {puanTuruId === "LISANS" && lisansSonuc?.kind === "tek-alan" && (
-            <div className="rounded-xl bg-white/70 p-5 text-center">
+            <div className="rounded-xl bg-white p-5 text-center">
               <p className="text-xs text-muted-foreground">
                 Ağırlıklı Standart Puanınız (ASP) — {lisansSonuc.alanLabel}
               </p>
@@ -333,7 +333,7 @@ export function KpssCalculator() {
           {puanTuruId === "LISANS" && lisansSonuc?.kind === "coklu-alan" && (
             <div className="grid gap-3 sm:grid-cols-2">
               {lisansSonuc.testler.map((t) => (
-                <div key={t.label} className="rounded-xl bg-white/70 p-4 text-center">
+                <div key={t.label} className="rounded-xl bg-white p-4 text-center">
                   <p className="text-xs text-muted-foreground">{t.label} Standart Puan</p>
                   <p className="text-2xl font-bold text-primary">{t.sp.toFixed(2)}</p>
                 </div>
@@ -342,7 +342,7 @@ export function KpssCalculator() {
           )}
 
           {barajlar?.some((b) => !b.gecti) && (
-            <div className="rounded-xl bg-white/70 p-4 text-center text-sm text-slate-800">
+            <div className="rounded-xl bg-white p-4 text-center text-sm text-slate-800">
               Girdiğiniz netlere göre en az bir zorunlu testte baraj (1 net)
               sağlanamadığı için puan hesaplanamıyor.
             </div>
@@ -350,12 +350,12 @@ export function KpssCalculator() {
 
           {!isGenelIkiTest && !lisansSonuc && !genelTekSonuc && (
             <div className="grid gap-3 sm:grid-cols-2">
-              <div className="rounded-xl bg-white/70 p-4 text-center">
+              <div className="rounded-xl bg-white p-4 text-center">
                 <p className="text-xs text-muted-foreground">Genel Yetenek + Genel Kültür Net</p>
                 <p className="text-2xl font-bold text-primary">{gyGkNet.toFixed(2)}</p>
               </div>
               {alanResults.map((r) => (
-                <div key={r.key} className="rounded-xl bg-white/70 p-4 text-center">
+                <div key={r.key} className="rounded-xl bg-white p-4 text-center">
                   <p className="text-xs text-muted-foreground">{r.label} Net</p>
                   <p className="text-2xl font-bold text-primary">{r.net.toFixed(2)}</p>
                 </div>

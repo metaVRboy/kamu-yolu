@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Inbox, Lock, MessageCircle, Repeat, Sparkles } from "lucide-react";
+import { Briefcase, Inbox, Lock, MessageCircle, Repeat } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { getOkunmamisMesajSayisi, getTaleplerim } from "@/lib/becayis";
 import { getPostingsForDepartment, getPostingsForLevel } from "@/lib/matching";
@@ -56,7 +56,7 @@ export default async function ProfilimPage() {
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
-        <Card className="gap-3 border-primary/20 bg-white/70 p-5 backdrop-blur-md">
+        <Card className="gap-3 border-primary/20 bg-white p-5 shadow-sm">
           <h2 className="flex items-center gap-2 font-semibold text-slate-900">
             <Repeat className="h-4 w-4 text-primary" />
             Aktif Becayiş İlanlarım
@@ -96,7 +96,7 @@ export default async function ProfilimPage() {
           )}
         </Card>
 
-        <Card className="gap-3 border-primary/20 bg-white/70 p-5 backdrop-blur-md">
+        <Card className="gap-3 border-primary/20 bg-white p-5 shadow-sm">
           <h2 className="flex items-center gap-2 font-semibold text-slate-900">
             <Inbox className="h-4 w-4 text-primary" />
             Gelen Mesajlarım
@@ -139,7 +139,7 @@ export default async function ProfilimPage() {
 
       <div className="mt-6">
         <h2 className="flex items-center gap-2 font-semibold text-slate-900">
-          <Sparkles className="h-4 w-4 text-primary" />
+          <Briefcase className="h-4 w-4 text-primary" />
           Bana Özel İlanlar
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -169,7 +169,7 @@ export default async function ProfilimPage() {
 
             {!isPremium && (
               <div className="absolute inset-0 flex items-center justify-center">
-                <Card className="items-center gap-3 border-primary/25 bg-white/95 p-6 text-center shadow-xl shadow-primary/20 backdrop-blur-md">
+                <Card className="items-center gap-3 border-primary/25 bg-white p-6 text-center shadow-xl shadow-primary/20">
                   <Lock className="h-6 w-6 text-primary" />
                   <p className="max-w-xs text-sm font-medium text-slate-800">
                     Sana özel {kisiselIlanlar.length} ilan bulundu. Görmek için hesabını yükselt.

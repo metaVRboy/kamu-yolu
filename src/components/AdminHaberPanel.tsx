@@ -59,7 +59,7 @@ export function AdminHaberPanel({ haberler }: { haberler: Haber[] }) {
 
   return (
     <div className="space-y-6">
-      <Card className="gap-3 border-primary/20 bg-white/70 p-5 backdrop-blur-md">
+      <Card className="gap-3 border-primary/20 bg-white p-5 shadow-sm">
         <form onSubmit={handleCreate} className="space-y-3">
           <div>
             <Label className="mb-1.5">Başlık</Label>
@@ -107,7 +107,7 @@ export function AdminHaberPanel({ haberler }: { haberler: Haber[] }) {
 
       <div className="space-y-2">
         {haberler.map((h) => (
-          <Card key={h.id} className="flex-row items-start justify-between gap-3 border-primary/20 bg-white/70 p-4 backdrop-blur-md">
+          <Card key={h.id} className="flex-row items-start justify-between gap-3 border-primary/20 bg-white p-4 shadow-sm">
             <div>
               <p className="text-sm font-semibold text-slate-900">{h.baslik}</p>
               <p className="mt-0.5 text-sm text-muted-foreground">{h.ozet}</p>

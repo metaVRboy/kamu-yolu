@@ -68,7 +68,7 @@ export function SifreSifirlaForm({ token }: { token: string }) {
   }
 
   return (
-    <Card className="mx-auto max-w-sm gap-4 border-primary/20 bg-white/70 p-6 backdrop-blur-md">
+    <Card className="mx-auto max-w-sm gap-4 border-primary/20 bg-white p-6 shadow-sm">
       <h1 className="text-xl font-bold text-slate-900">Yeni Şifre Belirle</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

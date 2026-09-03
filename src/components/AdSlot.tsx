@@ -10,7 +10,7 @@ export function AdSlot({ side }: { side: "left" | "right" }) {
     <div className="sticky top-24 hidden h-[600px] w-[160px] shrink-0 2xl:block">
       <div
         className={cn(
-          "flex h-full w-full flex-col items-center justify-center gap-2 rounded-2xl border border-primary/20 bg-primary/5 text-center backdrop-blur-md",
+          "flex h-full w-full flex-col items-center justify-center gap-2 rounded-2xl border border-primary/20 bg-primary/5 text-center",
         )}
       >
         <span className="text-[11px] font-medium uppercase tracking-wide text-primary/50">

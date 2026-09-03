@@ -71,7 +71,7 @@ export function BecayisTalepForm() {
   }
 
   return (
-    <Card className="gap-4 border-primary/20 bg-white/70 p-6 backdrop-blur-md">
+    <Card className="gap-4 border-primary/20 bg-white p-6 shadow-sm">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <Label className="mb-1.5"><span className="text-destructive">*</span> Kurum Türü</Label>
@@ -154,7 +154,7 @@ export function BecayisTalepForm() {
               )}
             </>
           ) : (
-            <div className="rounded-xl border border-primary/20 bg-white/50 p-3 text-sm text-muted-foreground">
+            <div className="rounded-xl border border-primary/20 bg-white p-3 text-sm text-muted-foreground">
               Önce mevcut il seçin
             </div>
           )}

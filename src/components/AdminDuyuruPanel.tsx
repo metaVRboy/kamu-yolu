@@ -39,7 +39,7 @@ export function AdminDuyuruPanel({ duyurular }: { duyurular: Duyuru[] }) {
 
   return (
     <div className="space-y-6">
-      <Card className="gap-3 border-primary/20 bg-white/70 p-5 backdrop-blur-md">
+      <Card className="gap-3 border-primary/20 bg-white p-5 shadow-sm">
         <form onSubmit={handleCreate} className="space-y-3">
           <Input
             value={baslik}
@@ -64,7 +64,7 @@ export function AdminDuyuruPanel({ duyurular }: { duyurular: Duyuru[] }) {
 
       <div className="space-y-2">
         {duyurular.map((d) => (
-          <Card key={d.id} className="flex-row items-start justify-between gap-3 border-primary/20 bg-white/70 p-4 backdrop-blur-md">
+          <Card key={d.id} className="flex-row items-start justify-between gap-3 border-primary/20 bg-white p-4 shadow-sm">
             <div>
               <p className="text-sm font-semibold text-slate-900">{d.baslik}</p>
               <p className="mt-0.5 text-sm text-muted-foreground">{d.icerik}</p>

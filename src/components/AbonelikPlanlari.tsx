@@ -106,7 +106,7 @@ export function AbonelikPlanlari({ mevcutPlan }: { mevcutPlan: PlanKey }) {
               )}
               <Card
                 className={cn(
-                  "h-full gap-4 border-primary/20 bg-white/70 p-6 backdrop-blur-md",
+                  "h-full gap-4 border-primary/20 bg-white p-6 shadow-sm",
                   plan.populer && "border-primary shadow-lg shadow-primary/20",
                 )}
               >

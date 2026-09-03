@@ -58,7 +58,7 @@ export function AuthForm({ mode }: { mode: "kayit" | "giris" }) {
   }
 
   return (
-    <Card className="mx-auto max-w-sm gap-4 border-primary/20 bg-white/70 p-6 backdrop-blur-md">
+    <Card className="mx-auto max-w-sm gap-4 border-primary/20 bg-white p-6 shadow-sm">
       <h1 className="text-xl font-bold text-slate-900">
         {mode === "kayit" ? "Kayıt Ol" : "Giriş Yap"}
       </h1>

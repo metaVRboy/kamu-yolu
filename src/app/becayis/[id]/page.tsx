@@ -19,7 +19,7 @@ export default async function BecayisDetayPage({
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-14 sm:px-6 sm:py-20">
-      <Card className="gap-4 border-primary/20 bg-white/70 p-6 backdrop-blur-md">
+      <Card className="gap-4 border-primary/20 bg-white p-6 shadow-sm">
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">{talep.meslek}</h1>
         {talep.kurumTuru && <p className="text-sm text-muted-foreground">{talep.kurumTuru}</p>}
 
@@ -35,7 +35,7 @@ export default async function BecayisDetayPage({
         </div>
 
         {talep.aciklama && (
-          <p className="rounded-xl bg-white/70 p-3 text-sm text-slate-700">{talep.aciklama}</p>
+          <p className="rounded-xl bg-primary/5 p-3 text-sm text-slate-700">{talep.aciklama}</p>
         )}
 
         <p className="flex items-center gap-1.5 text-xs text-muted-foreground">

@@ -37,12 +37,12 @@ export function ProfilSidebar({ okunmamisMesajSayisi }: { okunmamisMesajSayisi: 
   ];
 
   return (
-    <nav className="space-y-2">
+    <nav className="space-y-1 rounded-2xl border border-primary/15 bg-white p-1.5 shadow-sm">
       <Link
         href="/profilim"
         className={cn(
-          "flex items-center gap-2.5 rounded-xl border border-primary/15 bg-white/70 px-3.5 py-2.5 text-sm font-semibold backdrop-blur-md transition-colors",
-          pathname === "/profilim" ? "text-primary" : "text-slate-800 hover:text-primary",
+          "flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-colors",
+          pathname === "/profilim" ? "bg-primary/10 text-primary" : "text-slate-800 hover:bg-primary/5 hover:text-primary",
         )}
       >
         <UserRound className="h-4 w-4" />
@@ -52,8 +52,8 @@ export function ProfilSidebar({ okunmamisMesajSayisi }: { okunmamisMesajSayisi: 
       <Link
         href="/profilim/ayarlar"
         className={cn(
-          "flex items-center gap-2.5 rounded-xl border border-primary/15 bg-white/70 px-3.5 py-2.5 text-sm font-semibold backdrop-blur-md transition-colors",
-          pathname === "/profilim/ayarlar" ? "text-primary" : "text-slate-800 hover:text-primary",
+          "flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-colors",
+          pathname === "/profilim/ayarlar" ? "bg-primary/10 text-primary" : "text-slate-800 hover:bg-primary/5 hover:text-primary",
         )}
       >
         <Settings className="h-4 w-4" />
@@ -63,8 +63,8 @@ export function ProfilSidebar({ okunmamisMesajSayisi }: { okunmamisMesajSayisi: 
       <Link
         href="/profilim/abonelik"
         className={cn(
-          "flex items-center gap-2.5 rounded-xl border border-primary/15 bg-white/70 px-3.5 py-2.5 text-sm font-semibold backdrop-blur-md transition-colors",
-          pathname === "/profilim/abonelik" ? "text-primary" : "text-slate-800 hover:text-primary",
+          "flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-colors",
+          pathname === "/profilim/abonelik" ? "bg-primary/10 text-primary" : "text-slate-800 hover:bg-primary/5 hover:text-primary",
         )}
       >
         <Crown className="h-4 w-4" />
@@ -74,11 +74,11 @@ export function ProfilSidebar({ okunmamisMesajSayisi }: { okunmamisMesajSayisi: 
       {sections.map((section) => {
         const open = openSection === section.key;
         return (
-          <div key={section.key} className="rounded-xl border border-primary/15 bg-white/70 backdrop-blur-md">
+          <div key={section.key}>
             <button
               type="button"
               onClick={() => setOpenSection(open ? null : section.key)}
-              className="flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-sm font-semibold text-slate-800"
+              className="flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-sm font-semibold text-slate-800 hover:bg-primary/5"
             >
               <span className="flex items-center gap-2.5">
                 <section.icon className="h-4 w-4 text-primary" />
@@ -87,7 +87,7 @@ export function ProfilSidebar({ okunmamisMesajSayisi }: { okunmamisMesajSayisi: 
               <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", open && "rotate-180")} />
             </button>
             {open && (
-              <div className="space-y-1 px-2 pb-2">
+              <div className="space-y-1 px-2 pb-1">
                 {section.items.map((item) => (
                   <Link
                     key={item.href}

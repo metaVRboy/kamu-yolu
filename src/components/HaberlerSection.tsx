@@ -50,7 +50,7 @@ export function HaberlerSection({ haberler, showAllLink = true }: { haberler: Ha
         {haberler.map((h) => (
           <Card
             key={h.id}
-            className="gap-3 overflow-hidden border-primary/20 bg-white/70 p-3 shadow-sm shadow-primary/5 backdrop-blur-md"
+            className="gap-3 overflow-hidden border-primary/20 bg-white p-3 shadow-sm"
           >
             <div className="relative">
               <HaberGorsel src={h.gorselUrl} alt={h.baslik} logoMu={h.gorselLogoMu} />

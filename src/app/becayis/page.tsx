@@ -40,7 +40,7 @@ export default async function BecayisPage() {
           <Link key={talep.id} href={`/becayis/${talep.id}`}>
             <Card
               className={cn(
-                "gap-2 border-primary/20 bg-white/70 p-5 shadow-sm shadow-primary/5 backdrop-blur-md transition-shadow hover:shadow-md hover:shadow-primary/10",
+                "gap-2 border-primary/20 bg-white p-5 shadow-sm transition-shadow hover:shadow-md hover:shadow-primary/10",
               )}
             >
               <div className="flex flex-wrap items-center justify-between gap-2">

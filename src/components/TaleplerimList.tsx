@@ -68,7 +68,7 @@ function ThreadPanel({ talepId, thread, currentUserId }: { talepId: string; thre
   }
 
   return (
-    <div className="rounded-xl border border-primary/15 bg-white/70">
+    <div className="rounded-xl border border-primary/15 bg-white">
       <button
         type="button"
         onClick={handleOpen}
@@ -125,7 +125,7 @@ export function TaleplerimList({ talepler, currentUserId }: { talepler: Talep[];
   return (
     <div className="space-y-4">
       {talepler.map((talep) => (
-        <Card key={talep.id} className="gap-3 border-primary/20 bg-white/70 p-5 backdrop-blur-md">
+        <Card key={talep.id} className="gap-3 border-primary/20 bg-white p-5 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="font-semibold text-slate-900">{talep.meslek}</h3>
             {!talep.isActive && (

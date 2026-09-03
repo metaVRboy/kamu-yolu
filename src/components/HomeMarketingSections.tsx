@@ -88,7 +88,7 @@ export function HowItWorksSection() {
         {STEPS.map((step, i) => (
           <div
             key={step.title}
-            className="flex items-start gap-4 rounded-2xl border border-primary/15 bg-white/70 p-5 shadow-sm shadow-primary/5 backdrop-blur-md sm:items-center sm:gap-6 sm:p-6"
+            className="flex items-start gap-4 rounded-2xl border border-primary/15 bg-white p-5 shadow-sm sm:items-center sm:gap-6 sm:p-6"
           >
             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md shadow-primary/25">
               <step.icon className="h-5 w-5" />
@@ -150,7 +150,7 @@ export function TrustSection({
         {TRUST_FEATURES.map((f) => (
           <Card
             key={f.title}
-            className="gap-2 border-primary/15 bg-white/70 p-5 text-center backdrop-blur-md"
+            className="gap-2 border-primary/15 bg-white p-5 text-center shadow-sm"
           >
             <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <f.icon className="h-5 w-5" />
