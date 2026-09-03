@@ -13,6 +13,7 @@ type DepartmentOption = {
   slug: string;
   name: string;
   level: string;
+  ilanSayisi: number;
 };
 
 function normalizeTr(text: string): string {
@@ -132,9 +133,17 @@ export function DepartmentSearch({
                     )}
                   >
                     <span>{d.name}</span>
-                    <Badge className="border-primary/15 bg-primary/10 font-normal text-primary">
-                      {LEVEL_LABEL[d.level] ?? d.level}
-                    </Badge>
+                    <span className="flex items-center gap-1.5">
+                      <Badge className="border-primary/15 bg-primary/10 font-normal text-primary">
+                        {LEVEL_LABEL[d.level] ?? d.level}
+                      </Badge>
+                      <span
+                        title={`${d.ilanSayisi} ilan`}
+                        className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground"
+                      >
+                        {d.ilanSayisi}
+                      </span>
+                    </span>
                   </button>
                 </li>
               ))}

@@ -13,6 +13,51 @@ export type PostingFilters = {
   il?: string;
 };
 
+/**
+ * Tum bolumler icin, getPostingsForDepartment ile AYNI kurala gore
+ * (o bolume acikca eslesmis + bolum sarti olmayan ayni seviyedeki genel
+ * ilanlar, tekilleştirilmiş) esleşen aktif ilan sayisini tek seferde
+ * hesaplar. Her bolum icin ayri sorgu atmak yerine tum aktif ilanlari
+ * bir kez cekip bellekte sayar.
+ */
+export async function getDepartmentPostingCounts(): Promise<Map<string, number>> {
+  const activePostings = await prisma.posting.findMany({
+    where: { isActive: true },
+    select: {
+      id: true,
+      isDepartmentRestricted: true,
+      educationLevels: true,
+      departments: { select: { departmentId: true } },
+    },
+  });
+
+  const generalPostingIdsByLevel = new Map<string, Set<string>>();
+  const explicitPostingIdsByDept = new Map<string, Set<string>>();
+
+  for (const p of activePostings) {
+    if (!p.isDepartmentRestricted) {
+      for (const lvl of p.educationLevels) {
+        if (!generalPostingIdsByLevel.has(lvl)) generalPostingIdsByLevel.set(lvl, new Set());
+        generalPostingIdsByLevel.get(lvl)!.add(p.id);
+      }
+    }
+    for (const pd of p.departments) {
+      if (!explicitPostingIdsByDept.has(pd.departmentId)) explicitPostingIdsByDept.set(pd.departmentId, new Set());
+      explicitPostingIdsByDept.get(pd.departmentId)!.add(p.id);
+    }
+  }
+
+  const departments = await prisma.department.findMany({ select: { id: true, level: true } });
+
+  const counts = new Map<string, number>();
+  for (const d of departments) {
+    const combined = new Set(explicitPostingIdsByDept.get(d.id) ?? []);
+    for (const id of generalPostingIdsByLevel.get(d.level) ?? []) combined.add(id);
+    counts.set(d.id, combined.size);
+  }
+  return counts;
+}
+
 function buildFilterWhere(filters?: PostingFilters): Prisma.PostingWhereInput {
   const where: Prisma.PostingWhereInput = {};
   if (filters?.institutionType) {

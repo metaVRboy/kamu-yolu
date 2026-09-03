@@ -52,6 +52,9 @@ export default async function DepartmentResultsPage({
         <Badge variant="outline" className="border-primary/30 text-primary">
           {LEVEL_LABEL[department.level] ?? department.level}
         </Badge>
+        <Badge className="border-transparent bg-primary text-primary-foreground">
+          {postings.length} İlan
+        </Badge>
       </div>
       <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
         Bu bölüme özel şart koşan ilanlar ile bölüm şartı olmayan, öğrenim

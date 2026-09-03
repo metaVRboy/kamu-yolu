@@ -1,4 +1,4 @@
-import { getLatestPostings, getHomepageStats } from "@/lib/matching";
+import { getLatestPostings, getHomepageStats, getDepartmentPostingCounts } from "@/lib/matching";
 import { getLatestHaberler } from "@/lib/haberler";
 import { prisma } from "@/lib/prisma";
 import { PostingCard } from "@/components/PostingCard";
@@ -12,12 +12,20 @@ import { Badge } from "@/components/ui/badge";
 export const revalidate = 300;
 
 export default async function Home() {
-  const [latestPostings, haberler, departments, stats] = await Promise.all([
+  const [latestPostings, haberler, departmentRows, stats, postingCounts] = await Promise.all([
     getLatestPostings(6),
     getLatestHaberler(5),
-    prisma.department.findMany({ select: { slug: true, name: true, level: true }, orderBy: { name: "asc" } }),
+    prisma.department.findMany({ select: { id: true, slug: true, name: true, level: true }, orderBy: { name: "asc" } }),
     getHomepageStats(),
+    getDepartmentPostingCounts(),
   ]);
+
+  const departments = departmentRows.map((d) => ({
+    slug: d.slug,
+    name: d.name,
+    level: d.level,
+    ilanSayisi: postingCounts.get(d.id) ?? 0,
+  }));
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
