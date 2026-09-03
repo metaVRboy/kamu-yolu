@@ -7,6 +7,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { toast } from "@/components/ui/toast";
 
 type Haber = {
   id: string;
@@ -26,6 +37,8 @@ export function AdminHaberPanel({ haberler }: { haberler: Haber[] }) {
   const [gorselUrl, setGorselUrl] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [silinecek, setSilinecek] = useState<Haber | null>(null);
+  const [siliniyor, setSiliniyor] = useState(false);
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -46,15 +59,28 @@ export function AdminHaberPanel({ haberler }: { haberler: Haber[] }) {
       setOzet("");
       setKaynakUrl("");
       setGorselUrl("");
+      toast.success("Haber yayınlandı.");
       router.refresh();
     } finally {
       setLoading(false);
     }
   }
 
-  async function handleDelete(id: string) {
-    await fetch(`/api/admin/haberler/${id}`, { method: "DELETE" });
-    router.refresh();
+  async function handleDelete() {
+    if (!silinecek) return;
+    setSiliniyor(true);
+    try {
+      const res = await fetch(`/api/admin/haberler/${silinecek.id}`, { method: "DELETE" });
+      if (!res.ok) {
+        toast.error("Haber silinemedi.", "Lütfen tekrar dene.");
+        return;
+      }
+      toast.success("Haber silindi.");
+      setSilinecek(null);
+      router.refresh();
+    } finally {
+      setSiliniyor(false);
+    }
   }
 
   return (
@@ -119,7 +145,7 @@ export function AdminHaberPanel({ haberler }: { haberler: Haber[] }) {
             </div>
             <button
               type="button"
-              onClick={() => handleDelete(h.id)}
+              onClick={() => setSilinecek(h)}
               aria-label="Sil"
               className="text-muted-foreground hover:text-destructive"
             >
@@ -128,6 +154,23 @@ export function AdminHaberPanel({ haberler }: { haberler: Haber[] }) {
           </Card>
         ))}
       </div>
+
+      <AlertDialog open={!!silinecek} onOpenChange={(open) => !open && setSilinecek(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Haberi sil</AlertDialogTitle>
+            <AlertDialogDescription>
+              &quot;{silinecek?.baslik}&quot; kalıcı olarak silinecek. Bu işlem geri alınamaz.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={siliniyor}>Vazgeç</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" disabled={siliniyor} onClick={handleDelete}>
+              {siliniyor ? "Siliniyor..." : "Sil"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -142,6 +142,10 @@ model User {
   // ozellikten once kayit olmus hesaplarda bos olabilir.
   kvkkOnayTarihi DateTime?
   createdAt      DateTime        @default(now())
+  // Sifre degistirildiginde artirilir; o anda gecerli tum oturumlarin
+  // (JWT'lerin) kimlik dogrulamasi bu deger uzerinden yapilir, boylece
+  // sifre degisince tum cihazlardaki eski oturumlar aninda gecersiz olur.
+  tokenVersion   Int             @default(0)
 
   becayisTalepleri BecayisTalep[]
   gonderdigiMesajlar BecayisMesaj[] @relation("MesajGonderen")
@@ -267,4 +271,16 @@ model ChatAbuse {
   lockedUntil     DateTime?
   lastViolationAt DateTime?
   createdAt       DateTime  @default(now())
+}
+
+// Giris ve sifre degistirme uc noktalarinda basarisiz deneme sayacini
+// tutar (kademeli bekleme suresi icin). identifier, giris icin e-posta,
+// sifre degistirme icin "user:<id>" seklindedir.
+model AuthAbuse {
+  id          String    @id @default(cuid())
+  identifier  String    @unique
+  failCount   Int       @default(0)
+  lockedUntil DateTime?
+  lastFailAt  DateTime?
+  createdAt   DateTime  @default(now())
 }

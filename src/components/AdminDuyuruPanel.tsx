@@ -6,6 +6,17 @@ import { Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { toast } from "@/components/ui/toast";
 
 type Duyuru = { id: string; baslik: string; icerik: string; createdAt: string };
 
@@ -14,27 +25,46 @@ export function AdminDuyuruPanel({ duyurular }: { duyurular: Duyuru[] }) {
   const [baslik, setBaslik] = useState("");
   const [icerik, setIcerik] = useState("");
   const [loading, setLoading] = useState(false);
+  const [silinecek, setSilinecek] = useState<Duyuru | null>(null);
+  const [siliniyor, setSiliniyor] = useState(false);
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     try {
-      await fetch("/api/admin/duyurular", {
+      const res = await fetch("/api/admin/duyurular", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ baslik, icerik }),
       });
+      if (!res.ok) {
+        toast.error("Duyuru yayınlanamadı.", "Lütfen tekrar dene.");
+        return;
+      }
       setBaslik("");
       setIcerik("");
+      toast.success("Duyuru yayınlandı.");
       router.refresh();
     } finally {
       setLoading(false);
     }
   }
 
-  async function handleDelete(id: string) {
-    await fetch(`/api/admin/duyurular/${id}`, { method: "DELETE" });
-    router.refresh();
+  async function handleDelete() {
+    if (!silinecek) return;
+    setSiliniyor(true);
+    try {
+      const res = await fetch(`/api/admin/duyurular/${silinecek.id}`, { method: "DELETE" });
+      if (!res.ok) {
+        toast.error("Duyuru silinemedi.", "Lütfen tekrar dene.");
+        return;
+      }
+      toast.success("Duyuru silindi.");
+      setSilinecek(null);
+      router.refresh();
+    } finally {
+      setSiliniyor(false);
+    }
   }
 
   return (
@@ -71,7 +101,7 @@ export function AdminDuyuruPanel({ duyurular }: { duyurular: Duyuru[] }) {
             </div>
             <button
               type="button"
-              onClick={() => handleDelete(d.id)}
+              onClick={() => setSilinecek(d)}
               aria-label="Sil"
               className="text-muted-foreground hover:text-destructive"
             >
@@ -80,6 +110,23 @@ export function AdminDuyuruPanel({ duyurular }: { duyurular: Duyuru[] }) {
           </Card>
         ))}
       </div>
+
+      <AlertDialog open={!!silinecek} onOpenChange={(open) => !open && setSilinecek(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Duyuruyu sil</AlertDialogTitle>
+            <AlertDialogDescription>
+              &quot;{silinecek?.baslik}&quot; kalıcı olarak silinecek. Bu işlem geri alınamaz.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={siliniyor}>Vazgeç</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" disabled={siliniyor} onClick={handleDelete}>
+              {siliniyor ? "Siliniyor..." : "Sil"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

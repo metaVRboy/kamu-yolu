@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { createSession, isSessionConfigured, verifyPassword } from "@/lib/auth";
+import { clearFailures, getLockoutState, lockoutMessage, recordFailure } from "@/lib/authAbuse";
 
 const bodySchema = z.object({
   email: z.string().trim().toLowerCase().email(),
@@ -23,16 +24,23 @@ export async function POST(req: NextRequest) {
   }
   const { email, password } = parsed.data;
 
+  const lockout = await getLockoutState(email);
+  if (lockout.locked && lockout.lockedUntil) {
+    return NextResponse.json({ error: lockoutMessage(lockout.lockedUntil) }, { status: 429 });
+  }
+
   try {
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user || !(await verifyPassword(password, user.passwordHash))) {
+      await recordFailure(email);
       return NextResponse.json(
         { error: "E-posta veya şifre hatalı." },
         { status: 401 },
       );
     }
 
-    await createSession(user.id);
+    await clearFailures(email);
+    await createSession(user.id, user.tokenVersion);
 
     return NextResponse.json({ id: user.id, adSoyad: user.adSoyad, email: user.email });
   } catch (err) {

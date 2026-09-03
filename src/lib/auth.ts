@@ -24,8 +24,8 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
   return bcrypt.compare(password, hash);
 }
 
-export async function createSession(userId: string): Promise<void> {
-  const token = await new SignJWT({ userId })
+export async function createSession(userId: string, tokenVersion: number): Promise<void> {
+  const token = await new SignJWT({ userId, tokenVersion })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime(`${SESSION_MAX_AGE_SECONDS}s`)
@@ -46,23 +46,28 @@ export async function destroySession(): Promise<void> {
   cookieStore.delete(SESSION_COOKIE);
 }
 
-async function getSessionUserId(): Promise<string | null> {
+async function getSessionPayload(): Promise<{ userId: string; tokenVersion: number } | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get(SESSION_COOKIE)?.value;
   if (!token) return null;
 
   try {
     const { payload } = await jwtVerify(token, getSecretKey());
-    return typeof payload.userId === "string" ? payload.userId : null;
+    if (typeof payload.userId !== "string" || typeof payload.tokenVersion !== "number") return null;
+    return { userId: payload.userId, tokenVersion: payload.tokenVersion };
   } catch {
     return null;
   }
 }
 
 export async function getCurrentUser() {
-  const userId = await getSessionUserId();
-  if (!userId) return null;
-  return prisma.user.findUnique({ where: { id: userId } });
+  const session = await getSessionPayload();
+  if (!session) return null;
+  const user = await prisma.user.findUnique({ where: { id: session.userId } });
+  // tokenVersion uyusmuyorsa (sifre degistirilmis, oturum baska bir yerden
+  // dusurulmus) bu JWT artik gecersiz sayilir - suresi dolmamis olsa bile.
+  if (!user || user.tokenVersion !== session.tokenVersion) return null;
+  return user;
 }
 
 export async function requireUser() {

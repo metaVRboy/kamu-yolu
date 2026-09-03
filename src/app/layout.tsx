@@ -11,6 +11,7 @@ import { AdSlot } from "@/components/AdSlot";
 import { NotificationBell } from "@/components/NotificationBell";
 import { ProfileMenu } from "@/components/ProfileMenu";
 import { buttonVariants } from "@/components/ui/button";
+import { Toaster } from "@/components/ui/toast";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
@@ -197,6 +198,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             </p>
           </div>
         </footer>
+        <Toaster />
       </body>
     </html>
   );

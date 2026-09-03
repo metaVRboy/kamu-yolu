@@ -36,12 +36,17 @@ export async function POST(req: NextRequest) {
 
   const passwordHash = await hashPassword(password);
 
-  await prisma.$transaction([
-    prisma.user.update({ where: { id: resetToken.userId }, data: { passwordHash } }),
+  // tokenVersion da artirilir: sifirlama linki calinmis/paylasilmis olabilir,
+  // bu da o an gecerli olabilecek her eski oturumu gecersiz kilar.
+  const [updatedUser] = await prisma.$transaction([
+    prisma.user.update({
+      where: { id: resetToken.userId },
+      data: { passwordHash, tokenVersion: { increment: 1 } },
+    }),
     prisma.passwordResetToken.update({ where: { id: resetToken.id }, data: { usedAt: new Date() } }),
   ]);
 
-  await createSession(resetToken.userId);
+  await createSession(updatedUser.id, updatedUser.tokenVersion);
 
   return NextResponse.json({ ok: true });
 }

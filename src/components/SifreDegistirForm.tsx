@@ -1,24 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
+import { useRouter } from "next/navigation";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { PasswordInput } from "@/components/ui/password-input";
+import { toast } from "@/components/ui/toast";
 import { passwordRequirementIssues } from "@/lib/authValidation";
 import { PasswordRequirementsHint } from "@/components/SifreSifirlaForm";
 
 export function SifreDegistirForm() {
+  const router = useRouter();
   const [mevcutSifre, setMevcutSifre] = useState("");
   const [yeniSifre, setYeniSifre] = useState("");
   const [yeniSifreTekrar, setYeniSifreTekrar] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [basarili, setBasarili] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    setBasarili(false);
 
     if (passwordRequirementIssues(yeniSifre).length > 0) {
       setError("Yeni şifre gereksinimleri karşılanmıyor.");
@@ -34,17 +35,20 @@ export function SifreDegistirForm() {
       const res = await fetch("/api/profil/sifre-degistir", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mevcutSifre, yeniSifre }),
+        body: JSON.stringify({ mevcutSifre, yeniSifre, yeniSifreTekrar }),
       });
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "Bir şeyler ters gitti.");
         return;
       }
-      setBasarili(true);
-      setMevcutSifre("");
-      setYeniSifre("");
-      setYeniSifreTekrar("");
+
+      toast.success(
+        "Şifren güncellendi.",
+        "Güvenliğin için oturumun kapatıldı. Yeni şifrenle tekrar giriş yapman gerekiyor.",
+      );
+      router.push("/giris");
+      router.refresh();
     } finally {
       setLoading(false);
     }
@@ -54,8 +58,7 @@ export function SifreDegistirForm() {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <Label className="mb-1.5">Mevcut Şifre</Label>
-        <Input
-          type="password"
+        <PasswordInput
           value={mevcutSifre}
           onChange={(e) => setMevcutSifre(e.target.value)}
           required
@@ -64,8 +67,7 @@ export function SifreDegistirForm() {
       </div>
       <div>
         <Label className="mb-1.5">Yeni Şifre</Label>
-        <Input
-          type="password"
+        <PasswordInput
           value={yeniSifre}
           onChange={(e) => setYeniSifre(e.target.value)}
           required
@@ -75,16 +77,18 @@ export function SifreDegistirForm() {
       </div>
       <div>
         <Label className="mb-1.5">Yeni Şifre (Tekrar)</Label>
-        <Input
-          type="password"
+        <PasswordInput
           value={yeniSifreTekrar}
           onChange={(e) => setYeniSifreTekrar(e.target.value)}
           required
+          aria-invalid={yeniSifreTekrar.length > 0 && yeniSifreTekrar !== yeniSifre}
           className="border-primary/20 bg-white"
         />
+        {yeniSifreTekrar.length > 0 && yeniSifreTekrar !== yeniSifre && (
+          <p className="mt-1 text-xs text-destructive">Şifreler eşleşmiyor.</p>
+        )}
       </div>
       {error && <p className="text-sm text-destructive">{error}</p>}
-      {basarili && <p className="text-sm text-emerald-600">Şifren güncellendi.</p>}
       <Button type="submit" disabled={loading}>
         {loading ? "Güncelleniyor..." : "Şifreyi Güncelle"}
       </Button>

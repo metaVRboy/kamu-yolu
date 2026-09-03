@@ -30,11 +30,16 @@ export function NotificationBell({ isLoggedIn }: { isLoggedIn: boolean }) {
   }, [open]);
 
   async function fetchData() {
-    const res = await fetch("/api/bildirimler");
-    const data = await res.json();
-    setGenel(data.genel);
-    setBanaOzel(data.banaOzel);
-    setOkunmamisSayisi(data.okunmamisSayisi);
+    try {
+      const res = await fetch("/api/bildirimler");
+      if (!res.ok) return;
+      const data = await res.json();
+      setGenel(data.genel);
+      setBanaOzel(data.banaOzel);
+      setOkunmamisSayisi(data.okunmamisSayisi);
+    } catch {
+      // Sessizce yok say - 30sn sonraki periyodik denemede tekrar dener.
+    }
   }
 
   useEffect(() => {

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { PasswordInput } from "@/components/ui/password-input";
 import { passwordRequirementIssues } from "@/lib/authValidation";
 import { PasswordRequirementsHint } from "@/components/SifreSifirlaForm";
 
@@ -94,8 +95,7 @@ export function AuthForm({ mode }: { mode: "kayit" | "giris" }) {
               </Link>
             )}
           </div>
-          <Input
-            type="password"
+          <PasswordInput
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required

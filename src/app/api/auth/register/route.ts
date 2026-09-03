@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
       data: { adSoyad, email, passwordHash, kvkkOnayTarihi: new Date() },
     });
 
-    await createSession(user.id);
+    await createSession(user.id, user.tokenVersion);
 
     return NextResponse.json({ id: user.id, adSoyad: user.adSoyad, email: user.email });
   } catch (err) {
