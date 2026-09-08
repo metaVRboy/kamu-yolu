@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
-import { getTalepDetay, sendMesaj } from "@/lib/becayis";
+import { deleteMesajlar, getTalepDetay, sendMesaj } from "@/lib/becayis";
 
 const bodySchema = z.object({
   talepId: z.string().min(1),
@@ -47,4 +47,37 @@ export async function POST(req: NextRequest) {
   });
 
   return NextResponse.json({ id: created.id });
+}
+
+const deleteSchema = z.object({
+  talepId: z.string().min(1),
+  // Verilirse tek bir sohbet, verilmezse talebe ait tum sohbetler silinir.
+  konusmaKarsiId: z.string().min(1).optional(),
+});
+
+export async function DELETE(req: NextRequest) {
+  const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ error: "Giriş yapmalısınız." }, { status: 401 });
+  }
+
+  const parsed = deleteSchema.safeParse(await req.json().catch(() => null));
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Geçersiz bilgiler." }, { status: 400 });
+  }
+  const { talepId, konusmaKarsiId } = parsed.data;
+
+  const talep = await getTalepDetay(talepId);
+  if (!talep) {
+    return NextResponse.json({ error: "Talep bulunamadı." }, { status: 404 });
+  }
+
+  const isSahibi = talep.userId === user.id;
+  const yetkili = konusmaKarsiId ? isSahibi || konusmaKarsiId === user.id : isSahibi;
+  if (!yetkili) {
+    return NextResponse.json({ error: "Yetkiniz yok." }, { status: 403 });
+  }
+
+  await deleteMesajlar(talepId, konusmaKarsiId);
+  return NextResponse.json({ ok: true });
 }

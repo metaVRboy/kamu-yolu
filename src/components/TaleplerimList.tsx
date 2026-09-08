@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, MapPin, Send } from "lucide-react";
+import { ChevronDown, MapPin, Send, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -67,23 +67,39 @@ function ThreadPanel({ talepId, thread, currentUserId }: { talepId: string; thre
     }
   }
 
+  async function handleDelete() {
+    if (!window.confirm("Bu sohbeti silmek istediğinize emin misiniz?")) return;
+    await fetch("/api/becayis/mesaj", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ talepId, konusmaKarsiId: thread.karsiId }),
+    });
+    router.refresh();
+  }
+
   return (
     <div className="rounded-xl border border-primary/15 bg-white">
-      <button
-        type="button"
-        onClick={handleOpen}
-        className="flex w-full items-center justify-between px-3.5 py-2.5 text-left text-sm"
-      >
-        <span className="font-medium text-slate-800">{thread.karsiAdSoyad}</span>
-        <span className="flex items-center gap-2">
-          {thread.okunmamisSayisi > 0 && (
-            <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground">
-              {thread.okunmamisSayisi}
-            </span>
-          )}
-          <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", open && "rotate-180")} />
-        </span>
-      </button>
+      <div className="flex items-center justify-between px-3.5 py-2.5">
+        <button type="button" onClick={handleOpen} className="flex flex-1 items-center justify-between text-left text-sm">
+          <span className="font-medium text-slate-800">{thread.karsiAdSoyad}</span>
+          <span className="flex items-center gap-2">
+            {thread.okunmamisSayisi > 0 && (
+              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground">
+                {thread.okunmamisSayisi}
+              </span>
+            )}
+            <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", open && "rotate-180")} />
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={handleDelete}
+          title="Sohbeti sil"
+          className="ml-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-red-50 hover:text-red-600"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
+      </div>
 
       {open && (
         <div className="space-y-2 border-t border-primary/10 p-3">
@@ -117,6 +133,58 @@ function ThreadPanel({ talepId, thread, currentUserId }: { talepId: string; thre
   );
 }
 
+function TalepCard({ talep, currentUserId }: { talep: Talep; currentUserId: string }) {
+  const router = useRouter();
+
+  async function handleDeleteAll() {
+    if (!window.confirm("Bu ilana ait tüm sohbetleri silmek istediğinize emin misiniz?")) return;
+    await fetch("/api/becayis/mesaj", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ talepId: talep.id }),
+    });
+    router.refresh();
+  }
+
+  return (
+    <Card className="gap-3 border-primary/20 bg-white p-5 shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="font-semibold text-slate-900">{talep.meslek}</h3>
+        <div className="flex items-center gap-2">
+          {!talep.isActive && (
+            <span className="rounded-full bg-slate-200 px-2.5 py-1 text-xs text-slate-600">Pasif</span>
+          )}
+          {talep.threads.length > 0 && (
+            <button
+              type="button"
+              onClick={handleDeleteAll}
+              className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-red-50 hover:text-red-600"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              Tümünü sil
+            </button>
+          )}
+        </div>
+      </div>
+      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <MapPin className="h-3.5 w-3.5" />
+        {talep.mevcutIl}
+        {talep.mevcutIlce ? ` / ${talep.mevcutIlce}` : ""} → {talep.istenenIller.join(", ")}
+      </div>
+
+      {talep.threads.length === 0 ? (
+        <p className="text-sm text-muted-foreground">Henüz mesaj gelmedi.</p>
+      ) : (
+        <div className="space-y-2">
+          {talep.threads.map((thread) => (
+            <ThreadPanel key={thread.karsiId} talepId={talep.id} thread={thread} currentUserId={currentUserId} />
+          ))}
+        </div>
+      )}
+    </Card>
+  );
+}
+
 export function TaleplerimList({ talepler, currentUserId }: { talepler: Talep[]; currentUserId: string }) {
   if (talepler.length === 0) {
     return <p className="text-sm text-muted-foreground">Henüz bir becayiş talebin yok.</p>;
@@ -125,29 +193,7 @@ export function TaleplerimList({ talepler, currentUserId }: { talepler: Talep[];
   return (
     <div className="space-y-4">
       {talepler.map((talep) => (
-        <Card key={talep.id} className="gap-3 border-primary/20 bg-white p-5 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="font-semibold text-slate-900">{talep.meslek}</h3>
-            {!talep.isActive && (
-              <span className="rounded-full bg-slate-200 px-2.5 py-1 text-xs text-slate-600">Pasif</span>
-            )}
-          </div>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <MapPin className="h-3.5 w-3.5" />
-            {talep.mevcutIl}
-            {talep.mevcutIlce ? ` / ${talep.mevcutIlce}` : ""} → {talep.istenenIller.join(", ")}
-          </div>
-
-          {talep.threads.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Henüz mesaj gelmedi.</p>
-          ) : (
-            <div className="space-y-2">
-              {talep.threads.map((thread) => (
-                <ThreadPanel key={thread.karsiId} talepId={talep.id} thread={thread} currentUserId={currentUserId} />
-              ))}
-            </div>
-          )}
-        </Card>
+        <TalepCard key={talep.id} talep={talep} currentUserId={currentUserId} />
       ))}
     </div>
   );

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronDown, MapPin, Send } from "lucide-react";
+import { ChevronDown, MapPin, Send, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -63,36 +63,52 @@ function IlgilenilenTalepCard({ talep, currentUserId }: { talep: IlgilenilenTale
     }
   }
 
+  async function handleDelete() {
+    if (!window.confirm("Bu sohbeti silmek istediğinize emin misiniz?")) return;
+    await fetch("/api/becayis/mesaj", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ talepId: talep.id, konusmaKarsiId: currentUserId }),
+    });
+    router.refresh();
+  }
+
   return (
     <Card className="gap-0 border-primary/20 bg-white p-0 shadow-sm">
-      <button
-        type="button"
-        onClick={handleOpen}
-        className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left"
-      >
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="font-semibold text-slate-900">{talep.meslek}</h3>
-            {!talep.isActive && (
-              <span className="rounded-full bg-slate-200 px-2.5 py-1 text-xs text-slate-600">Pasif</span>
+      <div className="flex w-full items-center justify-between gap-3 px-5 py-4">
+        <button type="button" onClick={handleOpen} className="flex min-w-0 flex-1 items-center justify-between gap-3 text-left">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="font-semibold text-slate-900">{talep.meslek}</h3>
+              {!talep.isActive && (
+                <span className="rounded-full bg-slate-200 px-2.5 py-1 text-xs text-slate-600">Pasif</span>
+              )}
+            </div>
+            <p className="mt-0.5 text-xs text-muted-foreground">İlan sahibi: {talep.ilanSahibiAdSoyad}</p>
+            <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+              <MapPin className="h-3.5 w-3.5" />
+              {talep.mevcutIl}
+              {talep.mevcutIlce ? ` / ${talep.mevcutIlce}` : ""} → {talep.istenenIller.join(", ")}
+            </div>
+          </div>
+          <span className="flex shrink-0 items-center gap-2">
+            {talep.okunmamisSayisi > 0 && (
+              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground">
+                {talep.okunmamisSayisi}
+              </span>
             )}
-          </div>
-          <p className="mt-0.5 text-xs text-muted-foreground">İlan sahibi: {talep.ilanSahibiAdSoyad}</p>
-          <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <MapPin className="h-3.5 w-3.5" />
-            {talep.mevcutIl}
-            {talep.mevcutIlce ? ` / ${talep.mevcutIlce}` : ""} → {talep.istenenIller.join(", ")}
-          </div>
-        </div>
-        <span className="flex shrink-0 items-center gap-2">
-          {talep.okunmamisSayisi > 0 && (
-            <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground">
-              {talep.okunmamisSayisi}
-            </span>
-          )}
-          <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", open && "rotate-180")} />
-        </span>
-      </button>
+            <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", open && "rotate-180")} />
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={handleDelete}
+          title="Sohbeti sil"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-red-50 hover:text-red-600"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
+      </div>
 
       {open && (
         <div className="space-y-2 border-t border-primary/10 p-4">

@@ -167,3 +167,10 @@ export async function markThreadOkundu(talepId: string, karsiId: string, forUser
     data: { okundu: true },
   });
 }
+
+// konusmaKarsiId verilirse sadece o sohbet, verilmezse talebe ait tum sohbetler silinir.
+export async function deleteMesajlar(talepId: string, konusmaKarsiId?: string) {
+  await prisma.becayisMesaj.deleteMany({
+    where: { talepId, ...(konusmaKarsiId ? { konusmaKarsiId } : {}) },
+  });
+}
