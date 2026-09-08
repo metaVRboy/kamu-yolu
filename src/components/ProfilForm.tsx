@@ -5,7 +5,17 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { KURUM_TURLERI, meslekSecenekleri } from "@/lib/kurumMeslek";
+import {
+  KURUM_TURLERI,
+  isciAltMeslekleri,
+  memurAltMeslekleri,
+  meslekSecenekleri,
+  meslekSeciminiCoz,
+} from "@/lib/kurumMeslek";
+
+const DIGER = "Diğer";
+const ISCI = "İşçi";
+const MEMUR = "Memur";
 
 type DepartmentOption = { id: string; name: string };
 
@@ -33,8 +43,11 @@ export function ProfilForm({
 }) {
   const router = useRouter();
   const [telefon, setTelefon] = useState(initial.telefon ?? "");
-  const [meslek, setMeslek] = useState(initial.meslek ?? "");
   const [kurumTuru, setKurumTuru] = useState(initial.kurumTuru ?? "");
+  const ilkCozum = meslekSeciminiCoz(initial.kurumTuru ?? "", initial.meslek ?? "");
+  const [meslek, setMeslek] = useState(ilkCozum.meslek);
+  const [meslekAltUnvan, setMeslekAltUnvan] = useState(ilkCozum.altUnvan);
+  const [meslekSerbest, setMeslekSerbest] = useState(ilkCozum.serbest);
   const [kamuCalisaniDegil, setKamuCalisaniDegil] = useState(initial.kamuCalisaniDegil);
   const [departmentId, setDepartmentId] = useState(initial.departmentId ?? "");
   const [educationLevel, setEducationLevel] = useState(initial.educationLevel ?? "");
@@ -42,10 +55,27 @@ export function ProfilForm({
   const [loading, setLoading] = useState(false);
 
   const meslekler = kurumTuru ? meslekSecenekleri(kurumTuru) : [];
+  const altUnvanlar =
+    meslek === ISCI ? isciAltMeslekleri(kurumTuru) : meslek === MEMUR ? memurAltMeslekleri(kurumTuru) : [];
+  const serbestMetinGerekli = meslek === DIGER || meslekAltUnvan === DIGER;
+  const nihaiMeslek = serbestMetinGerekli ? meslekSerbest.trim() : altUnvanlar.length > 0 ? meslekAltUnvan : meslek;
 
   function handleKurumTuruChange(value: string) {
     setKurumTuru(value);
     setMeslek("");
+    setMeslekAltUnvan("");
+    setMeslekSerbest("");
+  }
+
+  function handleMeslekChange(value: string) {
+    setMeslek(value);
+    setMeslekAltUnvan("");
+    setMeslekSerbest("");
+  }
+
+  function handleMeslekAltUnvanChange(value: string) {
+    setMeslekAltUnvan(value);
+    setMeslekSerbest("");
   }
 
   function handleKamuCalisaniDegilChange(checked: boolean) {
@@ -53,6 +83,8 @@ export function ProfilForm({
     if (checked) {
       setKurumTuru("");
       setMeslek("");
+      setMeslekAltUnvan("");
+      setMeslekSerbest("");
     }
   }
 
@@ -65,7 +97,7 @@ export function ProfilForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           telefon: telefon || null,
-          meslek: meslek || null,
+          meslek: nihaiMeslek || null,
           kurumTuru: kurumTuru || null,
           kamuCalisaniDegil,
           departmentId: departmentId || null,
@@ -114,7 +146,7 @@ export function ProfilForm({
         <Label className="mb-1.5">Meslek / Unvan</Label>
         <select
           value={meslek}
-          onChange={(e) => setMeslek(e.target.value)}
+          onChange={(e) => handleMeslekChange(e.target.value)}
           disabled={kamuCalisaniDegil || !kurumTuru}
           className="h-10 w-full rounded-xl border border-primary/20 bg-white px-3 text-sm disabled:opacity-50"
         >
@@ -123,6 +155,33 @@ export function ProfilForm({
             <option key={m} value={m}>{m}</option>
           ))}
         </select>
+        {altUnvanlar.length > 0 && (
+          <div className="mt-2">
+            <Label className="mb-1.5">{meslek} Unvanını Belirt</Label>
+            <select
+              value={meslekAltUnvan}
+              onChange={(e) => handleMeslekAltUnvanChange(e.target.value)}
+              className="h-10 w-full rounded-xl border border-primary/20 bg-white px-3 text-sm"
+            >
+              <option value="">Seçilmedi</option>
+              {altUnvanlar.map((u) => (
+                <option key={u} value={u}>{u}</option>
+              ))}
+            </select>
+          </div>
+        )}
+        {serbestMetinGerekli && (
+          <div className="mt-2">
+            <Label className="mb-1.5">Unvanını Yaz</Label>
+            <input
+              type="text"
+              value={meslekSerbest}
+              onChange={(e) => setMeslekSerbest(e.target.value)}
+              placeholder="Unvanını yaz"
+              className="h-10 w-full rounded-xl border border-primary/20 bg-white px-3 text-sm"
+            />
+          </div>
+        )}
       </div>
       <div>
         <Label className="mb-1.5">Mezun Olduğun Bölüm</Label>

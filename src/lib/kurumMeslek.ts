@@ -10,10 +10,416 @@
 const DIGER = "Diğer";
 const ISCI = "İşçi";
 
+// "İşçi" secildiginde ve "Memur" secildiginde acilan ikinci kutuda
+// gosterilen alt-unvan listeleri. Her kurumun kendi "Görevde Yükselme ve
+// Unvan Değişikliği Yönetmeliği"nden (Resmi Gazete/mevzuat.gov.tr,
+// lexpera.com.tr konsolide metinleri) dogrulanmis gercek unvanlarla
+// derlendi. Ek unvan bulunamayan kurumlarda sadece taban liste kullanilir
+// - hicbir unvan uydurulmadi.
+const ISCI_TABAN = [
+  "Aşçı",
+  "Bahçıvan",
+  "Bekçi",
+  "Dağıtıcı",
+  "Gassal",
+  "Hastabakıcı",
+  "Hayvan Bakıcısı",
+  "Hayvan Kesicisi",
+  "Hizmetli",
+  "Çocuk Bakıcısı",
+  "Gemici",
+  "Bakıcı Anne",
+  "Temizlik Hizmetlisi",
+  "Kaloriferci",
+  "Sağlık Teknisyen Yardımcısı",
+  "Teknisyen Yardımcısı",
+  "Matbaacı",
+];
+
+const MEMUR_TABAN = [
+  "Bilgisayar İşletmeni",
+  "Veri Hazırlama ve Kontrol İşletmeni",
+  "Veznedar",
+  "Ambar Memuru",
+  "Ayniyat Memuru",
+  "Bilet Satış Memuru",
+  "Evlendirme Memuru",
+  "Gişe Memuru",
+  "Memur",
+  "Mutemet",
+  "Sayaç Memuru",
+  "Tahsildar",
+  "Şoför",
+  "Gemi Adamı",
+  "Koruma ve Güvenlik Görevlisi",
+];
+
+// Askeri "Milli Savunma Bakanlığı, Genelkurmay Başkanlığı ve Kuvvet
+// Komutanlıklarında Görevli Devlet Memurlarının Görevde Yükselme ve Unvan
+// Değişikliği Yönetmeliği" bu 5 kurumun ortak kaynagi.
+const ASKERI_ISCI_EK = [
+  "Mehteran/Müzisyen",
+  "Terzi",
+  "Berber",
+  "Boyacı/Badanacı",
+  "Garson",
+  "Kuaför",
+  "Kunduracı",
+  "Kuru Temizlemeci",
+  "Resepsiyoncu",
+  "İtfaiyeci",
+];
+const ASKERI_MEMUR_EK = [
+  "Muhasebeci",
+  "Mal Sorumlusu",
+  "Arşiv Memuru",
+  "Hesap Sorumlusu",
+  "Redaktör",
+  "Santral Memuru",
+  "Sekreter",
+  "Matbaacı",
+  "Zabıt Kâtibi",
+];
+
+const ISCI_EKLER: Record<string, string[]> = {
+  "Aile ve Sosyal Hizmetler Bakanlığı": ["Berber", "Terzi"],
+  "Kültür ve Turizm Bakanlığı": ["İtfaiyeci"],
+  "Milli Savunma Bakanlığı": ASKERI_ISCI_EK,
+  "Genelkurmay Başkanlığı": ASKERI_ISCI_EK,
+  "Kara Kuvvetleri Komutanlığı": ASKERI_ISCI_EK,
+  "Deniz Kuvvetleri Komutanlığı": ASKERI_ISCI_EK,
+  "Hava Kuvvetleri Komutanlığı": ASKERI_ISCI_EK,
+  "Sağlık Bakanlığı": ["Terzi", "Berber"],
+  "Tarım ve Orman Bakanlığı": ["Rasatçı Yardımcısı"],
+  "Adli Tıp Kurumu Başkanlığı": ["Otopsi Teknisyen Yardımcısı", "Laborant Yardımcısı"],
+  "Anayasa Mahkemesi": ["Mübaşir"],
+  "Jandarma Genel Komutanlığı": [
+    "Garson",
+    "Berber",
+    "Kuru Temizlemeci",
+    "Ütücü-Kolacı",
+    "Ambalaj Memuru",
+    "Fırıncı/Hamurkâr",
+    "Kasap",
+    "Tahmil Tahliye Memuru",
+    "Terzi",
+  ],
+  "Sahil Güvenlik Komutanlığı": ["Terzi", "Boyacı/Badanacı", "Berber", "Garson", "Soğuk Hava Depo Memuru"],
+  "Üniversite": ["Berber", "Garson", "İtfaiyeci", "Laborant Yardımcısı", "Terzi"],
+  "Devlet Opera ve Balesi Genel Müdürlüğü": ["İtfaiyeci"],
+  "Devlet Tiyatroları Genel Müdürlüğü": ["İtfaiyeci"],
+  "Sosyal Güvenlik Kurumu": ["Berber"],
+  "Orman Genel Müdürlüğü": [
+    "Orman İşçisi",
+    "Ekskavatör/Dozer/Greyder/İş Makinesi Operatörü",
+    "Ağır Taşıt Şoförü/Arazöz Şoförü",
+    "Motor İmalat Bakım ve Onarım İşçisi",
+  ],
+  "Devlet Su İşleri Genel Müdürlüğü": [
+    "Teknisyen (Elektrik-Elektronik)",
+    "Teknisyen (İnşaat)",
+    "Teknisyen (Bilgisayar)",
+    "Teknisyen (İşletme)",
+    "Teknisyen (Makina)",
+    "Teknisyen (Arazi Kontrol)",
+    "Teknisyen (Pompaj)",
+    "Teknisyen (İstimlak)",
+    "Teknisyen (Yer Altı Suları)",
+    "Aşçı Yardımcısı",
+    "Pompaj İstasyonu Operatörü",
+    "Jeofizik Teknisyeni",
+    "Fotoğrafçı",
+    "Teknik Ressam",
+    "Laborant Yardımcısı",
+    "Su Dağıtım Teknisyeni",
+    "Sürveyan",
+    "Döşemeci Yardımcısı",
+    "Operatör (Ekskavatör/Dozer/Beko Loder/Yükleyici/Vinç/Greyder)",
+    "Forklift Operatörü",
+    "Kompresör Operatörü",
+    "Usta Yardımcısı",
+    "Alet Operatörü",
+    "Bakımcı-Yağcı",
+    "Sondaj İşçisi",
+    "Topoğraf",
+    "Treyler Operatör Yardımcısı",
+    "Hidrolog Yardımcısı",
+    "Düz İşçi",
+    "Akaryakıtçı",
+  ],
+  "Tarım İşletmeleri Genel Müdürlüğü": [
+    "At Bakıcısı/Seyis",
+    "Nalbant",
+    "Pide Ustası",
+    "Center-Pivot/Zirai Sulamacı",
+    "İnşaat İşçisi",
+    "Elektrik Tesisat ve Pano Montörü",
+  ],
+  "Et ve Süt Kurumu Genel Müdürlüğü": ["Kasap"],
+  "Çay İşletmeleri Genel Müdürlüğü": ["Çay Eksperi", "Beden İşçisi"],
+  "Maden Tetkik ve Arama Genel Müdürlüğü": ["Sondaj İşçisi"],
+  "Elektrik Üretim A.Ş. Genel Müdürlüğü": [
+    "Makine Teknisyeni",
+    "Elektrik Teknisyeni",
+    "Elektronik Teknisyeni",
+    "Kimya Teknisyeni",
+    "Ağır Vasıta Operatörü",
+  ],
+  "Türkiye Elektrik Dağıtım A.Ş.": [
+    "Elektrik Teknisyeni",
+    "Elektronik Teknisyeni",
+    "İnşaat Teknisyeni",
+    "Harita Teknisyeni",
+    "Sıhhi Tesisat Teknisyeni",
+    "Kaynak Teknisyeni",
+    "Ziraat Teknisyeni",
+    "Aşçı",
+    "Resepsiyon Görevlisi",
+    "İtfaiyeci",
+    "Garson",
+  ],
+  "Türkiye Elektrik İletim A.Ş.": [
+    "Elektrik Teknisyeni",
+    "Elektronik Teknisyeni",
+    "İnşaat Teknisyeni",
+    "Harita Teknisyeni",
+    "Makine Teknisyeni",
+    "Sıhhi Tesisat Teknisyeni",
+    "Kimya Teknisyeni",
+    "Kaynak Teknisyeni",
+    "Teknik Ressam",
+    "Aşçı",
+    "Resepsiyon Görevlisi",
+    "Garson",
+  ],
+  "Türkiye Petrolleri Anonim Ortaklığı": [
+    "Üretim Operatör Yardımcısı",
+    "Ağır Vasıta Operatör Yardımcısı",
+    "Güç Sistemleri Mekanik Operatörü",
+    "Malzeme Eksperi",
+    "Genel Takip İşçisi",
+  ],
+  "Eti Maden İşletmesi Genel Müdürlüğü": ["Proses İşçisi"],
+  "Makine ve Kimya Endüstrisi Kurumu": ["İtfaiyeci"],
+  "Türkiye Şeker Fabrikaları A.Ş.": ["Postacı", "İtfaiyeci"],
+  "Türkiye Cumhuriyeti Devlet Demiryolları": ["İtfaiyeci"],
+  "TCDD Taşımacılık A.Ş.": ["İtfaiyeci"],
+  "Devlet Meteoroloji İşleri Genel Müdürlüğü": ["Rasatçı Yardımcısı"],
+};
+
+const MEMUR_EKLER: Record<string, string[]> = {
+  "Adalet Bakanlığı": [
+    "Zabıt Kâtibi",
+    "Satınalma Memuru",
+    "Emanet Memuru",
+    "Tebligat Memuru",
+    "Santral Memuru",
+    "Sekreter",
+    "Mübaşir",
+    "İşaret Dili Tercümanı",
+  ],
+  "Aile ve Sosyal Hizmetler Bakanlığı": [
+    "Ayniyat Saymanı",
+    "Daktilograf",
+    "İşaret Dili Tercümanı",
+    "Santral Memuru",
+    "Satınalma Memuru",
+    "Sekreter",
+    "Yurt Yönetim Memuru",
+  ],
+  "Çevre, Şehircilik ve İklim Değişikliği Bakanlığı": ["Ayniyat Saymanı", "Muhasebeci", "Santral Memuru", "Daktilograf"],
+  "Çalışma ve Sosyal Güvenlik Bakanlığı": ["Muhasebeci", "Santral Memuru"],
+  "Dışişleri Bakanlığı": ["Daktilograf", "Santral Memuru"],
+  "Enerji ve Tabii Kaynaklar Bakanlığı": ["Ayniyat Saymanı", "Satınalma Memuru", "Sekreter"],
+  "Hazine ve Maliye Bakanlığı": ["Ayniyat Saymanı", "Santral Memuru", "Hazine Sayman Yardımcısı"],
+  "Kültür ve Turizm Bakanlığı": [
+    "Ayniyat Saymanı",
+    "Muhasebeci",
+    "Enformasyon Memuru",
+    "Fotoğrafçı",
+    "Daktilograf",
+    "Sekreter",
+    "Usta Öğretici",
+  ],
+  "Milli Eğitim Bakanlığı": ["Ayniyat Saymanı", "Raportör", "Santral Memuru"],
+  "Milli Savunma Bakanlığı": ASKERI_MEMUR_EK,
+  "Genelkurmay Başkanlığı": ASKERI_MEMUR_EK,
+  "Kara Kuvvetleri Komutanlığı": ASKERI_MEMUR_EK,
+  "Deniz Kuvvetleri Komutanlığı": ASKERI_MEMUR_EK,
+  "Hava Kuvvetleri Komutanlığı": ASKERI_MEMUR_EK,
+  "Sağlık Bakanlığı": ["Ayniyat Saymanı", "Muhasebeci", "Daktilograf", "Santral Memuru"],
+  "Sanayi ve Teknoloji Bakanlığı": ["Ayniyat Saymanı", "Santral Memuru", "Sekreter", "Daktilograf"],
+  "Tarım ve Orman Bakanlığı": ["Daktilograf", "Santral Memuru", "Orman Muhafaza Memuru", "Haberleşme Memuru", "Spiker"],
+  "Ticaret Bakanlığı": [
+    "Ayniyat Saymanı",
+    "Muayene Memuru",
+    "Muhafaza Memuru",
+    "İcra Memuru",
+    "Satış Memuru",
+    "Tüketici Hakem Heyeti Raportörü",
+  ],
+  "Ulaştırma ve Altyapı Bakanlığı": ["Ayniyat Saymanı"],
+  "Adli Tıp Kurumu Başkanlığı": [
+    "Emanet Memuru",
+    "İnfaz ve Koruma Memuru",
+    "Santral Memuru",
+    "Silah Muayene Memuru",
+    "Daktilograf",
+    "Sekreter",
+  ],
+  "Anayasa Mahkemesi": ["Santral Memuru"],
+  "Ceza ve Tevkifevleri Genel Müdürlüğü": ["Sayman", "Santral Memuru", "Cezaevi Kâtibi", "Satınalma Memuru", "İnfaz ve Koruma Başmemuru"],
+  "Emniyet Genel Müdürlüğü": ["Santral Memuru"],
+  "Jandarma Genel Komutanlığı": ["Hesap Sorumlusu", "Muhasebeci", "Matbaacı", "Zabıt Kâtibi"],
+  "Sahil Güvenlik Komutanlığı": [
+    "Muhasebeci",
+    "Mal Sorumlusu",
+    "Sevk ve Tesellüm Memuru",
+    "Santral Memuru",
+    "Danışma/Resepsiyon Memuru",
+    "Spiker",
+    "Zabıt Kâtibi",
+    "Hesap Sorumlusu",
+    "Giriş Kontrol Görevlisi",
+  ],
+  "Savunma Sanayii Başkanlığı": ["Ayniyat Saymanı"],
+  "Yargıtay": ["Mübaşir", "Zabıt Kâtibi"],
+  "Yüksek Seçim Kurulu Başkanlığı": ["Arşiv Memuru", "Santral Memuru", "Sekreter", "Zabıt Kâtibi"],
+  "Afet ve Acil Durum Yönetimi Başkanlığı": ["Satın Alma Memuru", "Santral Memuru", "Arşiv Memuru", "Sekreter"],
+  "Nüfus ve Vatandaşlık İşleri Genel Müdürlüğü": ["Sekreter"],
+  "Üniversite": [
+    "Programcı Yardımcısı",
+    "Santral Memuru",
+    "Daktilograf",
+    "Sekreter",
+    "Satınalma Memuru",
+    "Yurt Yönetim Memuru",
+    "Raportör",
+  ],
+  "Atatürk Kültür, Dil ve Tarih Yüksek Kurumu": [
+    "Ayniyat Saymanı",
+    "Sayman",
+    "Santral Memuru",
+    "Satınalma Memuru",
+    "Sekreter",
+    "Muhasebeci",
+    "Kameraman",
+  ],
+  "Devlet Opera ve Balesi Genel Müdürlüğü": [
+    "Sayman",
+    "Ayniyat Saymanı",
+    "Satınalma Memuru",
+    "Bilet Kontrol Memuru",
+    "Santral Memuru",
+    "Sekreter",
+    "Daktilograf",
+  ],
+  "Devlet Tiyatroları Genel Müdürlüğü": [
+    "Sayman",
+    "Ayniyat Saymanı",
+    "Satınalma Memuru",
+    "Bilet Kontrol Memuru",
+    "Santral Memuru",
+    "Daktilograf",
+  ],
+  "Diyanet İşleri Başkanlığı": ["Santral Memuru", "Daktilograf", "Satın Alma Memuru", "Sekreter"],
+  "Vakıflar Genel Müdürlüğü": ["Musahhih", "Ayniyat Saymanı", "Teberrükât Saymanı", "Kameraman"],
+  "Türk İşbirliği ve Kalkınma İdaresi Başkanlığı": ["Sekreter"],
+  "Spor Genel Müdürlüğü": ["Ayniyat Saymanı", "Muhasebeci", "Satın Alma Memuru", "Santral Memuru", "Daktilograf"],
+  "Hudut ve Sahiller Sağlık Genel Müdürlüğü": ["Ayniyat Saymanı"],
+  "Sosyal Güvenlik Kurumu": ["İcra Memuru"],
+  "Türkiye İş Kurumu Genel Müdürlüğü": ["Ayniyat Saymanı", "Muhasebeci", "Dava Takip Memuru", "Santral Memuru", "Fotoğrafçı"],
+  "Bankacılık Düzenleme ve Denetleme Kurumu": ["Dava Takip Memuru", "Santral Memuru", "Sekreter"],
+  "Ziraat Bankası Genel Müdürlüğü": ["Servis Görevlisi"],
+  "Gelir İdaresi Başkanlığı": ["Yoklama Memuru", "İcra Memuru"],
+  "Enerji Piyasası Düzenleme Kurumu": ["Yönetim Görevlisi", "İletişim Görevlisi"],
+  "Strateji ve Bütçe Başkanlığı": ["Ayniyat Saymanı", "Satınalma Memuru", "Sekreter", "Daktilograf"],
+  "Türk Patent ve Marka Kurumu": ["Sekreter", "Santral Memuru"],
+  "Milli Piyango İdaresi Genel Müdürlüğü": ["Bilet Kontrol Memuru"],
+  "Türkiye İstatistik Kurumu": ["Anketör", "Satınalma Memuru"],
+  "Basın İlan Kurumu Genel Müdürlüğü": ["Muhasebe Memuru", "İlan Memuru", "Doküman İşleri Memuru", "Yazı İşleri Memuru"],
+  "Orman Genel Müdürlüğü": ["Orman Muhafaza Memuru"],
+  "Türkiye Kömür İşletmeleri Genel Müdürlüğü": ["Satınalma Memuru", "Dava Takip Memuru"],
+  "Makine ve Kimya Endüstrisi Kurumu": ["Sekreter"],
+  "Türkiye Şeker Fabrikaları A.Ş.": ["Sekreter", "Daktilograf"],
+  "Türkiye Cumhuriyeti Devlet Demiryolları": [
+    "Manevracı",
+    "Makasçı",
+    "Hareket Memuru",
+    "Enformasyon Memuru",
+    "Haberleşme Memuru",
+    "İş Makinesi Sürücüsü",
+    "Puantör",
+    "Liman Puantörü",
+    "Kondüktör",
+    "Repartitör",
+    "Kontrolör",
+    "Başkontrolör",
+    "Sayman",
+    "Makinist",
+    "YHT Makinisti",
+    "Revizör",
+    "Vagon Teknisyeni",
+    "Sürveyan",
+  ],
+  "TCDD Taşımacılık A.Ş.": [
+    "Kondüktör",
+    "Tren Teşkil Memuru",
+    "Şeftren",
+    "Lojistik Memuru",
+    "Puantör",
+    "Repartitör",
+    "Kontrolör",
+    "Başkontrolör",
+    "Sekreter",
+    "Yemekli ve Yataklı Servis Görevlisi",
+    "Makinist",
+    "YHT Makinisti",
+    "Revizör",
+    "Vagon Teknisyeni",
+  ],
+  "Devlet Hava Meydanları İşletmesi Genel Müdürlüğü": [
+    "Apron Memuru",
+    "AIM Memuru",
+    "ARFF Memuru",
+    "Köprü Operatörü",
+    "İş Makineleri Sürücüsü",
+    "Santral Memuru",
+    "Hava Trafik Kontrolörü",
+  ],
+  PTT: ["Başdağıtıcı", "Kontrolör", "Daktilograf"],
+  "Sivil Havacılık Genel Müdürlüğü": ["Muhasebeci"],
+  "Karayolları Genel Müdürlüğü": ["Ayniyat Saymanı", "Muhasebeci"],
+  "Tapu ve Kadastro Genel Müdürlüğü": ["Santral Memuru", "Arşiv Memuru", "Kontrol Memuru", "Kadastro Teknisyeni"],
+  "Devlet Meteoroloji İşleri Genel Müdürlüğü": ["Ayniyat Saymanı", "Rasat Kontrol Memuru", "Haberleşme Memuru", "Daktilograf", "Rasatçı"],
+  "Devlet Malzeme Ofisi Genel Müdürlüğü": [
+    "Muhasebeci Yardımcısı",
+    "Satış Memuru",
+    "Santral Memuru",
+    "Satınalma Memuru",
+    "Sekreter",
+    "Pazarlamacı",
+  ],
+};
+
+// Bu kurumlar 657 sayili Kanun'un klasik "Isci/Memur (GIH)" ayrimina tabi
+// degil (kendi ozel personel rejimleri var); bu yuzden "Isci" secenegi
+// hic gosterilmez.
+const ISCI_HARIC_KURUMLAR = new Set<string>(["Türkiye Bilimsel ve Teknolojik Araştırma Kurumu"]);
+
 // Her kurumda mutlaka bulunabilecek, ozel listelerde tekrar yazilmasina
 // gerek olmayan meslekler.
-function herKurumdaBulunanlar(meslekler: string[]): string[] {
-  return Array.from(new Set([...meslekler, ISCI, DIGER]));
+function herKurumdaBulunanlar(meslekler: string[], kurum: string): string[] {
+  const ekler = ISCI_HARIC_KURUMLAR.has(kurum) ? [DIGER] : [ISCI, DIGER];
+  return Array.from(new Set([...meslekler, ...ekler]));
+}
+
+export function isciAltMeslekleri(kurumTuru: string): string[] {
+  return Array.from(new Set([...(ISCI_EKLER[kurumTuru] ?? []), ...ISCI_TABAN, DIGER]));
+}
+
+export function memurAltMeslekleri(kurumTuru: string): string[] {
+  return Array.from(new Set([...(MEMUR_EKLER[kurumTuru] ?? []), ...MEMUR_TABAN, DIGER]));
 }
 
 const GENEL_MESLEKLER = [
@@ -71,6 +477,14 @@ const OZEL_MESLEKLER: Record<string, string[]> = {
   "Emniyet Genel Müdürlüğü": ["Polis Memuru", "Komiser", "Memur"],
   "Jandarma Genel Komutanlığı": ["Jandarma Erbaş/Er", "Astsubay", "Subay", "Sivil Memur"],
   "Sahil Güvenlik Komutanlığı": ["Astsubay", "Subay", "Sivil Memur"],
+  "Kıyı Emniyeti Genel Müdürlüğü": [
+    "Gözlemci-Telsizci",
+    "İkinci Kaptan",
+    "İkinci Mühendis",
+    "Kılavuz Kaptan",
+    "Büro Personeli",
+    "Memur",
+  ],
   "Aile ve Sosyal Hizmetler Bakanlığı": ["Sosyal Çalışmacı", "Psikolog", "Çocuk Gelişimcisi", "Bakım Elemanı", "Memur"],
   "Tarım ve Orman Bakanlığı": ["Ziraat Mühendisi", "Veteriner Hekim", "Orman Mühendisi", "Teknisyen", "Memur"],
   "Orman Genel Müdürlüğü": ["Orman Mühendisi", "Orman Muhafaza Memuru", "Memur"],
@@ -120,6 +534,17 @@ const OZEL_MESLEKLER: Record<string, string[]> = {
   Yargıtay: ["Zabıt Katibi", "Tetkik Hakimi", "Memur"],
   PTT: ["Dağıtıcı", "Gişe Memuru", "Memur"],
   "Türkiye İş Kurumu Genel Müdürlüğü": ["İş ve Meslek Danışmanı", "Memur"],
+  // 657 sayili Kanun'a tabi degil; kendi "Hizmet Gruplari" (Y/AG/A/B/C)
+  // sistemini kullanir, klasik Isci/Memur (GIH) ayrimi yoktur.
+  "Türkiye Bilimsel ve Teknolojik Araştırma Kurumu": [
+    "Araştırmacı",
+    "Uzman",
+    "Mühendis",
+    "Tekniker",
+    "Teknisyen",
+    "Avukat",
+    "Bilgisayar İşletmeni",
+  ],
 };
 
 export const KURUM_TURLERI: string[] = [
@@ -128,7 +553,6 @@ export const KURUM_TURLERI: string[] = [
   "Afet ve Acil Durum Yönetimi Başkanlığı",
   "Aile ve Sosyal Hizmetler Bakanlığı",
   "Anayasa Mahkemesi",
-  "Arsa Ofisi Genel Müdürlüğü",
   "Atatürk Kültür, Dil ve Tarih Yüksek Kurumu",
   "Bankacılık Düzenleme ve Denetleme Kurumu",
   "Basın İlan Kurumu Genel Müdürlüğü",
@@ -224,10 +648,30 @@ export const KURUM_TURLERI: string[] = [
 export const KURUM_TURU_MESLEKLERI: Record<string, string[]> = Object.fromEntries(
   KURUM_TURLERI.map((kurum) => [
     kurum,
-    herKurumdaBulunanlar(OZEL_MESLEKLER[kurum] ?? GENEL_MESLEKLER),
+    herKurumdaBulunanlar(OZEL_MESLEKLER[kurum] ?? GENEL_MESLEKLER, kurum),
   ]),
 );
 
 export function meslekSecenekleri(kurumTuru: string): string[] {
-  return KURUM_TURU_MESLEKLERI[kurumTuru] ?? herKurumdaBulunanlar(GENEL_MESLEKLER);
+  return KURUM_TURU_MESLEKLERI[kurumTuru] ?? herKurumdaBulunanlar(GENEL_MESLEKLER, kurumTuru);
+}
+
+export type MeslekSecimi = { meslek: string; altUnvan: string; serbest: string };
+
+// Daha once kaydedilmis duz bir meslek metnini (ki bu artik "Isci" degil,
+// dogrudan somut bir unvan olabilir - ör. "Temizlik Hizmetlisi") formun
+// ihtiyac duydugu ust secim/alt secim/serbest metin durumuna geri cozer.
+export function meslekSeciminiCoz(kurumTuru: string, kayitliMeslek: string): MeslekSecimi {
+  if (!kayitliMeslek) return { meslek: "", altUnvan: "", serbest: "" };
+
+  if (meslekSecenekleri(kurumTuru).includes(kayitliMeslek)) {
+    return { meslek: kayitliMeslek, altUnvan: "", serbest: "" };
+  }
+  if (isciAltMeslekleri(kurumTuru).includes(kayitliMeslek)) {
+    return { meslek: ISCI, altUnvan: kayitliMeslek, serbest: "" };
+  }
+  if (memurAltMeslekleri(kurumTuru).includes(kayitliMeslek)) {
+    return { meslek: "Memur", altUnvan: kayitliMeslek, serbest: "" };
+  }
+  return { meslek: DIGER, altUnvan: "", serbest: kayitliMeslek };
 }

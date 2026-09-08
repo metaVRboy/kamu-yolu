@@ -4,8 +4,11 @@ import { getCurrentUser } from "@/lib/auth";
 import { createTalep } from "@/lib/becayis";
 import { TURKIYE_ILLERI } from "@/lib/iller";
 import { ilceSecenekleri } from "@/lib/ilceler";
-import { KURUM_TURLERI, meslekSecenekleri } from "@/lib/kurumMeslek";
+import { KURUM_TURLERI } from "@/lib/kurumMeslek";
 
+// meslek artik sabit bir listeyle sinirli degil: "Isci"/"Memur" secilince
+// kullanicinin sectigi somut alt unvan, "Diger" secilince serbest metin
+// gonderiliyor - ikisi de kurum listesinde birebir yer almayabilir.
 const bodySchema = z
   .object({
     kurumTuru: z.enum(KURUM_TURLERI as [string, ...string[]]),
@@ -14,10 +17,6 @@ const bodySchema = z
     mevcutIlce: z.string().trim().max(60).optional(),
     istenenIller: z.array(z.enum(TURKIYE_ILLERI)).min(1).max(10),
     aciklama: z.string().trim().max(1000).optional(),
-  })
-  .refine((data) => meslekSecenekleri(data.kurumTuru).includes(data.meslek), {
-    message: "Seçilen meslek, seçilen kurum türüyle uyuşmuyor.",
-    path: ["meslek"],
   })
   .refine(
     (data) => !data.mevcutIlce || ilceSecenekleri(data.mevcutIl).includes(data.mevcutIlce),

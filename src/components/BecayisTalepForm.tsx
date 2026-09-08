@@ -7,12 +7,18 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TURKIYE_ILLERI } from "@/lib/iller";
 import { ilceSecenekleri } from "@/lib/ilceler";
-import { KURUM_TURLERI, meslekSecenekleri } from "@/lib/kurumMeslek";
+import { KURUM_TURLERI, isciAltMeslekleri, memurAltMeslekleri, meslekSecenekleri } from "@/lib/kurumMeslek";
+
+const DIGER = "Diğer";
+const ISCI = "İşçi";
+const MEMUR = "Memur";
 
 export function BecayisTalepForm() {
   const router = useRouter();
   const [kurumTuru, setKurumTuru] = useState("");
   const [meslek, setMeslek] = useState("");
+  const [meslekAltUnvan, setMeslekAltUnvan] = useState("");
+  const [meslekSerbest, setMeslekSerbest] = useState("");
   const [mevcutIl, setMevcutIl] = useState("");
   const [mevcutIlce, setMevcutIlce] = useState("");
   const [istenenIller, setIstenenIller] = useState<string[]>([]);
@@ -22,10 +28,30 @@ export function BecayisTalepForm() {
 
   const meslekler = kurumTuru ? meslekSecenekleri(kurumTuru) : [];
   const ilceler = mevcutIl ? ilceSecenekleri(mevcutIl) : [];
+  const altUnvanlar =
+    meslek === ISCI ? isciAltMeslekleri(kurumTuru) : meslek === MEMUR ? memurAltMeslekleri(kurumTuru) : [];
+  const serbestMetinGerekli = meslek === DIGER || meslekAltUnvan === DIGER;
+
+  // Sunucuya gonderilecek nihai unvan: "Isci"/"Memur" gibi belirsiz bir
+  // baslik degil, kullanicinin sectigi/yazdigi somut unvan.
+  const nihaiMeslek = serbestMetinGerekli ? meslekSerbest.trim() : altUnvanlar.length > 0 ? meslekAltUnvan : meslek;
 
   function handleKurumTuruChange(value: string) {
     setKurumTuru(value);
     setMeslek("");
+    setMeslekAltUnvan("");
+    setMeslekSerbest("");
+  }
+
+  function handleMeslekChange(value: string) {
+    setMeslek(value);
+    setMeslekAltUnvan("");
+    setMeslekSerbest("");
+  }
+
+  function handleMeslekAltUnvanChange(value: string) {
+    setMeslekAltUnvan(value);
+    setMeslekSerbest("");
   }
 
   function handleMevcutIlChange(value: string) {
@@ -44,6 +70,14 @@ export function BecayisTalepForm() {
       setError("Kurum türü, meslek, mevcut il ve en az bir istenen il zorunludur.");
       return;
     }
+    if (altUnvanlar.length > 0 && !meslekAltUnvan) {
+      setError("Lütfen unvanını daha spesifik olarak belirt.");
+      return;
+    }
+    if (serbestMetinGerekli && !meslekSerbest.trim()) {
+      setError("Lütfen unvanını yaz.");
+      return;
+    }
     setLoading(true);
     try {
       const res = await fetch("/api/becayis/talepler", {
@@ -51,7 +85,7 @@ export function BecayisTalepForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           kurumTuru,
-          meslek,
+          meslek: nihaiMeslek,
           mevcutIl,
           mevcutIlce: mevcutIlce || undefined,
           istenenIller,
@@ -90,7 +124,7 @@ export function BecayisTalepForm() {
           <Label className="mb-1.5"><span className="text-destructive">*</span> Meslek / Unvan</Label>
           <select
             value={meslek}
-            onChange={(e) => setMeslek(e.target.value)}
+            onChange={(e) => handleMeslekChange(e.target.value)}
             disabled={!kurumTuru}
             className="h-10 w-full rounded-xl border border-primary/20 bg-white px-3 text-sm disabled:opacity-50"
           >
@@ -99,6 +133,35 @@ export function BecayisTalepForm() {
               <option key={m} value={m}>{m}</option>
             ))}
           </select>
+          {altUnvanlar.length > 0 && (
+            <div className="mt-2">
+              <Label className="mb-1.5">
+                <span className="text-destructive">*</span> {meslek} Unvanını Belirt
+              </Label>
+              <select
+                value={meslekAltUnvan}
+                onChange={(e) => handleMeslekAltUnvanChange(e.target.value)}
+                className="h-10 w-full rounded-xl border border-primary/20 bg-white px-3 text-sm"
+              >
+                <option value="">Seçiniz</option>
+                {altUnvanlar.map((u) => (
+                  <option key={u} value={u}>{u}</option>
+                ))}
+              </select>
+            </div>
+          )}
+          {serbestMetinGerekli && (
+            <div className="mt-2">
+              <Label className="mb-1.5"><span className="text-destructive">*</span> Unvanını Yaz</Label>
+              <input
+                type="text"
+                value={meslekSerbest}
+                onChange={(e) => setMeslekSerbest(e.target.value)}
+                placeholder="Unvanını yaz"
+                className="h-10 w-full rounded-xl border border-primary/20 bg-white px-3 text-sm"
+              />
+            </div>
+          )}
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
