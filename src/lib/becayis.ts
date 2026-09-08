@@ -174,3 +174,7 @@ export async function deleteMesajlar(talepId: string, konusmaKarsiId?: string) {
     where: { talepId, ...(konusmaKarsiId ? { konusmaKarsiId } : {}) },
   });
 }
+
+export async function deleteTalep(talepId: string, userId: string) {
+  await prisma.becayisTalep.deleteMany({ where: { id: talepId, userId } });
+}

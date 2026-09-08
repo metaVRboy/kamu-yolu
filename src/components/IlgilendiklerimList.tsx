@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ChevronDown, MapPin, Send, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { cn } from "@/lib/utils";
 
 type Mesaj = {
@@ -33,6 +34,8 @@ function IlgilenilenTalepCard({ talep, currentUserId }: { talep: IlgilenilenTale
   const [open, setOpen] = useState(false);
   const [cevap, setCevap] = useState("");
   const [sending, setSending] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   async function handleOpen() {
     const next = !open;
@@ -64,13 +67,18 @@ function IlgilenilenTalepCard({ talep, currentUserId }: { talep: IlgilenilenTale
   }
 
   async function handleDelete() {
-    if (!window.confirm("Bu sohbeti silmek istediğinize emin misiniz?")) return;
-    await fetch("/api/becayis/mesaj", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ talepId: talep.id, konusmaKarsiId: currentUserId }),
-    });
-    router.refresh();
+    setDeleting(true);
+    try {
+      await fetch("/api/becayis/mesaj", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ talepId: talep.id, konusmaKarsiId: currentUserId }),
+      });
+      router.refresh();
+    } finally {
+      setDeleting(false);
+      setConfirmOpen(false);
+    }
   }
 
   return (
@@ -102,13 +110,22 @@ function IlgilenilenTalepCard({ talep, currentUserId }: { talep: IlgilenilenTale
         </button>
         <button
           type="button"
-          onClick={handleDelete}
+          onClick={() => setConfirmOpen(true)}
           title="Sohbeti sil"
           className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-red-50 hover:text-red-600"
         >
           <Trash2 className="h-3.5 w-3.5" />
         </button>
       </div>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title="Sohbeti sil"
+        description="Bu ilana ait sohbetin kalıcı olarak silinecek. Bu işlem geri alınamaz."
+        onConfirm={handleDelete}
+        loading={deleting}
+      />
 
       {open && (
         <div className="space-y-2 border-t border-primary/10 p-4">

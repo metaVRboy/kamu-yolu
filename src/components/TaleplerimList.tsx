@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ChevronDown, MapPin, Send, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { cn } from "@/lib/utils";
 
 type Mesaj = {
@@ -37,6 +38,8 @@ function ThreadPanel({ talepId, thread, currentUserId }: { talepId: string; thre
   const [open, setOpen] = useState(false);
   const [cevap, setCevap] = useState("");
   const [sending, setSending] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   async function handleOpen() {
     const next = !open;
@@ -68,13 +71,18 @@ function ThreadPanel({ talepId, thread, currentUserId }: { talepId: string; thre
   }
 
   async function handleDelete() {
-    if (!window.confirm("Bu sohbeti silmek istediğinize emin misiniz?")) return;
-    await fetch("/api/becayis/mesaj", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ talepId, konusmaKarsiId: thread.karsiId }),
-    });
-    router.refresh();
+    setDeleting(true);
+    try {
+      await fetch("/api/becayis/mesaj", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ talepId, konusmaKarsiId: thread.karsiId }),
+      });
+      router.refresh();
+    } finally {
+      setDeleting(false);
+      setConfirmOpen(false);
+    }
   }
 
   return (
@@ -93,13 +101,22 @@ function ThreadPanel({ talepId, thread, currentUserId }: { talepId: string; thre
         </button>
         <button
           type="button"
-          onClick={handleDelete}
+          onClick={() => setConfirmOpen(true)}
           title="Sohbeti sil"
           className="ml-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-red-50 hover:text-red-600"
         >
           <Trash2 className="h-3.5 w-3.5" />
         </button>
       </div>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title="Sohbeti sil"
+        description={`"${thread.karsiAdSoyad}" ile olan sohbet kalıcı olarak silinecek. Bu işlem geri alınamaz.`}
+        onConfirm={handleDelete}
+        loading={deleting}
+      />
 
       {open && (
         <div className="space-y-2 border-t border-primary/10 p-3">
@@ -135,15 +152,31 @@ function ThreadPanel({ talepId, thread, currentUserId }: { talepId: string; thre
 
 function TalepCard({ talep, currentUserId }: { talep: Talep; currentUserId: string }) {
   const router = useRouter();
+  const [confirmType, setConfirmType] = useState<"sohbetler" | "ilan" | null>(null);
+  const [busy, setBusy] = useState(false);
 
-  async function handleDeleteAll() {
-    if (!window.confirm("Bu ilana ait tüm sohbetleri silmek istediğinize emin misiniz?")) return;
-    await fetch("/api/becayis/mesaj", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ talepId: talep.id }),
-    });
-    router.refresh();
+  async function handleConfirm() {
+    if (!confirmType) return;
+    setBusy(true);
+    try {
+      if (confirmType === "sohbetler") {
+        await fetch("/api/becayis/mesaj", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ talepId: talep.id }),
+        });
+      } else {
+        await fetch("/api/becayis/talepler", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ talepId: talep.id }),
+        });
+      }
+      router.refresh();
+    } finally {
+      setBusy(false);
+      setConfirmType(null);
+    }
   }
 
   return (
@@ -157,13 +190,21 @@ function TalepCard({ talep, currentUserId }: { talep: Talep; currentUserId: stri
           {talep.threads.length > 0 && (
             <button
               type="button"
-              onClick={handleDeleteAll}
+              onClick={() => setConfirmType("sohbetler")}
               className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-red-50 hover:text-red-600"
             >
               <Trash2 className="h-3.5 w-3.5" />
               Tümünü sil
             </button>
           )}
+          <button
+            type="button"
+            onClick={() => setConfirmType("ilan")}
+            className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-red-50 hover:text-red-600"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            İlanı sil
+          </button>
         </div>
       </div>
       <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -181,6 +222,19 @@ function TalepCard({ talep, currentUserId }: { talep: Talep; currentUserId: stri
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmType !== null}
+        onOpenChange={(o) => !o && setConfirmType(null)}
+        title={confirmType === "ilan" ? "İlanı sil" : "Tüm sohbetleri sil"}
+        description={
+          confirmType === "ilan"
+            ? "Bu becayiş ilanı ve ilana ait tüm mesajlar kalıcı olarak silinecek. Bu işlem geri alınamaz."
+            : "Bu ilana ait tüm sohbetler kalıcı olarak silinecek. Bu işlem geri alınamaz."
+        }
+        onConfirm={handleConfirm}
+        loading={busy}
+      />
     </Card>
   );
 }

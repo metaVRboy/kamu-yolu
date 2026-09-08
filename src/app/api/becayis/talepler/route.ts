@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
-import { createTalep } from "@/lib/becayis";
+import { createTalep, deleteTalep } from "@/lib/becayis";
 import { TURKIYE_ILLERI } from "@/lib/iller";
 import { ilceSecenekleri } from "@/lib/ilceler";
 import { KURUM_TURLERI } from "@/lib/kurumMeslek";
@@ -42,4 +42,19 @@ export async function POST(req: NextRequest) {
 
   const talep = await createTalep(user.id, parsed.data);
   return NextResponse.json({ id: talep.id });
+}
+
+export async function DELETE(req: NextRequest) {
+  const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ error: "Giriş yapmalısınız." }, { status: 401 });
+  }
+
+  const parsed = z.object({ talepId: z.string().min(1) }).safeParse(await req.json().catch(() => null));
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Geçersiz bilgiler." }, { status: 400 });
+  }
+
+  await deleteTalep(parsed.data.talepId, user.id);
+  return NextResponse.json({ ok: true });
 }

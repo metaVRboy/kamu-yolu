@@ -38,6 +38,14 @@ export async function markBildirimlerOkundu(userId: string) {
   await prisma.bildirim.updateMany({ where: { userId, okundu: false }, data: { okundu: true } });
 }
 
+export async function deleteBildirim(id: string, userId: string) {
+  await prisma.bildirim.deleteMany({ where: { id, userId } });
+}
+
+export async function deleteTumBildirimler(userId: string) {
+  await prisma.bildirim.deleteMany({ where: { userId } });
+}
+
 /**
  * Yeni bir ilan belirli bolumlerle eslestiginde, o bolumu profilinde
  * secmis kullanicilara "bolumune uygun ilan" bildirimi olusturur.
