@@ -165,6 +165,23 @@ model PasswordResetToken {
   @@index([userId])
 }
 
+// Kayit formu gonderilince hesap hemen olusturulmaz; bu tabloya bekleyen
+// kayit bilgileri (sifre zaten hash'lenmis halde) ve e-postaya gonderilen
+// kod kisa sureligine yazilir. Kod dogrulaninca gercek User kaydi burdaki
+// bilgilerden olusturulur. E-posta basina tek aktif kayit oldugu icin
+// email alani unique - yeniden kod istenince ayni satir guncellenir.
+model EmailVerificationCode {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  code           String
+  adSoyad        String
+  passwordHash   String
+  kvkkOnayTarihi DateTime
+  expiresAt      DateTime
+  usedAt         DateTime?
+  createdAt      DateTime  @default(now())
+}
+
 model BecayisTalep {
   id           String   @id @default(cuid())
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
