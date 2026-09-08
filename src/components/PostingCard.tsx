@@ -4,6 +4,7 @@ import { INSTITUTION_TYPE_LABEL, LEVEL_LABEL } from "@/lib/labels";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { slugify } from "@/lib/slug";
 
 export type PostingCardData = {
   id: string;
@@ -84,9 +85,7 @@ export function PostingCard({ posting }: { posting: PostingCardData }) {
           <span>Kaynak: {posting.sourceName}</span>
         </div>
         <Link
-          href={posting.sourceUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+          href={`/ilan/${posting.id}/${slugify(posting.title)}`}
           className={buttonVariants({ size: "sm", className: "shrink-0" })}
         >
           İlana Git

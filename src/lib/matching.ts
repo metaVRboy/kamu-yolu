@@ -210,6 +210,15 @@ export async function getLastSuccessfulScrapeAt(): Promise<Date | null> {
   return lastRun?.finishedAt ?? null;
 }
 
+export async function getPostingById(id: string) {
+  return prisma.posting.findUnique({
+    where: { id },
+    include: {
+      departments: { include: { department: { select: { name: true, slug: true } } } },
+    },
+  });
+}
+
 export async function getLatestPostings(limit = 12) {
   return prisma.posting.findMany({
     where: { isActive: true },

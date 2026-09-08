@@ -6,6 +6,7 @@ import { Repeat, Calculator, ListChecks } from "lucide-react";
 import { getLastSuccessfulScrapeAt } from "@/lib/matching";
 import { cn } from "@/lib/utils";
 import { getCurrentUser } from "@/lib/auth";
+import { SITE_URL } from "@/lib/site";
 import { SiteMenu } from "@/components/SiteMenu";
 import { AdSlot } from "@/components/AdSlot";
 import { NotificationBell } from "@/components/NotificationBell";
@@ -23,6 +24,7 @@ const sourceSerif = Source_Serif_4({
 export const revalidate = 300;
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "Kamu Yolu — Bölümüne Göre Kamu İlanları",
   description:
     "Mezun olduğun bölümü seç, o bölüme uygun ve bölüm şartı olmayan güncel kamu personeli/memur ilanlarını listele.",
