@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getOkunmamisMesajSayisi } from "@/lib/becayis";
+import { getOkunmamisIlgilendiklerimSayisi, getOkunmamisMesajSayisi } from "@/lib/becayis";
 import { ProfilForm } from "@/components/ProfilForm";
 import { ProfilLayout } from "@/components/ProfilLayout";
 import { SifreDegistirForm } from "@/components/SifreDegistirForm";
@@ -13,13 +13,17 @@ export default async function ProfilAyarlarPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/giris");
 
-  const [departments, okunmamisSayisi] = await Promise.all([
+  const [departments, okunmamisSayisi, okunmamisIlgilendiklerimSayisi] = await Promise.all([
     prisma.department.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
     getOkunmamisMesajSayisi(user.id),
+    getOkunmamisIlgilendiklerimSayisi(user.id),
   ]);
 
   return (
-    <ProfilLayout okunmamisMesajSayisi={okunmamisSayisi}>
+    <ProfilLayout
+      okunmamisMesajSayisi={okunmamisSayisi}
+      okunmamisIlgilendiklerimSayisi={okunmamisIlgilendiklerimSayisi}
+    >
       <h1 className="text-2xl font-bold tracking-tight text-slate-900">Ayarlar</h1>
       <p className="mt-1 text-sm text-muted-foreground">
         Hesap ve profil bilgilerini buradan yönetebilirsin.

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Briefcase, Inbox, Lock, MessageCircle, Repeat } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
-import { getOkunmamisMesajSayisi, getTaleplerim } from "@/lib/becayis";
+import { getOkunmamisIlgilendiklerimSayisi, getOkunmamisMesajSayisi, getTaleplerim } from "@/lib/becayis";
 import { getPostingsForDepartment, getPostingsForLevel } from "@/lib/matching";
 import { ProfilLayout } from "@/components/ProfilLayout";
 import { LogoutButton } from "@/components/LogoutButton";
@@ -17,9 +17,10 @@ export default async function ProfilimPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/giris");
 
-  const [taleplerim, okunmamisSayisi] = await Promise.all([
+  const [taleplerim, okunmamisSayisi, okunmamisIlgilendiklerimSayisi] = await Promise.all([
     getTaleplerim(user.id),
     getOkunmamisMesajSayisi(user.id),
+    getOkunmamisIlgilendiklerimSayisi(user.id),
   ]);
 
   const aktifTalepler = taleplerim.filter((t) => t.isActive);
@@ -46,7 +47,10 @@ export default async function ProfilimPage() {
       : [];
 
   return (
-    <ProfilLayout okunmamisMesajSayisi={okunmamisSayisi}>
+    <ProfilLayout
+      okunmamisMesajSayisi={okunmamisSayisi}
+      okunmamisIlgilendiklerimSayisi={okunmamisIlgilendiklerimSayisi}
+    >
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">Profilim</h1>

@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { getTaleplerim } from "@/lib/becayis";
+import { getOkunmamisIlgilendiklerimSayisi, getTaleplerim } from "@/lib/becayis";
 import { TaleplerimList } from "@/components/TaleplerimList";
 import { ProfilLayout } from "@/components/ProfilLayout";
 
@@ -10,14 +10,20 @@ export default async function TaleplerimPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/giris");
 
-  const talepler = await getTaleplerim(user.id);
+  const [talepler, okunmamisIlgilendiklerimSayisi] = await Promise.all([
+    getTaleplerim(user.id),
+    getOkunmamisIlgilendiklerimSayisi(user.id),
+  ]);
   const okunmamisSayisi = talepler.reduce(
     (sum, t) => sum + t.threads.reduce((s, th) => s + th.okunmamisSayisi, 0),
     0,
   );
 
   return (
-    <ProfilLayout okunmamisMesajSayisi={okunmamisSayisi}>
+    <ProfilLayout
+      okunmamisMesajSayisi={okunmamisSayisi}
+      okunmamisIlgilendiklerimSayisi={okunmamisIlgilendiklerimSayisi}
+    >
       <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
         Mevcut Taleplerim
       </h1>

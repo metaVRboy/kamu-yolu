@@ -118,6 +118,12 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                     >
                       Mevcut Taleplerim
                     </Link>
+                    <Link
+                      href="/becayis/ilgilendiklerim"
+                      className="block px-4 py-2 text-sm font-medium text-slate-700 hover:bg-primary/10 hover:text-slate-900"
+                    >
+                      İlgilendiğim İlanlar
+                    </Link>
                   </div>
                 </div>
               </div>

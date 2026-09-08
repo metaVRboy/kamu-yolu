@@ -84,6 +84,54 @@ export async function getOkunmamisMesajSayisi(userId: string): Promise<number> {
   });
 }
 
+// Kullanicinin BASKASININ talebine mesaj gonderdigi (ilgilendigi) ilanlar:
+// konusmaKarsiId her zaman ilgilenen tarafin id'sini tuttugu icin, bu
+// alanda kendi id'si gecen ama sahibi olmadigi talepleri bulmak yeterli.
+export async function getIlgilendiklerim(userId: string) {
+  const mesajlar = await prisma.becayisMesaj.findMany({
+    where: { konusmaKarsiId: userId },
+    orderBy: { createdAt: "asc" },
+    include: {
+      gonderen: { select: { id: true, adSoyad: true } },
+      talep: { include: { user: { select: { id: true, adSoyad: true } } } },
+    },
+  });
+
+  const talepMap = new Map<string, { talep: (typeof mesajlar)[number]["talep"]; mesajlar: typeof mesajlar }>();
+  for (const m of mesajlar) {
+    if (m.talep.userId === userId) continue;
+    const entry = talepMap.get(m.talepId);
+    if (entry) entry.mesajlar.push(m);
+    else talepMap.set(m.talepId, { talep: m.talep, mesajlar: [m] });
+  }
+
+  return Array.from(talepMap.values())
+    .map(({ talep, mesajlar: talepMesajlari }) => ({
+      id: talep.id,
+      meslek: talep.meslek,
+      mevcutIl: talep.mevcutIl,
+      mevcutIlce: talep.mevcutIlce,
+      istenenIller: talep.istenenIller,
+      isActive: talep.isActive,
+      ilanSahibiAdSoyad: talep.user.adSoyad,
+      mesajlar: talepMesajlari,
+      okunmamisSayisi: talepMesajlari.filter((m) => !m.okundu && m.gonderenId !== userId).length,
+      sonMesajTarihi: talepMesajlari[talepMesajlari.length - 1].createdAt,
+    }))
+    .sort((a, b) => b.sonMesajTarihi.getTime() - a.sonMesajTarihi.getTime());
+}
+
+export async function getOkunmamisIlgilendiklerimSayisi(userId: string): Promise<number> {
+  return prisma.becayisMesaj.count({
+    where: {
+      okundu: false,
+      konusmaKarsiId: userId,
+      gonderenId: { not: userId },
+      talep: { userId: { not: userId } },
+    },
+  });
+}
+
 export async function sendMesaj(params: {
   talepId: string;
   gonderenId: string;
@@ -98,12 +146,16 @@ export async function sendMesaj(params: {
   // Bildirim, mesaji ALAN tarafa gider: eger gonderen talep sahibiyse
   // karsi taraf (konusmaKarsiId) alici olur, degilse talep sahibi alici olur.
   const aliciId = params.gonderenId === talep.userId ? params.konusmaKarsiId : talep.userId;
+  // Link, alicinin bu talepteki rolune gore degisir: talep sahibi icin
+  // konusma "Mevcut Taleplerim"de, ilgilenen taraf icin "İlgilendiğim
+  // İlanlar"da yer alir - aksi halde alici kendi konusmasini bulamaz.
+  const link = aliciId === talep.userId ? "/becayis/taleplerim" : "/becayis/ilgilendiklerim";
   await createBildirim({
     userId: aliciId,
     tur: "BECAYIS_MESAJ",
     baslik: "Yeni becayiş mesajınız var",
     icerik: params.mesaj.slice(0, 120),
-    link: "/becayis/taleplerim",
+    link,
   });
 
   return created;

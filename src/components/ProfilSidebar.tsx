@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, FilePlus2, Inbox, Repeat, UserRound, Settings, Crown } from "lucide-react";
+import { ChevronDown, FilePlus2, Heart, Inbox, Repeat, UserRound, Settings, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type SidebarSection = {
@@ -13,7 +13,13 @@ type SidebarSection = {
   items: { href: string; label: string; icon: typeof FilePlus2; badge?: number }[];
 };
 
-export function ProfilSidebar({ okunmamisMesajSayisi }: { okunmamisMesajSayisi: number }) {
+export function ProfilSidebar({
+  okunmamisMesajSayisi,
+  okunmamisIlgilendiklerimSayisi = 0,
+}: {
+  okunmamisMesajSayisi: number;
+  okunmamisIlgilendiklerimSayisi?: number;
+}) {
   const pathname = usePathname();
   const [openSection, setOpenSection] = useState<string | null>("becayis");
 
@@ -31,6 +37,12 @@ export function ProfilSidebar({ okunmamisMesajSayisi }: { okunmamisMesajSayisi: 
           label: "Mevcut Taleplerim",
           icon: Inbox,
           badge: okunmamisMesajSayisi,
+        },
+        {
+          href: "/becayis/ilgilendiklerim",
+          label: "İlgilendiğim İlanlar",
+          icon: Heart,
+          badge: okunmamisIlgilendiklerimSayisi,
         },
       ],
     },
