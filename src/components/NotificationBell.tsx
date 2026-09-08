@@ -63,7 +63,7 @@ export function NotificationBell({ isLoggedIn }: { isLoggedIn: boolean }) {
         type="button"
         onClick={handleOpen}
         aria-label="Bildirimler"
-        className="relative flex h-9 w-9 items-center justify-center rounded-xl text-slate-700 hover:bg-primary/10 hover:text-slate-900"
+        className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors hover:bg-primary hover:text-white"
       >
         <Bell className="h-4.5 w-4.5" />
         {okunmamisSayisi > 0 && (

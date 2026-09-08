@@ -10,7 +10,6 @@ import { SiteMenu } from "@/components/SiteMenu";
 import { AdSlot } from "@/components/AdSlot";
 import { NotificationBell } from "@/components/NotificationBell";
 import { ProfileMenu } from "@/components/ProfileMenu";
-import { buttonVariants } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/toast";
 import "./globals.css";
 
@@ -126,7 +125,10 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               {user ? (
                 <ProfileMenu adSoyad={user.adSoyad} abonelikPlani={user.abonelikPlani} />
               ) : (
-                <Link href="/giris" className={buttonVariants({ size: "sm" })}>
+                <Link
+                  href="/giris"
+                  className="flex h-9 items-center justify-center rounded-xl bg-primary/10 px-4 text-sm font-medium text-primary transition-colors hover:bg-primary hover:text-white"
+                >
                   Giriş Yap
                 </Link>
               )}
