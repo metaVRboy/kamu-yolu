@@ -26,7 +26,16 @@ export async function resolveGroundingUrl(redirectUrl: string): Promise<string |
       headers: BROWSER_HEADERS,
     });
     res.body?.cancel?.().catch(() => {});
-    return res.url && /^https?:\/\//.test(res.url) ? res.url : null;
+    if (!res.url || !/^https?:\/\//.test(res.url)) return null;
+
+    // Yonlendirme linki suresi dolmus/gecersizse Google bazen hic
+    // yonlendirmeden ayni grounding-redirect adresini 200 ile doner -
+    // bu durumda "cozulmus" URL hala Google'in kendi alan adindadir ve
+    // gercek kaynak degildir.
+    const host = new URL(res.url).hostname;
+    if (host === "google.com" || host.endsWith(".google.com")) return null;
+
+    return res.url;
   } catch {
     return null;
   }

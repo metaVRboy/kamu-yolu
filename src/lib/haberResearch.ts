@@ -4,6 +4,7 @@ import { toGeminiSchema, parseGeminiJson } from "@/lib/geminiSchema";
 import { resolveGroundingUrl } from "@/lib/resolveGroundingUrl";
 import { extractOgImage } from "@/lib/extractOgImage";
 import { findInstitutionImage } from "@/lib/findInstitutionImage";
+import { verifyHaberKaynak } from "@/lib/verifyHaberKaynak";
 
 const HaberSchema = z.object({
   haberler: z
@@ -86,6 +87,11 @@ export async function researchHaberler(): Promise<HaberResearchItem[]> {
       result.data.haberler.map(async (h): Promise<HaberResearchItem | null> => {
         const kaynakUrl = await resolveGroundingUrl(h.kaynakUrl);
         if (!kaynakUrl || kaynakUrl.includes("isinolsa.com")) return null;
+
+        // Sayfa teknik olarak acilsa bile tamamen alakasiz olabilir -
+        // gercek icerigi tekrar dogrulanmadan hicbir kaynak kabul edilmez.
+        const dogrulandi = await verifyHaberKaynak({ baslik: h.baslik, ozet: h.ozet, url: kaynakUrl });
+        if (!dogrulandi) return null;
 
         // Once haberin kendi kaynagindan gercek bir gorsel dene; yoksa
         // kurumun Wikipedia'daki (acik lisansli) logosuna dus.

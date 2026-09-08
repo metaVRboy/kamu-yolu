@@ -4,6 +4,7 @@ import { toGeminiSchema, parseGeminiJson } from "@/lib/geminiSchema";
 import { resolveGroundingUrl } from "@/lib/resolveGroundingUrl";
 import { extractOgImage } from "@/lib/extractOgImage";
 import { findInstitutionImage } from "@/lib/findInstitutionImage";
+import { verifyHaberKaynak } from "@/lib/verifyHaberKaynak";
 
 export type IsinolsaLead = {
   externalId: string;
@@ -120,13 +121,22 @@ export async function researchIsinolsaLeads(
           };
 
           const sonuc = parsed.data.sonuclar.find((s) => s.index === i);
-          if (!sonuc || !sonuc.dogrulandi || !sonuc.resmiKaynakUrl) return bos;
+          if (!sonuc || !sonuc.dogrulandi || !sonuc.resmiKaynakUrl || !sonuc.baslik || !sonuc.ozet) return bos;
 
           // resmiKaynakUrl, Gemini'nin grounding yonlendirme linki - gercek
           // kaynak alan adini ancak coz(er)sek gorebiliriz. isinolsa.com
           // disleme kontrolu de bu yuzden COZULMUS url uzerinde yapilmali.
           const cozulmusUrl = await resolveGroundingUrl(sonuc.resmiKaynakUrl);
           if (!cozulmusUrl || cozulmusUrl.includes("isinolsa.com")) return bos;
+
+          // Sayfa teknik olarak acilsa bile tamamen alakasiz olabilir -
+          // gercek icerigi tekrar dogrulanmadan hicbir kaynak kabul edilmez.
+          const dogrulandiIcerik = await verifyHaberKaynak({
+            baslik: sonuc.baslik,
+            ozet: sonuc.ozet,
+            url: cozulmusUrl,
+          });
+          if (!dogrulandiIcerik) return bos;
 
           // Once haberin kendi kaynagindan gercek bir gorsel dene; yoksa
           // kurumun Wikipedia'daki (acik lisansli) logosuna dus.
