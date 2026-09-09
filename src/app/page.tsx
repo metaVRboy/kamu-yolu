@@ -33,7 +33,7 @@ export default async function Home() {
           <div className="absolute -top-20 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
         </div>
 
-        <h1 className="relative text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl">
+        <h1 className="relative font-sans text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl">
           Mezun olduğun bölüme uygun{" "}
           <span className="italic text-primary">kamu ilanlarını</span> bul
         </h1>
