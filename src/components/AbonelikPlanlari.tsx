@@ -21,9 +21,9 @@ const PLANLAR: {
 }[] = [
   {
     key: "UCRETSIZ",
-    ad: "Ücretsiz",
-    aylikFiyat: "₺0",
-    yillikFiyat: "₺0",
+    ad: "Standart",
+    aylikFiyat: "Ücretsiz",
+    yillikFiyat: "Ücretsiz",
     aciklama: "Temel kullanım için.",
     ozellikler: [
       "Tüm ilanları görüntüleme",
@@ -39,7 +39,7 @@ const PLANLAR: {
     aciklama: "Aktif iş arayanlar için.",
     populer: true,
     ozellikler: [
-      "Ücretsiz'deki her şey",
+      "Standart'taki her şey",
       "Bana özel ilanlar",
       "SMS ile anlık ilan bildirimi",
     ],
@@ -59,7 +59,7 @@ const PLANLAR: {
 ];
 
 const PLAN_ETIKET: Record<PlanKey, string> = {
-  UCRETSIZ: "Ücretsiz",
+  UCRETSIZ: "Standart",
   PRO: "Pro",
   PRO_PLUS: "Pro+",
 };
@@ -111,7 +111,7 @@ export function AbonelikPlanlari({ mevcutPlan }: { mevcutPlan: PlanKey }) {
                 )}
               >
                 <div>
-                  <h3 className="font-semibold text-slate-900">{plan.ad}</h3>
+                  <h3 className="font-sans font-semibold text-slate-900">{plan.ad}</h3>
                   <p className="mt-0.5 text-sm text-muted-foreground">{plan.aciklama}</p>
                 </div>
 
