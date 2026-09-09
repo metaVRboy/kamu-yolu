@@ -167,13 +167,13 @@ export function TrustSection({
 export function ClosingCtaSection() {
   return (
     <section className="rounded-2xl bg-primary px-6 py-14 text-center text-primary-foreground sm:py-16">
-      <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-white/10">
+      <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10">
         <Image
           src="/brand/kamu-yolu-emblem.png"
           alt=""
-          width={20}
-          height={20}
-          className="h-5 w-5 brightness-0 invert"
+          width={32}
+          height={32}
+          className="h-8 w-8 brightness-0 invert"
         />
       </span>
       <h2 className="mt-4 text-2xl font-bold tracking-tight sm:text-3xl">
@@ -183,7 +183,7 @@ export function ClosingCtaSection() {
         Kamu Yolu tamamen ücretsizdir; kayıt gerektirmez.
       </p>
       <Link
-        href="/"
+        href="/#bolum-arama"
         className={cn(
           buttonVariants({ size: "lg" }),
           "mt-6 bg-white text-primary hover:bg-white/90",

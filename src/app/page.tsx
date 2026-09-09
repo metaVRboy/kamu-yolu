@@ -40,7 +40,7 @@ export default async function Home() {
         <p className="mx-auto mt-3 max-w-2xl text-balance text-slate-600">
           Bölümünü seç, sana uygun güncel kamu ilanlarını hemen listeleyelim.
         </p>
-        <div className="mt-6 flex justify-center">
+        <div id="bolum-arama" className="mt-6 flex scroll-mt-24 justify-center">
           <DepartmentSearch departments={departments} />
         </div>
 

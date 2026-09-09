@@ -11,6 +11,7 @@ import { SiteMenu } from "@/components/SiteMenu";
 import { AdSlot } from "@/components/AdSlot";
 import { NotificationBell } from "@/components/NotificationBell";
 import { ProfileMenu } from "@/components/ProfileMenu";
+import { PageTransition } from "@/components/PageTransition";
 import { Toaster } from "@/components/ui/toast";
 import "./globals.css";
 
@@ -151,7 +152,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
 
         <div className="mx-auto flex w-full max-w-[1600px] flex-1 items-start justify-center gap-4 px-2">
           <AdSlot side="left" />
-          <main className="min-w-0 flex-1">{children}</main>
+          <main className="min-w-0 flex-1">
+            <PageTransition>{children}</PageTransition>
+          </main>
           <AdSlot side="right" />
         </div>
 
