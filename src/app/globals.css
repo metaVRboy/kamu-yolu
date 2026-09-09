@@ -163,24 +163,24 @@
   animation: page-fade-up 0.45s ease-out both;
 }
 
-@keyframes wave-glow {
-  0% {
-    transform: translate(-30%, 6%) scale(1) rotate(0deg);
-  }
-  25% {
-    transform: translate(22%, -16%) scale(1.35) rotate(8deg);
+/* Hero panelinin cercevesinden disariya yayilan, panelin ONUNE gecmeyen
+   (box-shadow her zaman elemanin arkasinda/disinda kalir) kosemli/karesel
+   bir isik yansimasi - dairesel bir blob degil, kartin kendi dortgen
+   hatlarini takip eder. */
+@keyframes frame-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 40px 4px rgba(37, 99, 235, 0.25),
+      0 0 90px 20px rgba(37, 99, 235, 0.12);
   }
   50% {
-    transform: translate(30%, 14%) scale(0.85) rotate(-6deg);
-  }
-  75% {
-    transform: translate(-22%, -10%) scale(1.2) rotate(5deg);
-  }
-  100% {
-    transform: translate(-30%, 6%) scale(1) rotate(0deg);
+    box-shadow:
+      0 0 70px 14px rgba(37, 99, 235, 0.4),
+      0 0 140px 40px rgba(37, 99, 235, 0.2);
   }
 }
 
-.animate-wave-glow {
-  animation: wave-glow 6s ease-in-out infinite;
+.animate-frame-glow {
+  animation: frame-glow 6s ease-in-out infinite;
 }
