@@ -164,18 +164,23 @@
 }
 
 @keyframes wave-glow {
-  0%,
+  0% {
+    transform: translate(-30%, 6%) scale(1) rotate(0deg);
+  }
+  25% {
+    transform: translate(22%, -16%) scale(1.35) rotate(8deg);
+  }
+  50% {
+    transform: translate(30%, 14%) scale(0.85) rotate(-6deg);
+  }
+  75% {
+    transform: translate(-22%, -10%) scale(1.2) rotate(5deg);
+  }
   100% {
-    transform: translate(-8%, 0%) scale(1);
-  }
-  33% {
-    transform: translate(8%, 5%) scale(1.1);
-  }
-  66% {
-    transform: translate(-4%, -6%) scale(0.92);
+    transform: translate(-30%, 6%) scale(1) rotate(0deg);
   }
 }
 
 .animate-wave-glow {
-  animation: wave-glow 12s ease-in-out infinite;
+  animation: wave-glow 6s ease-in-out infinite;
 }
