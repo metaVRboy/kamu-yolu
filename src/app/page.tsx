@@ -27,7 +27,11 @@ export default async function Home() {
   }));
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
+    <div className="relative mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-16 z-0 flex justify-center">
+        <div className="h-72 w-[36rem] animate-wave-glow rounded-full bg-primary/25 blur-3xl" />
+      </div>
+
       <section className="relative z-20 mx-auto max-w-3xl overflow-hidden rounded-3xl border border-primary/10 bg-primary/[0.04] p-8 text-center shadow-sm backdrop-blur-xl sm:p-12">
         <div aria-hidden className="pointer-events-none absolute inset-0">
           <div className="absolute -top-20 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
@@ -35,12 +39,12 @@ export default async function Home() {
 
         <h1 className="relative font-sans text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl">
           Mezun olduğun bölüme uygun{" "}
-          <span className="italic text-primary">kamu ilanlarını</span> bul
+          <span className="italic text-primary">kamu ilanlarını</span> bul.
         </h1>
         <p className="mx-auto mt-3 max-w-2xl text-balance text-slate-600">
           Bölümünü seç, sana uygun güncel kamu ilanlarını hemen listeleyelim.
         </p>
-        <div id="bolum-arama" className="mt-6 flex scroll-mt-24 justify-center">
+        <div className="mt-6 flex justify-center">
           <DepartmentSearch departments={departments} />
         </div>
 

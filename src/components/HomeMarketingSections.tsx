@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -183,7 +185,13 @@ export function ClosingCtaSection() {
         Kamu Yolu tamamen ücretsizdir; kayıt gerektirmez.
       </p>
       <Link
-        href="/#bolum-arama"
+        href="/"
+        onClick={(e) => {
+          if (window.location.pathname === "/") {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }
+        }}
         className={cn(
           buttonVariants({ size: "lg" }),
           "mt-6 bg-white text-primary hover:bg-white/90",
