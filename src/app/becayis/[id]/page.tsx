@@ -20,7 +20,7 @@ export default async function BecayisDetayPage({
   return (
     <div className="mx-auto max-w-2xl px-4 py-14 sm:px-6 sm:py-20">
       <Card className="gap-4 border-primary/20 bg-white p-6 shadow-sm">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">{talep.meslek}</h1>
+        <h1 className="font-sans text-2xl font-bold tracking-tight text-primary">{talep.meslek}</h1>
         {talep.kurumTuru && <p className="text-sm text-muted-foreground">{talep.kurumTuru}</p>}
 
         <div className="flex flex-wrap items-center gap-2 text-sm">

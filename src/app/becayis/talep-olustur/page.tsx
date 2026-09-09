@@ -20,7 +20,7 @@ export default async function BecayisTalepOlusturPage() {
       okunmamisMesajSayisi={okunmamisSayisi}
       okunmamisIlgilendiklerimSayisi={okunmamisIlgilendiklerimSayisi}
     >
-      <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+      <h1 className="font-sans text-2xl font-bold tracking-tight text-primary sm:text-3xl">
         Becayiş Talebi Oluştur
       </h1>
       <p className="mt-2 text-sm text-muted-foreground">

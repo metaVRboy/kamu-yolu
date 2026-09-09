@@ -19,7 +19,7 @@ export default async function BecayisPage() {
     <div className="mx-auto max-w-4xl px-4 py-14 sm:px-6 sm:py-20">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+          <h1 className="flex items-center gap-2 font-sans text-2xl font-bold tracking-tight text-primary sm:text-3xl">
             <Repeat className="h-6 w-6 text-primary" />
             Becayiş İlanları
           </h1>

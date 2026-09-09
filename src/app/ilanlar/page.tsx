@@ -33,7 +33,7 @@ export default async function TumIlanlarPage({
         Ana sayfaya dön
       </Link>
 
-      <h1 className="mt-4 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+      <h1 className="mt-4 font-sans text-2xl font-bold tracking-tight text-primary sm:text-3xl">
         Tüm İlanlar
       </h1>
       <p className="mt-1 max-w-2xl text-sm text-muted-foreground">

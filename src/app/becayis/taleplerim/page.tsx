@@ -24,7 +24,7 @@ export default async function TaleplerimPage() {
       okunmamisMesajSayisi={okunmamisSayisi}
       okunmamisIlgilendiklerimSayisi={okunmamisIlgilendiklerimSayisi}
     >
-      <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+      <h1 className="font-sans text-2xl font-bold tracking-tight text-primary sm:text-3xl">
         Mevcut Taleplerim
       </h1>
       <p className="mt-1 text-sm text-muted-foreground">

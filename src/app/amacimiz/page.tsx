@@ -17,7 +17,7 @@ export default async function AmacimizPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
-      <h1 className="text-center text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+      <h1 className="text-center font-sans text-2xl font-bold tracking-tight text-primary sm:text-3xl">
         Amacımız
       </h1>
       <p className="mx-auto mt-2 max-w-xl text-center text-sm text-muted-foreground">

@@ -53,7 +53,7 @@ export default async function ProfilimPage() {
     >
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Profilim</h1>
+          <h1 className="font-sans text-2xl font-bold tracking-tight text-primary">Profilim</h1>
           <p className="mt-1 text-sm text-muted-foreground">{user.adSoyad} — {user.email}</p>
         </div>
         <LogoutButton />

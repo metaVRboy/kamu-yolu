@@ -20,7 +20,7 @@ export default async function AbonelikPage() {
       okunmamisMesajSayisi={okunmamisSayisi}
       okunmamisIlgilendiklerimSayisi={okunmamisIlgilendiklerimSayisi}
     >
-      <h1 className="text-2xl font-bold tracking-tight text-slate-900">Aboneliğim</h1>
+      <h1 className="font-sans text-2xl font-bold tracking-tight text-primary">Aboneliğim</h1>
       <p className="mt-1 text-sm text-muted-foreground">
         Planını yönet, ihtiyacına göre yükselt.
       </p>

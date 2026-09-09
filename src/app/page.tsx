@@ -74,7 +74,7 @@ export default async function Home() {
       <section className="mt-16">
         <div className="flex items-baseline justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-foreground">
+            <h2 className="font-sans text-xl font-semibold text-primary">
               Yeni Eklenen İlanlar
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
