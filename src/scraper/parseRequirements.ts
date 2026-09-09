@@ -1,12 +1,20 @@
 import { EducationLevel, InstitutionType } from "@/generated/prisma/enums";
 
-/** Kariyer Kapisi ilan metinleri basit bir BBCode benzeri isaretleme kullanir. */
+/**
+ * Kariyer Kapisi ilan metinleri BBCode benzeri isaretleme kullanir. Belirli
+ * etiketleri tek tek listelemek yerine (yeni bir etiket turu - ör. [size=..],
+ * [color=..] - cikinca tekrar kirilir), [tag], [/tag] ve [tag=deger]
+ * bicimindeki HERHANGI bir etiketi genel olarak temizler.
+ */
 export function stripBbCode(text: string): string {
   return text
-    .replace(/\[url=[^\]]*\]/gi, "")
-    .replace(/\[\/?(justify|b|i|u|url|list)\]/gi, "")
     .replace(/\[\*\]/g, "- ")
-    .replace(/\s+\n/g, "\n")
+    .replace(/\[\/?[a-zA-Z0-9]+(?:=[^\]]*)?\]/g, "")
+    // Bazi kaynaklarda etiketin acan koseli parantezi kayboluyor, geriye
+    // "=14pt%" gibi anlamsiz bir kalinti kaliyor - bunu da temizle.
+    .replace(/=\d+pt%?/g, "")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
     .trim();
 }
 
