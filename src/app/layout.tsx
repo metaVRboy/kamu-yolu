@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Source_Serif_4 } from "next/font/google";
+import { Inter, Bodoni_Moda } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
 import { Repeat, Calculator, ListChecks } from "lucide-react";
@@ -15,10 +15,14 @@ import { Toaster } from "@/components/ui/toast";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
-const sourceSerif = Source_Serif_4({
+// Bodoni Moda: kalin/ince zit vurgulu, belirgin bir editoryal gorunum -
+// onceki serif secimi (Source Serif 4) ile karistirilmayacak kadar farkli.
+const bodoniModa = Bodoni_Moda({
   subsets: ["latin", "latin-ext"],
   variable: "--font-heading",
-  weight: ["600", "700"],
+  weight: "variable",
+  style: ["normal", "italic"],
+  axes: ["opsz"],
 });
 
 export const revalidate = 300;
@@ -34,7 +38,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const [lastScrapeAt, user] = await Promise.all([getLastSuccessfulScrapeAt(), getCurrentUser()]);
 
   return (
-    <html lang="tr" className={cn("h-full antialiased", inter.variable, sourceSerif.variable, "font-sans")}>
+    <html lang="tr" className={cn("h-full antialiased", inter.variable, bodoniModa.variable, "font-sans")}>
       <body className="flex min-h-full flex-col bg-white text-foreground">
         <header className="sticky top-0 z-40 border-b border-primary/20 bg-primary/15 backdrop-blur-xl">
           <div className="relative flex w-full items-center justify-between px-4 py-[15px] sm:px-6">

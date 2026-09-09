@@ -5,7 +5,6 @@ import { PostingCard } from "@/components/PostingCard";
 import { DepartmentSearch } from "@/components/DepartmentSearch";
 import { HaberlerSection } from "@/components/HaberlerSection";
 import { ClosingCtaSection } from "@/components/HomeMarketingSections";
-import { Badge } from "@/components/ui/badge";
 
 // Ilan verileri periyodik olarak degistigi icin sayfa build-time'da
 // dondurulmamali; her birkac dakikada bir yeniden olusturulur.
@@ -29,13 +28,19 @@ export default async function Home() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
-      <section className="relative z-20 mx-auto max-w-3xl rounded-3xl border border-primary/10 bg-primary/[0.04] p-8 text-center shadow-sm backdrop-blur-xl sm:p-12">
-        <Badge className="border-transparent bg-primary text-primary-foreground">
-          Kamu personeli & memur ilanları
-        </Badge>
+      <section className="relative z-20 mx-auto max-w-3xl overflow-hidden rounded-3xl border border-primary/10 bg-primary/[0.04] p-8 text-center shadow-sm backdrop-blur-xl sm:p-12">
+        <div aria-hidden className="pointer-events-none absolute inset-0">
+          <div className="absolute -top-20 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
+        </div>
 
-        <h1 className="mt-5 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-          Mezun olduğun bölüme uygun kamu ilanlarını bul
+        <span className="relative inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white px-4 py-1.5 text-xs font-semibold tracking-wide text-primary shadow-sm">
+          <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+          Kamu personeli & memur ilanları
+        </span>
+
+        <h1 className="relative mt-6 text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl">
+          Mezun olduğun bölüme uygun{" "}
+          <span className="italic text-primary">kamu ilanlarını</span> bul
         </h1>
         <p className="mx-auto mt-3 max-w-2xl text-balance text-slate-600">
           Bölümünü seç, sana uygun güncel kamu ilanlarını hemen listeleyelim.

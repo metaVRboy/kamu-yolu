@@ -26,18 +26,20 @@ function isYeni(yayinTarihi: string): boolean {
 export function HaberlerSection({ haberler, showAllLink = true }: { haberler: HaberItem[]; showAllLink?: boolean }) {
   return (
     <section>
-      <div className="flex items-baseline justify-between">
-        <div>
-          <h2 className="flex items-center gap-2 text-xl font-semibold text-foreground">
-            <Newspaper className="h-5 w-5 text-primary" />
-            Haberler
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Kamu personel alımları, toplu alım duyuruları ve gündemdeki gelişmeler.
-          </p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md shadow-primary/25">
+            <Newspaper className="h-5 w-5" />
+          </span>
+          <div>
+            <h2 className="text-2xl font-semibold text-foreground">Haberler</h2>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              Kamu personel alımları, toplu alım duyuruları ve gündemdeki gelişmeler.
+            </p>
+          </div>
         </div>
         {showAllLink && (
-          <Link href="/haberler" className="text-sm font-medium text-primary hover:underline">
+          <Link href="/haberler" className="shrink-0 text-sm font-medium text-primary hover:underline">
             Tümü »
           </Link>
         )}
