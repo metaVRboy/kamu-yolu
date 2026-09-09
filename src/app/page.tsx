@@ -33,12 +33,7 @@ export default async function Home() {
           <div className="absolute -top-20 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
         </div>
 
-        <span className="relative inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white px-4 py-1.5 text-xs font-semibold tracking-wide text-primary shadow-sm">
-          <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-          Kamu personeli & memur ilanları
-        </span>
-
-        <h1 className="relative mt-6 text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl">
+        <h1 className="relative text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl">
           Mezun olduğun bölüme uygun{" "}
           <span className="italic text-primary">kamu ilanlarını</span> bul
         </h1>
