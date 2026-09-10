@@ -109,7 +109,7 @@ export function DepartmentSearch({
             aria-expanded={isOpen}
             aria-controls="department-search-list"
             placeholder="Bölümünü yaz (ör. Bilgisayar Mühendisliği)"
-            className="h-12 rounded-2xl border-primary/20 bg-white pl-11 text-base shadow-sm"
+            className="h-12 rounded-2xl border-primary/20 bg-white pl-11 text-sm shadow-sm sm:text-base"
           />
 
           {isOpen && filtered.length > 0 && (

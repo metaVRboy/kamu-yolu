@@ -176,4 +176,8 @@
 
 .animate-frame-glow {
   animation: frame-glow 6s ease-in-out infinite;
+  /* box-shadow animasyonu kendi katmanina izole edilmezse, panelin
+     icindeki input'un imleci Safari'de her karede yeniden boyanirken
+     gecici olarak yanlis konumda cizilebiliyor. */
+  will-change: box-shadow;
 }
