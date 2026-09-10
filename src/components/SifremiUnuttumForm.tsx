@@ -28,7 +28,7 @@ export function SifremiUnuttumForm() {
 
   return (
     <Card className="mx-auto max-w-sm gap-4 border-primary/20 bg-white p-6 shadow-sm">
-      <h1 className="text-xl font-bold text-slate-900">Şifremi Unuttum</h1>
+      <h1 className="font-sans text-xl font-bold text-primary">Şifremi Unuttum</h1>
       {sent ? (
         <p className="text-sm text-emerald-600">
           Eğer bu e-posta ile bir hesap varsa, şifre sıfırlama bağlantısı gönderildi. Gelen

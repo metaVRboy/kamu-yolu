@@ -11,7 +11,7 @@ export default function KvkkPage() {
 
       <div className="prose prose-slate mt-6 max-w-none space-y-5 text-sm leading-relaxed text-slate-700">
         <section>
-          <h2 className="text-base font-semibold text-slate-900">1. Veri Sorumlusu</h2>
+          <h2 className="font-sans text-base font-semibold text-primary">1. Veri Sorumlusu</h2>
           <p>
             Kamu Yolu (&quot;Site&quot;), 6698 sayılı Kişisel Verilerin Korunması Kanunu
             (&quot;KVKK&quot;) kapsamında, üyelik sırasında ve site kullanımı süresince elde
@@ -20,7 +20,7 @@ export default function KvkkPage() {
         </section>
 
         <section>
-          <h2 className="text-base font-semibold text-slate-900">2. İşlenen Kişisel Veriler</h2>
+          <h2 className="font-sans text-base font-semibold text-primary">2. İşlenen Kişisel Veriler</h2>
           <ul className="list-disc pl-5">
             <li>Kimlik ve iletişim bilgileri: ad soyad, e-posta, (varsa) telefon numarası</li>
             <li>Mesleki bilgiler: meslek/unvan, çalışılan kurum türü, mezun olunan bölüm ve öğrenim düzeyi</li>
@@ -30,7 +30,7 @@ export default function KvkkPage() {
         </section>
 
         <section>
-          <h2 className="text-base font-semibold text-slate-900">3. İşleme Amaçları</h2>
+          <h2 className="font-sans text-base font-semibold text-primary">3. İşleme Amaçları</h2>
           <ul className="list-disc pl-5">
             <li>Üyelik oluşturma, oturum açma ve hesabınızı güvenli şekilde yönetme</li>
             <li>Becayiş taleplerinin yayınlanması ve kullanıcılar arası mesajlaşmanın sağlanması</li>
@@ -40,7 +40,7 @@ export default function KvkkPage() {
         </section>
 
         <section>
-          <h2 className="text-base font-semibold text-slate-900">4. Verilerin Paylaşımı</h2>
+          <h2 className="font-sans text-base font-semibold text-primary">4. Verilerin Paylaşımı</h2>
           <p>
             Becayiş modülünde iletişim bilgileriniz (e-posta, telefon) diğer kullanıcılara
             <strong> hiçbir zaman doğrudan gösterilmez</strong>; ilgilenen kullanıcılar size yalnızca
@@ -51,7 +51,7 @@ export default function KvkkPage() {
         </section>
 
         <section>
-          <h2 className="text-base font-semibold text-slate-900">5. Haklarınız</h2>
+          <h2 className="font-sans text-base font-semibold text-primary">5. Haklarınız</h2>
           <p>
             KVKK&apos;nın 11. maddesi uyarınca; verilerinizin işlenip işlenmediğini öğrenme, işlenmişse
             buna ilişkin bilgi talep etme, işlenme amacını öğrenme, yurt içinde/dışında aktarıldığı
@@ -62,7 +62,7 @@ export default function KvkkPage() {
         </section>
 
         <section>
-          <h2 className="text-base font-semibold text-slate-900">6. Kullanım Şartları</h2>
+          <h2 className="font-sans text-base font-semibold text-primary">6. Kullanım Şartları</h2>
           <ul className="list-disc pl-5">
             <li>Sitede paylaştığınız bilgilerin doğru ve güncel olmasından siz sorumlusunuz.</li>
             <li>Becayiş modülü yalnızca kamu personeli arasında iletişimi kolaylaştırmak amacıyla sunulur; Kamu Yolu, kullanıcılar arasında gerçekleşen becayiş sürecine taraf değildir ve sonucundan sorumlu tutulamaz.</li>

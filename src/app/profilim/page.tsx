@@ -61,7 +61,7 @@ export default async function ProfilimPage() {
 
       <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
         <Card className="gap-3 border-primary/20 bg-white p-5 shadow-sm">
-          <h2 className="flex items-center gap-2 font-semibold text-slate-900">
+          <h2 className="flex items-center gap-2 font-sans font-semibold text-primary">
             <Repeat className="h-4 w-4 text-primary" />
             Aktif Becayiş İlanlarım
           </h2>
@@ -101,7 +101,7 @@ export default async function ProfilimPage() {
         </Card>
 
         <Card className="gap-3 border-primary/20 bg-white p-5 shadow-sm">
-          <h2 className="flex items-center gap-2 font-semibold text-slate-900">
+          <h2 className="flex items-center gap-2 font-sans font-semibold text-primary">
             <Inbox className="h-4 w-4 text-primary" />
             Gelen Mesajlarım
             {okunmamisSayisi > 0 && (
@@ -142,7 +142,7 @@ export default async function ProfilimPage() {
       </div>
 
       <div className="mt-6">
-        <h2 className="flex items-center gap-2 font-semibold text-slate-900">
+        <h2 className="flex items-center gap-2 font-sans font-semibold text-primary">
           <Briefcase className="h-4 w-4 text-primary" />
           Bana Özel İlanlar
         </h2>

@@ -30,7 +30,7 @@ export default async function ProfilAyarlarPage() {
       </p>
 
       <Card className="mt-6 border-primary/20 bg-white p-6 shadow-sm">
-        <h2 className="mb-4 font-semibold text-slate-900">Bilgilerim</h2>
+        <h2 className="mb-4 font-sans font-semibold text-primary">Bilgilerim</h2>
         <ProfilForm
           departments={departments}
           initial={{
@@ -45,7 +45,7 @@ export default async function ProfilAyarlarPage() {
       </Card>
 
       <Card className="mt-6 border-primary/20 bg-white p-6 shadow-sm">
-        <h2 className="mb-4 font-semibold text-slate-900">Şifre Değiştir</h2>
+        <h2 className="mb-4 font-sans font-semibold text-primary">Şifre Değiştir</h2>
         <SifreDegistirForm />
       </Card>
     </ProfilLayout>

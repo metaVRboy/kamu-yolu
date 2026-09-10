@@ -127,7 +127,7 @@ export function AuthForm({ mode }: { mode: "kayit" | "giris" }) {
     const saniye = kalanSaniye % 60;
     return (
       <Card className="mx-auto max-w-sm gap-4 border-primary/20 bg-white p-6 shadow-sm">
-        <h1 className="text-xl font-bold text-slate-900">E-postanı Doğrula</h1>
+        <h1 className="font-sans text-xl font-bold text-primary">E-postanı Doğrula</h1>
         <p className="text-sm text-muted-foreground">
           <strong>{email}</strong> adresine 6 haneli bir doğrulama kodu gönderdik.
         </p>
@@ -177,7 +177,7 @@ export function AuthForm({ mode }: { mode: "kayit" | "giris" }) {
 
   return (
     <Card className="mx-auto max-w-sm gap-4 border-primary/20 bg-white p-6 shadow-sm">
-      <h1 className="text-xl font-bold text-slate-900">
+      <h1 className="font-sans text-xl font-bold text-primary">
         {mode === "kayit" ? "Kayıt Ol" : "Giriş Yap"}
       </h1>
       <form onSubmit={mode === "kayit" ? handleKayitSubmit : handleGirisSubmit} className="space-y-4">
