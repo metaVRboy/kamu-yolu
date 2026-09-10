@@ -49,6 +49,7 @@ export async function haberleriEkleVeTekillestir(
     kaynakUrl: string | null;
     gorselUrl: string | null;
     gorselLogoMu: boolean;
+    departmentIds: string[];
   }[],
 ): Promise<{ eklenen: number; degistirilen: number }> {
   if (adaylar.length === 0) return { eklenen: 0, degistirilen: 0 };
@@ -62,9 +63,11 @@ export async function haberleriEkleVeTekillestir(
   let eklenen = 0;
   let degistirilen = 0;
 
-  for (const aday of adaylar) {
+  for (const { departmentIds, ...aday } of adaylar) {
     const eslesenId = await ayniHaberIdBul(aday, mevcutlar);
     if (eslesenId) {
+      // Haber kaydi silindiginde iliskili HaberDepartment satirlari da
+      // (onDelete: Cascade) otomatik silinir.
       await prisma.haber.delete({ where: { id: eslesenId } });
       mevcutlar = mevcutlar.filter((m) => m.id !== eslesenId);
       degistirilen++;
@@ -73,6 +76,12 @@ export async function haberleriEkleVeTekillestir(
     }
 
     const olusturulan = await prisma.haber.create({ data: aday });
+    if (departmentIds.length > 0) {
+      await prisma.haberDepartment.createMany({
+        data: departmentIds.map((departmentId) => ({ haberId: olusturulan.id, departmentId })),
+        skipDuplicates: true,
+      });
+    }
     mevcutlar.push({ id: olusturulan.id, baslik: aday.baslik, ozet: aday.ozet });
   }
 

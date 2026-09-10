@@ -73,6 +73,7 @@ async function runIsinolsaHaberArastir(req: NextRequest) {
         kaynakUrl: s.resmiKaynakUrl!,
         gorselUrl: s.gorselUrl,
         gorselLogoMu: s.gorselLogoMu,
+        departmentIds: s.departmentIds,
       })),
     );
 

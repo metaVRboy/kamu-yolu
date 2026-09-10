@@ -41,18 +41,18 @@ export async function verifyHaberKaynak(params: {
   baslik: string;
   ozet: string;
   url: string;
-}): Promise<boolean> {
+}): Promise<{ destekliyor: boolean; metin: string | null }> {
   let metin: string;
   try {
     const res = await fetch(params.url, {
       signal: AbortSignal.timeout(8000),
       headers: BROWSER_HEADERS,
     });
-    if (!res.ok) return false;
+    if (!res.ok) return { destekliyor: false, metin: null };
     metin = htmlToText(await res.text());
-    if (metin.length < 100) return false;
+    if (metin.length < 100) return { destekliyor: false, metin: null };
   } catch {
-    return false;
+    return { destekliyor: false, metin: null };
   }
 
   try {
@@ -71,8 +71,9 @@ export async function verifyHaberKaynak(params: {
     });
 
     const parsed = DogrulamaSchema.safeParse(parseGeminiJson(res.text));
-    return parsed.success && parsed.data.destekliyor;
+    const destekliyor = parsed.success && parsed.data.destekliyor;
+    return { destekliyor, metin: destekliyor ? metin : null };
   } catch {
-    return false;
+    return { destekliyor: false, metin: null };
   }
 }

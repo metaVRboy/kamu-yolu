@@ -5,6 +5,7 @@ import { resolveGroundingUrl } from "@/lib/resolveGroundingUrl";
 import { extractOgImage } from "@/lib/extractOgImage";
 import { findInstitutionImage } from "@/lib/findInstitutionImage";
 import { verifyHaberKaynak } from "@/lib/verifyHaberKaynak";
+import { haberIcinBolumEslestir } from "@/lib/haberDepartmentMatch";
 
 export type IsinolsaLead = {
   externalId: string;
@@ -37,6 +38,7 @@ export type IsinolsaHaberSonuc = {
   resmiKaynakUrl: string | null;
   gorselUrl: string | null;
   gorselLogoMu: boolean;
+  departmentIds: string[];
 };
 
 const SYSTEM_PROMPT = `Sana bir kurum adi ve kisa bir konu basligi listesi verilecek. Bu
@@ -118,6 +120,7 @@ export async function researchIsinolsaLeads(
             resmiKaynakUrl: null,
             gorselUrl: null,
             gorselLogoMu: false,
+            departmentIds: [],
           };
 
           const sonuc = parsed.data.sonuclar.find((s) => s.index === i);
@@ -131,12 +134,19 @@ export async function researchIsinolsaLeads(
 
           // Sayfa teknik olarak acilsa bile tamamen alakasiz olabilir -
           // gercek icerigi tekrar dogrulanmadan hicbir kaynak kabul edilmez.
-          const dogrulandiIcerik = await verifyHaberKaynak({
+          const { destekliyor, metin } = await verifyHaberKaynak({
             baslik: sonuc.baslik,
             ozet: sonuc.ozet,
             url: cozulmusUrl,
           });
-          if (!dogrulandiIcerik) return bos;
+          if (!destekliyor) return bos;
+
+          // Bolum eslesmesi SADECE kisa ozete degil, kaynagin tam metnine
+          // gore yapilir - ozette gecmeyen ama haberin icinde gecen bir
+          // bolum adi da boylece yakalanir.
+          const departmentIds = metin
+            ? await haberIcinBolumEslestir({ baslik: sonuc.baslik, ozet: sonuc.ozet, tamMetin: metin })
+            : [];
 
           // Once haberin kendi kaynagindan gercek bir gorsel dene; yoksa
           // kurumun Wikipedia'daki (acik lisansli) logosuna dus.
@@ -151,6 +161,7 @@ export async function researchIsinolsaLeads(
             resmiKaynakUrl: cozulmusUrl,
             gorselUrl: ogGorsel ?? kurumGorseli,
             gorselLogoMu: !ogGorsel && !!kurumGorseli,
+            departmentIds,
           };
         }),
       );

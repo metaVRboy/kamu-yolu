@@ -5,6 +5,7 @@ import { resolveGroundingUrl } from "@/lib/resolveGroundingUrl";
 import { extractOgImage } from "@/lib/extractOgImage";
 import { findInstitutionImage } from "@/lib/findInstitutionImage";
 import { verifyHaberKaynak } from "@/lib/verifyHaberKaynak";
+import { haberIcinBolumEslestir } from "@/lib/haberDepartmentMatch";
 
 const HaberSchema = z.object({
   haberler: z
@@ -32,6 +33,7 @@ export type HaberResearchItem = {
   kaynakUrl: string;
   gorselUrl: string | null;
   gorselLogoMu: boolean;
+  departmentIds: string[];
 };
 
 const SYSTEM_PROMPT = `Turkiye'de kamu personeli/memur alimlariyla ilgili GUNCEL (son birkac
@@ -90,13 +92,22 @@ export async function researchHaberler(): Promise<HaberResearchItem[]> {
 
         // Sayfa teknik olarak acilsa bile tamamen alakasiz olabilir -
         // gercek icerigi tekrar dogrulanmadan hicbir kaynak kabul edilmez.
-        const dogrulandi = await verifyHaberKaynak({ baslik: h.baslik, ozet: h.ozet, url: kaynakUrl });
-        if (!dogrulandi) return null;
+        const { destekliyor, metin } = await verifyHaberKaynak({ baslik: h.baslik, ozet: h.ozet, url: kaynakUrl });
+        if (!destekliyor) return null;
+
+        // Bolum eslesmesi SADECE kisa ozete degil, kaynagin tam metnine gore
+        // yapilir - ozette gecmeyen ama haberin icinde gecen bir bolum adi
+        // (ör. "diyetisyen alimi") da boylece yakalanir.
+        const departmentIds = metin
+          ? await haberIcinBolumEslestir({ baslik: h.baslik, ozet: h.ozet, tamMetin: metin })
+          : [];
 
         // Once haberin kendi kaynagindan gercek bir gorsel dene; yoksa
         // kurumun Wikipedia'daki (acik lisansli) logosuna dus.
         const ogGorsel = await extractOgImage(kaynakUrl);
-        if (ogGorsel) return { baslik: h.baslik, ozet: h.ozet, kaynakUrl, gorselUrl: ogGorsel, gorselLogoMu: false };
+        if (ogGorsel) {
+          return { baslik: h.baslik, ozet: h.ozet, kaynakUrl, gorselUrl: ogGorsel, gorselLogoMu: false, departmentIds };
+        }
 
         const kurumGorseli = await findInstitutionImage(h.kurumAdi);
         return {
@@ -105,6 +116,7 @@ export async function researchHaberler(): Promise<HaberResearchItem[]> {
           kaynakUrl,
           gorselUrl: kurumGorseli,
           gorselLogoMu: !!kurumGorseli,
+          departmentIds,
         };
       }),
     );

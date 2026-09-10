@@ -41,6 +41,7 @@ model Department {
   level     EducationLevel   // bu bolumun hangi ogrenim derecesine ait oldugu (onlisans/lisans vb.)
   aliases   DepartmentAlias[]
   postings  PostingDepartment[]
+  haberler  HaberDepartment[]
   users     User[]
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt
@@ -246,7 +247,24 @@ model Haber {
   yayinTarihi DateTime @default(now())
   createdAt   DateTime @default(now())
 
+  departments HaberDepartment[]
+
   @@index([yayinTarihi])
+}
+
+// Haberin TAM kaynak metnine gore (sadece kisa ozete degil) hesaplanan
+// bolum eslesmeleri - boylece "ozette gecmeyen ama haberin icinde gecen"
+// bir bolum adi da yakalanir. Haber olusturulurken bir kez hesaplanip
+// saklanir, bolum sayfasinda hizli sorgu icin kullanilir.
+model HaberDepartment {
+  id           String     @id @default(cuid())
+  haber        Haber      @relation(fields: [haberId], references: [id], onDelete: Cascade)
+  haberId      String
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  departmentId String
+  matchedAlias String?
+
+  @@unique([haberId, departmentId])
 }
 
 // isinolsa.com yalnizca "boyle bir alim var" sinyali olarak kullanilir -
