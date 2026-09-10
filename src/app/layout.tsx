@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Newsreader } from "next/font/google";
+import { Inter } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
 import { Repeat, Calculator, ListChecks } from "lucide-react";
@@ -17,17 +17,9 @@ import { CerezBildirimi } from "@/components/CerezBildirimi";
 import { ReklamEngelleyiciKontrol } from "@/components/ReklamEngelleyiciKontrol";
 import "./globals.css";
 
+// Site genelinde tek font: Inter. Baslik/govde ayrimi icin ayri bir serif
+// kullanilmiyor - modern/duz gorunum icin her yerde ayni sans-serif.
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
-// Newsreader: belirgin/editoryal ama ekranda okunmak icin tasarlanmis bir
-// serif - "opsz" ekseni sayesinde kucuk basliklarda (kart, dialog) daha
-// okunur, buyuk hero basliginda daha karakterli goruntuye otomatik gecer.
-const newsreader = Newsreader({
-  subsets: ["latin", "latin-ext"],
-  variable: "--font-heading",
-  weight: "variable",
-  style: ["normal", "italic"],
-  axes: ["opsz"],
-});
 
 export const revalidate = 300;
 
@@ -42,7 +34,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const [lastScrapeAt, user] = await Promise.all([getLastSuccessfulScrapeAt(), getCurrentUser()]);
 
   return (
-    <html lang="tr" className={cn("h-full antialiased", inter.variable, newsreader.variable, "font-sans")}>
+    <html lang="tr" className={cn("h-full antialiased", inter.variable, "font-sans")}>
       <body className="flex min-h-full flex-col bg-white text-foreground">
         <header className="sticky top-0 z-40 border-b border-primary/20 bg-primary/15 backdrop-blur-xl">
           <div className="relative flex w-full items-center justify-between px-4 py-[15px] sm:px-6">

@@ -126,13 +126,6 @@
   html {
     @apply font-sans;
   }
-  h1,
-  h2,
-  h3,
-  h4 {
-    font-family: var(--font-heading);
-    font-optical-sizing: auto;
-  }
 }
 
 @keyframes marquee {
