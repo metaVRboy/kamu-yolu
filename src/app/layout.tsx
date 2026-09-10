@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
@@ -22,6 +22,15 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const revalidate = 300;
+
+// Mobil tarayicilarda (ozellikle iOS Safari) initial-scale belirtilmezse
+// sayfa gecisleri arasinda yakinlastirma orani tutarsizlasip elemanlar
+// oldugundan buyuk/kucuk gorunebiliyor - sabit bir olcek zorunlu kilinir.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
