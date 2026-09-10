@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
-import { Repeat, Calculator, ListChecks } from "lucide-react";
+import { Repeat, Calculator, ListChecks, UserRound } from "lucide-react";
 import { getLastSuccessfulScrapeAt } from "@/lib/matching";
 import { cn } from "@/lib/utils";
 import { getCurrentUser } from "@/lib/auth";
@@ -144,9 +144,10 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               ) : (
                 <Link
                   href="/giris"
-                  className="flex h-9 items-center justify-center rounded-xl bg-primary/10 px-4 text-sm font-medium text-primary transition-colors hover:bg-primary hover:text-white"
+                  className="flex h-9 items-center justify-center gap-1.5 rounded-xl bg-primary/10 px-2.5 text-sm font-medium text-primary transition-colors hover:bg-primary hover:text-white sm:px-4"
                 >
-                  Giriş Yap
+                  <UserRound className="h-4 w-4 sm:hidden" />
+                  <span className="hidden sm:inline">Giriş Yap</span>
                 </Link>
               )}
             </div>

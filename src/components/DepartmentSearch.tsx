@@ -160,10 +160,11 @@ export function DepartmentSearch({
           type="button"
           onClick={handleSearch}
           disabled={!query.trim()}
-          className={buttonVariants({ className: "h-12 shrink-0 rounded-2xl px-5" })}
+          aria-label="Ara"
+          className={buttonVariants({ className: "h-12 shrink-0 rounded-2xl px-3.5 sm:px-5" })}
         >
           <Search className="h-4 w-4" />
-          Ara
+          <span className="hidden sm:inline">Ara</span>
         </button>
       </div>
     </div>
