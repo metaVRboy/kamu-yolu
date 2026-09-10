@@ -23,7 +23,17 @@ function isYeni(yayinTarihi: string): boolean {
   return fark < YENI_ESIGI_GUN * 24 * 60 * 60 * 1000;
 }
 
-export function HaberlerSection({ haberler, showAllLink = true }: { haberler: HaberItem[]; showAllLink?: boolean }) {
+export function HaberlerSection({
+  haberler,
+  showAllLink = true,
+  baslik = "Haberler",
+  aciklama = "Kamu personel alımları, toplu alım duyuruları ve gündemdeki gelişmeler.",
+}: {
+  haberler: HaberItem[];
+  showAllLink?: boolean;
+  baslik?: string;
+  aciklama?: string;
+}) {
   return (
     <section>
       <div className="flex items-center justify-between">
@@ -32,10 +42,8 @@ export function HaberlerSection({ haberler, showAllLink = true }: { haberler: Ha
             <Newspaper className="h-5 w-5" />
           </span>
           <div>
-            <h2 className="font-sans text-2xl font-semibold text-primary">Haberler</h2>
-            <p className="mt-0.5 text-sm text-muted-foreground">
-              Kamu personel alımları, toplu alım duyuruları ve gündemdeki gelişmeler.
-            </p>
+            <h2 className="font-sans text-2xl font-semibold text-primary">{baslik}</h2>
+            <p className="mt-0.5 text-sm text-muted-foreground">{aciklama}</p>
           </div>
         </div>
         {showAllLink && (

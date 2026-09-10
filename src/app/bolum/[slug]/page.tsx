@@ -6,8 +6,10 @@ import {
   getAvailableFiltersForDepartment,
   getPostingsForDepartment,
 } from "@/lib/matching";
+import { getHaberlerForDepartment } from "@/lib/haberler";
 import { PostingCard } from "@/components/PostingCard";
 import { FilterBar } from "@/components/FilterBar";
+import { HaberlerSection } from "@/components/HaberlerSection";
 import { Badge } from "@/components/ui/badge";
 import { LEVEL_LABEL } from "@/lib/labels";
 
@@ -26,13 +28,14 @@ export default async function DepartmentResultsPage({
   const department = await prisma.department.findUnique({ where: { slug } });
   if (!department) notFound();
 
-  const [postings, filterOptions] = await Promise.all([
+  const [postings, filterOptions, ilgiliHaberler] = await Promise.all([
     getPostingsForDepartment(department.id, {
       institutionType: kurum,
       ilanTuru,
       il,
     }),
     getAvailableFiltersForDepartment(department.id),
+    getHaberlerForDepartment(department),
   ]);
 
   return (
@@ -76,6 +79,17 @@ export default async function DepartmentResultsPage({
           <PostingCard key={posting.id} posting={posting} />
         ))}
       </div>
+
+      {ilgiliHaberler.length > 0 && (
+        <div className="mt-16">
+          <HaberlerSection
+            haberler={ilgiliHaberler.map((h) => ({ ...h, yayinTarihi: h.yayinTarihi.toISOString() }))}
+            showAllLink={false}
+            baslik="İlgili Haberler ve Duyurular"
+            aciklama={`${department.name} ile ilgili gündemdeki haberler ve duyurular.`}
+          />
+        </div>
+      )}
     </div>
   );
 }
