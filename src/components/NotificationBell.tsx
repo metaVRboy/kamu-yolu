@@ -9,6 +9,8 @@ type Duyuru = { id: string; baslik: string; icerik: string; createdAt: string };
 type Bildirim = { id: string; baslik: string; icerik: string | null; link: string | null; createdAt: string; okundu: boolean };
 
 const POLL_MS = 30000;
+const PANEL_WIDTH = 320; // w-80
+const VIEWPORT_MARGIN = 8;
 
 export function NotificationBell({ isLoggedIn }: { isLoggedIn: boolean }) {
   const [open, setOpen] = useState(false);
@@ -16,7 +18,9 @@ export function NotificationBell({ isLoggedIn }: { isLoggedIn: boolean }) {
   const [genel, setGenel] = useState<Duyuru[]>([]);
   const [banaOzel, setBanaOzel] = useState<Bildirim[]>([]);
   const [okunmamisSayisi, setOkunmamisSayisi] = useState(0);
+  const [panelPos, setPanelPos] = useState<{ top: number; left: number } | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -50,6 +54,14 @@ export function NotificationBell({ isLoggedIn }: { isLoggedIn: boolean }) {
 
   async function handleOpen() {
     const next = !open;
+    if (next && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      const left = Math.min(
+        rect.right - PANEL_WIDTH,
+        window.innerWidth - PANEL_WIDTH - VIEWPORT_MARGIN,
+      );
+      setPanelPos({ top: rect.bottom + 8, left: Math.max(VIEWPORT_MARGIN, left) });
+    }
     setOpen(next);
     if (next && isLoggedIn && okunmamisSayisi > 0) {
       await fetch("/api/bildirimler/okundu", { method: "POST" });
@@ -70,6 +82,7 @@ export function NotificationBell({ isLoggedIn }: { isLoggedIn: boolean }) {
   return (
     <div className="relative" ref={panelRef}>
       <button
+        ref={buttonRef}
         type="button"
         onClick={handleOpen}
         aria-label="Bildirimler"
@@ -81,8 +94,11 @@ export function NotificationBell({ isLoggedIn }: { isLoggedIn: boolean }) {
         )}
       </button>
 
-      {open && (
-        <div className="absolute top-full right-0 z-50 mt-2 w-80 overflow-hidden rounded-2xl border border-primary/20 bg-white shadow-2xl shadow-primary/20">
+      {open && panelPos && (
+        <div
+          style={{ top: panelPos.top, left: panelPos.left }}
+          className="fixed z-50 w-80 overflow-hidden rounded-2xl border border-primary/20 bg-white shadow-2xl shadow-primary/20"
+        >
           <div className="flex border-b border-primary/10">
             <button
               type="button"
