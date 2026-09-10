@@ -3,19 +3,40 @@
 import { useEffect, useState } from "react";
 
 /**
- * Reklam engelleyici tespiti: coklu reklam engelleyicilerin (uBlock,
- * AdBlock Plus vb.) kozmetik filtrelerinin hedef aldigi bilinen sinif
- * adlarina sahip "yem" bir eleman DOM'a eklenir. Engelleyici bu elemani
- * gizlerse (display:none, boyutu 0 vb.) reklam engelleyici oldugu
- * anlasilir. Site reklam geliriyle ucretsiz tutuldugu icin engelleyici
- * kapatilmadan sitenin geri kalanina erisim engellenir.
+ * Reklam engelleyici tespiti iki yontemi birlikte kullanir - modern
+ * engelleyiciler (ör. güncel uBlock Origin) sadece sinif adina gore
+ * gizleme yapan basit "yem" elemanlari artik es geçebiliyor, bu yuzden
+ * tek basina yeterli degil:
+ *
+ * 1) Bilinen bir reklam sunucusuna (Google AdSense yukleyicisi) gercek
+ *    bir istek atilir - engelleyiciler agirlikli olarak bu TUR gercek
+ *    reklam sunucusu isteklerini engelledigi icin bu yontem daha
+ *    guvenilir. Istek engellenirse fetch reddedilir.
+ * 2) Bilinen reklam sinif adlarina sahip bir "yem" eleman DOM'a eklenip
+ *    gizlenip gizlenmedigine bakilir (daha eski/basit engelleyicileri
+ *    yakalar).
+ *
+ * Ikisinden biri bile engellemeyi gosterirse reklam engelleyici aktif
+ * kabul edilir.
  */
-export function ReklamEngelleyiciKontrol() {
-  const [durum, setDurum] = useState<"kontrol" | "temiz" | "engellendi">("kontrol");
+async function agIstegiEngellendiMi(): Promise<boolean> {
+  try {
+    await fetch("https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js", {
+      method: "HEAD",
+      mode: "no-cors",
+      cache: "no-store",
+      signal: AbortSignal.timeout(2000),
+    });
+    return false;
+  } catch {
+    return true;
+  }
+}
 
-  function kontrolEt() {
+function yemElemaniGizliMi(): Promise<boolean> {
+  return new Promise((resolve) => {
     const yem = document.createElement("div");
-    yem.className = "adsbox ad-banner adsbygoogle advertisement ad-placement";
+    yem.className = "adsbox ad-banner adsbygoogle advertisement ad-placement pub_300x250";
     yem.setAttribute("aria-hidden", "true");
     yem.style.cssText = "position:absolute;top:0;left:-9999px;width:2px;height:2px;";
     document.body.appendChild(yem);
@@ -28,8 +49,18 @@ export function ReklamEngelleyiciKontrol() {
         stil.display === "none" ||
         stil.visibility === "hidden";
       document.body.removeChild(yem);
-      setDurum(gizlenmis ? "engellendi" : "temiz");
-    }, 300);
+      resolve(gizlenmis);
+    }, 400);
+  });
+}
+
+export function ReklamEngelleyiciKontrol() {
+  const [durum, setDurum] = useState<"kontrol" | "temiz" | "engellendi">("kontrol");
+
+  async function kontrolEt() {
+    setDurum("kontrol");
+    const [agEngellendi, yemGizli] = await Promise.all([agIstegiEngellendiMi(), yemElemaniGizliMi()]);
+    setDurum(agEngellendi || yemGizli ? "engellendi" : "temiz");
   }
 
   useEffect(() => {
@@ -47,14 +78,7 @@ export function ReklamEngelleyiciKontrol() {
           Siteyi kullanmaya devam edebilmek için lütfen reklam engelleyicini kapat ve sayfayı
           yeniden dene.
         </p>
-        <button
-          type="button"
-          onClick={() => {
-            setDurum("kontrol");
-            kontrolEt();
-          }}
-          className="mt-4 w-full rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90"
-        >
+        <button type="button" onClick={kontrolEt} className="mt-4 w-full rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90">
           Kapattım, Tekrar Dene
         </button>
       </div>
