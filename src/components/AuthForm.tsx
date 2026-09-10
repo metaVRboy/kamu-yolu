@@ -23,6 +23,7 @@ export function AuthForm({ mode }: { mode: "kayit" | "giris" }) {
   const [adSoyad, setAdSoyad] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordTekrar, setPasswordTekrar] = useState("");
   const [kvkkOnay, setKvkkOnay] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -92,6 +93,10 @@ export function AuthForm({ mode }: { mode: "kayit" | "giris" }) {
 
     if (passwordRequirementIssues(password).length > 0) {
       setError("Şifre gereksinimleri karşılanmıyor.");
+      return;
+    }
+    if (password !== passwordTekrar) {
+      setError("Şifreler eşleşmiyor.");
       return;
     }
     if (!kvkkOnay) {
@@ -227,6 +232,21 @@ export function AuthForm({ mode }: { mode: "kayit" | "giris" }) {
           {mode === "kayit" && <PasswordRequirementsHint password={password} />}
         </div>
         {mode === "kayit" && (
+          <div>
+            <Label className="mb-1.5">Şifre (Tekrar)</Label>
+            <PasswordInput
+              value={passwordTekrar}
+              onChange={(e) => setPasswordTekrar(e.target.value)}
+              required
+              aria-invalid={passwordTekrar.length > 0 && passwordTekrar !== password}
+              className="border-primary/20 bg-white"
+            />
+            {passwordTekrar.length > 0 && passwordTekrar !== password && (
+              <p className="mt-1 text-xs text-destructive">Şifreler eşleşmiyor.</p>
+            )}
+          </div>
+        )}
+        {mode === "kayit" && (
           <label className="flex items-start gap-2 text-xs text-slate-600">
             <input
               type="checkbox"
@@ -244,7 +264,15 @@ export function AuthForm({ mode }: { mode: "kayit" | "giris" }) {
         )}
         <TurnstileWidget onVerify={setTurnstileToken} />
         {error && <p className="text-sm text-destructive">{error}</p>}
-        <Button type="submit" disabled={loading || (TURNSTILE_ETKIN && !turnstileToken)} className="w-full">
+        <Button
+          type="submit"
+          disabled={
+            loading ||
+            (TURNSTILE_ETKIN && !turnstileToken) ||
+            (mode === "kayit" && password !== passwordTekrar)
+          }
+          className="w-full"
+        >
           {loading ? "Bekleyin..." : mode === "kayit" ? "Devam Et" : "Giriş Yap"}
         </Button>
       </form>

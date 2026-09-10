@@ -13,6 +13,8 @@ import { NotificationBell } from "@/components/NotificationBell";
 import { ProfileMenu } from "@/components/ProfileMenu";
 import { PageTransition } from "@/components/PageTransition";
 import { Toaster } from "@/components/ui/toast";
+import { CerezBildirimi } from "@/components/CerezBildirimi";
+import { ReklamEngelleyiciKontrol } from "@/components/ReklamEngelleyiciKontrol";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
@@ -189,6 +191,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                 <li><Link href="/kpss-puan-hesaplama" className="hover:text-white">KPSS Puan Hesaplama</Link></li>
                 <li><Link href="/becayis" className="hover:text-white">Becayiş İlanları</Link></li>
                 <li><Link href="/kvkk" className="hover:text-white">KVKK ve Kullanım Şartları</Link></li>
+                <li><Link href="/cerez-politikasi" className="hover:text-white">Çerez Politikası</Link></li>
               </ul>
             </div>
 
@@ -217,6 +220,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           </div>
         </footer>
         <Toaster />
+        <CerezBildirimi />
+        <ReklamEngelleyiciKontrol />
       </body>
     </html>
   );
