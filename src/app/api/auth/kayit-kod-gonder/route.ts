@@ -5,12 +5,14 @@ import { prisma } from "@/lib/prisma";
 import { hashPassword, isSessionConfigured } from "@/lib/auth";
 import { sendEmail } from "@/lib/email";
 import { passwordSchema } from "@/lib/authValidation";
+import { verifyTurnstileToken } from "@/lib/turnstile";
 
 const bodySchema = z.object({
   adSoyad: z.string().trim().min(2).max(100),
   email: z.string().trim().toLowerCase().email(),
   password: passwordSchema,
   kvkkOnay: z.literal(true, { message: "KVKK aydınlatma metnini onaylamalısınız." }),
+  turnstileToken: z.string().nullable().optional(),
 });
 
 const KOD_GECERLILIK_DAKIKA = 2;
@@ -32,7 +34,11 @@ export async function POST(req: NextRequest) {
       { status: 400 },
     );
   }
-  const { adSoyad, email, password } = parsed.data;
+  const { adSoyad, email, password, turnstileToken } = parsed.data;
+
+  if (!(await verifyTurnstileToken(turnstileToken))) {
+    return NextResponse.json({ error: "İnsan doğrulaması başarısız. Lütfen tekrar deneyin." }, { status: 400 });
+  }
 
   try {
     const existingUser = await prisma.user.findUnique({ where: { email } });

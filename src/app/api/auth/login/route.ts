@@ -3,10 +3,12 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { createSession, isSessionConfigured, verifyPassword } from "@/lib/auth";
 import { clearFailures, getLockoutState, lockoutMessage, recordFailure } from "@/lib/authAbuse";
+import { verifyTurnstileToken } from "@/lib/turnstile";
 
 const bodySchema = z.object({
   email: z.string().trim().toLowerCase().email(),
   password: z.string().min(1),
+  turnstileToken: z.string().nullable().optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -22,7 +24,11 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Geçersiz bilgiler." }, { status: 400 });
   }
-  const { email, password } = parsed.data;
+  const { email, password, turnstileToken } = parsed.data;
+
+  if (!(await verifyTurnstileToken(turnstileToken))) {
+    return NextResponse.json({ error: "İnsan doğrulaması başarısız. Lütfen tekrar deneyin." }, { status: 400 });
+  }
 
   const lockout = await getLockoutState(email);
   if (lockout.locked && lockout.lockedUntil) {

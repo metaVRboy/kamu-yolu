@@ -11,8 +11,12 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { toast } from "@/components/ui/toast";
 import { passwordRequirementIssues } from "@/lib/authValidation";
 import { PasswordRequirementsHint } from "@/components/SifreSifirlaForm";
+import { TurnstileWidget } from "@/components/TurnstileWidget";
 
 const KOD_GECERLILIK_SANIYE = 120;
+// Site key tanimli degilse (ör. yerel gelistirme ortaminda henuz
+// ayarlanmadiysa) formu tamamen kilitlememek icin dogrulamayi atla.
+const TURNSTILE_ETKIN = !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 export function AuthForm({ mode }: { mode: "kayit" | "giris" }) {
   const router = useRouter();
@@ -25,6 +29,7 @@ export function AuthForm({ mode }: { mode: "kayit" | "giris" }) {
   const [kodAsamasi, setKodAsamasi] = useState(false);
   const [kod, setKod] = useState("");
   const [kalanSaniye, setKalanSaniye] = useState(KOD_GECERLILIK_SANIYE);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   useEffect(() => {
     if (!kodAsamasi || kalanSaniye <= 0) return;
@@ -40,7 +45,7 @@ export function AuthForm({ mode }: { mode: "kayit" | "giris" }) {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, turnstileToken }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -63,7 +68,7 @@ export function AuthForm({ mode }: { mode: "kayit" | "giris" }) {
       const res = await fetch("/api/auth/kayit-kod-gonder", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ adSoyad, email, password, kvkkOnay }),
+        body: JSON.stringify({ adSoyad, email, password, kvkkOnay, turnstileToken }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -237,8 +242,9 @@ export function AuthForm({ mode }: { mode: "kayit" | "giris" }) {
             </span>
           </label>
         )}
+        <TurnstileWidget onVerify={setTurnstileToken} />
         {error && <p className="text-sm text-destructive">{error}</p>}
-        <Button type="submit" disabled={loading} className="w-full">
+        <Button type="submit" disabled={loading || (TURNSTILE_ETKIN && !turnstileToken)} className="w-full">
           {loading ? "Bekleyin..." : mode === "kayit" ? "Devam Et" : "Giriş Yap"}
         </Button>
       </form>
