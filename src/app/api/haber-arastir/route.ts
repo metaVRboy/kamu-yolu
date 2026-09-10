@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { researchHaberler } from "@/lib/haberResearch";
+import { haberleriEkleVeTekillestir } from "@/lib/haberDedupe";
 
 export const maxDuration = 290;
 
@@ -31,23 +32,13 @@ async function runHaberArastir(req: NextRequest) {
     );
 
     const yeniler = bulunanlar.filter((h) => !mevcutUrller.has(h.kaynakUrl));
-
-    if (yeniler.length > 0) {
-      await prisma.haber.createMany({
-        data: yeniler.map((h) => ({
-          baslik: h.baslik,
-          ozet: h.ozet,
-          kaynakUrl: h.kaynakUrl,
-          gorselUrl: h.gorselUrl,
-          gorselLogoMu: h.gorselLogoMu,
-        })),
-      });
-    }
+    const { eklenen, degistirilen } = await haberleriEkleVeTekillestir(yeniler);
 
     return NextResponse.json({
       ok: true,
       bulunan: bulunanlar.length,
-      eklenen: yeniler.length,
+      eklenen,
+      degistirilen,
       atlanan: bulunanlar.length - yeniler.length,
     });
   } catch (err) {

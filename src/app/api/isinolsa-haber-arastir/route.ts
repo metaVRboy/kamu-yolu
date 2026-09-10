@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { fetchIsinolsaIlanlari } from "@/scraper/isinolsaClient";
 import { researchIsinolsaLeads } from "@/lib/isinolsaHaberResearch";
+import { haberleriEkleVeTekillestir } from "@/lib/haberDedupe";
 
 export const maxDuration = 290;
 
@@ -65,17 +66,15 @@ async function runIsinolsaHaberArastir(req: NextRequest) {
       (s) => s.dogrulandi && s.resmiKaynakUrl && !mevcutUrller.has(s.resmiKaynakUrl),
     );
 
-    if (yeniHaberler.length > 0) {
-      await prisma.haber.createMany({
-        data: yeniHaberler.map((s) => ({
-          baslik: s.baslik!,
-          ozet: s.ozet!,
-          kaynakUrl: s.resmiKaynakUrl!,
-          gorselUrl: s.gorselUrl,
-          gorselLogoMu: s.gorselLogoMu,
-        })),
-      });
-    }
+    const { eklenen, degistirilen } = await haberleriEkleVeTekillestir(
+      yeniHaberler.map((s) => ({
+        baslik: s.baslik!,
+        ozet: s.ozet!,
+        kaynakUrl: s.resmiKaynakUrl!,
+        gorselUrl: s.gorselUrl,
+        gorselLogoMu: s.gorselLogoMu,
+      })),
+    );
 
     // Denenen HER lead'i (dogrulanmis olsun olmasin) isaretle ki tekrar
     // tekrar arastirilmasin.
@@ -89,7 +88,8 @@ async function runIsinolsaHaberArastir(req: NextRequest) {
       toplamLead: ilanlar.length,
       yeniLead: yeniLeadler.length,
       dogrulanan: sonuclar.filter((s) => s.dogrulandi).length,
-      eklenenHaber: yeniHaberler.length,
+      eklenenHaber: eklenen,
+      degistirilenHaber: degistirilen,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
