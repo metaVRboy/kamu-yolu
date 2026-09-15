@@ -29,6 +29,7 @@ const PLANLAR: {
       "Tüm ilanları görüntüleme",
       "Bölüm/seviyeye göre arama",
       "Yeni ilan bildirimleri",
+      "Becayiş ilanlarını görüntüleme",
     ],
   },
   {
@@ -42,6 +43,7 @@ const PLANLAR: {
       "Standart'taki her şey",
       "Bana özel ilanlar",
       "SMS ile anlık ilan bildirimi",
+      "Becayiş için site içi mesajlaşma",
     ],
   },
   {
@@ -54,6 +56,7 @@ const PLANLAR: {
       "Pro'daki her şey",
       "Öncelikli destek",
       "Ek özellikler (yakında)",
+      "Reklamsız deneyim",
     ],
   },
 ];
