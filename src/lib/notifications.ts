@@ -50,6 +50,9 @@ export async function deleteTumBildirimler(userId: string) {
  * Yeni bir ilan belirli bolumlerle eslestiginde, o bolumu profilinde
  * secmis kullanicilara "bolumune uygun ilan" bildirimi olusturur.
  * Scraper, her ilanin bolum eslesmeleri kaydedildikten sonra cagirir.
+ *
+ * Bu, "Bana ozel ilanlar" ile ayni Pro ozelligi - Standart (UCRETSIZ)
+ * kullanicilar bu bildirimi almaz.
  */
 export async function notifyUsersForMatchedPosting(params: {
   postingTitle: string;
@@ -58,7 +61,10 @@ export async function notifyUsersForMatchedPosting(params: {
   if (params.departments.length === 0) return;
 
   const users = await prisma.user.findMany({
-    where: { departmentId: { in: params.departments.map((d) => d.departmentId) } },
+    where: {
+      departmentId: { in: params.departments.map((d) => d.departmentId) },
+      abonelikPlani: { not: "UCRETSIZ" },
+    },
     select: { id: true, departmentId: true },
   });
   if (users.length === 0) return;
