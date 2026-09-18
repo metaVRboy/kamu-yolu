@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { getCurrentUser } from "@/lib/auth";
 import { SITE_URL } from "@/lib/site";
 import { SiteMenu } from "@/components/SiteMenu";
+import { HeaderNavLink } from "@/components/HeaderNavLink";
 import { AdSlot } from "@/components/AdSlot";
 import { NotificationBell } from "@/components/NotificationBell";
 import { ProfileMenu } from "@/components/ProfileMenu";
@@ -55,25 +56,15 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                   alt="Kamu Yolu"
                   width={716}
                   height={537}
-                  className="h-10 w-auto sm:h-11"
+                  className="h-9 w-auto sm:h-10"
                   priority
                 />
               </Link>
               <nav className="hidden items-center gap-1 xl:flex">
-                <Link
-                  href="/kpss-puan-hesaplama"
-                  className="rounded-lg bg-primary/8 px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/15"
-                >
-                  KPSS Puan Hesaplama
-                </Link>
+                <HeaderNavLink href="/kpss-puan-hesaplama">KPSS Puan Hesaplama</HeaderNavLink>
 
                 <div className="group relative">
-                  <Link
-                    href="/ilanlar"
-                    className="rounded-lg bg-primary/8 px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/15"
-                  >
-                    Aktif İlanlar
-                  </Link>
+                  <HeaderNavLink href="/ilanlar">Aktif İlanlar</HeaderNavLink>
                   <div className="absolute left-0 top-full z-50 w-56 pt-1 opacity-0 pointer-events-none transition-opacity group-hover:opacity-100 group-hover:pointer-events-auto">
                     <div className="overflow-hidden rounded-xl border border-primary/20 bg-white py-1.5 shadow-xl shadow-primary/10">
                       <Link
@@ -102,12 +93,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
 
             <div className="flex items-center gap-2">
               <div className="group relative hidden xl:block">
-                <Link
-                  href="/becayis"
-                  className="rounded-lg bg-primary/8 px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/15"
-                >
-                  Becayiş İlanları
-                </Link>
+                <HeaderNavLink href="/becayis">Becayiş İlanları</HeaderNavLink>
                 <div className="absolute right-0 top-full z-50 w-48 pt-1 opacity-0 pointer-events-none transition-opacity group-hover:opacity-100 group-hover:pointer-events-auto">
                   <div className="overflow-hidden rounded-xl border border-primary/20 bg-white py-1.5 shadow-xl shadow-primary/10">
                     <Link
