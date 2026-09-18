@@ -45,14 +45,24 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="tr" className={cn("h-full antialiased", inter.variable, "font-sans")}>
       <body className="flex min-h-full flex-col bg-white text-foreground">
-        <header className="sticky top-0 z-40 border-b border-primary/20 bg-primary/15 backdrop-blur-xl">
-          <div className="relative flex w-full items-center justify-between px-4 py-[15px] sm:px-6">
-            <div className="flex items-center gap-4">
+        <header className="sticky top-0 z-40 border-b border-border bg-white/90 backdrop-blur-xl">
+          <div className="flex w-full items-center justify-between gap-4 px-4 py-3 sm:px-6">
+            <div className="flex items-center gap-5">
               <SiteMenu />
-              <nav className="hidden items-center gap-2 xl:flex">
+              <Link href="/" className="shrink-0">
+                <Image
+                  src="/brand/kamu-yolu-logo.png"
+                  alt="Kamu Yolu"
+                  width={716}
+                  height={537}
+                  className="h-10 w-auto sm:h-11"
+                  priority
+                />
+              </Link>
+              <nav className="hidden items-center gap-1.5 xl:flex">
                 <Link
                   href="/kpss-puan-hesaplama"
-                  className="flex items-center gap-1.5 rounded-xl bg-primary px-3.5 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                  className="flex items-center gap-1.5 rounded-xl bg-primary/10 px-3.5 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary hover:text-white"
                 >
                   <Calculator className="h-4 w-4" />
                   KPSS Puan Hesaplama
@@ -61,7 +71,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                 <div className="group relative">
                   <Link
                     href="/ilanlar"
-                    className="flex items-center gap-1.5 rounded-xl bg-primary px-3.5 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                    className="flex items-center gap-1.5 rounded-xl bg-primary/10 px-3.5 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary hover:text-white"
                   >
                     <ListChecks className="h-4 w-4" />
                     Aktif İlanlar
@@ -92,25 +102,11 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               </nav>
             </div>
 
-            <Link
-              href="/"
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-            >
-              <Image
-                src="/brand/kamu-yolu-logo.png"
-                alt="Kamu Yolu"
-                width={716}
-                height={537}
-                className="h-[55px] w-auto sm:h-[60px]"
-                priority
-              />
-            </Link>
-
             <div className="flex items-center gap-2">
               <div className="group relative hidden xl:block">
                 <Link
                   href="/becayis"
-                  className="flex items-center gap-1.5 rounded-xl bg-primary px-3.5 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                  className="flex items-center gap-1.5 rounded-xl bg-primary/10 px-3.5 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary hover:text-white"
                 >
                   <Repeat className="h-4 w-4" />
                   Becayiş İlanları
