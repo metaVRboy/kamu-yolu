@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
-import { Repeat, Calculator, ListChecks, UserRound } from "lucide-react";
+import { UserRound } from "lucide-react";
 import { getLastSuccessfulScrapeAt } from "@/lib/matching";
 import { cn } from "@/lib/utils";
 import { getCurrentUser } from "@/lib/auth";
@@ -59,21 +59,19 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                   priority
                 />
               </Link>
-              <nav className="hidden items-center gap-1.5 xl:flex">
+              <nav className="hidden items-center gap-1 xl:flex">
                 <Link
                   href="/kpss-puan-hesaplama"
-                  className="flex items-center gap-1.5 rounded-xl bg-primary/10 px-3.5 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary hover:text-white"
+                  className="rounded-lg bg-primary/8 px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/15"
                 >
-                  <Calculator className="h-4 w-4" />
                   KPSS Puan Hesaplama
                 </Link>
 
                 <div className="group relative">
                   <Link
                     href="/ilanlar"
-                    className="flex items-center gap-1.5 rounded-xl bg-primary/10 px-3.5 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary hover:text-white"
+                    className="rounded-lg bg-primary/8 px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/15"
                   >
-                    <ListChecks className="h-4 w-4" />
                     Aktif İlanlar
                   </Link>
                   <div className="absolute left-0 top-full z-50 w-56 pt-1 opacity-0 pointer-events-none transition-opacity group-hover:opacity-100 group-hover:pointer-events-auto">
@@ -106,9 +104,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               <div className="group relative hidden xl:block">
                 <Link
                   href="/becayis"
-                  className="flex items-center gap-1.5 rounded-xl bg-primary/10 px-3.5 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary hover:text-white"
+                  className="rounded-lg bg-primary/8 px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/15"
                 >
-                  <Repeat className="h-4 w-4" />
                   Becayiş İlanları
                 </Link>
                 <div className="absolute right-0 top-full z-50 w-48 pt-1 opacity-0 pointer-events-none transition-opacity group-hover:opacity-100 group-hover:pointer-events-auto">
@@ -140,7 +137,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               ) : (
                 <Link
                   href="/giris"
-                  className="flex h-9 items-center justify-center gap-1.5 rounded-xl bg-primary/10 px-2.5 text-sm font-medium text-primary transition-colors hover:bg-primary hover:text-white sm:px-4"
+                  className="flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border bg-white px-2.5 text-sm font-medium text-slate-600 transition-colors hover:border-primary/30 hover:text-primary sm:px-4"
                 >
                   <UserRound className="h-4 w-4 sm:hidden" />
                   <span className="hidden sm:inline">Giriş Yap</span>
