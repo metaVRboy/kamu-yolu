@@ -46,9 +46,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="tr" className={cn("h-full antialiased", inter.variable, "font-sans")}>
       <body className="flex min-h-full flex-col bg-white text-foreground">
-        <header className="sticky top-0 z-40 border-b border-white/10 bg-slate-950">
+        <header className="sticky top-0 z-40 border-b border-border bg-white/90 backdrop-blur-xl">
           <div className="relative flex w-full items-center justify-between gap-4 px-4 py-3 sm:px-6">
-            <div className="flex items-center gap-5">
+            <div className="flex items-center gap-3">
               <SiteMenu />
               <Link href="/" className="shrink-0">
                 <Image
@@ -56,13 +56,14 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                   alt="Kamu Yolu"
                   width={716}
                   height={537}
-                  className="h-9 w-auto brightness-0 invert sm:h-10"
+                  className="h-9 w-auto sm:h-10"
                   priority
                 />
               </Link>
-              <div className="hidden xl:block">
-                <HeaderNav />
-              </div>
+            </div>
+
+            <div className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 xl:block">
+              <HeaderNav />
             </div>
 
             <div className="flex items-center gap-2">
@@ -72,7 +73,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               ) : (
                 <Link
                   href="/giris"
-                  className="flex h-9 items-center justify-center gap-1.5 rounded-lg px-2.5 text-sm font-medium text-slate-300 transition-colors hover:bg-white/10 hover:text-white sm:px-4"
+                  className="flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border bg-white px-2.5 text-sm font-medium text-slate-600 transition-colors hover:border-primary/30 hover:text-primary sm:px-4"
                 >
                   <UserRound className="h-4 w-4 sm:hidden" />
                   <span className="hidden sm:inline">Giriş Yap</span>

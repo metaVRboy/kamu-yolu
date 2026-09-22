@@ -98,8 +98,8 @@ export function HeaderNav() {
           href={link.href}
           onMouseEnter={handlePlainEnter}
           className={cn(
-            "rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-            isActive(link.href) ? "bg-white/10 text-white" : "text-slate-300 hover:text-white",
+            "rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors",
+            isActive(link.href) ? "bg-primary/10 text-primary" : "text-slate-600 hover:text-primary",
           )}
         >
           {link.label}
@@ -115,10 +115,10 @@ export function HeaderNav() {
           }}
           onMouseEnter={() => handleTriggerEnter(index)}
           className={cn(
-            "flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+            "flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors",
             isActive(group.href) || openIndex === index
-              ? "bg-white/10 text-white"
-              : "text-slate-300 hover:text-white",
+              ? "bg-primary/10 text-primary"
+              : "text-slate-600 hover:text-primary",
           )}
         >
           {group.label}
@@ -136,7 +136,7 @@ export function HeaderNav() {
           <div
             key={openIndex}
             className={cn(
-              "w-56 overflow-hidden rounded-2xl border border-white/10 bg-slate-900 p-1.5 shadow-2xl shadow-black/40",
+              "w-56 overflow-hidden rounded-2xl border border-primary/20 bg-white p-1.5 shadow-xl shadow-primary/10",
               direction === "right" ? "animate-menu-slide-right" : "animate-menu-slide-left",
             )}
           >
@@ -144,7 +144,7 @@ export function HeaderNav() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="block rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition-colors hover:bg-white/5 hover:text-white"
+                className="block rounded-lg px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-primary/10 hover:text-slate-900"
               >
                 {item.label}
               </Link>

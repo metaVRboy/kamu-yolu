@@ -26,13 +26,13 @@ export function SiteMenu() {
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? "Menüyü kapat" : "Menüyü aç"}
         aria-expanded={open}
-        className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-300 transition-colors hover:bg-white/10 hover:text-white"
+        className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-700 transition-colors hover:bg-primary/10 hover:text-slate-900"
       >
         {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </button>
 
       {open && (
-        <div className="absolute inset-x-0 top-full z-50 border-b border-white/10 bg-slate-900 shadow-2xl shadow-black/40">
+        <div className="absolute inset-x-0 top-full z-50 border-b border-border bg-white shadow-xl shadow-primary/10">
           <nav className="flex flex-col gap-1 p-3">
             {PLAIN_LINKS.map((link) => (
               <Link
@@ -41,7 +41,7 @@ export function SiteMenu() {
                 onClick={() => setOpen(false)}
                 className={cn(
                   "rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                  isActive(link.href) ? "bg-white/10 text-white" : "text-slate-300 hover:bg-white/5 hover:text-white",
+                  isActive(link.href) ? "bg-primary/10 text-primary" : "text-slate-700 hover:bg-primary/10 hover:text-slate-900",
                 )}
               >
                 {link.label}
@@ -57,20 +57,20 @@ export function SiteMenu() {
                     onClick={() => setOpenGroup(isOpen ? null : group.label)}
                     className={cn(
                       "flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                      isActive(group.href) ? "bg-white/10 text-white" : "text-slate-300 hover:bg-white/5 hover:text-white",
+                      isActive(group.href) ? "bg-primary/10 text-primary" : "text-slate-700 hover:bg-primary/10 hover:text-slate-900",
                     )}
                   >
                     {group.label}
                     <ChevronDown className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")} />
                   </button>
                   {isOpen && (
-                    <div className="ml-3 flex flex-col gap-1 border-l border-white/10 pl-3">
+                    <div className="ml-3 flex flex-col gap-1 border-l border-primary/15 pl-3">
                       {group.items.map((item) => (
                         <Link
                           key={item.href}
                           href={item.href}
                           onClick={() => setOpen(false)}
-                          className="rounded-lg px-3 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-white/5 hover:text-white"
+                          className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-primary/10 hover:text-slate-900"
                         >
                           {item.label}
                         </Link>
