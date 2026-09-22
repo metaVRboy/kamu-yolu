@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 export const PLAIN_LINKS = [
   { href: "/", label: "Ana Sayfa" },
-  { href: "/amacimiz", label: "Amacımız" },
+  { href: "/amacimiz", label: "Hakkımızda" },
   { href: "/haberler", label: "Haberler" },
   { href: "/kpss-puan-hesaplama", label: "KPSS Puan Hesaplama" },
 ];

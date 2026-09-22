@@ -28,7 +28,6 @@ const PLANLAR: {
     ozellikler: [
       "Tüm ilanları görüntüleme",
       "Bölüm/seviyeye göre arama",
-      "Yeni ilan bildirimleri",
       "Becayiş ilanlarını görüntüleme",
     ],
   },
@@ -41,6 +40,7 @@ const PLANLAR: {
     populer: true,
     ozellikler: [
       "Standart'taki her şey",
+      "Yeni ilan bildirimleri",
       "Bana özel ilanlar",
       "SMS ile anlık ilan bildirimi",
       "Becayiş için site içi mesajlaşma",

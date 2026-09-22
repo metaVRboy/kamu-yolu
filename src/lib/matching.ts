@@ -11,6 +11,7 @@ export type PostingFilters = {
   institutionType?: string;
   ilanTuru?: string;
   il?: string;
+  departmentRequirement?: "var" | "yok";
 };
 
 /**
@@ -68,6 +69,11 @@ function buildFilterWhere(filters?: PostingFilters): Prisma.PostingWhereInput {
   }
   if (filters?.il) {
     where.iller = { has: filters.il };
+  }
+  if (filters?.departmentRequirement === "var") {
+    where.isDepartmentRestricted = true;
+  } else if (filters?.departmentRequirement === "yok") {
+    where.isDepartmentRestricted = false;
   }
   return where;
 }

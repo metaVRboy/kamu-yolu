@@ -45,6 +45,9 @@ Aradigin haber turleri:
 - Kamu calisanlarini (ozellikle saglik personeli, ogretmen, memur) ilgilendiren
   sendika aciklamalari/haberleri
 - Kamuda yeni kadro, atama, ozluk haklariyla ilgili resmi/gazete haberleri
+- Bu arastirma sirasinda secmeyemektarifleri.net sitesini de mutlaka ara/kontrol
+  et - bu site diger kaynaklarda az rastlanan kamu personeli alim haberlerini de
+  yayinliyor.
 
 KRITIK KURALLAR:
 - SADECE gercekten arama sonuclarinda bulup okudugun, gercek bir kaynagi
@@ -52,10 +55,11 @@ KRITIK KURALLAR:
   genellemeyle doldurma. Yeterli sayida gercek/guncel haber bulamazsan,
   bulduklarinla yetin veya bos liste don - eksik sayida gercek haber,
   uydurma haberden iyidir.
-- isinolsa.com sitesini kaynak olarak ASLA kullanma/gosterme - bu site
-  sadece diger sitelerin ilanlarini topluyor, orijinal kaynak degil. O
-  siteyi bulursan, ayni haberin resmi/orijinal haber kaynagini (bakanlik,
-  kurum sitesi, Resmi Gazete, buyuk bir haber ajansi/gazete vb.) ara.`;
+- isinolsa.com ve secmeyemektarifleri.net sitelerini kaynak olarak ASLA
+  kullanma/gosterme - bunlar sadece diger sitelerin ilanlarini toplayan
+  siteler, orijinal kaynak degiller. Bu siteleri bulursan, ayni haberin
+  resmi/orijinal haber kaynagini (bakanlik, kurum sitesi, Resmi Gazete,
+  buyuk bir haber ajansi/gazete vb.) ara.`;
 
 /**
  * Kamu personel alimlariyla ilgili guncel haberleri web aramasiyla arastirir.
@@ -88,7 +92,7 @@ export async function researchHaberler(): Promise<HaberResearchItem[]> {
     const cozulmus = await Promise.all(
       result.data.haberler.map(async (h): Promise<HaberResearchItem | null> => {
         const kaynakUrl = await resolveGroundingUrl(h.kaynakUrl);
-        if (!kaynakUrl || kaynakUrl.includes("isinolsa.com")) return null;
+        if (!kaynakUrl || kaynakUrl.includes("isinolsa.com") || kaynakUrl.includes("secmeyemektarifleri.net")) return null;
 
         // Sayfa teknik olarak acilsa bile tamamen alakasiz olabilir -
         // gercek icerigi tekrar dogrulanmadan hicbir kaynak kabul edilmez.

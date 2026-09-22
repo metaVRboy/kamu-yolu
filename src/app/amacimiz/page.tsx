@@ -8,7 +8,7 @@ import {
 export const revalidate = 300;
 
 export const metadata = {
-  title: "Amacımız — Kamu Yolu",
+  title: "Hakkımızda — Kamu Yolu",
   description: "Kamu Yolu neden var, nasıl çalışır ve verileri nereden alıyor.",
 };
 
@@ -18,7 +18,7 @@ export default async function AmacimizPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
       <h1 className="text-center font-sans text-2xl font-bold tracking-tight text-primary sm:text-3xl">
-        Amacımız
+        Hakkımızda
       </h1>
       <p className="mx-auto mt-2 max-w-xl text-center text-sm text-muted-foreground">
         Kamu Yolu&apos;nu neden kurduk, nasıl çalışıyor ve verilerin doğruluğunu nasıl

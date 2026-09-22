@@ -20,10 +20,11 @@ export default async function DepartmentResultsPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ kurum?: string; ilanTuru?: string; il?: string }>;
+  searchParams: Promise<{ kurum?: string; ilanTuru?: string; il?: string; bolumSarti?: string }>;
 }) {
   const { slug } = await params;
-  const { kurum, ilanTuru, il } = await searchParams;
+  const { kurum, ilanTuru, il, bolumSarti } = await searchParams;
+  const departmentRequirement = bolumSarti === "var" || bolumSarti === "yok" ? bolumSarti : undefined;
 
   const department = await prisma.department.findUnique({ where: { slug } });
   if (!department) notFound();
@@ -33,6 +34,7 @@ export default async function DepartmentResultsPage({
       institutionType: kurum,
       ilanTuru,
       il,
+      departmentRequirement,
     }),
     getAvailableFiltersForDepartment(department.id),
     getHaberlerForDepartment(department),

@@ -18,16 +18,18 @@ export default async function LevelResultsPage({
   searchParams,
 }: {
   params: Promise<{ level: string }>;
-  searchParams: Promise<{ kurum?: string; ilanTuru?: string; il?: string }>;
+  searchParams: Promise<{ kurum?: string; ilanTuru?: string; il?: string; bolumSarti?: string }>;
 }) {
   const { level: levelSlug } = await params;
-  const { kurum, ilanTuru, il } = await searchParams;
+  const { kurum, ilanTuru, il, bolumSarti } = await searchParams;
 
   const level = LEVEL_SLUG_TO_ENUM[levelSlug];
   if (!level) notFound();
 
+  const departmentRequirement = bolumSarti === "var" || bolumSarti === "yok" ? bolumSarti : undefined;
+
   const [postings, filterOptions] = await Promise.all([
-    getPostingsForLevel(level, { institutionType: kurum, ilanTuru, il }),
+    getPostingsForLevel(level, { institutionType: kurum, ilanTuru, il, departmentRequirement }),
     getAvailableFiltersForLevel(level),
   ]);
 

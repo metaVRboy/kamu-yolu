@@ -24,6 +24,7 @@ const PARAM_KEYS = {
   institutionType: "kurum",
   ilanTuru: "ilanTuru",
   il: "il",
+  departmentRequirement: "bolumSarti",
 } as const;
 
 export function FilterBar({ options }: { options: FilterOptions }) {
@@ -45,18 +46,29 @@ export function FilterBar({ options }: { options: FilterOptions }) {
   const hasActiveFilters =
     searchParams.get(PARAM_KEYS.institutionType) ||
     searchParams.get(PARAM_KEYS.ilanTuru) ||
-    searchParams.get(PARAM_KEYS.il);
-
-  if (
-    options.institutionTypes.length === 0 &&
-    options.ilanTurleri.length === 0 &&
-    options.iller.length === 0
-  ) {
-    return null;
-  }
+    searchParams.get(PARAM_KEYS.il) ||
+    searchParams.get(PARAM_KEYS.departmentRequirement);
 
   return (
     <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-primary/20 bg-white p-3 shadow-sm">
+      <Select
+        value={searchParams.get(PARAM_KEYS.departmentRequirement) ?? ALL}
+        onValueChange={(v) => updateParam(PARAM_KEYS.departmentRequirement, v)}
+      >
+        <SelectTrigger className="w-[190px] border-primary/20 bg-white">
+          <SelectValue>
+            {(v: string) =>
+              v === ALL || !v ? "Bölüm Şartı: Tümü" : v === "var" ? "Bölüm Şartı: Var" : "Bölüm Şartı: Yok"
+            }
+          </SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={ALL}>Bölüm Şartı: Tümü</SelectItem>
+          <SelectItem value="var">Bölüm Şartı: Var</SelectItem>
+          <SelectItem value="yok">Bölüm Şartı: Yok</SelectItem>
+        </SelectContent>
+      </Select>
+
       {options.institutionTypes.length > 1 && (
         <Select
           value={searchParams.get(PARAM_KEYS.institutionType) ?? ALL}

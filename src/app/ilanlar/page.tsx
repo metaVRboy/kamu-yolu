@@ -14,12 +14,13 @@ export const metadata = {
 export default async function TumIlanlarPage({
   searchParams,
 }: {
-  searchParams: Promise<{ kurum?: string; ilanTuru?: string; il?: string }>;
+  searchParams: Promise<{ kurum?: string; ilanTuru?: string; il?: string; bolumSarti?: string }>;
 }) {
-  const { kurum, ilanTuru, il } = await searchParams;
+  const { kurum, ilanTuru, il, bolumSarti } = await searchParams;
+  const departmentRequirement = bolumSarti === "var" || bolumSarti === "yok" ? bolumSarti : undefined;
 
   const [postings, filterOptions] = await Promise.all([
-    getAllActivePostings({ institutionType: kurum, ilanTuru, il }),
+    getAllActivePostings({ institutionType: kurum, ilanTuru, il, departmentRequirement }),
     getAvailableFiltersForAll(),
   ]);
 
