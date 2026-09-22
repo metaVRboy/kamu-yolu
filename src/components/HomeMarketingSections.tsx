@@ -58,28 +58,24 @@ export function ProblemSection() {
 
 const STEPS = [
   {
-    who: "Sen",
     icon: MessageCircle,
-    title: "Bölümünü ya da mesleğini söyle",
+    title: "Bölümünü ya da mesleğini yaz",
     description:
-      "Yukarıdaki asistana sohbet eder gibi yaz: mezun olduğun bölümü, öğrenim düzeyini ya da ne aradığını.",
+      "Ana sayfadaki arama kutusuna bölümünü yazmaya başla, çıkan öneriler arasından kendi bölümünü seç.",
   },
   {
-    who: "Kamu Yolu",
     icon: Wand2,
-    title: "Yapay zeka anlıyor ve eşleştiriyor",
+    title: "Eşleşen ilanları buluruz",
     description:
-      "Bölümün veritabanımızda yoksa bile internetten araştırıp ne iş yaptığını öğrenir, kalıcı olarak ekler ve seninle eşleştirir.",
+      "Bölümüne özel açılmış ilanlar ile bölüm şartı olmayan, öğrenim düzeyine uygun genel ilanlar bir araya getirilir.",
   },
   {
-    who: "Kamu Yolu",
     icon: ListChecks,
     title: "Güncel ilanları listeliyoruz",
     description:
       "Bakanlık, üniversite, hastane, belediye ve daha fazlası — bölümüne uygun ya da bölüm şartı olmayan tüm açık ilanlar periyodik olarak taranır.",
   },
   {
-    who: "Sen",
     icon: ExternalLink,
     title: "İlana tıkla, doğrudan başvur",
     description:
@@ -106,11 +102,7 @@ export function HowItWorksSection() {
               <step.icon className="h-5 w-5" />
             </span>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-primary">
-                  {i + 1}. {step.who}
-                </span>
-              </div>
+              <span className="text-xs font-semibold text-primary">Adım {i + 1}</span>
               <h3 className="mt-0.5 font-semibold text-slate-900">{step.title}</h3>
               <p className="mt-1 text-sm text-muted-foreground">{step.description}</p>
             </div>
