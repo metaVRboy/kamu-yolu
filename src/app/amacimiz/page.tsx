@@ -2,6 +2,7 @@ import { getHomepageStats } from "@/lib/matching";
 import {
   HowItWorksSection,
   ProblemSection,
+  SiteFeaturesSection,
   TrustSection,
 } from "@/components/HomeMarketingSections";
 
@@ -31,7 +32,13 @@ export default async function AmacimizPage() {
 
       <HowItWorksSection />
 
-      <TrustSection postingCount={stats.postingCount} institutionCount={stats.institutionCount} />
+      <SiteFeaturesSection />
+
+      <TrustSection
+        postingCount={stats.postingCount}
+        institutionCount={stats.institutionCount}
+        departmentCount={stats.departmentCount}
+      />
     </div>
   );
 }

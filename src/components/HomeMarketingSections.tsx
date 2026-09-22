@@ -10,6 +10,16 @@ import {
   Wand2,
   Layers,
   ExternalLink,
+  Newspaper,
+  Calculator,
+  Repeat,
+  Bell,
+  UserRound,
+  Sparkles,
+  Gem,
+  Smartphone,
+  ShieldCheck,
+  SlidersHorizontal,
 } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -111,6 +121,100 @@ export function HowItWorksSection() {
   );
 }
 
+const SITE_FEATURES = [
+  {
+    icon: SlidersHorizontal,
+    title: "Bölüme ve Seviyeye Göre Arama",
+    description:
+      "Ana sayfadaki arama kutusuna bölümünü yaz; lise, önlisans veya lisans seviyesine göre de ayrı sayfalardan ilanlara ulaş.",
+  },
+  {
+    icon: ListChecks,
+    title: "Aktif İlanlar ve Filtreler",
+    description:
+      "Tüm güncel ilanları tek sayfada gör; kurum türü, il, ilan türü ve \"bölüm şartı var/yok\" filtreleriyle daralt.",
+  },
+  {
+    icon: Newspaper,
+    title: "Haberler",
+    description:
+      "Kamu personeli alımıyla ilgili güncel haberleri yapay zeka birden fazla kaynaktan araştırır; yayınlamadan önce her haberi resmi kaynağından (bakanlık, kurum sitesi, Resmi Gazete) doğrular.",
+  },
+  {
+    icon: Calculator,
+    title: "KPSS Puan Hesaplama",
+    description: "Sınav sonuçlarını girerek KPSS puanını hızlıca hesapla.",
+  },
+  {
+    icon: Repeat,
+    title: "Becayiş İlanları",
+    description:
+      "Yer değiştirmek isteyen kamu çalışanları için talep oluştur, ilgi duyduğun talepleri takip et, site içi mesajlaşmayla doğrudan iletişime geç.",
+  },
+  {
+    icon: Bell,
+    title: "Bildirimler",
+    description:
+      "Genel duyurular herkese açık; bölümüne uygun yeni ilan çıktığında veya becayiş talebine mesaj geldiğinde ayrıca haberdar olursun.",
+  },
+  {
+    icon: UserRound,
+    title: "Hesap ve Profil",
+    description:
+      "E-posta doğrulamalı kayıt, güvenli giriş (insan doğrulamalı) ve profilinden bölüm/öğrenim düzeyi bilgini güncelleme.",
+  },
+  {
+    icon: Sparkles,
+    title: "Bana Özel İlanlar",
+    description:
+      "Profilinde belirttiğin bölüm veya öğrenim düzeyine uygun ilanlar, profil sayfanda otomatik olarak senin için listelenir.",
+  },
+  {
+    icon: Gem,
+    title: "Standart, Pro ve Pro+ Planları",
+    description:
+      "Temel kullanım her zaman ücretsizdir. Pro ve Pro+ planları becayiş mesajlaşması, bölümüne özel bildirim ve reklamsız deneyim gibi ek özellikler sunar.",
+  },
+  {
+    icon: Smartphone,
+    title: "Her Cihazda Uyumlu",
+    description: "Telefon, tablet ve bilgisayarda aynı hızlı ve sade deneyim.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "KVKK ve Gizlilik",
+    description:
+      "Kullanım şartları ve KVKK metni, çerez politikası ile hangi verinin ne amaçla kullanıldığı açıkça belirtilir.",
+  },
+] as const;
+
+export function SiteFeaturesSection() {
+  return (
+    <section className="py-14 sm:py-20">
+      <div className="mx-auto max-w-2xl text-center">
+        <h2 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+          Sitede Neler Var? A&apos;dan Z&apos;ye
+        </h2>
+        <p className="mt-3 text-sm text-muted-foreground sm:text-base">
+          Kamu Yolu&apos;nun sunduğu tüm özellikler tek bakışta.
+        </p>
+      </div>
+
+      <div className="mx-auto mt-10 grid max-w-5xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {SITE_FEATURES.map((f) => (
+          <Card key={f.title} className="gap-2 border-primary/15 bg-white p-5 shadow-sm">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <f.icon className="h-5 w-5" />
+            </span>
+            <h3 className="mt-1 text-sm font-semibold text-slate-900">{f.title}</h3>
+            <p className="text-xs text-muted-foreground">{f.description}</p>
+          </Card>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 const TRUST_FEATURES = [
   {
     icon: RefreshCw,
@@ -132,9 +236,11 @@ const TRUST_FEATURES = [
 export function TrustSection({
   postingCount,
   institutionCount,
+  departmentCount,
 }: {
   postingCount: number;
   institutionCount: number;
+  departmentCount?: number;
 }) {
   return (
     <section className="rounded-3xl border border-primary/15 bg-primary/5 px-6 py-14 sm:py-20">
@@ -144,7 +250,7 @@ export function TrustSection({
         </h2>
         <p className="mt-3 text-sm text-muted-foreground sm:text-base">
           Şu anda sistemde {postingCount} aktif ilan, {institutionCount} farklı kurumdan
-          derleniyor.
+          derleniyor{departmentCount ? ` ve ${departmentCount} bölüm tanımlı` : ""}.
         </p>
       </div>
 
