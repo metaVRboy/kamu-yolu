@@ -42,7 +42,7 @@ export function ProfileMenu({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex h-9 items-center gap-1.5 rounded-lg border border-border bg-white px-2.5 text-sm font-medium text-slate-600 transition-colors hover:border-primary/30 hover:text-primary"
+        className="flex h-9 items-center gap-1.5 rounded-lg px-2.5 text-sm font-medium text-slate-300 transition-colors hover:bg-white/10 hover:text-white"
       >
         <UserRound className="h-4 w-4" />
         <span className="hidden sm:inline">{adSoyad}</span>

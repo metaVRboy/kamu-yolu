@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { getCurrentUser } from "@/lib/auth";
 import { SITE_URL } from "@/lib/site";
 import { SiteMenu } from "@/components/SiteMenu";
-import { HeaderNavLink } from "@/components/HeaderNavLink";
+import { HeaderNav } from "@/components/HeaderNav";
 import { AdSlot } from "@/components/AdSlot";
 import { NotificationBell } from "@/components/NotificationBell";
 import { ProfileMenu } from "@/components/ProfileMenu";
@@ -46,8 +46,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="tr" className={cn("h-full antialiased", inter.variable, "font-sans")}>
       <body className="flex min-h-full flex-col bg-white text-foreground">
-        <header className="sticky top-0 z-40 border-b border-border bg-white/90 backdrop-blur-xl">
-          <div className="flex w-full items-center justify-between gap-4 px-4 py-3 sm:px-6">
+        <header className="sticky top-0 z-40 border-b border-white/10 bg-slate-950">
+          <div className="relative flex w-full items-center justify-between gap-4 px-4 py-3 sm:px-6">
             <div className="flex items-center gap-5">
               <SiteMenu />
               <Link href="/" className="shrink-0">
@@ -56,74 +56,23 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                   alt="Kamu Yolu"
                   width={716}
                   height={537}
-                  className="h-9 w-auto sm:h-10"
+                  className="h-9 w-auto brightness-0 invert sm:h-10"
                   priority
                 />
               </Link>
-              <nav className="hidden items-center gap-1 xl:flex">
-                <HeaderNavLink href="/kpss-puan-hesaplama">KPSS Puan Hesaplama</HeaderNavLink>
-
-                <div className="group relative">
-                  <HeaderNavLink href="/ilanlar">Aktif İlanlar</HeaderNavLink>
-                  <div className="absolute left-0 top-full z-50 w-56 pt-1 opacity-0 pointer-events-none transition-opacity group-hover:opacity-100 group-hover:pointer-events-auto">
-                    <div className="overflow-hidden rounded-xl border border-primary/20 bg-white py-1.5 shadow-xl shadow-primary/10">
-                      <Link
-                        href="/seviye/lise"
-                        className="block px-4 py-2 text-sm font-medium text-slate-700 hover:bg-primary/10 hover:text-slate-900"
-                      >
-                        Lise Mezunları İçin İlanlar
-                      </Link>
-                      <Link
-                        href="/seviye/onlisans"
-                        className="block px-4 py-2 text-sm font-medium text-slate-700 hover:bg-primary/10 hover:text-slate-900"
-                      >
-                        Önlisans Mezunları İçin İlanlar
-                      </Link>
-                      <Link
-                        href="/seviye/lisans"
-                        className="block px-4 py-2 text-sm font-medium text-slate-700 hover:bg-primary/10 hover:text-slate-900"
-                      >
-                        Lisans Mezunları İçin İlanlar
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </nav>
+              <div className="hidden xl:block">
+                <HeaderNav />
+              </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <div className="group relative hidden xl:block">
-                <HeaderNavLink href="/becayis">Becayiş İlanları</HeaderNavLink>
-                <div className="absolute right-0 top-full z-50 w-48 pt-1 opacity-0 pointer-events-none transition-opacity group-hover:opacity-100 group-hover:pointer-events-auto">
-                  <div className="overflow-hidden rounded-xl border border-primary/20 bg-white py-1.5 shadow-xl shadow-primary/10">
-                    <Link
-                      href="/becayis/talep-olustur"
-                      className="block px-4 py-2 text-sm font-medium text-slate-700 hover:bg-primary/10 hover:text-slate-900"
-                    >
-                      Talep Oluştur
-                    </Link>
-                    <Link
-                      href="/becayis/taleplerim"
-                      className="block px-4 py-2 text-sm font-medium text-slate-700 hover:bg-primary/10 hover:text-slate-900"
-                    >
-                      Mevcut Taleplerim
-                    </Link>
-                    <Link
-                      href="/becayis/ilgilendiklerim"
-                      className="block px-4 py-2 text-sm font-medium text-slate-700 hover:bg-primary/10 hover:text-slate-900"
-                    >
-                      İlgilendiğim İlanlar
-                    </Link>
-                  </div>
-                </div>
-              </div>
               <NotificationBell isLoggedIn={!!user} />
               {user ? (
                 <ProfileMenu adSoyad={user.adSoyad} abonelikPlani={user.abonelikPlani} />
               ) : (
                 <Link
                   href="/giris"
-                  className="flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border bg-white px-2.5 text-sm font-medium text-slate-600 transition-colors hover:border-primary/30 hover:text-primary sm:px-4"
+                  className="flex h-9 items-center justify-center gap-1.5 rounded-lg px-2.5 text-sm font-medium text-slate-300 transition-colors hover:bg-white/10 hover:text-white sm:px-4"
                 >
                   <UserRound className="h-4 w-4 sm:hidden" />
                   <span className="hidden sm:inline">Giriş Yap</span>
