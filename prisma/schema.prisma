@@ -279,6 +279,16 @@ model IsinolsaLeadIslendi {
   islenmeTarihi DateTime @default(now())
 }
 
+// secmeyemektarifleri.net icin ayni amacla IsinolsaLeadIslendi'nin
+// esdegeri - bu site de yalnizca "boyle bir alim var" sinyali olarak
+// kullanilir, icerigi asla dogrudan sitede gosterilmez.
+model SecmeyemektarifleriLeadIslendi {
+  id            String   @id @default(cuid())
+  externalId    String   @unique
+  bulundu       Boolean
+  islenmeTarihi DateTime @default(now())
+}
+
 // Kullaniciya ozel bildirimler: gelen becayis mesaji, mezun oldugu
 // bolume/seviyeye uygun yeni ilan vb.
 model Bildirim {

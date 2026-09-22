@@ -11,6 +11,10 @@
     {
       "path": "/api/isinolsa-haber-arastir",
       "schedule": "0 6,9,12,15 * * *"
+    },
+    {
+      "path": "/api/secmeyemektarifleri-haber-arastir",
+      "schedule": "0 6,9,12,15 * * *"
     }
   ]
 }

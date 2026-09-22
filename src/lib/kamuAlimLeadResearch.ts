@@ -7,9 +7,13 @@ import { findInstitutionImage } from "@/lib/findInstitutionImage";
 import { verifyHaberKaynak } from "@/lib/verifyHaberKaynak";
 import { haberIcinBolumEslestir } from "@/lib/haberDepartmentMatch";
 
-export type IsinolsaLead = {
+// Guvenilmeyen "toplama" siteleri - bunlar sadece arastirma ipucu (lead)
+// kaynagi olarak kullanilir, nihai haber kaynagi olarak ASLA gosterilmez.
+const TOPLAMA_SITELERI = ["isinolsa.com", "secmeyemektarifleri.net"];
+
+export type KamuAlimLead = {
   externalId: string;
-  kurumAdi: string;
+  kurumAdi?: string;
   baslik: string;
 };
 
@@ -25,12 +29,12 @@ const SonucSchema = z.object({
       resmiKaynakUrl: z
         .string()
         .nullable()
-        .describe("Dogrulandiysa, bulunan resmi kaynagin (Resmi Gazete, kurum/bakanlik sitesi vb.) GERCEK URL'si. isinolsa.com veya baska bir ucuncu taraf toplama sitesi OLAMAZ."),
+        .describe("Dogrulandiysa, bulunan resmi kaynagin (Resmi Gazete, kurum/bakanlik sitesi vb.) GERCEK URL'si. Ucuncu taraf bir toplama sitesi OLAMAZ."),
     }),
   ),
 });
 
-export type IsinolsaHaberSonuc = {
+export type KamuAlimHaberSonuc = {
   externalId: string;
   dogrulandi: boolean;
   baslik: string | null;
@@ -41,7 +45,7 @@ export type IsinolsaHaberSonuc = {
   departmentIds: string[];
 };
 
-const SYSTEM_PROMPT = `Sana bir kurum adi ve kisa bir konu basligi listesi verilecek. Bu
+const SYSTEM_PROMPT = `Sana bir kurum adi ve/veya kisa bir konu basligi listesi verilecek. Bu
 listedeki HER BIR madde icin, o kurumun gercekten boyle bir personel/memur
 alimi yaptigini/yapacagini Google Search kullanarak BAGIMSIZ OLARAK
 dogrulamaya calis.
@@ -51,8 +55,8 @@ KRITIK KURALLAR:
   kurumun/universitenin/belediyenin kendi resmi web sitesi, ilgili
   bakanligin resmi web sitesi, YOK/OSYM/Kariyer Kapisi gibi resmi
   platformlar. Haber siteleri, is ilani toplama siteleri (ozellikle
-  isinolsa.com) veya ucuncu taraf blog/forum kaynaklarini GECERLI KAYNAK
-  OLARAK KULLANMA - bunlari sadece "arastirma ipucu" olarak
+  ${TOPLAMA_SITELERI.join(", ")}) veya ucuncu taraf blog/forum kaynaklarini
+  GECERLI KAYNAK OLARAK KULLANMA - bunlari sadece "arastirma ipucu" olarak
   gorebilirsin ama nihai kaynak/URL olarak asla verme.
 - Bagimsiz, resmi bir kaynaktan dogrulayamadigin bir maddeyi
   "dogrulandi: false" olarak isaretle ve baslik/ozet/resmiKaynakUrl
@@ -65,25 +69,33 @@ function beklet(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function toplamaSitesiMi(url: string): boolean {
+  return TOPLAMA_SITELERI.some((site) => url.includes(site));
+}
+
 /**
- * isinolsa.com'dan gelen "lead"leri (sadece kurum adi + kisa konu)
- * BAGIMSIZ olarak resmi kaynaklardan arastirip dogrular. isinolsa.com'un
- * kendi sayfasina veya URL'sine asla referans vermez/donmez - sadece
- * "boyle bir alim var mi" sinyali olarak kullanilir.
+ * Bir toplama/haber sitesinden gelen "lead"leri (kurum adi ve/veya kisa
+ * konu basligi) BAGIMSIZ olarak resmi kaynaklardan arastirip dogrular.
+ * Lead'in geldigi sitenin kendi sayfasina/URL'sine asla referans
+ * vermez/donmez - sadece "boyle bir alim var mi" sinyali olarak kullanilir.
  *
  * Gercek bir sonuc alinamazsa (API hatasi, gecici asiri yuk, model semaya
  * uymayan cikti uretmesi vb.) hata firlatir - "arastirilamadi" durumunu
  * "resmi kaynaktan dogrulanamadi" ile KARISTIRMAMAK icin. Cagiran taraf
- * (route), bu leadleri IsinolsaLeadIslendi'ye ISLENMEMIS olarak birakip bir
+ * (route), bu leadleri *LeadIslendi tablosuna ISLENMEMIS olarak birakip bir
  * sonraki calistirmada tekrar denemeli.
  */
-export async function researchIsinolsaLeads(
-  leads: IsinolsaLead[],
-): Promise<IsinolsaHaberSonuc[]> {
+export async function researchKamuAlimLeads(
+  leads: KamuAlimLead[],
+): Promise<KamuAlimHaberSonuc[]> {
   if (leads.length === 0) return [];
 
   const girdiListesi = leads
-    .map((l, i) => `${i}. Kurum: "${l.kurumAdi}" | Konu: "${l.baslik}"`)
+    .map((l, i) =>
+      l.kurumAdi
+        ? `${i}. Kurum: "${l.kurumAdi}" | Konu: "${l.baslik}"`
+        : `${i}. Konu: "${l.baslik}"`,
+    )
     .join("\n");
 
   // maxDuration (290s) icinde kalmak icin en fazla 3 deneme: tek basarisiz
@@ -111,7 +123,7 @@ export async function researchIsinolsaLeads(
       if (!parsed.success) throw new Error("Gemini yaniti semaya uymuyor.");
 
       return Promise.all(
-        leads.map(async (lead, i): Promise<IsinolsaHaberSonuc> => {
+        leads.map(async (lead, i): Promise<KamuAlimHaberSonuc> => {
           const bos = {
             externalId: lead.externalId,
             dogrulandi: false,
@@ -127,10 +139,10 @@ export async function researchIsinolsaLeads(
           if (!sonuc || !sonuc.dogrulandi || !sonuc.resmiKaynakUrl || !sonuc.baslik || !sonuc.ozet) return bos;
 
           // resmiKaynakUrl, Gemini'nin grounding yonlendirme linki - gercek
-          // kaynak alan adini ancak coz(er)sek gorebiliriz. isinolsa.com
+          // kaynak alan adini ancak coz(er)sek gorebiliriz. Toplama sitesi
           // disleme kontrolu de bu yuzden COZULMUS url uzerinde yapilmali.
           const cozulmusUrl = await resolveGroundingUrl(sonuc.resmiKaynakUrl);
-          if (!cozulmusUrl || cozulmusUrl.includes("isinolsa.com")) return bos;
+          if (!cozulmusUrl || toplamaSitesiMi(cozulmusUrl)) return bos;
 
           // Sayfa teknik olarak acilsa bile tamamen alakasiz olabilir -
           // gercek icerigi tekrar dogrulanmadan hicbir kaynak kabul edilmez.
@@ -151,7 +163,7 @@ export async function researchIsinolsaLeads(
           // Once haberin kendi kaynagindan gercek bir gorsel dene; yoksa
           // kurumun Wikipedia'daki (acik lisansli) logosuna dus.
           const ogGorsel = await extractOgImage(cozulmusUrl);
-          const kurumGorseli = ogGorsel ? null : await findInstitutionImage(lead.kurumAdi);
+          const kurumGorseli = ogGorsel ? null : await findInstitutionImage(lead.kurumAdi ?? lead.baslik);
 
           return {
             externalId: lead.externalId,
@@ -167,7 +179,7 @@ export async function researchIsinolsaLeads(
       );
     } catch (err) {
       sonHata = err;
-      console.error(`İşin Olsa lead araştırması denemesi ${deneme}/${DENEME_SAYISI} başarısız:`, err);
+      console.error(`Kamu alimi lead arastirmasi denemesi ${deneme}/${DENEME_SAYISI} basarisiz:`, err);
       if (deneme < DENEME_SAYISI) await beklet(deneme * 3000);
     }
   }

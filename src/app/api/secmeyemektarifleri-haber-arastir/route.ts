@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { fetchIsinolsaIlanlari } from "@/scraper/isinolsaClient";
+import { fetchSecmeyemektarifleriMakaleleri } from "@/scraper/secmeyemektarifleriClient";
 import { researchKamuAlimLeads } from "@/lib/kamuAlimLeadResearch";
 import { haberleriEkleVeTekillestir } from "@/lib/haberDedupe";
 
 export const maxDuration = 290;
 
-// Tek calistirmada arastirilacak en fazla yeni lead sayisi - Claude'a tek
+// Tek calistirmada arastirilacak en fazla yeni lead sayisi - Gemini'ye tek
 // seferde asiri buyuk bir liste vermemek ve maxDuration icinde kalmak icin.
 const BATCH_SIZE = 12;
 
@@ -22,32 +22,32 @@ function isAuthorized(req: NextRequest): boolean {
   return false;
 }
 
-async function runIsinolsaHaberArastir(req: NextRequest) {
+async function runSecmeyemektarifleriHaberArastir(req: NextRequest) {
   if (!isAuthorized(req)) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
   try {
-    const ilanlar = await fetchIsinolsaIlanlari();
+    const makaleler = await fetchSecmeyemektarifleriMakaleleri();
 
     const islenenIdler = new Set(
       (
-        await prisma.isinolsaLeadIslendi.findMany({
-          where: { externalId: { in: ilanlar.map((i) => i.externalId) } },
+        await prisma.secmeyemektarifleriLeadIslendi.findMany({
+          where: { externalId: { in: makaleler.map((m) => m.externalId) } },
           select: { externalId: true },
         })
       ).map((l) => l.externalId),
     );
 
-    const yeniLeadler = ilanlar
-      .filter((i) => !islenenIdler.has(i.externalId))
+    const yeniLeadler = makaleler
+      .filter((m) => !islenenIdler.has(m.externalId))
       .slice(0, BATCH_SIZE)
-      .map((i) => ({ externalId: i.externalId, kurumAdi: i.kurumAdi, baslik: i.baslik }));
+      .map((m) => ({ externalId: m.externalId, baslik: m.baslik }));
 
     if (yeniLeadler.length === 0) {
       return NextResponse.json({
         ok: true,
-        toplamLead: ilanlar.length,
+        toplamLead: makaleler.length,
         yeniLead: 0,
         dogrulanan: 0,
         eklenenHaber: 0,
@@ -79,14 +79,14 @@ async function runIsinolsaHaberArastir(req: NextRequest) {
 
     // Denenen HER lead'i (dogrulanmis olsun olmasin) isaretle ki tekrar
     // tekrar arastirilmasin.
-    await prisma.isinolsaLeadIslendi.createMany({
+    await prisma.secmeyemektarifleriLeadIslendi.createMany({
       data: sonuclar.map((s) => ({ externalId: s.externalId, bulundu: s.dogrulandi })),
       skipDuplicates: true,
     });
 
     return NextResponse.json({
       ok: true,
-      toplamLead: ilanlar.length,
+      toplamLead: makaleler.length,
       yeniLead: yeniLeadler.length,
       dogrulanan: sonuclar.filter((s) => s.dogrulandi).length,
       eklenenHaber: eklenen,
@@ -99,10 +99,10 @@ async function runIsinolsaHaberArastir(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  return runIsinolsaHaberArastir(req);
+  return runSecmeyemektarifleriHaberArastir(req);
 }
 
 // Vercel Cron istekleri GET olarak gelir.
 export async function GET(req: NextRequest) {
-  return runIsinolsaHaberArastir(req);
+  return runSecmeyemektarifleriHaberArastir(req);
 }
