@@ -3,30 +3,38 @@
 import { useEffect, useState } from "react";
 
 /**
- * Reklam engelleyici tespiti iki yontemi birlikte kullanir - modern
- * engelleyiciler (ör. güncel uBlock Origin) sadece sinif adina gore
- * gizleme yapan basit "yem" elemanlari artik es geçebiliyor, bu yuzden
- * tek basina yeterli degil:
+ * Reklam engelleyici tespiti UC yontemi birlikte kullanir - hicbiri tek
+ * basina guvenilir degil:
  *
- * 1) Bilinen bir reklam sunucusuna (Google AdSense yukleyicisi) gercek
- *    bir istek atilir - engelleyiciler agirlikli olarak bu TUR gercek
- *    reklam sunucusu isteklerini engelledigi icin bu yontem daha
- *    guvenilir. Istek engellenirse fetch reddedilir.
- * 2) Bilinen reklam sinif adlarina sahip bir "yem" eleman DOM'a eklenip
- *    gizlenip gizlenmedigine bakilir (daha eski/basit engelleyicileri
+ * 1) Google'in gercek AdSense yukleyicisine (adsbygoogle.js) istek atilir.
+ *    SORUN: bircok guncel engelleyici (ör. uBlock Origin) bu dosyayi agdan
+ *    tamamen engellemek yerine, siteleri bozmamak icin BOS/zararsiz bir
+ *    "guduk" script ile degistirir (redirect) - yani istek BASARILI gorunur,
+ *    engelleyici acikken bile. Bu yuzden tek basina yeterli degil.
+ * 2) Kendi alan adimizda, acikca "reklam" gibi duran bir yolda (/ads/...)
+ *    bos bir dosyaya istek atilir. Google'in dosyasinin aksine bunun icin
+ *    ozel bir "guduk'e yonlendirme" istisnasi yoktur - engelleyicilerin
+ *    URL desenine gore calisan genel kurallari (ör. "/ads/") bu dosyayi da
+ *    yakalar, boylece 1. yontemin atlanabildigi durumlari kapatir.
+ * 3) Bilinen reklam sinif adlarina sahip bir "yem" eleman DOM'a eklenip
+ *    gizlenip gizlenmedigine bakilir (kozmetik/CSS tabanli engelleyicileri
  *    yakalar).
  *
- * Ikisinden biri bile engellemeyi gosterirse reklam engelleyici aktif
- * kabul edilir.
+ * Ucunden biri bile engellemeyi gosterirse reklam engelleyici aktif kabul
+ * edilir.
  */
-async function agIstegiEngellendiMi(): Promise<boolean> {
+async function istekEngellendiMi(url: string, ayniKaynak: boolean): Promise<boolean> {
   try {
-    await fetch("https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js", {
-      method: "HEAD",
-      mode: "no-cors",
+    const res = await fetch(url, {
+      method: "GET",
+      mode: ayniKaynak ? "cors" : "no-cors",
       cache: "no-store",
-      signal: AbortSignal.timeout(2000),
+      signal: AbortSignal.timeout(2500),
     });
+    // Ayni kaynaktaki istek gercek bir HTTP durum kodu doner - engelleyici
+    // bunu agdan tamamen dusurmediyse bile 403/404 gibi bir sahte yanitla
+    // degistirmis olabilir.
+    if (ayniKaynak && !res.ok) return true;
     return false;
   } catch {
     return true;
@@ -35,10 +43,14 @@ async function agIstegiEngellendiMi(): Promise<boolean> {
 
 function yemElemaniGizliMi(): Promise<boolean> {
   return new Promise((resolve) => {
-    const yem = document.createElement("div");
+    // Gercek bir AdSense reklam biriminin markup'ini taklit eder (<ins
+    // class="adsbygoogle">) - kozmetik filtre listeleri genellikle sinif
+    // adindan cok bu tur gercekci reklam elemani desenlerini hedefler.
+    const yem = document.createElement("ins");
     yem.className = "adsbox ad-banner adsbygoogle advertisement ad-placement pub_300x250";
     yem.setAttribute("aria-hidden", "true");
-    yem.style.cssText = "position:absolute;top:0;left:-9999px;width:2px;height:2px;";
+    yem.style.cssText =
+      "display:block;position:absolute;top:0;left:-9999px;width:300px;height:250px;";
     document.body.appendChild(yem);
 
     window.setTimeout(() => {
@@ -59,8 +71,12 @@ export function ReklamEngelleyiciKontrol() {
 
   async function kontrolEt() {
     setDurum("kontrol");
-    const [agEngellendi, yemGizli] = await Promise.all([agIstegiEngellendiMi(), yemElemaniGizliMi()]);
-    setDurum(agEngellendi || yemGizli ? "engellendi" : "temiz");
+    const [googleEngellendi, kendiKaynakEngellendi, yemGizli] = await Promise.all([
+      istekEngellendiMi("https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js", false),
+      istekEngellendiMi("/ads/ad-banner.js", true),
+      yemElemaniGizliMi(),
+    ]);
+    setDurum(googleEngellendi || kendiKaynakEngellendi || yemGizli ? "engellendi" : "temiz");
   }
 
   useEffect(() => {
