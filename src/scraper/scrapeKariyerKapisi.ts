@@ -15,6 +15,7 @@ import {
 } from "./parseRequirements";
 import { matchDepartmentsForText } from "@/lib/matching";
 import { notifyUsersForMatchedPosting } from "@/lib/notifications";
+import { removeCrossSourceDuplicate } from "@/lib/postingDedupe";
 
 export const SOURCE_NAME = "Kariyer Kapısı";
 
@@ -69,6 +70,11 @@ async function upsertPosting(
   if (matches.length === 0) {
     unmatchedTexts.push(requirementText.slice(0, 200));
   }
+
+  // Ayni gercek ilan Memurlar.Net gibi baska bir kaynaktan da gelmis
+  // olabilir - varsa o eski kaydi kaldirip yerine bu (en guncel islenen)
+  // kaydin durmasini sagla.
+  await removeCrossSourceDuplicate({ institutionName: ilan.kurumAdi, title, sourceName: SOURCE_NAME });
 
   const existing = await prisma.posting.findUnique({
     where: { externalId },

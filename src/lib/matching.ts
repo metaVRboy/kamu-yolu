@@ -249,8 +249,24 @@ export async function getHomepageStats() {
  * karsilastirip eslesen bolumleri dondurur. Scraper pipeline'i tarafindan
  * her yeni ilan kaydedilirken cagrilir.
  */
+// "Tarih" hem bir bolum adi hem de gunluk dilde "tarih/gun" anlaminda cok
+// yaygin bir kelime - "yayimlandigi tarih itibariyle", "belirtilen tarih
+// itibariyla" gibi butun ilanlarda gecebilen burokratik kaliplarda "tarih"
+// TEK BASINA bir kelime olarak gecer (whole-word kontrolu bunu ayirt
+// edemez). Bu kaliplar eslestirmeden once maskeleniyor; "Tarih bolumu",
+// "Tarih ogretmenligi" gibi gercek eslesmeler etkilenmez.
+const YANLIS_POZITIF_KALIPLARI = [/\btarih\s+itibar\p{L}*\b/gu];
+
+function maskFalsePositiveIdioms(normalized: string): string {
+  let result = normalized;
+  for (const pattern of YANLIS_POZITIF_KALIPLARI) {
+    result = result.replace(pattern, "");
+  }
+  return result;
+}
+
 export async function matchDepartmentsForText(rawText: string) {
-  const normalized = normalize(rawText);
+  const normalized = maskFalsePositiveIdioms(normalize(rawText));
   const allAliases = await prisma.departmentAlias.findMany({
     include: { department: true },
   });
@@ -405,7 +421,7 @@ export async function linkDepartmentToExistingPostings(
   let linked = 0;
   for (const posting of postings) {
     if (!posting.departmentRequirementRaw) continue;
-    const normalizedText = normalize(posting.departmentRequirementRaw);
+    const normalizedText = maskFalsePositiveIdioms(normalize(posting.departmentRequirementRaw));
     const matchedTerm = terms.find((t) => includesWholeWord(normalizedText, normalize(t)));
     if (!matchedTerm) continue;
 

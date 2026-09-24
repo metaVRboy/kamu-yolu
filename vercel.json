@@ -15,6 +15,10 @@
     {
       "path": "/api/secmeyemektarifleri-haber-arastir",
       "schedule": "0 6,9,12,15 * * *"
+    },
+    {
+      "path": "/api/scrape-memurlar",
+      "schedule": "0 6,9,12,15 * * *"
     }
   ]
 }
