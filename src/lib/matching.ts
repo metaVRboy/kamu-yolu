@@ -15,46 +15,20 @@ export type PostingFilters = {
 };
 
 /**
- * Tum bolumler icin, getPostingsForDepartment ile AYNI kurala gore
- * (o bolume acikca eslesmis + bolum sarti olmayan ayni seviyedeki genel
- * ilanlar, tekilleştirilmiş) esleşen aktif ilan sayisini tek seferde
- * hesaplar. Her bolum icin ayri sorgu atmak yerine tum aktif ilanlari
- * bir kez cekip bellekte sayar.
+ * Tum bolumler icin, getPostingsForDepartment ile AYNI kurala gore (SADECE
+ * o bolume acikca eslesmis ilanlar) esleşen aktif ilan sayisini tek
+ * seferde hesaplar. Her bolum icin ayri sorgu atmak yerine tum aktif
+ * eslesmeleri bir kez cekip bellekte sayar.
  */
 export async function getDepartmentPostingCounts(): Promise<Map<string, number>> {
-  const activePostings = await prisma.posting.findMany({
-    where: { isActive: true },
-    select: {
-      id: true,
-      isDepartmentRestricted: true,
-      educationLevels: true,
-      departments: { select: { departmentId: true } },
-    },
+  const eslesmeler = await prisma.postingDepartment.findMany({
+    where: { posting: { isActive: true } },
+    select: { departmentId: true },
   });
 
-  const generalPostingIdsByLevel = new Map<string, Set<string>>();
-  const explicitPostingIdsByDept = new Map<string, Set<string>>();
-
-  for (const p of activePostings) {
-    if (!p.isDepartmentRestricted) {
-      for (const lvl of p.educationLevels) {
-        if (!generalPostingIdsByLevel.has(lvl)) generalPostingIdsByLevel.set(lvl, new Set());
-        generalPostingIdsByLevel.get(lvl)!.add(p.id);
-      }
-    }
-    for (const pd of p.departments) {
-      if (!explicitPostingIdsByDept.has(pd.departmentId)) explicitPostingIdsByDept.set(pd.departmentId, new Set());
-      explicitPostingIdsByDept.get(pd.departmentId)!.add(p.id);
-    }
-  }
-
-  const departments = await prisma.department.findMany({ select: { id: true, level: true } });
-
   const counts = new Map<string, number>();
-  for (const d of departments) {
-    const combined = new Set(explicitPostingIdsByDept.get(d.id) ?? []);
-    for (const id of generalPostingIdsByLevel.get(d.level) ?? []) combined.add(id);
-    counts.set(d.id, combined.size);
+  for (const e of eslesmeler) {
+    counts.set(e.departmentId, (counts.get(e.departmentId) ?? 0) + 1);
   }
   return counts;
 }
@@ -79,30 +53,20 @@ function buildFilterWhere(filters?: PostingFilters): Prisma.PostingWhereInput {
 }
 
 /**
- * Bir bolum icin gosterilecek ilanlari getirir:
- * 1) o bolume acikca eslesmis (PostingDepartment) ilanlar
- * 2) bolum sarti olmayan (isDepartmentRestricted = false) ve bolumun ogrenim
- *    derecesine uyan "genel" ilanlar (ör. "lisans mezunu olmak" yeter)
+ * Bir bolum icin gosterilecek ilanlari getirir: SADECE o bolume acikca
+ * eslesmis (PostingDepartment) ilanlar. Bolum sarti olmayan genel ilanlar
+ * kasitli olarak DAHIL EDILMEZ - "X bolumu" arandiginda sadece o bolumle
+ * ilgili ilanlarin listelenmesi icin.
  */
 export async function getPostingsForDepartment(
   departmentId: string,
   filters?: PostingFilters,
 ) {
-  const department = await prisma.department.findUniqueOrThrow({
-    where: { id: departmentId },
-  });
-
   const postings = await prisma.posting.findMany({
     where: {
       isActive: true,
       ...buildFilterWhere(filters),
-      OR: [
-        { departments: { some: { departmentId } } },
-        {
-          isDepartmentRestricted: false,
-          educationLevels: { has: department.level },
-        },
-      ],
+      departments: { some: { departmentId } },
     },
     orderBy: [{ applicationEnd: "asc" }, { publishedAt: "desc" }],
     include: { departments: { include: { department: true } } },
@@ -113,20 +77,10 @@ export async function getPostingsForDepartment(
 
 /** Bir bolumun (filtre uygulanmadan once) sonuc kumesindeki mevcut filtre secenekleri. */
 export async function getAvailableFiltersForDepartment(departmentId: string) {
-  const department = await prisma.department.findUniqueOrThrow({
-    where: { id: departmentId },
-  });
-
   const postings = await prisma.posting.findMany({
     where: {
       isActive: true,
-      OR: [
-        { departments: { some: { departmentId } } },
-        {
-          isDepartmentRestricted: false,
-          educationLevels: { has: department.level },
-        },
-      ],
+      departments: { some: { departmentId } },
     },
     select: { institutionType: true, ilanTuru: true, iller: true },
   });

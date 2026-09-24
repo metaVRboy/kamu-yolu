@@ -62,8 +62,7 @@ export default async function DepartmentResultsPage({
         </Badge>
       </div>
       <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-        Bu bölüme özel şart koşan ilanlar ile bölüm şartı olmayan, öğrenim
-        derecesine göre açılan ilanlar birlikte listelenir.
+        Sadece bu bölüme özel şart koşan ilanlar listelenir.
       </p>
 
       <div className="mt-6">
