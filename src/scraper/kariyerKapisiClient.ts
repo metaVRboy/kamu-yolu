@@ -81,6 +81,18 @@ export async function fetchAltIlanlar(ilanGuid: string): Promise<AltIlan[]> {
   return post<AltIlan[]>("/altilan/GetAltIlanInfoByIlanIdPublic", { ilanGuid });
 }
 
+export type IlanPreview = {
+  ilanBaslik: string;
+  ilanMetni: string; // tam ilan metni (BBCode) - unvan/alt ilan kirilimi olmayan ilanlarda kullanilir
+};
+
+// Bazi ilan turleri (ozellikle Isci Ilanlari) unvan/pozisyon kirilimi
+// (alt ilan) kullanmiyor - fetchAltIlanlar bunlar icin bos dizi doner.
+// Bu durumda ilanin tam metnini almak icin bu uc nokta kullanilir.
+export async function fetchIlanPreview(ilanGuid: string): Promise<IlanPreview> {
+  return post<IlanPreview>("/ilan/GetIlanPreviewPublic", { ilanGuid });
+}
+
 export function ilanDetayUrl(guid: string): string {
   return `https://kariyerkapisi.gov.tr/IlanDetay?i=${guid}`;
 }

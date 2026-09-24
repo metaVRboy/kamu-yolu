@@ -1,9 +1,11 @@
 import { PrismaClient } from "@/generated/prisma/client";
-import { EducationLevel } from "@/generated/prisma/enums";
+import { EducationLevel, InstitutionType } from "@/generated/prisma/enums";
 import {
   fetchAltIlanlar,
   fetchIlanList,
+  fetchIlanPreview,
   ilanDetayUrl,
+  type SearchIlan,
 } from "./kariyerKapisiClient";
 import {
   detectEducationLevels,
@@ -27,6 +29,114 @@ export type ScrapeSummary = {
   staleDeactivated: number;
   unmatchedSamples: string[];
 };
+
+/**
+ * Tek bir pozisyon/ilan icin ham metni siniflandirip veritabanina isler
+ * (upsert + bolum eslesmeleri + yeni eslesme bildirimi). Hem unvan/alt
+ * ilan kirilimi olan hem olmayan ilanlar tarafindan ortak kullanilir.
+ */
+async function upsertPosting(
+  prisma: PrismaClient,
+  params: {
+    externalId: string;
+    title: string;
+    ilan: SearchIlan;
+    institutionType: InstitutionType;
+    sourceUrl: string;
+    requirementText: string;
+    iller: string[];
+  },
+  unmatchedTexts: string[],
+): Promise<void> {
+  const { externalId, title, ilan, institutionType, sourceUrl, requirementText, iller } = params;
+
+  // "Isci Ilanlari" turundeki ilanlarin Kariyer Kapisi'ndaki metni genelde
+  // sadece Iskur uzerinden nasil basvurulacagini anlatir - egitim
+  // seviyesi/bolum sartina dair bilgi icermez (asil kriterler Iskur'un
+  // kendi il bazli "Acik Is" sisteminde). Bu turde toplu iscii kadrolari
+  // pratikte neredeyse hicbir zaman bolume ozel degildir ve taban seviyesi
+  // genelde ortaogretimdir - metin bosken LISANS/kisitli varsaymak yerine
+  // bu daha gercekci varsayilanlar kullanilir.
+  const isciIlaniMi = ilan.ilanTuru === "İşçi İlanları";
+
+  const levels = detectEducationLevels(requirementText);
+  const educationLevels =
+    levels.length > 0 ? levels : [isciIlaniMi ? EducationLevel.LISE : EducationLevel.LISANS];
+
+  const matches = await matchDepartmentsForText(requirementText);
+  const isDepartmentRestricted =
+    matches.length > 0 || (!isciIlaniMi && !isGenericNoRestriction(requirementText));
+  if (matches.length === 0) {
+    unmatchedTexts.push(requirementText.slice(0, 200));
+  }
+
+  const existing = await prisma.posting.findUnique({
+    where: { externalId },
+    select: { id: true },
+  });
+
+  const posting = await prisma.posting.upsert({
+    where: { externalId },
+    update: {
+      title,
+      institutionName: ilan.kurumAdi,
+      institutionType,
+      ilanTuru: ilan.ilanTuru ?? null,
+      iller,
+      sourceUrl,
+      educationLevels,
+      departmentRequirementRaw: requirementText,
+      isDepartmentRestricted,
+      applicationStart: ilan.basTarih ? new Date(ilan.basTarih) : null,
+      applicationEnd: ilan.bitTarih ? new Date(ilan.bitTarih) : null,
+      isActive: true,
+      scrapedAt: new Date(),
+    },
+    create: {
+      externalId,
+      title,
+      institutionName: ilan.kurumAdi,
+      institutionType,
+      ilanTuru: ilan.ilanTuru ?? null,
+      iller,
+      sourceName: SOURCE_NAME,
+      sourceUrl,
+      educationLevels,
+      departmentRequirementRaw: requirementText,
+      isDepartmentRestricted,
+      applicationStart: ilan.basTarih ? new Date(ilan.basTarih) : null,
+      applicationEnd: ilan.bitTarih ? new Date(ilan.bitTarih) : null,
+      publishedAt: ilan.basTarih ? new Date(ilan.basTarih) : new Date(),
+      isActive: true,
+    },
+  });
+
+  await prisma.postingDepartment.deleteMany({
+    where: { postingId: posting.id },
+  });
+  for (const match of matches) {
+    await prisma.postingDepartment.create({
+      data: {
+        postingId: posting.id,
+        departmentId: match.departmentId,
+        matchedAlias: match.matchedAlias,
+      },
+    });
+  }
+
+  // Sadece yeni eklenen ilanlar icin bildirim gonder; her taramada
+  // ayni aktif ilan icin tekrar tekrar bildirim gitmesin.
+  if (!existing && matches.length > 0) {
+    const departments = await prisma.department.findMany({
+      where: { id: { in: matches.map((m) => m.departmentId) } },
+      select: { id: true, slug: true },
+    });
+    await notifyUsersForMatchedPosting({
+      postingTitle: title,
+      departments: departments.map((d) => ({ departmentId: d.id, slug: d.slug })),
+    });
+  }
+}
 
 /**
  * Kariyer Kapisi'ndaki aktif ilanlari cekip veritabanini gunceller.
@@ -60,94 +170,64 @@ export async function scrapeKariyerKapisi(
       const institutionType = detectInstitutionType(ilan.kurumAdi);
       const sourceUrl = ilanDetayUrl(ilan.guid);
 
+      // Bazi ilan turleri (ozellikle "Isci Ilanlari") unvan/pozisyon
+      // kirilimi (alt ilan) kullanmiyor - bunlar icin alt ilan listesi
+      // hep bos doner. Bu durumda ilanin tam metnini ayri bir uc
+      // noktadan alip tek bir posting olarak isliyoruz; aksi halde bu
+      // ilanlar sessizce hic islenmeden atlaniyordu.
+      if (altIlanlar.length === 0) {
+        const externalId = `kariyerkapisi:${ilan.guid}`;
+        seenExternalIds.add(externalId);
+
+        let preview;
+        try {
+          preview = await fetchIlanPreview(ilan.guid);
+        } catch (err) {
+          console.error(`İlan önizlemesi çekilemedi (${ilan.guid}):`, err);
+          await sleep(300);
+          continue;
+        }
+
+        await upsertPosting(
+          prisma,
+          {
+            externalId,
+            title: preview.ilanBaslik || ilan.ilanBaslik || ilan.kurumAdi,
+            ilan,
+            institutionType,
+            sourceUrl,
+            requirementText: stripBbCode(preview.ilanMetni ?? ""),
+            iller: [],
+          },
+          unmatchedTexts,
+        );
+
+        await sleep(300);
+        continue;
+      }
+
       for (let i = 0; i < altIlanlar.length; i++) {
         const alt = altIlanlar[i];
         const externalId = `kariyerkapisi:${ilan.guid}:${i}`;
         seenExternalIds.add(externalId);
 
-        const requirementText = stripBbCode(alt.ilanMetni ?? "");
-        const levels = detectEducationLevels(requirementText);
-        const educationLevels =
-          levels.length > 0 ? levels : [EducationLevel.LISANS];
-
-        const matches = await matchDepartmentsForText(requirementText);
-        const isDepartmentRestricted =
-          matches.length > 0 || !isGenericNoRestriction(requirementText);
-        if (matches.length === 0) {
-          unmatchedTexts.push(requirementText.slice(0, 200));
-        }
-
-        const title = `${alt.unvan} — ${ilan.kurumAdi}`;
         const iller = Array.from(
           new Set((alt.kontenjanList ?? []).map((k) => k.il.trim()).filter(Boolean)),
         );
 
-        const existing = await prisma.posting.findUnique({
-          where: { externalId },
-          select: { id: true },
-        });
-
-        const posting = await prisma.posting.upsert({
-          where: { externalId },
-          update: {
-            title,
-            institutionName: ilan.kurumAdi,
-            institutionType,
-            ilanTuru: ilan.ilanTuru ?? null,
-            iller,
-            sourceUrl,
-            educationLevels,
-            departmentRequirementRaw: requirementText,
-            isDepartmentRestricted,
-            applicationStart: ilan.basTarih ? new Date(ilan.basTarih) : null,
-            applicationEnd: ilan.bitTarih ? new Date(ilan.bitTarih) : null,
-            isActive: true,
-            scrapedAt: new Date(),
-          },
-          create: {
+        await upsertPosting(
+          prisma,
+          {
             externalId,
-            title,
-            institutionName: ilan.kurumAdi,
+            title: `${alt.unvan} — ${ilan.kurumAdi}`,
+            ilan,
             institutionType,
-            ilanTuru: ilan.ilanTuru ?? null,
-            iller,
-            sourceName: SOURCE_NAME,
             sourceUrl,
-            educationLevels,
-            departmentRequirementRaw: requirementText,
-            isDepartmentRestricted,
-            applicationStart: ilan.basTarih ? new Date(ilan.basTarih) : null,
-            applicationEnd: ilan.bitTarih ? new Date(ilan.bitTarih) : null,
-            publishedAt: ilan.basTarih ? new Date(ilan.basTarih) : new Date(),
-            isActive: true,
+            requirementText: stripBbCode(alt.ilanMetni ?? ""),
+            iller,
           },
-        });
-
-        await prisma.postingDepartment.deleteMany({
-          where: { postingId: posting.id },
-        });
-        for (const match of matches) {
-          await prisma.postingDepartment.create({
-            data: {
-              postingId: posting.id,
-              departmentId: match.departmentId,
-              matchedAlias: match.matchedAlias,
-            },
-          });
-        }
-
-        // Sadece yeni eklenen ilanlar icin bildirim gonder; her taramada
-        // ayni aktif ilan icin tekrar tekrar bildirim gitmesin.
-        if (!existing && matches.length > 0) {
-          const departments = await prisma.department.findMany({
-            where: { id: { in: matches.map((m) => m.departmentId) } },
-            select: { id: true, slug: true },
-          });
-          await notifyUsersForMatchedPosting({
-            postingTitle: title,
-            departments: departments.map((d) => ({ departmentId: d.id, slug: d.slug })),
-          });
-        }
+          unmatchedTexts,
+        );
       }
 
       await sleep(300);

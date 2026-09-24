@@ -259,14 +259,14 @@ export async function matchDepartmentsForText(rawText: string) {
   const matches = new Map<string, { departmentId: string; matchedAlias: string }>();
 
   for (const dept of allDepartments) {
-    if (normalized.includes(normalize(dept.name))) {
+    if (includesWholeWord(normalized, normalize(dept.name))) {
       matches.set(dept.id, { departmentId: dept.id, matchedAlias: dept.name });
     }
   }
 
   for (const alias of allAliases) {
     if (matches.has(alias.departmentId)) continue;
-    if (normalized.includes(normalize(alias.alias))) {
+    if (includesWholeWord(normalized, normalize(alias.alias))) {
       matches.set(alias.departmentId, {
         departmentId: alias.departmentId,
         matchedAlias: alias.alias,
@@ -335,6 +335,21 @@ export function normalize(text: string): string {
 }
 
 /**
+ * Turkce, eklemeli bir dil oldugu icin bir kelimeye dogrudan (bosluksuz)
+ * ek gelebilir (ör. "tarih" + "inde" -> "tarihinde") - bu yuzden duz
+ * ".includes()" ile alan/alias eslestirmesi yanlis pozitif uretebilir
+ * ("tarih" bolumu, "21 eylul tarihinde" ifadesindeki "tarihinde" ile
+ * eslesir). Bu, needle'in haystack icinde TAM KELIME (once/sonrasinda
+ * harf/rakam olmayan) olarak gectigini kontrol eder.
+ */
+export function includesWholeWord(haystack: string, needle: string): boolean {
+  if (!needle) return false;
+  const escaped = needle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const pattern = new RegExp(`(?<![\\p{L}\\p{N}])${escaped}(?![\\p{L}\\p{N}])`, "u");
+  return pattern.test(haystack);
+}
+
+/**
  * Sohbet asistani, veritabaninda karsiligi olmayan bir bolumu internetten
  * arastirip ogrendiginde bunu kalici olarak eklemek icin kullanilir.
  * Ayni isimde bolum zaten varsa (ör. baska bir kullanicinin aninda once
@@ -391,7 +406,7 @@ export async function linkDepartmentToExistingPostings(
   for (const posting of postings) {
     if (!posting.departmentRequirementRaw) continue;
     const normalizedText = normalize(posting.departmentRequirementRaw);
-    const matchedTerm = terms.find((t) => normalizedText.includes(normalize(t)));
+    const matchedTerm = terms.find((t) => includesWholeWord(normalizedText, normalize(t)));
     if (!matchedTerm) continue;
 
     await prisma.postingDepartment.upsert({
