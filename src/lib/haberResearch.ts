@@ -23,7 +23,7 @@ const HaberSchema = z.object({
           .describe("Haberin ilgili olduğu kurumun/kuruluşun tam, resmi adı (ör. \"Adalet Bakanlığı\", \"Pamukkale Üniversitesi\")."),
       }),
     )
-    .max(6)
+    .max(8)
     .describe("Bulunan gerçek, doğrulanabilir haberlerin listesi. Hiçbir şey bulunamadıysa boş dizi."),
 });
 
@@ -36,20 +36,7 @@ export type HaberResearchItem = {
   departmentIds: string[];
 };
 
-const SYSTEM_PROMPT = `Turkiye'de kamu personeli/memur alimlariyla ilgili GUNCEL (son birkac
-gun icindeki, en fazla son 1 hafta) haberleri Google Search ile arastir.
-Aradigin haber turleri:
-- Bakanliklarin/kamu kurumlarinin acikladigi toplu personel/memur/sozlesmeli
-  personel alim ilanlari veya planlari
-- KPSS, kamu istihdami ile ilgili gundemdeki tartismalar/kararlar
-- Kamu calisanlarini (ozellikle saglik personeli, ogretmen, memur) ilgilendiren
-  sendika aciklamalari/haberleri
-- Kamuda yeni kadro, atama, ozluk haklariyla ilgili resmi/gazete haberleri
-- Bu arastirma sirasinda secmeyemektarifleri.net sitesini de mutlaka ara/kontrol
-  et - bu site diger kaynaklarda az rastlanan kamu personeli alim haberlerini de
-  yayinliyor.
-
-KRITIK KURALLAR:
+const KRITIK_KURALLAR = `KRITIK KURALLAR:
 - SADECE gercekten arama sonuclarinda bulup okudugun, gercek bir kaynagi
   (URL) olan haberleri raporla. Hicbir haberi uydurma, tahmin etme veya
   genellemeyle doldurma. Yeterli sayida gercek/guncel haber bulamazsan,
@@ -61,17 +48,52 @@ KRITIK KURALLAR:
   resmi/orijinal haber kaynagini (bakanlik, kurum sitesi, Resmi Gazete,
   buyuk bir haber ajansi/gazete vb.) ara.`;
 
-/**
- * Kamu personel alimlariyla ilgili guncel haberleri web aramasiyla arastirir.
- * Sadece gercek, kaynakli sonuclar doner; basarisiz olursa bos dizi doner.
- */
-export async function researchHaberler(): Promise<HaberResearchItem[]> {
+// Tek, genis bir sorgu yerine kurum kategorisine gore ayri/hedefli
+// sorgular calistirilir - her biri kendi alanina odaklandigi icin tek bir
+// genel sorgudan cok daha fazla ve cesitli gercek haber buluyor. Sorgular
+// paralel calisir, toplam sure buyumez.
+const KATEGORI_PROMPTLARI = [
+  `Turkiye'de bakanliklarin ve merkezi kamu kurumlarinin GUNCEL (son birkac
+gun icindeki, en fazla son 1 hafta) personel/memur/sozlesmeli personel
+alim haberlerini Google Search ile arastir. Ozellikle:
+- Bakanliklarin acikladigi toplu personel/memur alim ilanlari veya planlari
+- KPSS, kamu istihdami ile ilgili gundemdeki tartismalar/kararlar
+- Kamu calisanlarini (saglik personeli, ogretmen, memur) ilgilendiren
+  sendika aciklamalari/haberleri
+- Kamuda yeni kadro, atama, ozluk haklariyla ilgili resmi/gazete haberleri
+- Bu arastirma sirasinda secmeyemektarifleri.net sitesini de ara/kontrol et.
+
+${KRITIK_KURALLAR}`,
+  `Turkiye'deki UNIVERSITELERIN GUNCEL (son birkac gun icindeki, en fazla
+son 1 hafta) akademik (ogretim uyesi/gorevlisi, arastirma gorevlisi) ve
+idari personel alim ilanlarina dair haberleri Google Search ile arastir.
+Devlet universitelerinin kendi ilan sayfalarindaki veya Resmi Gazete'deki
+duyurulara ozellikle dikkat et.
+
+${KRITIK_KURALLAR}`,
+  `Turkiye'deki BELEDIYELERIN, il ozel idarelerinin, mahalli idare
+birliklerinin ve kamu iktisadi tesekkullerinin (KIT) GUNCEL (son birkac
+gun icindeki, en fazla son 1 hafta) personel/iscii alim haberlerini
+Google Search ile arastir.
+
+${KRITIK_KURALLAR}`,
+] as const;
+
+type HaberAdayi = {
+  baslik: string;
+  ozet: string;
+  kaynakUrl: string;
+  kurumAdi: string;
+};
+
+/** Tek bir kategori sorgusunu calistirir. Basarisiz olursa (diger kategorileri etkilemeden) bos dizi doner. */
+async function researchHaberKategorisi(systemPrompt: string): Promise<HaberAdayi[]> {
   try {
     const res = await gemini.models.generateContent({
       model: GEMINI_MODEL,
       contents: "Güncel kamu personel alımı haberlerini araştır ve JSON ile cevap ver.",
       config: {
-        systemInstruction: SYSTEM_PROMPT,
+        systemInstruction: systemPrompt,
         tools: [{ googleSearch: {} }],
         responseMimeType: "application/json",
         responseJsonSchema: toGeminiSchema(HaberSchema),
@@ -84,13 +106,40 @@ export async function researchHaberler(): Promise<HaberResearchItem[]> {
     const result = HaberSchema.safeParse(parsedJson);
     if (!result.success) return [];
 
+    return result.data.haberler;
+  } catch (err) {
+    console.error("Haber kategori araştırması başarısız:", err);
+    return [];
+  }
+}
+
+/**
+ * Kamu personel alimlariyla ilgili guncel haberleri web aramasiyla arastirir.
+ * Tek genis sorgu yerine kurum kategorisine gore paralel, hedefli sorgular
+ * calistirilir. Sadece gercek, kaynakli sonuclar doner; basarisiz olan
+ * sorgular sessizce atlanir (diger kategoriler etkilenmez).
+ */
+export async function researchHaberler(): Promise<HaberResearchItem[]> {
+  const kategoriSonuclari = await Promise.all(
+    KATEGORI_PROMPTLARI.map((prompt) => researchHaberKategorisi(prompt)),
+  );
+  // Farkli kategori sorgulari ayni haberi (ayni ham grounding URL'siyle)
+  // bulmus olabilir - pahali dogrulama adimindan once basitce tekillestir.
+  const gorulenUrller = new Set<string>();
+  const tumAdaylar = kategoriSonuclari.flat().filter((h) => {
+    if (gorulenUrller.has(h.kaynakUrl)) return false;
+    gorulenUrller.add(h.kaynakUrl);
+    return true;
+  });
+
+  try {
     // kaynakUrl, Gemini'nin grounding yonlendirme linki - kalici saklamadan
     // once gercek/nihai kaynak URL'sine cozuyoruz. Cozulemeyen (linkin
     // olmedigi/gecersiz oldugu) haberler atlanir. Prompt talimati tek
     // basina yeterli olmayabilir (model yine de isinolsa.com'u kaynak
     // gosterebilir) - kod seviyesinde de kesin olarak eliyoruz.
     const cozulmus = await Promise.all(
-      result.data.haberler.map(async (h): Promise<HaberResearchItem | null> => {
+      tumAdaylar.map(async (h): Promise<HaberResearchItem | null> => {
         const kaynakUrl = await resolveGroundingUrl(h.kaynakUrl);
         if (!kaynakUrl || kaynakUrl.includes("isinolsa.com") || kaynakUrl.includes("secmeyemektarifleri.net")) return null;
 
