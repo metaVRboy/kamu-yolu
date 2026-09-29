@@ -15,7 +15,11 @@ import {
 } from "./parseRequirements";
 import { matchDepartmentsForText } from "@/lib/matching";
 import { notifyUsersForMatchedPosting } from "@/lib/notifications";
-import { removeCrossSourceDuplicate } from "@/lib/postingDedupe";
+import {
+  buildCrossSourceDuplicateIndex,
+  removeCrossSourceDuplicate,
+  type CrossSourceDuplicateIndex,
+} from "@/lib/postingDedupe";
 
 export const SOURCE_NAME = "Kariyer Kapısı";
 
@@ -48,6 +52,7 @@ async function upsertPosting(
     iller: string[];
   },
   unmatchedTexts: string[],
+  dupIndex: CrossSourceDuplicateIndex,
 ): Promise<void> {
   const { externalId, title, ilan, institutionType, sourceUrl, requirementText, iller } = params;
 
@@ -74,7 +79,7 @@ async function upsertPosting(
   // Ayni gercek ilan Memurlar.Net gibi baska bir kaynaktan da gelmis
   // olabilir - varsa o eski kaydi kaldirip yerine bu (en guncel islenen)
   // kaydin durmasini sagla.
-  await removeCrossSourceDuplicate({ institutionName: ilan.kurumAdi, title, sourceName: SOURCE_NAME });
+  await removeCrossSourceDuplicate(dupIndex, { institutionName: ilan.kurumAdi, title });
 
   const existing = await prisma.posting.findUnique({
     where: { externalId },
@@ -161,6 +166,7 @@ export async function scrapeKariyerKapisi(
 
     const seenExternalIds = new Set<string>();
     const unmatchedTexts: string[] = [];
+    const dupIndex = await buildCrossSourceDuplicateIndex(SOURCE_NAME);
 
     for (const ilan of ilanList) {
       if (ilan.sonDurumu !== "Aktif") continue;
@@ -206,6 +212,7 @@ export async function scrapeKariyerKapisi(
             iller: [],
           },
           unmatchedTexts,
+          dupIndex,
         );
 
         await sleep(300);
@@ -233,6 +240,7 @@ export async function scrapeKariyerKapisi(
             iller,
           },
           unmatchedTexts,
+          dupIndex,
         );
       }
 

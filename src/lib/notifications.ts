@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
 
 export async function createBildirim(params: {
@@ -30,9 +31,16 @@ export async function getBanaOzelBildirimler(userId: string, limit = 30) {
   });
 }
 
-export async function getGenelDuyurular(limit = 30) {
-  return prisma.duyuru.findMany({ orderBy: { createdAt: "desc" }, take: limit });
-}
+// Herkes (giris yapmis/yapmamis TUM ziyaretciler) icin ayni sonuc - bildirim
+// zili her 2 dakikada bir bunu her acik sekme icin sorguluyor. Duyurular
+// dakikalik degismedigi icin kisa sureli cache, ayni anki tum ziyaretcilerin
+// tek bir Postgres sorgusunu paylasmasini saglayip veritabani yukunu
+// (ve Neon compute-suresini) ciddi olcude azaltiyor.
+export const getGenelDuyurular = unstable_cache(
+  async (limit = 30) => prisma.duyuru.findMany({ orderBy: { createdAt: "desc" }, take: limit }),
+  ["genel-duyurular"],
+  { revalidate: 120 },
+);
 
 export async function markBildirimlerOkundu(userId: string) {
   await prisma.bildirim.updateMany({ where: { userId, okundu: false }, data: { okundu: true } });

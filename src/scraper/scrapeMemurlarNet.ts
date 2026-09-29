@@ -9,7 +9,7 @@ import {
 import { detectEducationLevels, detectInstitutionType, isGenericNoRestriction } from "./parseRequirements";
 import { matchDepartmentsForText } from "@/lib/matching";
 import { notifyUsersForMatchedPosting } from "@/lib/notifications";
-import { removeCrossSourceDuplicate } from "@/lib/postingDedupe";
+import { buildCrossSourceDuplicateIndex, removeCrossSourceDuplicate } from "@/lib/postingDedupe";
 
 export const SOURCE_NAME = "Memurlar.Net";
 
@@ -54,6 +54,7 @@ export async function scrapeMemurlarNet(prisma: PrismaClient): Promise<ScrapeSum
     const seenExternalIds = new Set<string>();
     const unmatchedTexts: string[] = [];
     let postingsFound = 0;
+    const dupIndex = await buildCrossSourceDuplicateIndex(SOURCE_NAME);
 
     for (const kategori of MEMURLAR_KATEGORILER) {
       let ozetler;
@@ -103,7 +104,7 @@ export async function scrapeMemurlarNet(prisma: PrismaClient): Promise<ScrapeSum
         // Ayni gercek ilan Kariyer Kapisi'ndan da gelmis olabilir - varsa
         // o eski kaydi kaldirip yerine bu (en guncel islenen) kaydin
         // durmasini sagla.
-        await removeCrossSourceDuplicate({ institutionName: kurumAdi, title, sourceName: SOURCE_NAME });
+        await removeCrossSourceDuplicate(dupIndex, { institutionName: kurumAdi, title });
 
         const existing = await prisma.posting.findUnique({
           where: { externalId },

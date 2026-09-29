@@ -8,7 +8,12 @@ import { cn } from "@/lib/utils";
 type Duyuru = { id: string; baslik: string; icerik: string; createdAt: string };
 type Bildirim = { id: string; baslik: string; icerik: string | null; link: string | null; createdAt: string; okundu: boolean };
 
-const POLL_MS = 30000;
+// Her acik sekme bu araligin sonunda /api/bildirimler'i sorguluyor - bu
+// deger dogrudan veritabani yukune (Neon compute-suresine) ve Vercel
+// fonksiyon cagri sayisina etki ediyor, kullanici sayisiyla dogrudan
+// olceklendigi icin dusuk tutulmamali. 30sn -> 2dk + sekme arka plandayken
+// tamamen durdurma, ayni deneyimi cok daha az istekle sagliyor.
+const POLL_MS = 120000;
 const PANEL_WIDTH = 320; // w-80
 const VIEWPORT_MARGIN = 8;
 
@@ -48,8 +53,29 @@ export function NotificationBell({ isLoggedIn }: { isLoggedIn: boolean }) {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, POLL_MS);
-    return () => clearInterval(interval);
+    let interval: ReturnType<typeof setInterval> | null = setInterval(fetchData, POLL_MS);
+
+    // Sekme arka plandayken (kullanici baska bir sekmede/uygulamada)
+    // sorgulamayi tamamen durdur - acik ama gorunmeyen sekmeler tek
+    // basina en buyuk gereksiz yuk kaynagiydi. Sekmeye geri donulunce
+    // hemen guncelle ve periyodik sorgulamayi yeniden baslat.
+    function handleVisibilityChange() {
+      if (document.hidden) {
+        if (interval) {
+          clearInterval(interval);
+          interval = null;
+        }
+      } else {
+        fetchData();
+        if (!interval) interval = setInterval(fetchData, POLL_MS);
+      }
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      if (interval) clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, []);
 
   async function handleOpen() {
