@@ -233,6 +233,9 @@ model Duyuru {
 // ana sayfada "Haberler" bolumunde gosterilir.
 model Haber {
   id          String   @id @default(cuid())
+  // Basliktan turetilen, SEO icin okunakli benzersiz URL parcasi - her
+  // haberin kendi sayfasi (/haberler/[slug]) bu alanla adreslenir.
+  slug        String   @unique
   baslik      String
   ozet        String
   kaynakUrl   String?

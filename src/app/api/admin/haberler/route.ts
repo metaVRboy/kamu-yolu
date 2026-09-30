@@ -1,7 +1,9 @@
+import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { buildHaberSlug } from "@/lib/slug";
 
 const bodySchema = z.object({
   baslik: z.string().trim().min(2).max(160),
@@ -24,8 +26,11 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const id = randomUUID();
   const haber = await prisma.haber.create({
     data: {
+      id,
+      slug: buildHaberSlug(parsed.data.baslik, id),
       baslik: parsed.data.baslik,
       ozet: parsed.data.ozet,
       kaynakUrl: parsed.data.kaynakUrl || null,

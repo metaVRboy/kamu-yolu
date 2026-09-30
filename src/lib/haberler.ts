@@ -22,3 +22,11 @@ export async function getHaberlerForDepartment(department: { id: string }, limit
     take: limit,
   });
 }
+
+/** Haberin kendi sayfasi (/haberler/[slug]) icin - iliskili bolumleriyle birlikte. */
+export async function getHaberBySlug(slug: string) {
+  return prisma.haber.findUnique({
+    where: { slug },
+    include: { departments: { include: { department: true } } },
+  });
+}

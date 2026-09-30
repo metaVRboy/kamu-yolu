@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { HaberGorsel } from "@/components/HaberGorsel";
 import { Badge } from "@/components/ui/badge";
@@ -48,17 +49,13 @@ export function HeroHaberCarousel({ haberler }: { haberler: HaberItem[] }) {
           {haber.baslik}
         </h3>
         <p className="line-clamp-2 max-w-xl text-sm text-white/80 sm:text-base">{haber.ozet}</p>
-        {haber.kaynakUrl && (
-          <a
-            href={haber.kaynakUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-1 flex w-fit items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow transition hover:bg-white/90"
-          >
-            Detayları İncele
-            <ArrowRight className="h-4 w-4" />
-          </a>
-        )}
+        <Link
+          href={`/haberler/${haber.slug}`}
+          className="mt-1 flex w-fit items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow transition hover:bg-white/90"
+        >
+          Detayları İncele
+          <ArrowRight className="h-4 w-4" />
+        </Link>
       </div>
 
       {haberler.length > 1 && (

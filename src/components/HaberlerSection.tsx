@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarDays, Newspaper, ExternalLink } from "lucide-react";
+import { CalendarDays, Newspaper, ArrowRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { HaberGorsel } from "@/components/HaberGorsel";
 
 export type HaberItem = {
   id: string;
+  slug: string;
   baslik: string;
   ozet: string;
   kaynakUrl: string | null;
@@ -62,34 +63,34 @@ export function HaberlerSection({
             key={h.id}
             className="gap-3 overflow-hidden border-primary/20 bg-white p-3 shadow-sm"
           >
-            <div className="relative">
+            <Link href={`/haberler/${h.slug}`} className="relative block">
               <HaberGorsel src={h.gorselUrl} alt={h.baslik} logoMu={h.gorselLogoMu} />
               {isYeni(h.yayinTarihi) && (
                 <Badge className="absolute right-2 top-2 border-transparent bg-red-600 text-white shadow">
                   YENİ
                 </Badge>
               )}
-            </div>
+            </Link>
 
             <div className="flex flex-1 flex-col gap-1.5 px-2 pb-2">
-              <h3 className="font-semibold leading-snug text-slate-900">{h.baslik}</h3>
+              <h3 className="font-semibold leading-snug text-slate-900">
+                <Link href={`/haberler/${h.slug}`} className="hover:underline">
+                  {h.baslik}
+                </Link>
+              </h3>
               <p className="line-clamp-3 text-sm text-muted-foreground">{h.ozet}</p>
               <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-2">
                 <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <CalendarDays className="h-3.5 w-3.5" />
                   {new Date(h.yayinTarihi).toLocaleDateString("tr-TR", { day: "2-digit", month: "long", year: "numeric" })}
                 </span>
-                {h.kaynakUrl && (
-                  <a
-                    href={h.kaynakUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={cn(buttonVariants({ size: "sm", variant: "outline" }), "border-primary/25")}
-                  >
-                    Kaynağı Gör
-                    <ExternalLink className="h-3.5 w-3.5" />
-                  </a>
-                )}
+                <Link
+                  href={`/haberler/${h.slug}`}
+                  className={cn(buttonVariants({ size: "sm", variant: "outline" }), "border-primary/25")}
+                >
+                  Devamını Oku
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
               </div>
             </div>
           </Card>

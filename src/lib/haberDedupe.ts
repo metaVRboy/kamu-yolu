@@ -1,7 +1,9 @@
+import { randomUUID } from "crypto";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { gemini, GEMINI_MODEL } from "@/lib/gemini";
 import { toGeminiSchema, parseGeminiJson } from "@/lib/geminiSchema";
+import { buildHaberSlug } from "@/lib/slug";
 
 const EslesmeSchema = z.object({
   eslesenId: z.string().nullable().describe("Ayni haberi anlatan mevcut haberin id'si, yoksa null."),
@@ -75,7 +77,12 @@ export async function haberleriEkleVeTekillestir(
       eklenen++;
     }
 
-    const olusturulan = await prisma.haber.create({ data: aday });
+    // Slug id'ye bagli oldugu icin (benzersizlik garantisi) id onceden
+    // uretilip slug ile birlikte tek seferde yazilir.
+    const id = randomUUID();
+    const olusturulan = await prisma.haber.create({
+      data: { ...aday, id, slug: buildHaberSlug(aday.baslik, id) },
+    });
     if (departmentIds.length > 0) {
       await prisma.haberDepartment.createMany({
         data: departmentIds.map((departmentId) => ({ haberId: olusturulan.id, departmentId })),

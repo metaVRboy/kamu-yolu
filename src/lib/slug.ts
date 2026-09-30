@@ -27,3 +27,14 @@ export function slugify(input: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 }
+
+/**
+ * Haber sayfalari icin basliktan SEO-dostu, benzersiz bir slug uretir.
+ * Ayni/benzer basliga sahip iki haber olabilecegi icin id'nin son
+ * karakterleri sonuna eklenerek benzersizlik garanti edilir.
+ */
+export function buildHaberSlug(baslik: string, id: string): string {
+  const taban = slugify(baslik);
+  const ek = id.slice(-6);
+  return taban ? `${taban}-${ek}` : ek;
+}
