@@ -303,7 +303,7 @@ export default async function HaberDetayPage({
               Bölümüne uygun yeni ilan ve haberleri kaçırma.
             </p>
             <Link
-              href="/profilim/ayarlar"
+              href="/profilim/abonelik"
               className={cn(buttonVariants({ size: "sm" }), "mt-3 w-full")}
             >
               Bildirimleri Aç
