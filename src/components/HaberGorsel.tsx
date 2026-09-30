@@ -65,13 +65,18 @@ export function HaberGorsel({
       {content}
       {/* Haber gorseli her zaman ucuncu taraf bir kaynaktan (haberin kendi
           sitesi/kurum logosu) geldigi icin - kendi markamizi belli etmek
-          icin kucuk bir amblem damgasi eklenir. */}
+          icin alt kenardan yukari dogru saydamlasan beyaz bir alan ve
+          onun alt-ortasina hizali logo eklenir. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-white via-white/70 to-transparent"
+      />
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/brand/kamu-yolu-emblem.png"
+        src="/brand/kamu-yolu-logo.png"
         alt=""
         aria-hidden
-        className="pointer-events-none absolute bottom-1.5 right-1.5 h-5 w-5 rounded bg-white/85 p-0.5 shadow-sm sm:h-6 sm:w-6"
+        className="pointer-events-none absolute bottom-1.5 left-1/2 h-7 w-auto -translate-x-1/2 sm:h-8"
       />
     </div>
   );
