@@ -18,7 +18,7 @@ export type HaberItem = {
 
 const YENI_ESIGI_GUN = 3;
 
-function isYeni(yayinTarihi: string): boolean {
+export function isYeni(yayinTarihi: string): boolean {
   const fark = Date.now() - new Date(yayinTarihi).getTime();
   return fark < YENI_ESIGI_GUN * 24 * 60 * 60 * 1000;
 }
