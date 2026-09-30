@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
-import Script from "next/script";
 import { UserRound } from "lucide-react";
 import { getLastSuccessfulScrapeAt } from "@/lib/matching";
 import { cn } from "@/lib/utils";
@@ -49,11 +48,16 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="tr" className={cn("h-full antialiased", inter.variable, "font-sans")}>
       <body className="flex min-h-full flex-col bg-white text-foreground">
-        <Script
+        {/* next/script (afterInteractive/beforeInteractive fark etmeksizin)
+            src'yi ham HTML'de duz bir <script src=...> etiketi olarak degil,
+            istemci tarafi bir yukleyici cagrisi icinde gomuyor - AdSense'in
+            JS calistirmayan basit dogrulama/tarama araclari bunu Google'in
+            istedigi kod olarak tanimayabiliyor. Bu yuzden burada bilerek
+            duz/native bir <script> etiketi kullaniliyor (next/script degil). */}
+        <script
           async
           src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`}
           crossOrigin="anonymous"
-          strategy="afterInteractive"
         />
         <header className="sticky top-0 z-40 border-b border-border bg-white/90 backdrop-blur-xl">
           <div className="relative flex w-full items-center justify-between gap-4 px-4 py-3 sm:px-6">
