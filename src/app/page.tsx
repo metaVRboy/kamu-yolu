@@ -1,3 +1,4 @@
+import { ClipboardList } from "lucide-react";
 import { getLatestPostings, getHomepageStats, getDepartmentPostingCounts } from "@/lib/matching";
 import { getLatestHaberler } from "@/lib/haberler";
 import { prisma } from "@/lib/prisma";
@@ -79,14 +80,19 @@ export default async function Home() {
       </div>
 
       <section className="mt-16">
-        <div className="flex items-baseline justify-between">
-          <div>
-            <h2 className="font-sans text-xl font-semibold text-primary">
-              Yeni Eklenen İlanlar
-            </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Sisteme en son eklenen kamu ilanları.
-            </p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md shadow-primary/25">
+              <ClipboardList className="h-5 w-5" />
+            </span>
+            <div>
+              <h2 className="font-sans text-xl font-semibold text-primary">
+                Yeni Eklenen İlanlar
+              </h2>
+              <p className="mt-0.5 text-sm text-muted-foreground">
+                Sisteme en son eklenen kamu ilanları.
+              </p>
+            </div>
           </div>
         </div>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
