@@ -1,56 +1,6 @@
+import { decodeHtmlEntities, parseTurkceTarih } from "./scraperUtils";
+
 const LISTE_URL = "https://www.isinolsa.com/guncel-kamu-ilanlari/";
-
-const AY_ISIMLERI: Record<string, number> = {
-  ocak: 1,
-  şubat: 2,
-  subat: 2,
-  mart: 3,
-  nisan: 4,
-  mayıs: 5,
-  mayis: 5,
-  haziran: 6,
-  temmuz: 7,
-  ağustos: 8,
-  agustos: 8,
-  eylül: 9,
-  eylul: 9,
-  ekim: 10,
-  kasım: 11,
-  kasim: 11,
-  aralık: 12,
-  aralik: 12,
-};
-
-const HTML_ENTITIES: Record<string, string> = {
-  "&#8211;": "–",
-  "&#8212;": "—",
-  "&#8216;": "'",
-  "&#8217;": "'",
-  "&#8220;": "“",
-  "&#8221;": "”",
-  "&amp;": "&",
-  "&nbsp;": " ",
-};
-
-function decodeHtmlEntities(text: string): string {
-  return text
-    .replace(/&#8211;|&#8212;|&#8216;|&#8217;|&#8220;|&#8221;|&amp;|&nbsp;/g, (m) => HTML_ENTITIES[m])
-    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)));
-}
-
-/** "28 Ağustos 2026" -> Date; parse edilemezse null. */
-function parseTurkceTarih(text: string): Date | null {
-  const match = text
-    .trim()
-    .toLocaleLowerCase("tr-TR")
-    .match(/(\d{1,2})\s+([a-zçğıöşü]+)\s+(\d{4})/);
-  if (!match) return null;
-  const gun = Number(match[1]);
-  const ay = AY_ISIMLERI[match[2]];
-  const yil = Number(match[3]);
-  if (!ay) return null;
-  return new Date(Date.UTC(yil, ay - 1, gun));
-}
 
 export type IsinolsaIlan = {
   externalId: string;

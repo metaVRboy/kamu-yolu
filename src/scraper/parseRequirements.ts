@@ -1,4 +1,5 @@
 import { EducationLevel, InstitutionType } from "@/generated/prisma/enums";
+import { matchDepartmentsForText } from "@/lib/matching";
 
 /**
  * Kariyer Kapisi ilan metinleri BBCode benzeri isaretleme kullanir. Belirli
@@ -92,4 +93,25 @@ export function isGenericNoRestriction(text: string): boolean {
     return true;
   }
   return false;
+}
+
+/**
+ * Ham ilan metnini egitim seviyesi + bolum sarti acisindan siniflandirir.
+ * Isci ilanlarinin (daimi/gecici) metni genelde sadece basvuru prosedurunu
+ * anlatir - egitim seviyesi/bolum bilgisi icermez (asil kriterler Iskur'un
+ * kendi sisteminde). Bu turde toplu iscii kadrolari pratikte neredeyse
+ * hicbir zaman bolume ozel degildir ve taban seviyesi genelde
+ * ortaogretimdir - metin bosken LISANS/kisitli varsaymak yerine bu daha
+ * gercekci varsayilanlar kullanilir. Kariyer Kapisi ve Memurlar.Net
+ * scraper'lari tarafindan ortak kullanilir.
+ */
+export async function classifyRequirementText(requirementText: string, isciIlaniMi: boolean) {
+  const levels = detectEducationLevels(requirementText);
+  const educationLevels = levels.length > 0 ? levels : [isciIlaniMi ? EducationLevel.LISE : EducationLevel.LISANS];
+
+  const matches = await matchDepartmentsForText(requirementText);
+  const isDepartmentRestricted =
+    matches.length > 0 || (!isciIlaniMi && !isGenericNoRestriction(requirementText));
+
+  return { educationLevels, isDepartmentRestricted, matches };
 }

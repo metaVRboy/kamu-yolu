@@ -1,5 +1,5 @@
 import { PrismaClient } from "@/generated/prisma/client";
-import { EducationLevel, InstitutionType } from "@/generated/prisma/enums";
+import { InstitutionType } from "@/generated/prisma/enums";
 import {
   fetchAltIlanlar,
   fetchIlanList,
@@ -7,13 +7,7 @@ import {
   ilanDetayUrl,
   type SearchIlan,
 } from "./kariyerKapisiClient";
-import {
-  detectEducationLevels,
-  detectInstitutionType,
-  isGenericNoRestriction,
-  stripBbCode,
-} from "./parseRequirements";
-import { matchDepartmentsForText } from "@/lib/matching";
+import { classifyRequirementText, detectInstitutionType, stripBbCode } from "./parseRequirements";
 import { notifyUsersForMatchedPosting } from "@/lib/notifications";
 import {
   buildCrossSourceDuplicateIndex,
@@ -64,14 +58,10 @@ async function upsertPosting(
   // genelde ortaogretimdir - metin bosken LISANS/kisitli varsaymak yerine
   // bu daha gercekci varsayilanlar kullanilir.
   const isciIlaniMi = ilan.ilanTuru === "İşçi İlanları";
-
-  const levels = detectEducationLevels(requirementText);
-  const educationLevels =
-    levels.length > 0 ? levels : [isciIlaniMi ? EducationLevel.LISE : EducationLevel.LISANS];
-
-  const matches = await matchDepartmentsForText(requirementText);
-  const isDepartmentRestricted =
-    matches.length > 0 || (!isciIlaniMi && !isGenericNoRestriction(requirementText));
+  const { educationLevels, isDepartmentRestricted, matches } = await classifyRequirementText(
+    requirementText,
+    isciIlaniMi,
+  );
   if (matches.length === 0) {
     unmatchedTexts.push(requirementText.slice(0, 200));
   }

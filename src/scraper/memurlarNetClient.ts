@@ -1,3 +1,5 @@
+import { decodeHtmlEntities, parseTurkceTarih } from "./scraperUtils";
+
 const BASE_URL = "https://ilan.memurlar.net";
 
 // Sadece GERCEK kamu istihdami kategorileri taranir - sitenin "Akademik
@@ -27,37 +29,6 @@ const HEADERS = {
   "User-Agent":
     "KamuYoluBot/0.1 (kamu ilanlarini bolume gore listeleyen acik kaynak proje; iletisim: emirhan.koc@sonayyatirim.com)",
 };
-
-const AY_ISIMLERI: Record<string, number> = {
-  ocak: 1, şubat: 2, subat: 2, mart: 3, nisan: 4, mayıs: 5, mayis: 5,
-  haziran: 6, temmuz: 7, ağustos: 8, agustos: 8, eylül: 9, eylul: 9,
-  ekim: 10, kasım: 11, kasim: 11, aralık: 12, aralik: 12,
-};
-
-const HTML_ENTITIES: Record<string, string> = {
-  "&#8211;": "–", "&#8212;": "—", "&#8216;": "'", "&#8217;": "'",
-  "&#8220;": "“", "&#8221;": "”", "&amp;": "&", "&nbsp;": " ", "&quot;": '"',
-};
-
-function decodeHtmlEntities(text: string): string {
-  return text
-    .replace(/&#8211;|&#8212;|&#8216;|&#8217;|&#8220;|&#8221;|&amp;|&nbsp;|&quot;/g, (m) => HTML_ENTITIES[m])
-    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)));
-}
-
-/** "25 Eylül 2026" -> Date; parse edilemezse null. */
-function parseTurkceTarih(text: string): Date | null {
-  const match = text
-    .trim()
-    .toLocaleLowerCase("tr-TR")
-    .match(/(\d{1,2})\s+([a-zçğıöşü]+)\s+(\d{4})/);
-  if (!match) return null;
-  const gun = Number(match[1]);
-  const ay = AY_ISIMLERI[match[2]];
-  const yil = Number(match[3]);
-  if (!ay) return null;
-  return new Date(Date.UTC(yil, ay - 1, gun, 23, 59, 59));
-}
 
 // Sayfa "acildi/kapandi" etiketlerini dengeli sayarak <div class="detail">
 // icerigini cikarir - regex ile ic ice div'leri dogru yakalamak guvenilir
@@ -177,7 +148,7 @@ export async function fetchIlanDetay(id: string, slug: string): Promise<Memurlar
 
   const description = html.match(/<meta property="og:description" content="([^"]*)"/)?.[1] ?? "";
   const sonBasvuruMatch = description.match(/[Ss]on\s+ba[sş]vuru\s+tarihi\s+([^.]+)/);
-  const applicationEnd = sonBasvuruMatch ? parseTurkceTarih(sonBasvuruMatch[1]) : null;
+  const applicationEnd = sonBasvuruMatch ? parseTurkceTarih(sonBasvuruMatch[1], true) : null;
 
   const detailOpenTag = html.indexOf('<div class="detail">');
   const bodyText = detailOpenTag === -1 ? "" : stripHtmlTags(extractBalancedDiv(html, detailOpenTag));

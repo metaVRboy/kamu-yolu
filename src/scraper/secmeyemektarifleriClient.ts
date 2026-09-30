@@ -1,3 +1,5 @@
+import { decodeHtmlEntities } from "./scraperUtils";
+
 const LISTE_URL = "https://www.secmeyemektarifleri.net/category/memur-personel-alimi/";
 
 // Sitenin kendi statik sayfalari (menu/footer linkleri) - makale degiller,
@@ -20,23 +22,6 @@ export type SecmeyemektarifleriMakale = {
   externalId: string;
   baslik: string;
 };
-
-function decodeHtmlEntities(text: string): string {
-  return text
-    .replace(/&#8211;|&#8212;|&#8216;|&#8217;|&#8220;|&#8221;|&amp;|&nbsp;/g, (m) =>
-      ({
-        "&#8211;": "–",
-        "&#8212;": "—",
-        "&#8216;": "'",
-        "&#8217;": "'",
-        "&#8220;": "“",
-        "&#8221;": "”",
-        "&amp;": "&",
-        "&nbsp;": " ",
-      })[m] ?? m,
-    )
-    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)));
-}
 
 /**
  * secmeyemektarifleri.net'in "Memur Personel Alımı" kategori sayfasini

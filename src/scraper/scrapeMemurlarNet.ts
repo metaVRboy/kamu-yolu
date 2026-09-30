@@ -1,13 +1,11 @@
 import { PrismaClient } from "@/generated/prisma/client";
-import { EducationLevel } from "@/generated/prisma/enums";
 import {
   MEMURLAR_KATEGORILER,
   fetchIlanDetay,
   fetchKategoriIlanlari,
   ilanDetayUrl,
 } from "./memurlarNetClient";
-import { detectEducationLevels, detectInstitutionType, isGenericNoRestriction } from "./parseRequirements";
-import { matchDepartmentsForText } from "@/lib/matching";
+import { classifyRequirementText, detectInstitutionType } from "./parseRequirements";
 import { notifyUsersForMatchedPosting } from "@/lib/notifications";
 import { buildCrossSourceDuplicateIndex, removeCrossSourceDuplicate } from "@/lib/postingDedupe";
 
@@ -89,14 +87,10 @@ export async function scrapeMemurlarNet(prisma: PrismaClient): Promise<ScrapeSum
         // zaman bolume ozel degildir ve taban seviyesi genelde
         // ortaogretimdir (bkz. scrapeKariyerKapisi.ts'teki ayni mantik).
         const isciIlaniMi = kategori === "daimi-isci-ilanlari" || kategori === "gecici-isci-ilanlari";
-
-        const levels = detectEducationLevels(detay.bodyText);
-        const educationLevels =
-          levels.length > 0 ? levels : [isciIlaniMi ? EducationLevel.LISE : EducationLevel.LISANS];
-
-        const matches = await matchDepartmentsForText(detay.bodyText);
-        const isDepartmentRestricted =
-          matches.length > 0 || (!isciIlaniMi && !isGenericNoRestriction(detay.bodyText));
+        const { educationLevels, isDepartmentRestricted, matches } = await classifyRequirementText(
+          detay.bodyText,
+          isciIlaniMi,
+        );
         if (matches.length === 0) {
           unmatchedTexts.push(detay.bodyText.slice(0, 200));
         }
