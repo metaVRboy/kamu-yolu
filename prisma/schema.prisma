@@ -250,6 +250,25 @@ model Haber {
   yayinTarihi DateTime @default(now())
   createdAt   DateTime @default(now())
 
+  // Asagidaki yapilandirilmis alanlarin tumu SADECE haberin dogrulanmis
+  // kaynak metninden (bkz. haberDetayCikar.ts) cikarilir - metinde acikca
+  // belirtilmeyen bir bilgi ASLA uydurulmaz, bulunamazsa null/bos kalir.
+  // Bu yuzden admin panelinden elle eklenen haberlerde hepsi bos olabilir.
+  kurumAdi         String?
+  kadroPozisyon    String?
+  kontenjan        Int?
+  kategori         String?
+  istihdamTuru     String?
+  kpssTuru         String?
+  ustYas           Int?
+  egitimSeviyeleri EducationLevel[] @default([])
+  basvuruBaslangic DateTime?
+  basvuruBitis     DateTime?
+  // Serbest metin ayrinti bolumleri (neAciklandi, basvuruTakvimi,
+  // kimlerBasvurabilir, ozelSartlar, dikkatEdilmesiGerekenler, sss[]) -
+  // hepsi opsiyonel, bkz. HaberDetayExtract tipi (src/lib/haberDetayCikar.ts).
+  detaylar Json?
+
   departments HaberDepartment[]
 
   @@index([yayinTarihi])

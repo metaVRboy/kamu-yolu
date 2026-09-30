@@ -6,6 +6,7 @@ import { extractOgImage } from "@/lib/extractOgImage";
 import { findInstitutionImage } from "@/lib/findInstitutionImage";
 import { verifyHaberKaynak } from "@/lib/verifyHaberKaynak";
 import { haberIcinBolumEslestir } from "@/lib/haberDepartmentMatch";
+import { haberDetayCikar, type HaberDetayExtract } from "@/lib/haberDetayCikar";
 
 const HaberSchema = z.object({
   haberler: z
@@ -34,6 +35,7 @@ export type HaberResearchItem = {
   gorselUrl: string | null;
   gorselLogoMu: boolean;
   departmentIds: string[];
+  detay: HaberDetayExtract | null;
 };
 
 const KRITIK_KURALLAR = `KRITIK KURALLAR:
@@ -146,23 +148,26 @@ export async function researchHaberler(): Promise<HaberResearchItem[]> {
         // Sayfa teknik olarak acilsa bile tamamen alakasiz olabilir -
         // gercek icerigi tekrar dogrulanmadan hicbir kaynak kabul edilmez.
         const { destekliyor, metin } = await verifyHaberKaynak({ baslik: h.baslik, ozet: h.ozet, url: kaynakUrl });
-        if (!destekliyor) return null;
+        if (!destekliyor || !metin) return null;
 
-        // Bolum eslesmesi SADECE kisa ozete degil, kaynagin tam metnine gore
-        // yapilir - ozette gecmeyen ama haberin icinde gecen bir bolum adi
-        // (ör. "diyetisyen alimi") da boylece yakalanir.
-        const departmentIds = metin
-          ? await haberIcinBolumEslestir({ baslik: h.baslik, ozet: h.ozet, tamMetin: metin })
-          : [];
+        // Bolum eslesmesi ve yapilandirilmis ayrinti cikarimi SADECE kisa
+        // ozete degil, kaynagin tam metnine gore yapilir - ozette gecmeyen
+        // ama haberin icinde gecen bir bolum adi (ör. "diyetisyen alimi")
+        // veya kontenjan/tarih gibi detaylar boylece yakalanir. Iki cagri
+        // birbirinden bagimsiz oldugu icin paralel calistirilir.
+        const [departmentIds, detay] = await Promise.all([
+          haberIcinBolumEslestir({ baslik: h.baslik, ozet: h.ozet, tamMetin: metin }),
+          haberDetayCikar({ baslik: h.baslik, tamMetin: metin }),
+        ]);
 
         // Once haberin kendi kaynagindan gercek bir gorsel dene; yoksa
         // kurumun Wikipedia'daki (acik lisansli) logosuna dus.
         const ogGorsel = await extractOgImage(kaynakUrl);
         if (ogGorsel) {
-          return { baslik: h.baslik, ozet: h.ozet, kaynakUrl, gorselUrl: ogGorsel, gorselLogoMu: false, departmentIds };
+          return { baslik: h.baslik, ozet: h.ozet, kaynakUrl, gorselUrl: ogGorsel, gorselLogoMu: false, departmentIds, detay };
         }
 
-        const kurumGorseli = await findInstitutionImage(h.kurumAdi);
+        const kurumGorseli = await findInstitutionImage(detay?.kurumAdi ?? h.kurumAdi);
         return {
           baslik: h.baslik,
           ozet: h.ozet,
@@ -170,6 +175,7 @@ export async function researchHaberler(): Promise<HaberResearchItem[]> {
           gorselUrl: kurumGorseli,
           gorselLogoMu: !!kurumGorseli,
           departmentIds,
+          detay,
         };
       }),
     );

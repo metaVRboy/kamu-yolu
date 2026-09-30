@@ -74,6 +74,7 @@ async function runIsinolsaHaberArastir(req: NextRequest) {
         gorselUrl: s.gorselUrl,
         gorselLogoMu: s.gorselLogoMu,
         departmentIds: s.departmentIds,
+        detay: s.detay,
       })),
     );
 

@@ -6,6 +6,7 @@ import { extractOgImage } from "@/lib/extractOgImage";
 import { findInstitutionImage } from "@/lib/findInstitutionImage";
 import { verifyHaberKaynak } from "@/lib/verifyHaberKaynak";
 import { haberIcinBolumEslestir } from "@/lib/haberDepartmentMatch";
+import { haberDetayCikar, type HaberDetayExtract } from "@/lib/haberDetayCikar";
 
 // Guvenilmeyen "toplama" siteleri - bunlar sadece arastirma ipucu (lead)
 // kaynagi olarak kullanilir, nihai haber kaynagi olarak ASLA gosterilmez.
@@ -43,6 +44,7 @@ export type KamuAlimHaberSonuc = {
   gorselUrl: string | null;
   gorselLogoMu: boolean;
   departmentIds: string[];
+  detay: HaberDetayExtract | null;
 };
 
 const SYSTEM_PROMPT = `Sana bir kurum adi ve/veya kisa bir konu basligi listesi verilecek. Bu
@@ -133,6 +135,7 @@ export async function researchKamuAlimLeads(
             gorselUrl: null,
             gorselLogoMu: false,
             departmentIds: [],
+            detay: null,
           };
 
           const sonuc = parsed.data.sonuclar.find((s) => s.index === i);
@@ -151,19 +154,23 @@ export async function researchKamuAlimLeads(
             ozet: sonuc.ozet,
             url: cozulmusUrl,
           });
-          if (!destekliyor) return bos;
+          if (!destekliyor || !metin) return bos;
 
-          // Bolum eslesmesi SADECE kisa ozete degil, kaynagin tam metnine
-          // gore yapilir - ozette gecmeyen ama haberin icinde gecen bir
-          // bolum adi da boylece yakalanir.
-          const departmentIds = metin
-            ? await haberIcinBolumEslestir({ baslik: sonuc.baslik, ozet: sonuc.ozet, tamMetin: metin })
-            : [];
+          // Bolum eslesmesi ve yapilandirilmis ayrinti cikarimi SADECE kisa
+          // ozete degil, kaynagin tam metnine gore yapilir - ozette gecmeyen
+          // ama haberin icinde gecen bir bolum adi veya kontenjan/tarih gibi
+          // detaylar boylece yakalanir.
+          const [departmentIds, detay] = await Promise.all([
+            haberIcinBolumEslestir({ baslik: sonuc.baslik, ozet: sonuc.ozet, tamMetin: metin }),
+            haberDetayCikar({ baslik: sonuc.baslik, tamMetin: metin }),
+          ]);
 
           // Once haberin kendi kaynagindan gercek bir gorsel dene; yoksa
           // kurumun Wikipedia'daki (acik lisansli) logosuna dus.
           const ogGorsel = await extractOgImage(cozulmusUrl);
-          const kurumGorseli = ogGorsel ? null : await findInstitutionImage(lead.kurumAdi ?? lead.baslik);
+          const kurumGorseli = ogGorsel
+            ? null
+            : await findInstitutionImage(detay?.kurumAdi ?? lead.kurumAdi ?? lead.baslik);
 
           return {
             externalId: lead.externalId,
@@ -174,6 +181,7 @@ export async function researchKamuAlimLeads(
             gorselUrl: ogGorsel ?? kurumGorseli,
             gorselLogoMu: !ogGorsel && !!kurumGorseli,
             departmentIds,
+            detay,
           };
         }),
       );

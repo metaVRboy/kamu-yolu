@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { gemini, GEMINI_MODEL } from "@/lib/gemini";
 import { toGeminiSchema, parseGeminiJson } from "@/lib/geminiSchema";
 import { buildHaberSlug } from "@/lib/slug";
+import type { HaberDetayExtract } from "@/lib/haberDetayCikar";
+import { EducationLevel } from "@/generated/prisma/enums";
 
 const EslesmeSchema = z.object({
   eslesenId: z.string().nullable().describe("Ayni haberi anlatan mevcut haberin id'si, yoksa null."),
@@ -52,6 +54,7 @@ export async function haberleriEkleVeTekillestir(
     gorselUrl: string | null;
     gorselLogoMu: boolean;
     departmentIds: string[];
+    detay: HaberDetayExtract | null;
   }[],
 ): Promise<{ eklenen: number; degistirilen: number }> {
   if (adaylar.length === 0) return { eklenen: 0, degistirilen: 0 };
@@ -65,7 +68,7 @@ export async function haberleriEkleVeTekillestir(
   let eklenen = 0;
   let degistirilen = 0;
 
-  for (const { departmentIds, ...aday } of adaylar) {
+  for (const { departmentIds, detay, ...aday } of adaylar) {
     const eslesenId = await ayniHaberIdBul(aday, mevcutlar);
     if (eslesenId) {
       // Haber kaydi silindiginde iliskili HaberDepartment satirlari da
@@ -81,7 +84,31 @@ export async function haberleriEkleVeTekillestir(
     // uretilip slug ile birlikte tek seferde yazilir.
     const id = randomUUID();
     const olusturulan = await prisma.haber.create({
-      data: { ...aday, id, slug: buildHaberSlug(aday.baslik, id) },
+      data: {
+        ...aday,
+        id,
+        slug: buildHaberSlug(aday.baslik, id),
+        kurumAdi: detay?.kurumAdi ?? null,
+        kadroPozisyon: detay?.kadroPozisyon ?? null,
+        kontenjan: detay?.kontenjan ?? null,
+        kategori: detay?.kategori ?? null,
+        istihdamTuru: detay?.istihdamTuru ?? null,
+        kpssTuru: detay?.kpssTuru ?? null,
+        ustYas: detay?.ustYas ?? null,
+        egitimSeviyeleri: (detay?.egitimSeviyeleri ?? []) as EducationLevel[],
+        basvuruBaslangic: detay?.basvuruBaslangic ? new Date(detay.basvuruBaslangic) : null,
+        basvuruBitis: detay?.basvuruBitis ? new Date(detay.basvuruBitis) : null,
+        detaylar: detay
+          ? {
+              neAciklandi: detay.neAciklandi,
+              basvuruTakvimi: detay.basvuruTakvimi,
+              kimlerBasvurabilir: detay.kimlerBasvurabilir,
+              ozelSartlar: detay.ozelSartlar,
+              dikkatEdilmesiGerekenler: detay.dikkatEdilmesiGerekenler,
+              sss: detay.sss,
+            }
+          : undefined,
+      },
     });
     if (departmentIds.length > 0) {
       await prisma.haberDepartment.createMany({
