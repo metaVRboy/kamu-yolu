@@ -168,7 +168,6 @@ export default async function HaberDetayPage({
             logoMu={haber.gorselLogoMu}
             className="mt-6 aspect-[16/9] w-full rounded-2xl"
           />
-          <p className="mt-1.5 text-center text-xs text-muted-foreground">{haber.baslik} haber görseli</p>
 
           {bilgiKutulari.length > 0 && (
             <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
