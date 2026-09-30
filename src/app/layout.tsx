@@ -93,11 +93,13 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         </header>
 
         <div className="mx-auto flex w-full max-w-[1600px] flex-1 items-start justify-center gap-4 px-2">
-          <AdSlot side="left" slotId={process.env.NEXT_PUBLIC_ADSENSE_SLOT_LEFT} />
+          {/* Su an tek bir 160x600 manuel reklam birimi var - ikinci ayri
+              birim olusturulunca sol/sag icin farkli slotId verilebilir. */}
+          <AdSlot side="left" slotId="7192164037" />
           <main className="min-w-0 flex-1">
             <PageTransition>{children}</PageTransition>
           </main>
-          <AdSlot side="right" slotId={process.env.NEXT_PUBLIC_ADSENSE_SLOT_RIGHT} />
+          <AdSlot side="right" slotId="7192164037" />
         </div>
 
         <footer className="border-t border-border bg-slate-900 pt-12 pb-8 text-slate-300">
