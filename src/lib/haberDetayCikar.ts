@@ -22,7 +22,14 @@ const DetaySchema = z.object({
     .string()
     .nullable()
     .describe("İstihdam türü (ör. 'Memur', 'Sözleşmeli Personel', 'Sürekli İşçi'), yoksa null."),
-  kpssTuru: z.string().nullable().describe("İstenen KPSS puan türü (ör. 'KPSS P3'), metinde geçmiyorsa null."),
+  kpssTuru: z
+    .string()
+    .nullable()
+    .describe(
+      "İstenen KPSS puan türü, ÖĞRENİM SEVİYESİYLE BİRLİKTE (ör. 'Lisans KPSS P3', 'Önlisans KPSS P93', " +
+        "'Lise KPSS P94') - metinde geçen ogrenim seviyesi ile ayni seviyedeki KPSS sinavina karsilik " +
+        "gelir, bu ikisi birbirinden bagimsiz degildir. Metinde geçmiyorsa null.",
+    ),
   ustYas: z.number().int().nullable().describe("Başvuru için belirtilen üst yaş sınırı, yoksa null."),
   egitimSeviyeleri: z
     .array(z.enum(["ILKOGRETIM", "LISE", "ONLISANS", "LISANS", "YUKSEK_LISANS"]))
@@ -40,19 +47,35 @@ const DetaySchema = z.object({
   kimlerBasvurabilir: z
     .string()
     .nullable()
-    .describe("Başvuru şartlarını (eğitim, yaş, deneyim vb.) SADECE metinde geçene dayanarak özetleyen kısa açıklama."),
-  ozelSartlar: z.string().nullable().describe("Metinde belirtilen özel şartlar/nitelikler, yoksa null."),
+    .describe(
+      "Başvuru şartlarını (eğitim, yaş, deneyim vb.) SADECE metinde geçene dayanarak özetleyen kısa " +
+        "açıklama. Bir KPSS şartından bahsediyorsan, hangi öğrenim seviyesinin KPSS'i olduğunu MUTLAKA " +
+        "belirt (ör. 'Lisans KPSS'den ...' - asla sadece 'KPSS'den' veya 'KPSS puan türlerinin herhangi " +
+        "birinden' gibi seviyesiz/belirsiz ifade kullanma).",
+    ),
+  ozelSartlar: z
+    .string()
+    .nullable()
+    .describe(
+      "Metinde belirtilen özel şartlar/nitelikler, yoksa null. Bir KPSS şartından bahsediyorsan, hangi " +
+        "öğrenim seviyesinin KPSS'i olduğunu MUTLAKA belirt (ör. 'Lisans KPSS'den ...' - asla sadece " +
+        "'KPSS'den' veya 'KPSS puan türlerinin herhangi birinden' gibi seviyesiz/belirsiz ifade kullanma).",
+    ),
   dikkatEdilmesiGerekenler: z
     .string()
     .nullable()
     .describe(
       "Adayların dikkat etmesi gereken, metinde AÇIKÇA belirtilen bir uyarı/not varsa kısa açıklama, " +
-        "yoksa null - UYDURMA UYARI YAZMA.",
+        "yoksa null - UYDURMA UYARI YAZMA. KPSS'den bahsediyorsan burada da öğrenim seviyesini belirt " +
+        "(ör. 'Lisans KPSS').",
     ),
   sss: z
     .array(SssSchema)
     .max(4)
-    .describe("Sadece metindeki bilgiye dayanan, gerçekten cevaplanabilir 0-4 soru-cevap. Uydurma soru sorma, yetersizse boş dizi."),
+    .describe(
+      "Sadece metindeki bilgiye dayanan, gerçekten cevaplanabilir 0-4 soru-cevap. Uydurma soru sorma, " +
+        "yetersizse boş dizi. Cevapta KPSS'den bahsediyorsan öğrenim seviyesini belirt (ör. 'Lisans KPSS').",
+    ),
 });
 
 export type HaberDetayExtract = z.infer<typeof DetaySchema>;
@@ -78,7 +101,14 @@ export async function haberDetayCikar(params: {
           "yapılandırılmış bilgi çıkarmak. KRİTİK KURAL: SADECE metinde AÇIKÇA yazan bilgiyi çıkar. Bir " +
           "alan metinde belirtilmemişse veya belirsizse o alanı null/boş bırak - ASLA tahmin etme, genel " +
           "geçer bir değer uydurma veya varsayılan bir sayı/tarih yazma. Aynı bilgiyi farklı alanlarda " +
-          "tekrar etme - her alan farklı, gerçek bir bilgi taşımalı.",
+          "tekrar etme - her alan farklı, gerçek bir bilgi taşımalı.\n\n" +
+          "KPSS KURALI: KPSS öğrenim seviyesine göre ayrı sınavlardır (Lisans KPSS, Önlisans KPSS, Lise " +
+          "KPSS - birbirinden bağımsız, farklı puan türleri). İlanın öğrenim şartı (ör. lisans mezunu) " +
+          "hangi seviyeyse, o ilanda geçen KPSS puanı da OTOMATİK OLARAK O SEVİYENİN KPSS'idir - metinde " +
+          "'lisans mezunu ... KPSS puan türlerinin herhangi birinden' gibi seviyesiz yazılmış olsa bile " +
+          "sen çıktıda bunu ilandaki öğrenim şartına göre netleştirip 'Lisans KPSS puan türlerinin ...' " +
+          "şeklinde yaz. Bu bir tahmin değil, KPSS sisteminin çalışma mantığından kaynaklanan zorunlu bir " +
+          "eşleşmedir - asla seviyesiz/belirsiz 'KPSS'den X puan' ifadesi kullanma.",
         responseMimeType: "application/json",
         responseJsonSchema: toGeminiSchema(DetaySchema),
       },
