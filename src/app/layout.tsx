@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
+import Script from "next/script";
 import { UserRound } from "lucide-react";
 import { getLastSuccessfulScrapeAt } from "@/lib/matching";
 import { cn } from "@/lib/utils";
@@ -21,6 +22,8 @@ import "./globals.css";
 // Site genelinde tek font: Inter. Baslik/govde ayrimi icin ayri bir serif
 // kullanilmiyor - modern/duz gorunum icin her yerde ayni sans-serif.
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+
+const ADSENSE_CLIENT_ID = "ca-pub-2932226916873749";
 
 export const revalidate = 300;
 
@@ -46,6 +49,12 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="tr" className={cn("h-full antialiased", inter.variable, "font-sans")}>
       <body className="flex min-h-full flex-col bg-white text-foreground">
+        <Script
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`}
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
         <header className="sticky top-0 z-40 border-b border-border bg-white/90 backdrop-blur-xl">
           <div className="relative flex w-full items-center justify-between gap-4 px-4 py-3 sm:px-6">
             <div className="flex items-center gap-3">
@@ -84,11 +93,11 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         </header>
 
         <div className="mx-auto flex w-full max-w-[1600px] flex-1 items-start justify-center gap-4 px-2">
-          <AdSlot side="left" />
+          <AdSlot side="left" slotId={process.env.NEXT_PUBLIC_ADSENSE_SLOT_LEFT} />
           <main className="min-w-0 flex-1">
             <PageTransition>{children}</PageTransition>
           </main>
-          <AdSlot side="right" />
+          <AdSlot side="right" slotId={process.env.NEXT_PUBLIC_ADSENSE_SLOT_RIGHT} />
         </div>
 
         <footer className="border-t border-border bg-slate-900 pt-12 pb-8 text-slate-300">
