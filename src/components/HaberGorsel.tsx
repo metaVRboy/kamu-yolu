@@ -71,12 +71,15 @@ export function HaberGorsel({
         aria-hidden
         className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-white via-white/70 to-transparent"
       />
+      {/* Sabit piksel yukseklik yerine konteyner genisligine oranli (%) -
+          aksi halde kucuk kart onizlemesinde dogru gorunen boyut, buyuk
+          hero/detay gorsellerinde orantisiz kucuk kaliyordu. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/brand/kamu-yolu-logo.png"
         alt=""
         aria-hidden
-        className="pointer-events-none absolute bottom-1.5 left-1/2 h-7 w-auto -translate-x-1/2 sm:h-8"
+        className="pointer-events-none absolute bottom-[3%] left-1/2 h-auto w-[22%] min-w-[72px] max-w-[220px] -translate-x-1/2"
       />
     </div>
   );
