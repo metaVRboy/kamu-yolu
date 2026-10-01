@@ -14,7 +14,10 @@ export function AuthSplitPanel({
     <div className="mx-auto grid w-full max-w-4xl overflow-hidden rounded-3xl bg-white md:grid-cols-2">
       <div className="relative hidden flex-col justify-center gap-8 bg-slate-900 p-8 text-white md:flex">
         <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -top-16 -left-16 h-56 w-56 rounded-full bg-primary/25 blur-3xl" />
+          {/* Logo kendi orijinal (koyu lacivert/altin) renkleriyle
+              kullanildigi icin koyu panel uzerinde kaybolmamasi adina
+              arkasinda beyaz bir isik humesi var. */}
+          <div className="absolute -top-16 -left-16 h-64 w-64 rounded-full bg-white/25 blur-3xl" />
           <div className="absolute -bottom-20 -right-10 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
           <Image
             src="/brand/kamu-yolu-emblem.png"
@@ -35,7 +38,7 @@ export function AuthSplitPanel({
             alt="Kamu Yolu"
             width={200}
             height={150}
-            className="h-16 w-auto brightness-0 invert"
+            className="h-16 w-auto"
           />
         </div>
 
