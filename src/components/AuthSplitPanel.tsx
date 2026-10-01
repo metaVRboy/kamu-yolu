@@ -37,8 +37,13 @@ export function AuthSplitPanel({
   aciklama: string;
   children: React.ReactNode;
 }) {
+  // Yuvarlatma/kirpma (rounded-3xl + overflow-hidden) kasitli olarak
+  // burada degil, bu bileseni saran DISARIDAKI kapsayicida (AuthModal
+  // veya /giris, /kayit-ol sayfalari) uygulanir - ikisi de ayni radius'u
+  // tekrar uygularsa iki ayri yuvarlatma kosede ust uste binip ince bir
+  // beyaz/isikli kenar (antialiasing dikisi) birakiyordu.
   return (
-    <div className="mx-auto grid w-full max-w-4xl overflow-hidden rounded-3xl bg-white md:grid-cols-2">
+    <div className="mx-auto grid w-full max-w-4xl bg-white md:grid-cols-2">
       <div className="relative hidden flex-col justify-end bg-slate-900 p-8 text-white md:flex">
         <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
           {/* Logo kendi orijinal (koyu lacivert/altin) renkleriyle
