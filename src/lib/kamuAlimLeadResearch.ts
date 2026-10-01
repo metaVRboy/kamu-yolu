@@ -67,10 +67,6 @@ KRITIK KURALLAR:
 
 Girdi listesindeki HER madde icin (atlamadan) bir sonuc satiri uret.`;
 
-function beklet(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 function toplamaSitesiMi(url: string): boolean {
   return TOPLAMA_SITELERI.some((site) => url.includes(site));
 }
@@ -100,97 +96,92 @@ export async function researchKamuAlimLeads(
     )
     .join("\n");
 
-  // maxDuration (290s) icinde kalmak icin en fazla 3 deneme: tek basarisiz
-  // cagri bile ~50-100s surebiliyor.
-  const DENEME_SAYISI = 3;
-  let sonHata: unknown;
+  // Tekrar deneme YOK - basarisiz/aksak bir Gemini cagrisini tekrar tekrar
+  // denemek (ozellikle googleSearch grounding ucretli oldugu icin) maliyeti
+  // gereksiz yere katliyordu. Bu calistirmada bulunamazsa bir sonraki
+  // zamanlanmis taramada (3 saat sonra) tekrar denenir - leadler
+  // *LeadIslendi tablosuna islenmemis olarak kaldigi icin kaybolmaz.
+  try {
+    const res = await gemini.models.generateContent({
+      model: GEMINI_MODEL,
+      contents: girdiListesi,
+      config: {
+        systemInstruction: SYSTEM_PROMPT,
+        tools: [{ googleSearch: {} }],
+        responseMimeType: "application/json",
+        responseJsonSchema: toGeminiSchema(SonucSchema),
+      },
+    });
 
-  for (let deneme = 1; deneme <= DENEME_SAYISI; deneme++) {
-    try {
-      const res = await gemini.models.generateContent({
-        model: GEMINI_MODEL,
-        contents: girdiListesi,
-        config: {
-          systemInstruction: SYSTEM_PROMPT,
-          tools: [{ googleSearch: {} }],
-          responseMimeType: "application/json",
-          responseJsonSchema: toGeminiSchema(SonucSchema),
-        },
-      });
+    const parsedJson = parseGeminiJson(res.text);
+    if (!parsedJson) throw new Error("Gemini yanitindan JSON cikarilamadi.");
 
-      const parsedJson = parseGeminiJson(res.text);
-      if (!parsedJson) throw new Error("Gemini yanitindan JSON cikarilamadi.");
+    const parsed = SonucSchema.safeParse(parsedJson);
+    if (!parsed.success) throw new Error("Gemini yaniti semaya uymuyor.");
 
-      const parsed = SonucSchema.safeParse(parsedJson);
-      if (!parsed.success) throw new Error("Gemini yaniti semaya uymuyor.");
+    return await Promise.all(
+      leads.map(async (lead, i): Promise<KamuAlimHaberSonuc> => {
+        const bos = {
+          externalId: lead.externalId,
+          dogrulandi: false,
+          baslik: null,
+          ozet: null,
+          resmiKaynakUrl: null,
+          gorselUrl: null,
+          gorselLogoMu: false,
+          departmentIds: [],
+          detay: null,
+        };
 
-      return Promise.all(
-        leads.map(async (lead, i): Promise<KamuAlimHaberSonuc> => {
-          const bos = {
-            externalId: lead.externalId,
-            dogrulandi: false,
-            baslik: null,
-            ozet: null,
-            resmiKaynakUrl: null,
-            gorselUrl: null,
-            gorselLogoMu: false,
-            departmentIds: [],
-            detay: null,
-          };
+        const sonuc = parsed.data.sonuclar.find((s) => s.index === i);
+        if (!sonuc || !sonuc.dogrulandi || !sonuc.resmiKaynakUrl || !sonuc.baslik || !sonuc.ozet) return bos;
 
-          const sonuc = parsed.data.sonuclar.find((s) => s.index === i);
-          if (!sonuc || !sonuc.dogrulandi || !sonuc.resmiKaynakUrl || !sonuc.baslik || !sonuc.ozet) return bos;
+        // resmiKaynakUrl, Gemini'nin grounding yonlendirme linki - gercek
+        // kaynak alan adini ancak coz(er)sek gorebiliriz. Toplama sitesi
+        // disleme kontrolu de bu yuzden COZULMUS url uzerinde yapilmali.
+        const cozulmusUrl = await resolveGroundingUrl(sonuc.resmiKaynakUrl);
+        if (!cozulmusUrl || toplamaSitesiMi(cozulmusUrl)) return bos;
 
-          // resmiKaynakUrl, Gemini'nin grounding yonlendirme linki - gercek
-          // kaynak alan adini ancak coz(er)sek gorebiliriz. Toplama sitesi
-          // disleme kontrolu de bu yuzden COZULMUS url uzerinde yapilmali.
-          const cozulmusUrl = await resolveGroundingUrl(sonuc.resmiKaynakUrl);
-          if (!cozulmusUrl || toplamaSitesiMi(cozulmusUrl)) return bos;
+        // Sayfa teknik olarak acilsa bile tamamen alakasiz olabilir -
+        // gercek icerigi tekrar dogrulanmadan hicbir kaynak kabul edilmez.
+        const { destekliyor, metin } = await verifyHaberKaynak({
+          baslik: sonuc.baslik,
+          ozet: sonuc.ozet,
+          url: cozulmusUrl,
+        });
+        if (!destekliyor || !metin) return bos;
 
-          // Sayfa teknik olarak acilsa bile tamamen alakasiz olabilir -
-          // gercek icerigi tekrar dogrulanmadan hicbir kaynak kabul edilmez.
-          const { destekliyor, metin } = await verifyHaberKaynak({
-            baslik: sonuc.baslik,
-            ozet: sonuc.ozet,
-            url: cozulmusUrl,
-          });
-          if (!destekliyor || !metin) return bos;
+        // Bolum eslesmesi ve yapilandirilmis ayrinti cikarimi SADECE kisa
+        // ozete degil, kaynagin tam metnine gore yapilir - ozette gecmeyen
+        // ama haberin icinde gecen bir bolum adi veya kontenjan/tarih gibi
+        // detaylar boylece yakalanir.
+        const [departmentIds, detay] = await Promise.all([
+          haberIcinBolumEslestir({ baslik: sonuc.baslik, ozet: sonuc.ozet, tamMetin: metin }),
+          haberDetayCikar({ baslik: sonuc.baslik, tamMetin: metin }),
+        ]);
 
-          // Bolum eslesmesi ve yapilandirilmis ayrinti cikarimi SADECE kisa
-          // ozete degil, kaynagin tam metnine gore yapilir - ozette gecmeyen
-          // ama haberin icinde gecen bir bolum adi veya kontenjan/tarih gibi
-          // detaylar boylece yakalanir.
-          const [departmentIds, detay] = await Promise.all([
-            haberIcinBolumEslestir({ baslik: sonuc.baslik, ozet: sonuc.ozet, tamMetin: metin }),
-            haberDetayCikar({ baslik: sonuc.baslik, tamMetin: metin }),
-          ]);
+        // Once haberin kendi kaynagindan gercek bir gorsel dene; yoksa
+        // kurumun Wikipedia'daki (acik lisansli) logosuna dus.
+        const ogGorsel = await extractOgImage(cozulmusUrl);
+        const kurumGorseli = ogGorsel
+          ? null
+          : await findInstitutionImage(detay?.kurumAdi ?? lead.kurumAdi ?? lead.baslik);
 
-          // Once haberin kendi kaynagindan gercek bir gorsel dene; yoksa
-          // kurumun Wikipedia'daki (acik lisansli) logosuna dus.
-          const ogGorsel = await extractOgImage(cozulmusUrl);
-          const kurumGorseli = ogGorsel
-            ? null
-            : await findInstitutionImage(detay?.kurumAdi ?? lead.kurumAdi ?? lead.baslik);
-
-          return {
-            externalId: lead.externalId,
-            dogrulandi: true,
-            baslik: sonuc.baslik,
-            ozet: sonuc.ozet,
-            resmiKaynakUrl: cozulmusUrl,
-            gorselUrl: ogGorsel ?? kurumGorseli,
-            gorselLogoMu: !ogGorsel && !!kurumGorseli,
-            departmentIds,
-            detay,
-          };
-        }),
-      );
-    } catch (err) {
-      sonHata = err;
-      console.error(`Kamu alimi lead arastirmasi denemesi ${deneme}/${DENEME_SAYISI} basarisiz:`, err);
-      if (deneme < DENEME_SAYISI) await beklet(deneme * 3000);
-    }
+        return {
+          externalId: lead.externalId,
+          dogrulandi: true,
+          baslik: sonuc.baslik,
+          ozet: sonuc.ozet,
+          resmiKaynakUrl: cozulmusUrl,
+          gorselUrl: ogGorsel ?? kurumGorseli,
+          gorselLogoMu: !ogGorsel && !!kurumGorseli,
+          departmentIds,
+          detay,
+        };
+      }),
+    );
+  } catch (err) {
+    console.error("Kamu alimi lead arastirmasi basarisiz:", err);
+    throw err;
   }
-
-  throw sonHata;
 }
