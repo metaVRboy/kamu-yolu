@@ -12,7 +12,7 @@ export function AuthSplitPanel({
 }) {
   return (
     <div className="mx-auto grid w-full max-w-4xl overflow-hidden rounded-3xl bg-white md:grid-cols-2">
-      <div className="relative hidden flex-col justify-center gap-8 bg-slate-900 p-8 text-white md:flex">
+      <div className="relative hidden flex-col justify-end bg-slate-900 p-8 text-white md:flex">
         <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
           {/* Logo kendi orijinal (koyu lacivert/altin) renkleriyle
               kullanildigi icin koyu panel uzerinde kaybolmamasi adina
@@ -28,15 +28,15 @@ export function AuthSplitPanel({
           />
         </div>
 
-        <div className="relative -mt-4">
-          <Image
-            src="/brand/kamu-yolu-logo.png"
-            alt="Kamu Yolu"
-            width={260}
-            height={195}
-            className="h-24 w-auto"
-          />
-        </div>
+        {/* Logo, panelin icerik akisindan bagimsiz, her zaman sol-ust koseye
+            sabit - icerik kisa/uzun olsun degismez. */}
+        <Image
+          src="/brand/kamu-yolu-logo-premium.png"
+          alt="Kamu Yolu"
+          width={300}
+          height={300}
+          className="absolute left-6 top-6 h-20 w-auto"
+        />
 
         <div className="relative">
           <h2 className="font-sans text-2xl font-bold leading-tight tracking-tight">{baslik}</h2>
