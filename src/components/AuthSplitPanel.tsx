@@ -1,11 +1,23 @@
 import Image from "next/image";
 import { ShieldCheck, FileCheck2 } from "lucide-react";
 
-/** Giris modunun baslik metni - "kamuyolu.com" kismi altin sarisi/gloss efektli. */
+// Logodaki gercek altin rengi (kamu-yolu-logo-orijinal.png'den piksel
+// ornegiyle bulundu: #C0A050) - UI'da baska bir sari/amber uydurmak
+// yerine aciklik/koyuluk varyasyonlari BU renkten turetildi.
+const LOGO_ALTIN_ACIK = "#E8DBB8";
+const LOGO_ALTIN = "#C0A050";
+const LOGO_ALTIN_KOYU = "#7D6834";
+
+/** Giris modunun baslik metni - "kamuyolu.com" kismi logonun gercek altin rengiyle/gloss efektli. */
 export function GirisBasligi() {
   return (
     <>
-      <span className="bg-gradient-to-b from-amber-200 via-yellow-400 to-amber-600 bg-clip-text text-transparent">
+      <span
+        className="bg-clip-text text-transparent"
+        style={{
+          backgroundImage: `linear-gradient(to bottom, ${LOGO_ALTIN_ACIK}, ${LOGO_ALTIN}, ${LOGO_ALTIN_KOYU})`,
+        }}
+      >
         kamuyolu.com
       </span>
       &apos;a
@@ -49,7 +61,7 @@ export function AuthSplitPanel({
           alt="Kamu Yolu"
           width={300}
           height={300}
-          className="absolute left-6 top-6 h-40 w-auto"
+          className="absolute left-2 top-2 h-40 w-auto"
         />
 
         <div className="relative">
