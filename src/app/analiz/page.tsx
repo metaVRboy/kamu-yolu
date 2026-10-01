@@ -1,6 +1,7 @@
 import { Suspense } from "react";
-import { BarChart3 } from "lucide-react";
+import { BarChart3, Landmark } from "lucide-react";
 import { getBolumAnaliz, getVeriAraligi } from "@/lib/analiz";
+import { getResmiIstihdamSerisi } from "@/lib/resmiIstihdamIstatistikleri";
 import { AnalizFiltre } from "@/components/AnalizFiltre";
 
 export const metadata = { title: "Bölüm Bazlı Alım Analizi — Kamu Yolu" };
@@ -33,15 +34,69 @@ export default async function AnalizPage({
   const toplamIlan = satirlar.reduce((t, s) => t + s.ilanSayisi, 0);
   const toplamKontenjan = satirlar.reduce((t, s) => t + s.tahminiKontenjan, 0);
 
+  const resmiSeri = getResmiIstihdamSerisi();
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
-      <div className="flex items-center gap-2">
+      <div className="rounded-2xl border border-primary/20 bg-white p-4">
+        <div className="flex items-center gap-2">
+          <Landmark className="h-5 w-5 text-primary" />
+          <h2 className="text-sm font-semibold text-slate-700">
+            Türkiye Geneli Kamu İstihdamı (Resmi Kaynak)
+          </h2>
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Cumhurbaşkanlığı Strateji ve Bütçe Başkanlığı verilerine dayanır; bölüm/kurum kırılımı
+          içermez, sadece Türkiye genelinde toplam kamu personeli sayısını gösterir.
+        </p>
+        <div className="mt-3 overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-primary/10 text-left text-xs text-muted-foreground">
+                <th className="py-1.5 pr-4 font-medium">Dönem</th>
+                <th className="py-1.5 pr-4 font-medium">Toplam Kamu Personeli</th>
+                <th className="py-1.5 pr-4 font-medium">Yıllık Net Artış</th>
+                <th className="py-1.5 font-medium">Kaynak</th>
+              </tr>
+            </thead>
+            <tbody>
+              {resmiSeri.map((s) => (
+                <tr key={s.yil} className="border-b border-primary/5 last:border-0">
+                  <td className="py-1.5 pr-4 text-slate-800">
+                    {s.yil} {s.donem}
+                  </td>
+                  <td className="py-1.5 pr-4 font-medium text-slate-900">
+                    {s.toplamPersonel.toLocaleString("tr-TR")}
+                  </td>
+                  <td className="py-1.5 pr-4 text-slate-500">
+                    {s.netArtis !== null ? `+${s.netArtis.toLocaleString("tr-TR")}` : "—"}
+                  </td>
+                  <td className="py-1.5">
+                    <a
+                      href={s.kaynakUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      kaynak
+                    </a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="mt-10 flex items-center gap-2">
         <BarChart3 className="h-6 w-6 text-primary" />
-        <h1 className="text-2xl font-bold tracking-tight">Bölüm Bazlı Alım Analizi</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Bölüm Bazlı İlan Analizi (Kamu Yolu Verisi)</h1>
       </div>
       {ilk && son && (
         <p className="mt-2 text-sm text-muted-foreground">
-          Veri kapsamı: {turkceTarih(ilk)} – {turkceTarih(son)} arasında sitemizde yayımlanan ilanlar.
+          Veri kapsamı: {turkceTarih(ilk)} – {turkceTarih(son)} arasında sitemizin taradığı ilanlar.
+          Taramaya yakın zamanda başlandığı için ilanlar yoğunlukla güncel döneme aittir, yukarıdaki
+          resmi istatistik gibi uzun yıllara yayılan bir arşiv değildir.
         </p>
       )}
 
