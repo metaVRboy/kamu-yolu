@@ -65,3 +65,21 @@ export async function removeCrossSourceDuplicate(
   await prisma.posting.delete({ where: { id: matchId } });
   index.delete(sig);
 }
+
+/**
+ * Son basvuru tarihi gecmis ilanlari pasiflestirir. Bir ilan normalde
+ * SADECE kaynak sitenin kendi "aktif ilanlar" listesinden dustugunde
+ * pasiflesiyordu - ama kaynak site, suresi dolan bir ilani kendi
+ * sisteminden hemen cikarmayabiliyor, bu da son basvuru tarihi gecmis
+ * ilanlarin bizim sitemizde gunlerce "aktif" gorunmeye devam etmesine yol
+ * aciyordu. Bu fonksiyon tarih kontrolunu kaynaktan bagimsiz, doğrudan
+ * kendimiz yaparak bu gecikmeyi ortadan kaldirir - her tarama calismasinin
+ * basinda (tum kaynaklar icin ortak) cagrilmasi yeterlidir.
+ */
+export async function expireOverduePostings(): Promise<number> {
+  const result = await prisma.posting.updateMany({
+    where: { isActive: true, applicationEnd: { lt: new Date() } },
+    data: { isActive: false },
+  });
+  return result.count;
+}

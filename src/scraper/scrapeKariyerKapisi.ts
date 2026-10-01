@@ -12,6 +12,7 @@ import { notifyUsersForMatchedPosting } from "@/lib/notifications";
 import {
   buildCrossSourceDuplicateIndex,
   removeCrossSourceDuplicate,
+  expireOverduePostings,
   type CrossSourceDuplicateIndex,
 } from "@/lib/postingDedupe";
 
@@ -152,6 +153,8 @@ export async function scrapeKariyerKapisi(
   });
 
   try {
+    await expireOverduePostings();
+
     const ilanList = await fetchIlanList();
 
     const seenExternalIds = new Set<string>();

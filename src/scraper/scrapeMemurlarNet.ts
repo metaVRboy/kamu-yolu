@@ -7,7 +7,7 @@ import {
 } from "./memurlarNetClient";
 import { classifyRequirementText, detectInstitutionType } from "./parseRequirements";
 import { notifyUsersForMatchedPosting } from "@/lib/notifications";
-import { buildCrossSourceDuplicateIndex, removeCrossSourceDuplicate } from "@/lib/postingDedupe";
+import { buildCrossSourceDuplicateIndex, removeCrossSourceDuplicate, expireOverduePostings } from "@/lib/postingDedupe";
 
 export const SOURCE_NAME = "Memurlar.Net";
 
@@ -49,6 +49,8 @@ export async function scrapeMemurlarNet(prisma: PrismaClient): Promise<ScrapeSum
   });
 
   try {
+    await expireOverduePostings();
+
     const seenExternalIds = new Set<string>();
     const unmatchedTexts: string[] = [];
     let postingsFound = 0;
