@@ -52,13 +52,21 @@ const KRITIK_KURALLAR = `KRITIK KURALLAR:
 
 // Tek, genis bir sorgu yerine kurum kategorisine gore ayri/hedefli
 // sorgular calistirilir - her biri kendi alanina odaklandigi icin tek bir
-// genel sorgudan cok daha fazla ve cesitli gercek haber buluyor. Sorgular
-// paralel calisir, toplam sure buyumez.
+// genel sorgudan daha fazla ve cesitli gercek haber buluyor. Sorgular
+// paralel calisir, toplam sure buyumez. Googlesearch grounding istek
+// basina ucretlendirildigi icin (bkz. maliyet optimizasyonu) en yakin iki
+// kategori (bakanlik/merkezi kurum + belediye/mahalli/KIT - ikisi de
+// "genel kamu kurumu" niteliginde) TEK sorguda birlestirildi; akademik
+// personel alimi hacim/nitelik olarak yeterince farkli oldugu icin kendi
+// basina birakildi.
 const KATEGORI_PROMPTLARI = [
-  `Turkiye'de bakanliklarin ve merkezi kamu kurumlarinin GUNCEL (son birkac
-gun icindeki, en fazla son 1 hafta) personel/memur/sozlesmeli personel
-alim haberlerini Google Search ile arastir. Ozellikle:
-- Bakanliklarin acikladigi toplu personel/memur alim ilanlari veya planlari
+  `Turkiye'de bakanliklarin, merkezi kamu kurumlarinin, belediyelerin, il
+ozel idarelerinin, mahalli idare birliklerinin ve kamu iktisadi
+tesekkullerinin (KIT) GUNCEL (son birkac gun icindeki, en fazla son 1
+hafta) personel/memur/sozlesmeli personel/iscii alim haberlerini Google
+Search ile arastir. Ozellikle:
+- Bakanliklarin/belediyelerin acikladigi toplu personel/memur/isci alim
+  ilanlari veya planlari
 - KPSS, kamu istihdami ile ilgili gundemdeki tartismalar/kararlar
 - Kamu calisanlarini (saglik personeli, ogretmen, memur) ilgilendiren
   sendika aciklamalari/haberleri
@@ -71,12 +79,6 @@ son 1 hafta) akademik (ogretim uyesi/gorevlisi, arastirma gorevlisi) ve
 idari personel alim ilanlarina dair haberleri Google Search ile arastir.
 Devlet universitelerinin kendi ilan sayfalarindaki veya Resmi Gazete'deki
 duyurulara ozellikle dikkat et.
-
-${KRITIK_KURALLAR}`,
-  `Turkiye'deki BELEDIYELERIN, il ozel idarelerinin, mahalli idare
-birliklerinin ve kamu iktisadi tesekkullerinin (KIT) GUNCEL (son birkac
-gun icindeki, en fazla son 1 hafta) personel/iscii alim haberlerini
-Google Search ile arastir.
 
 ${KRITIK_KURALLAR}`,
 ] as const;

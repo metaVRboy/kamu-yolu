@@ -9,11 +9,7 @@
       "schedule": "0 6,9,12,15 * * *"
     },
     {
-      "path": "/api/isinolsa-haber-arastir",
-      "schedule": "0 6,9,12,15 * * *"
-    },
-    {
-      "path": "/api/secmeyemektarifleri-haber-arastir",
+      "path": "/api/kamu-alim-haber-arastir",
       "schedule": "0 6,9,12,15 * * *"
     },
     {
