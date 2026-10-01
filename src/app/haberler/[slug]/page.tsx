@@ -13,9 +13,11 @@ import {
 } from "lucide-react";
 import { getHaberBySlug, getLatestHaberler } from "@/lib/haberler";
 import { getLatestPostings } from "@/lib/matching";
+import { findInstitutionImageCached } from "@/lib/findInstitutionImage";
 import { HaberGorsel } from "@/components/HaberGorsel";
 import { HaberlerSection, isYeni } from "@/components/HaberlerSection";
 import { HaberPaylas } from "@/components/HaberPaylas";
+import { KurumLogo } from "@/components/KurumLogo";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { LEVEL_LABEL } from "@/lib/labels";
@@ -69,11 +71,18 @@ export default async function HaberDetayPage({
   const haber = await getHaberBySlug(slug);
   if (!haber) notFound();
 
-  const [digerHaberlerHam, guncelIlanlar] = await Promise.all([
+  const [digerHaberlerHam, guncelIlanlarHam] = await Promise.all([
     getLatestHaberler(6),
     getLatestPostings(5),
   ]);
   const digerHaberler = digerHaberlerHam.filter((h) => h.id !== haber.id).slice(0, 4);
+
+  const guncelIlanlar = await Promise.all(
+    guncelIlanlarHam.map(async (p) => ({
+      ...p,
+      gorselUrl: await findInstitutionImageCached(p.institutionName),
+    })),
+  );
 
   const detaylar = haber.detaylar as HaberDetaylar | null;
   const egitimLabel = haber.egitimSeviyeleri.length > 0
@@ -285,10 +294,13 @@ export default async function HaberDetayPage({
                   <Link
                     key={p.id}
                     href={`/ilan/${p.id}/${slugify(p.title)}`}
-                    className="block rounded-lg p-2 -mx-2 transition-colors hover:bg-primary/5"
+                    className="flex items-start gap-3 rounded-lg p-2 -mx-2 transition-colors hover:bg-primary/5"
                   >
-                    <p className="text-xs font-medium text-primary">{p.institutionName}</p>
-                    <p className="line-clamp-2 text-sm font-semibold text-slate-900">{p.title}</p>
+                    <KurumLogo src={p.gorselUrl} alt={p.institutionName} />
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-primary">{p.institutionName}</p>
+                      <p className="line-clamp-2 text-sm font-semibold text-slate-900">{p.title}</p>
+                    </div>
                   </Link>
                 ))}
               </div>

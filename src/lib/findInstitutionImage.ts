@@ -1,3 +1,5 @@
+import { unstable_cache } from "next/cache";
+
 async function ozetGorseliniGetir(baslik: string): Promise<string | null> {
   const res = await fetch(
     `https://tr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(baslik)}`,
@@ -88,3 +90,16 @@ export async function findInstitutionImage(kurumAdi: string): Promise<string | n
     return null;
   }
 }
+
+/**
+ * findInstitutionImage'in onbellekli hali - ilanlar sayfalarda tekrar
+ * tekrar (her sayfa render'inda) ayni kurum adiyla gosterilebilir, haberler
+ * gibi bir kez bulunup kalici saklanmiyor. Wikipedia'ya her render'da
+ * istek atmamak icin 7 gun onbelleklenir (kurum logolari pratikte hic
+ * degismez).
+ */
+export const findInstitutionImageCached = unstable_cache(
+  findInstitutionImage,
+  ["institution-image"],
+  { revalidate: 60 * 60 * 24 * 7 },
+);
