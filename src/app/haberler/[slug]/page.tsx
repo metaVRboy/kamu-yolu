@@ -73,12 +73,27 @@ export default async function HaberDetayPage({
 
   const [digerHaberlerHam, guncelIlanlarHam] = await Promise.all([
     getLatestHaberler(6),
-    getLatestPostings(5),
+    getLatestPostings(15),
   ]);
   const digerHaberler = digerHaberlerHam.filter((h) => h.id !== haber.id).slice(0, 4);
 
+  // Ayni kurumun ayni basliga sahip birden fazla pozisyonu (ör. ayni ilan
+  // icinde birden fazla "Uzman" kadrosu) gercekte farkli ilanlar ama bu
+  // kisa onizleme listesinde ayirt edici bilgi olmadan ayni gibi
+  // gorunuyor - gorsel karisikligi onlemek icin ilk gorunenden sonrakiler
+  // bu widget'ta atlanir (kendi sayfalarinda hala ayri ayri listelenirler).
+  const gorulenBaslikAnahtari = new Set<string>();
+  const guncelIlanlarTekil = guncelIlanlarHam
+    .filter((p) => {
+      const anahtar = `${p.institutionName}::${p.title}`;
+      if (gorulenBaslikAnahtari.has(anahtar)) return false;
+      gorulenBaslikAnahtari.add(anahtar);
+      return true;
+    })
+    .slice(0, 5);
+
   const guncelIlanlar = await Promise.all(
-    guncelIlanlarHam.map(async (p) => ({
+    guncelIlanlarTekil.map(async (p) => ({
       ...p,
       gorselUrl: await findInstitutionImageCached(p.institutionName),
     })),
