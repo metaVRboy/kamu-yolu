@@ -53,7 +53,7 @@ export function AuthSplitPanel({
           {/* Logo kendi orijinal (koyu lacivert/altin) renkleriyle
               kullanildigi icin koyu panel uzerinde kaybolmamasi adina
               arkasinda beyaz bir isik humesi var. */}
-          <div className="absolute -top-16 -left-16 h-64 w-64 rounded-full bg-white/25 blur-3xl" />
+          <div className="absolute -top-16 -left-16 h-64 w-64 rounded-full bg-white/45 blur-3xl" />
           {/* brightness-0 -> amblemi duz siyah siluete cevirir (invert
               UYGULANMAZ, aksi halde beyaz olur) - siyah, arka plandaki
               slate-900'den koyu oldugu icin panelde ondan daha koyu bir
