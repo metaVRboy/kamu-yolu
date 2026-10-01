@@ -12,13 +12,20 @@ export function AuthSplitPanel({
 }) {
   return (
     <div className="mx-auto grid w-full max-w-4xl overflow-hidden rounded-3xl bg-white md:grid-cols-2">
-      <div className="relative hidden flex-col justify-between bg-slate-900 p-8 text-white md:flex">
+      <div className="relative hidden flex-col justify-center gap-8 bg-slate-900 p-8 text-white md:flex">
         <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute -top-16 -left-16 h-56 w-56 rounded-full bg-primary/25 blur-3xl" />
           <div className="absolute -bottom-20 -right-10 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
+          <Image
+            src="/brand/kamu-yolu-emblem.png"
+            alt=""
+            width={360}
+            height={360}
+            className="absolute -top-10 -right-14 h-72 w-72 opacity-[0.06] brightness-0 invert"
+          />
         </div>
 
-        <div className="relative space-y-6">
+        <div className="relative space-y-5">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
             <Sparkles className="h-3 w-3" />
             GÜVENLİ ÜYELİK
@@ -26,9 +33,9 @@ export function AuthSplitPanel({
           <Image
             src="/brand/kamu-yolu-logo.png"
             alt="Kamu Yolu"
-            width={160}
-            height={120}
-            className="h-9 w-auto brightness-0 invert"
+            width={200}
+            height={150}
+            className="h-16 w-auto brightness-0 invert"
           />
         </div>
 
