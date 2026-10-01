@@ -42,10 +42,18 @@ export function AuthSplitPanel({
   // veya /giris, /kayit-ol sayfalari) uygulanir - ikisi de ayni radius'u
   // tekrar uygularsa iki ayri yuvarlatma kosede ust uste binip ince bir
   // beyaz/isikli kenar (antialiasing dikisi) birakiyordu.
+  // bg-white kasitli olarak kok elemanda degil - kirpilan (rounded)
+  // disaridaki kapsayicida kok elemanin kendi arka plan rengi, yuvarlak
+  // kosenin antialiasing kenarindan "sizip" beyaz bir taşma gibi
+  // gorunuyordu. Her yarim artik SADECE kendi arka planini tasiyor.
   return (
-    <div className="mx-auto grid w-full max-w-4xl bg-white md:grid-cols-2">
+    <div className="mx-auto grid w-full max-w-4xl md:grid-cols-2">
       <div className="relative hidden flex-col justify-end bg-slate-900 p-8 text-white md:flex">
         <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+          {/* Logo kendi orijinal (koyu lacivert/altin) renkleriyle
+              kullanildigi icin koyu panel uzerinde kaybolmamasi adina
+              arkasinda beyaz bir isik humesi var. */}
+          <div className="absolute -top-16 -left-16 h-64 w-64 rounded-full bg-white/25 blur-3xl" />
           {/* brightness-0 -> amblemi duz siyah siluete cevirir (invert
               UYGULANMAZ, aksi halde beyaz olur) - siyah, arka plandaki
               slate-900'den koyu oldugu icin panelde ondan daha koyu bir
@@ -101,7 +109,7 @@ export function AuthSplitPanel({
         </div>
       </div>
 
-      <div className="flex items-center justify-center p-6 sm:p-10">
+      <div className="flex items-center justify-center bg-white p-6 sm:p-10">
         <div className="w-full max-w-sm">{children}</div>
       </div>
     </div>
