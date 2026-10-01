@@ -61,7 +61,7 @@ export function AuthSplitPanel({
           alt="Kamu Yolu"
           width={300}
           height={300}
-          className="absolute left-2 top-2 h-40 w-auto"
+          className="absolute left-8 top-2 h-40 w-auto"
         />
 
         <div className="relative">
