@@ -13,6 +13,7 @@ export function HaberGorsel({
   alt,
   logoMu = false,
   className = "aspect-[16/9] w-full rounded-xl",
+  markaGizli = false,
 }: {
   src: string | null;
   alt: string;
@@ -20,6 +21,9 @@ export function HaberGorsel({
   // Varsayilan (kart icinde 16:9 kutu) disinda bir kaplama gerektiren
   // kullanimlar (ör. tam yukseklik dolduran hero carousel) icin.
   className?: string;
+  // Kenar cubugu gibi cok kucuk onizlemelerde marka damgasi gorsele
+  // sigmiyor/orantisiz kaliyor - bu durumlarda damga tamamen gizlenir.
+  markaGizli?: boolean;
 }) {
   const [hataVar, setHataVar] = useState(false);
 
@@ -63,24 +67,25 @@ export function HaberGorsel({
   return (
     <div className={cn("relative overflow-hidden", className)}>
       {content}
-      {/* Haber gorseli her zaman ucuncu taraf bir kaynaktan (haberin kendi
-          sitesi/kurum logosu) geldigi icin - kendi markamizi belli etmek
-          icin alt kenardan yukari dogru saydamlasan beyaz bir alan ve
-          onun alt-ortasina hizali logo eklenir. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-white via-white/70 to-transparent"
-      />
-      {/* Sabit piksel yukseklik yerine konteyner genisligine oranli (%) -
-          aksi halde kucuk kart onizlemesinde dogru gorunen boyut, buyuk
-          hero/detay gorsellerinde orantisiz kucuk kaliyordu. */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/brand/kamu-yolu-logo.png"
-        alt=""
-        aria-hidden
-        className="pointer-events-none absolute bottom-[3%] left-1/2 h-auto w-[13%] min-w-[56px] max-w-[110px] -translate-x-1/2"
-      />
+      {!markaGizli && (
+        <>
+          {/* Haber gorseli her zaman ucuncu taraf bir kaynaktan (haberin
+              kendi sitesi/kurum logosu) geldigi icin - kendi markamizi
+              belli etmek icin alt kenardan yukari dogru saydamlasan beyaz
+              bir alan ve onun alt-ortasina hizali logo eklenir. */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-white via-white/70 to-transparent"
+          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/brand/kamu-yolu-logo.png"
+            alt=""
+            aria-hidden
+            className="pointer-events-none absolute bottom-[3%] left-1/2 h-auto w-[13%] min-w-[56px] max-w-[110px] -translate-x-1/2"
+          />
+        </>
+      )}
     </div>
   );
 }

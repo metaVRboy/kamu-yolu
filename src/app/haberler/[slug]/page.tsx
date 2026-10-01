@@ -15,7 +15,7 @@ import { getHaberBySlug, getLatestHaberler } from "@/lib/haberler";
 import { getLatestPostings } from "@/lib/matching";
 import { findInstitutionImageCached } from "@/lib/findInstitutionImage";
 import { HaberGorsel } from "@/components/HaberGorsel";
-import { HaberlerSection, isYeni } from "@/components/HaberlerSection";
+import { isYeni } from "@/components/HaberlerSection";
 import { HaberPaylas } from "@/components/HaberPaylas";
 import { KurumLogo } from "@/components/KurumLogo";
 import { Badge } from "@/components/ui/badge";
@@ -322,6 +322,38 @@ export default async function HaberDetayPage({
             </div>
           )}
 
+          {digerHaberler.length > 0 && (
+            <div className="rounded-2xl border border-border bg-white p-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold text-slate-900">Benzer Haberler</p>
+                <Link href="/haberler" className="text-xs font-medium text-primary hover:underline">
+                  Tümünü Gör
+                </Link>
+              </div>
+              <div className="mt-3 space-y-3">
+                {digerHaberler.map((h) => (
+                  <Link
+                    key={h.id}
+                    href={`/haberler/${h.slug}`}
+                    className="flex items-start gap-3 rounded-lg p-2 -mx-2 transition-colors hover:bg-primary/5"
+                  >
+                    <HaberGorsel
+                      src={h.gorselUrl}
+                      alt={h.baslik}
+                      logoMu={h.gorselLogoMu}
+                      markaGizli
+                      className="h-14 w-20 shrink-0 rounded-lg"
+                    />
+                    <div className="min-w-0">
+                      <p className="line-clamp-2 text-sm font-semibold text-slate-900">{h.baslik}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">{tarihFormatla(h.yayinTarihi)}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4">
             <p className="text-sm font-semibold text-slate-900">Takipte Kal</p>
             <p className="mt-1 text-xs text-muted-foreground">
@@ -336,16 +368,6 @@ export default async function HaberDetayPage({
           </div>
         </aside>
       </div>
-
-      {digerHaberler.length > 0 && (
-        <div className="mt-16">
-          <HaberlerSection
-            haberler={digerHaberler.map((h) => ({ ...h, yayinTarihi: h.yayinTarihi.toISOString() }))}
-            baslik="Diğer Güncel Haberler"
-            aciklama="Kamu personel alımları ve gündemdeki diğer gelişmeler."
-          />
-        </div>
-      )}
 
       <Link
         href="/haberler"
