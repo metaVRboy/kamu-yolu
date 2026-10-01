@@ -8,7 +8,7 @@ export const metadata = { title: "Kayıt Ol — Kamu Yolu" };
 export default function KayitOlPage() {
   return (
     <div className="my-8 px-4 sm:my-14 sm:px-6">
-      <div className="mx-auto max-w-4xl overflow-hidden rounded-3xl border border-border shadow-xl">
+      <div className="mx-auto max-w-4xl overflow-hidden rounded-3xl shadow-xl">
         <AuthSplitPanel
           baslik="Bölümüne uygun ilanları kaçırma."
           aciklama="Ücretsiz hesap oluştur; bölümüne göre eşleşen ilanları ve haberleri tek yerden takip et."
