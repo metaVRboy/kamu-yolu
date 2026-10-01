@@ -104,20 +104,31 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <AdSlot side="right" slotId="3758342177" />
         </div>
 
-        <footer className="border-t border-border bg-slate-900 pt-12 pb-8 text-slate-300">
-          <div className="mx-auto grid max-w-6xl gap-10 px-4 sm:grid-cols-[1.3fr_1fr_1fr] sm:px-6">
+        <footer className="relative overflow-hidden border-t border-primary/40 bg-slate-900 pt-14 pb-8 text-slate-300">
+          <div aria-hidden className="pointer-events-none absolute inset-0">
+            <div className="absolute -top-24 left-1/4 h-72 w-72 rounded-full bg-primary/20 blur-3xl" />
+            <Image
+              src="/brand/kamu-yolu-emblem.png"
+              alt=""
+              width={420}
+              height={420}
+              className="absolute -bottom-16 -right-16 h-[22rem] w-[22rem] opacity-[0.04] brightness-0 invert"
+            />
+          </div>
+
+          <div className="relative mx-auto grid max-w-[1600px] gap-10 px-6 sm:px-10 lg:grid-cols-[1.4fr_1fr_1fr_1.1fr] lg:gap-16">
             <div>
-              <p className="flex items-center gap-2 text-sm font-semibold text-white">
+              <p className="flex items-center gap-2.5 text-base font-semibold text-white">
                 <Image
                   src="/brand/kamu-yolu-emblem.png"
                   alt=""
-                  width={16}
-                  height={16}
-                  className="h-4 w-4 brightness-0 invert"
+                  width={28}
+                  height={28}
+                  className="h-7 w-7 brightness-0 invert"
                 />
                 Kamu Yolu
               </p>
-              <p className="mt-3 max-w-sm text-sm text-slate-400">
+              <p className="mt-4 max-w-sm text-sm leading-relaxed text-slate-400">
                 Mezun olduğun bölümü söyle, bakanlık, üniversite, hastane,
                 belediye ve daha fazlasından bölümüne uygun ya da bölüm
                 şartı olmayan güncel kamu ilanlarını bul.
@@ -125,33 +136,51 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             </div>
 
             <div>
-              <p className="text-xs font-semibold tracking-wide text-slate-200 uppercase">
+              <p className="text-xs font-semibold tracking-wide text-primary/70 uppercase">
                 Sayfalar
               </p>
-              <ul className="mt-3 space-y-2 text-sm text-slate-400">
-                <li><Link href="/" className="hover:text-white">Ana Sayfa</Link></li>
-                <li><Link href="/amacimiz" className="hover:text-white">Hakkımızda</Link></li>
-                <li><Link href="/haberler" className="hover:text-white">Haberler</Link></li>
-                <li><Link href="/kpss-puan-hesaplama" className="hover:text-white">KPSS Puan Hesaplama</Link></li>
-                <li><Link href="/becayis" className="hover:text-white">Becayiş İlanları</Link></li>
-                <li><Link href="/kvkk" className="hover:text-white">KVKK ve Kullanım Şartları</Link></li>
-                <li><Link href="/cerez-politikasi" className="hover:text-white">Çerez Politikası</Link></li>
+              <ul className="mt-4 space-y-2.5 text-sm text-slate-400">
+                <li><Link href="/" className="transition-colors hover:text-white">Ana Sayfa</Link></li>
+                <li><Link href="/amacimiz" className="transition-colors hover:text-white">Hakkımızda</Link></li>
+                <li><Link href="/haberler" className="transition-colors hover:text-white">Haberler</Link></li>
+                <li><Link href="/kpss-puan-hesaplama" className="transition-colors hover:text-white">KPSS Puan Hesaplama</Link></li>
+                <li><Link href="/becayis" className="transition-colors hover:text-white">Becayiş İlanları</Link></li>
               </ul>
             </div>
 
             <div>
-              <p className="text-xs font-semibold tracking-wide text-slate-200 uppercase">
+              <p className="text-xs font-semibold tracking-wide text-primary/70 uppercase">
                 Öğrenim Düzeyine Göre
               </p>
-              <ul className="mt-3 space-y-2 text-sm text-slate-400">
-                <li><Link href="/seviye/lise" className="hover:text-white">Lise Mezunları</Link></li>
-                <li><Link href="/seviye/onlisans" className="hover:text-white">Önlisans Mezunları</Link></li>
-                <li><Link href="/seviye/lisans" className="hover:text-white">Lisans Mezunları</Link></li>
+              <ul className="mt-4 space-y-2.5 text-sm text-slate-400">
+                <li><Link href="/seviye/lise" className="transition-colors hover:text-white">Lise Mezunları</Link></li>
+                <li><Link href="/seviye/onlisans" className="transition-colors hover:text-white">Önlisans Mezunları</Link></li>
+                <li><Link href="/seviye/lisans" className="transition-colors hover:text-white">Lisans Mezunları</Link></li>
               </ul>
+              <p className="mt-6 text-xs font-semibold tracking-wide text-primary/70 uppercase">
+                Yasal
+              </p>
+              <ul className="mt-4 space-y-2.5 text-sm text-slate-400">
+                <li><Link href="/kvkk" className="transition-colors hover:text-white">KVKK ve Kullanım Şartları</Link></li>
+                <li><Link href="/cerez-politikasi" className="transition-colors hover:text-white">Çerez Politikası</Link></li>
+              </ul>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+              <p className="text-sm font-semibold text-white">Bölümünü aratmadın mı?</p>
+              <p className="mt-1.5 text-sm text-slate-400">
+                Sana uygun güncel kamu ilanlarını hemen bulalım.
+              </p>
+              <Link
+                href="/"
+                className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+              >
+                Bölüme Göre Ara
+              </Link>
             </div>
           </div>
 
-          <div className="mx-auto mt-10 max-w-6xl border-t border-white/10 px-4 pt-6 text-xs text-slate-500 sm:px-6">
+          <div className="relative mx-auto mt-10 max-w-[1600px] border-t border-white/10 px-6 pt-6 text-xs text-slate-500 sm:px-10">
             <p>
               Veriler otomatik ve periyodik olarak güncellenir. İlan
               detayları için lütfen kaynak kurumun ilan sayfasını esas alın.
