@@ -42,7 +42,7 @@ export function AuthSplitPanel({
               <div>
                 <p className="text-sm font-semibold">Güvenli oturum</p>
                 <p className="text-xs text-slate-400">
-                  Şifren tersine çevrilemeyecek şekilde saklanır, bağlantılar şifrelidir.
+                  Şifreni biz dahil kimse göremez; tüm bağlantılar şifreli iletilir.
                 </p>
               </div>
             </div>
