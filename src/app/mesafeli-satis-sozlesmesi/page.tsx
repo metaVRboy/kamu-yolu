@@ -69,14 +69,14 @@ export default function MesafeliSatisSozlesmesiPage() {
                   SMS ile anlık ilan bildirimi, bölüme özel bildirimler, becayiş modülünde site
                   içi mesajlaşma
                 </td>
-                <td className="border border-border p-2"><YerTutucu>[FİYAT - belirlenecek]</YerTutucu> / ay</td>
+                <td className="border border-border p-2">39 TL / ay</td>
               </tr>
               <tr>
                 <td className="border border-border p-2">Pro+</td>
                 <td className="border border-border p-2">
                   Pro&apos;daki tüm özellikler, reklamsız kullanım, öncelikli destek
                 </td>
-                <td className="border border-border p-2"><YerTutucu>[FİYAT - belirlenecek]</YerTutucu> / ay</td>
+                <td className="border border-border p-2">79 TL / ay</td>
               </tr>
             </tbody>
           </table>

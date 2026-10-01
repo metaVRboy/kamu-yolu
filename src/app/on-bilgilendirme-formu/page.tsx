@@ -58,8 +58,8 @@ export default function OnBilgilendirmeFormuPage() {
           <h2 className="font-sans text-base font-semibold text-primary">3. Toplam Fiyat (Vergiler Dahil)</h2>
           <p>
             Seçtiğiniz plan ve dönem (aylık/yıllık) için ödeyeceğiniz toplam tutar, ödeme
-            adımında KDV dahil olarak açıkça gösterilir. Güncel fiyatlar:{" "}
-            <YerTutucu>[FİYAT - belirlenecek]</YerTutucu>
+            adımında KDV dahil olarak açıkça gösterilir. Güncel fiyatlar: Pro 39 TL/ay (349
+            TL/yıl), Pro+ 79 TL/ay (699 TL/yıl).
           </p>
         </section>
 

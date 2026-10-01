@@ -8,8 +8,10 @@ import { cn } from "@/lib/utils";
 
 type PlanKey = "UCRETSIZ" | "PRO" | "PRO_PLUS";
 
-// Fiyat ve ozellikler henuz kesinlesmedi - burasi sadece arayuz iskeleti.
-// Gercek degerler belirlenince bu dizi guncellenecek.
+// Fiyatlar: rakip/pazar arastirmasina dayali oneri (becayis.net, kariyer.net,
+// ihale takip siteleri kiyaslamasi) - odeme altyapisi henuz baglanmadigi
+// icin "Yukseltme" butonlari hala pasif, ama fiyatlar artik gercek oneri
+// degerleri (placeholder "Yakinda" degil).
 const PLANLAR: {
   key: PlanKey;
   ad: string;
@@ -34,13 +36,13 @@ const PLANLAR: {
   {
     key: "PRO",
     ad: "Pro",
-    aylikFiyat: "Yakında",
-    yillikFiyat: "Yakında",
+    aylikFiyat: "39 TL",
+    yillikFiyat: "349 TL",
     aciklama: "Aktif iş arayanlar için.",
     populer: true,
     ozellikler: [
       "Standart'taki her şey",
-      "Yeni ilan bildirimleri",
+      "Bölümüne uygun yeni ilan çıktığında öncelikli bildirim",
       "Bana özel ilanlar",
       "SMS ile anlık ilan bildirimi",
       "Becayiş için site içi mesajlaşma",
@@ -49,14 +51,13 @@ const PLANLAR: {
   {
     key: "PRO_PLUS",
     ad: "Pro+",
-    aylikFiyat: "Yakında",
-    yillikFiyat: "Yakında",
+    aylikFiyat: "79 TL",
+    yillikFiyat: "699 TL",
     aciklama: "En kapsamlı deneyim.",
     ozellikler: [
       "Pro'daki her şey",
-      "Öncelikli destek",
-      "Ek özellikler (yakında)",
       "Reklamsız deneyim",
+      "Öncelikli destek",
     ],
   },
 ];
@@ -159,8 +160,8 @@ export function AbonelikPlanlari({ mevcutPlan }: { mevcutPlan: PlanKey }) {
       </div>
 
       <p className="mt-6 text-center text-xs text-muted-foreground">
-        Fiyatlar ve özellikler henüz kesinleşmedi, yakında güncellenecek. Yükseltme
-        işlemleri şu anda kullanıma açık değil.
+        Yükseltme işlemleri ödeme altyapısı tamamlanınca açılacak; fiyatlar o zamana
+        kadar değişebilir.
       </p>
     </div>
   );
