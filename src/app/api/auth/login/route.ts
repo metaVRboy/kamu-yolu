@@ -9,6 +9,7 @@ const bodySchema = z.object({
   email: z.string().trim().toLowerCase().email(),
   password: z.string().min(1),
   turnstileToken: z.string().nullable().optional(),
+  beniHatirla: z.boolean().optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -24,7 +25,7 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Geçersiz bilgiler." }, { status: 400 });
   }
-  const { email, password, turnstileToken } = parsed.data;
+  const { email, password, turnstileToken, beniHatirla } = parsed.data;
 
   if (!(await verifyTurnstileToken(turnstileToken))) {
     return NextResponse.json({ error: "İnsan doğrulaması başarısız. Lütfen tekrar deneyin." }, { status: 400 });
@@ -53,7 +54,7 @@ export async function POST(req: NextRequest) {
     }
 
     await clearFailures(email);
-    await createSession(user.id, user.tokenVersion);
+    await createSession(user.id, user.tokenVersion, beniHatirla ?? true);
 
     return NextResponse.json({ id: user.id, adSoyad: user.adSoyad, email: user.email });
   } catch (err) {

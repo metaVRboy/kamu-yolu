@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
-import { UserRound } from "lucide-react";
 import { getLastSuccessfulScrapeAt } from "@/lib/matching";
 import { cn } from "@/lib/utils";
 import { getCurrentUser } from "@/lib/auth";
@@ -16,6 +15,8 @@ import { PageTransition } from "@/components/PageTransition";
 import { Toaster } from "@/components/ui/toast";
 import { CerezBildirimi } from "@/components/CerezBildirimi";
 import { ReklamEngelleyiciKontrol } from "@/components/ReklamEngelleyiciKontrol";
+import { AuthModalProvider } from "@/components/AuthModal";
+import { HeaderAuthButton } from "@/components/HeaderAuthButton";
 import "./globals.css";
 
 // Site genelinde tek font: Inter. Baslik/govde ayrimi icin ayri bir serif
@@ -48,6 +49,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="tr" className={cn("h-full antialiased", inter.variable, "font-sans")}>
       <body className="flex min-h-full flex-col bg-white text-foreground">
+       <AuthModalProvider>
         {/* next/script (afterInteractive/beforeInteractive fark etmeksizin)
             src'yi ham HTML'de duz bir <script src=...> etiketi olarak degil,
             istemci tarafi bir yukleyici cagrisi icinde gomuyor - AdSense'in
@@ -84,13 +86,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               {user ? (
                 <ProfileMenu adSoyad={user.adSoyad} abonelikPlani={user.abonelikPlani} />
               ) : (
-                <Link
-                  href="/giris"
-                  className="flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border bg-white px-2.5 text-sm font-medium text-slate-600 transition-colors hover:border-primary/30 hover:text-primary sm:px-4"
-                >
-                  <UserRound className="h-4 w-4 sm:hidden" />
-                  <span className="hidden sm:inline">Giriş Yap</span>
-                </Link>
+                <HeaderAuthButton />
               )}
             </div>
           </div>
@@ -199,6 +195,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <Toaster />
         <CerezBildirimi />
         <ReklamEngelleyiciKontrol />
+       </AuthModalProvider>
       </body>
     </html>
   );

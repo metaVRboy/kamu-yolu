@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { ShieldCheck, FileCheck2 } from "lucide-react";
+import { ShieldCheck, FileCheck2, Sparkles } from "lucide-react";
 
 export function AuthSplitPanel({
   baslik,
@@ -11,13 +11,18 @@ export function AuthSplitPanel({
   children: React.ReactNode;
 }) {
   return (
-    <div className="mx-auto my-8 grid max-w-4xl overflow-hidden rounded-3xl border border-border bg-white shadow-xl sm:my-14 md:grid-cols-2">
+    <div className="mx-auto grid w-full max-w-4xl overflow-hidden rounded-3xl bg-white md:grid-cols-2">
       <div className="relative hidden flex-col justify-between bg-slate-900 p-8 text-white md:flex">
         <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute -top-16 -left-16 h-56 w-56 rounded-full bg-primary/25 blur-3xl" />
+          <div className="absolute -bottom-20 -right-10 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
         </div>
 
-        <div className="relative">
+        <div className="relative space-y-6">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+            <Sparkles className="h-3 w-3" />
+            GÜVENLİ ÜYELİK
+          </span>
           <Image
             src="/brand/kamu-yolu-logo.png"
             alt="Kamu Yolu"
@@ -51,10 +56,17 @@ export function AuthSplitPanel({
               </div>
             </div>
           </div>
+
+          <p className="mt-6 text-xs leading-relaxed text-slate-500">
+            Kamu Yolu, kamu personelinin bölümüne uygun ilan ve haberlere erişimini düzenli,
+            ölçülü ve güven odaklı bir deneyimle sunar.
+          </p>
         </div>
       </div>
 
-      <div className="flex items-center justify-center p-6 sm:p-10">{children}</div>
+      <div className="flex items-center justify-center p-6 sm:p-10">
+        <div className="w-full max-w-sm">{children}</div>
+      </div>
     </div>
   );
 }

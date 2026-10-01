@@ -24,7 +24,11 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
   return bcrypt.compare(password, hash);
 }
 
-export async function createSession(userId: string, tokenVersion: number): Promise<void> {
+export async function createSession(
+  userId: string,
+  tokenVersion: number,
+  beniHatirla = true,
+): Promise<void> {
   const token = await new SignJWT({ userId, tokenVersion })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
@@ -37,7 +41,11 @@ export async function createSession(userId: string, tokenVersion: number): Promi
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: SESSION_MAX_AGE_SECONDS,
+    // "Beni hatirla" isaretli degilse cerez icin maxAge verilmez - tarayici
+    // kapatilinca cerez (dolayisiyla oturum) silinir. JWT'nin kendisi
+    // yine de 30 gun gecerli kalir, bu sadece TARAYICIDA ne kadar
+    // saklanacagini belirler.
+    maxAge: beniHatirla ? SESSION_MAX_AGE_SECONDS : undefined,
   });
 }
 

@@ -2,11 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { PasswordInput } from "@/components/ui/password-input";
 import { toast } from "@/components/ui/toast";
 import { passwordRequirementIssues } from "@/lib/authValidation";
@@ -35,14 +34,25 @@ function GoogleIcon() {
   );
 }
 
-export function AuthForm({ mode }: { mode: "kayit" | "giris" }) {
+export function AuthForm({
+  mode,
+  onBasarili,
+}: {
+  mode: "kayit" | "giris";
+  // Modal icinde kullanildiginda, sayfaya yonlendirmeden ONCE modal'i
+  // kapatmak icin. Sayfa olarak (sayfa olarak /giris, /kayit-ol) kullanilirken
+  // bos birakilir - bu durumda ek bir sey yapilmasina gerek yok.
+  onBasarili?: () => void;
+}) {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const [adSoyad, setAdSoyad] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordTekrar, setPasswordTekrar] = useState("");
   const [kvkkOnay, setKvkkOnay] = useState(false);
+  const [beniHatirla, setBeniHatirla] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [kodAsamasi, setKodAsamasi] = useState(false);
@@ -54,7 +64,7 @@ export function AuthForm({ mode }: { mode: "kayit" | "giris" }) {
     const hata = searchParams.get("hata");
     if (hata) {
       toast.error(GOOGLE_HATA_MESAJLARI[hata] ?? "Bir şeyler ters gitti.");
-      router.replace(mode === "kayit" ? "/kayit-ol" : "/giris");
+      router.replace(pathname);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -73,13 +83,14 @@ export function AuthForm({ mode }: { mode: "kayit" | "giris" }) {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, turnstileToken }),
+        body: JSON.stringify({ email, password, turnstileToken, beniHatirla }),
       });
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "Bir şeyler ters gitti.");
         return;
       }
+      onBasarili?.();
       router.push("/profilim");
       router.refresh();
     } catch {
@@ -150,6 +161,7 @@ export function AuthForm({ mode }: { mode: "kayit" | "giris" }) {
         return;
       }
       toast.success("Hesabın oluşturuldu.");
+      onBasarili?.();
       router.push("/profilim");
       router.refresh();
     } catch {
@@ -163,7 +175,7 @@ export function AuthForm({ mode }: { mode: "kayit" | "giris" }) {
     const dakika = Math.floor(kalanSaniye / 60);
     const saniye = kalanSaniye % 60;
     return (
-      <Card className="mx-auto max-w-sm gap-4 border-primary/20 bg-white p-6 shadow-sm">
+      <div className="space-y-4">
         <h1 className="font-sans text-xl font-bold text-primary">E-postanı Doğrula</h1>
         <p className="text-sm text-muted-foreground">
           <strong>{email}</strong> adresine 6 haneli bir doğrulama kodu gönderdik.
@@ -208,36 +220,39 @@ export function AuthForm({ mode }: { mode: "kayit" | "giris" }) {
             </button>
           </div>
         </form>
-      </Card>
+      </div>
     );
   }
 
   return (
-    <Card className="mx-auto max-w-sm gap-4 border-primary/20 bg-white p-6 shadow-sm">
-      <h1 className="font-sans text-xl font-bold text-primary">
-        {mode === "kayit" ? "Kayıt Ol" : "Giriş Yap"}
-      </h1>
+    <div className="space-y-4">
+      <div>
+        <h1 className="font-sans text-xl font-bold text-slate-900">
+          {mode === "kayit" ? "Kayıt Ol" : "Giriş Yap"}
+        </h1>
+        <p className="mt-0.5 text-sm text-muted-foreground">
+          {mode === "kayit" ? "Devam etmek için bir yöntem seç." : "Devam etmek için bir yöntem seç."}
+        </p>
+      </div>
 
       <a
         href="/api/auth/google"
-        className="flex items-center justify-center gap-2.5 rounded-xl border border-border bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+        className="flex items-center justify-center gap-2.5 rounded-xl border border-border bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 hover:shadow-sm"
       >
         <GoogleIcon />
-        Google ile {mode === "kayit" ? "Kayıt Ol" : "Giriş Yap"}
+        Google
       </a>
-      {mode === "kayit" && (
-        <p className="-mt-2 text-center text-xs text-muted-foreground">
-          Google ile devam ederek{" "}
-          <Link href="/kvkk" target="_blank" className="underline hover:text-foreground">
-            KVKK
-          </Link>{" "}
-          ve{" "}
-          <Link href="/kullanim-kosullari" target="_blank" className="underline hover:text-foreground">
-            Kullanım Koşulları
-          </Link>
-          &apos;nı kabul etmiş olursun.
-        </p>
-      )}
+      <p className="-mt-2 text-center text-xs text-muted-foreground">
+        Sosyal hesapla devam ederken{" "}
+        <Link href="/kullanim-kosullari" target="_blank" className="font-medium text-primary underline">
+          Kullanım Koşulları
+        </Link>{" "}
+        ve{" "}
+        <Link href="/kvkk" target="_blank" className="font-medium text-primary underline">
+          Gizlilik Politikası
+        </Link>{" "}
+        hükümleri geçerlidir.
+      </p>
 
       <div className="flex items-center gap-3">
         <div className="h-px flex-1 bg-border" />
@@ -286,6 +301,17 @@ export function AuthForm({ mode }: { mode: "kayit" | "giris" }) {
           />
           {mode === "kayit" && <PasswordRequirementsHint password={password} />}
         </div>
+        {mode === "giris" && (
+          <label className="flex items-center gap-2 text-sm text-slate-600">
+            <input
+              type="checkbox"
+              checked={beniHatirla}
+              onChange={(e) => setBeniHatirla(e.target.checked)}
+              className="h-3.5 w-3.5 accent-primary"
+            />
+            Beni hatırla
+          </label>
+        )}
         {mode === "kayit" && (
           <div>
             <Label className="mb-1.5">Şifre (Tekrar)</Label>
@@ -335,6 +361,6 @@ export function AuthForm({ mode }: { mode: "kayit" | "giris" }) {
           {loading ? "Bekleyin..." : mode === "kayit" ? "Devam Et" : "Giriş Yap"}
         </Button>
       </form>
-    </Card>
+    </div>
   );
 }

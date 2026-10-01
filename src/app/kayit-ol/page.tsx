@@ -7,12 +7,12 @@ export const metadata = { title: "Kayıt Ol — Kamu Yolu" };
 
 export default function KayitOlPage() {
   return (
-    <div className="px-4 sm:px-6">
-      <AuthSplitPanel
-        baslik="Bölümüne uygun ilanları kaçırma."
-        aciklama="Ücretsiz hesap oluştur; bölümüne göre eşleşen ilanları ve haberleri tek yerden takip et."
-      >
-        <div className="w-full max-w-sm">
+    <div className="my-8 px-4 sm:my-14 sm:px-6">
+      <div className="mx-auto max-w-4xl overflow-hidden rounded-3xl border border-border shadow-xl">
+        <AuthSplitPanel
+          baslik="Bölümüne uygun ilanları kaçırma."
+          aciklama="Ücretsiz hesap oluştur; bölümüne göre eşleşen ilanları ve haberleri tek yerden takip et."
+        >
           <Suspense fallback={null}>
             <AuthForm mode="kayit" />
           </Suspense>
@@ -22,8 +22,8 @@ export default function KayitOlPage() {
               Giriş yap
             </Link>
           </p>
-        </div>
-      </AuthSplitPanel>
+        </AuthSplitPanel>
+      </div>
     </div>
   );
 }

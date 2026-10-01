@@ -7,12 +7,12 @@ export const metadata = { title: "Giriş Yap — Kamu Yolu" };
 
 export default function GirisPage() {
   return (
-    <div className="px-4 sm:px-6">
-      <AuthSplitPanel
-        baslik="Tekrar hoş geldin."
-        aciklama="Hesabına giriş yap, bölümüne uygun ilanları ve bildirimleri kaldığın yerden takip et."
-      >
-        <div className="w-full max-w-sm">
+    <div className="my-8 px-4 sm:my-14 sm:px-6">
+      <div className="mx-auto max-w-4xl overflow-hidden rounded-3xl border border-border shadow-xl">
+        <AuthSplitPanel
+          baslik="Tekrar hoş geldin."
+          aciklama="Hesabına giriş yap, bölümüne uygun ilanları ve bildirimleri kaldığın yerden takip et."
+        >
           <Suspense fallback={null}>
             <AuthForm mode="giris" />
           </Suspense>
@@ -22,8 +22,8 @@ export default function GirisPage() {
               Kayıt ol
             </Link>
           </p>
-        </div>
-      </AuthSplitPanel>
+        </AuthSplitPanel>
+      </div>
     </div>
   );
 }
