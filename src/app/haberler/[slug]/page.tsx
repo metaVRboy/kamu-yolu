@@ -301,27 +301,6 @@ export default async function HaberDetayPage({
         </div>
 
         <aside className="space-y-6 lg:sticky lg:top-6 lg:self-start">
-          {guncelIlanlar.length > 0 && (
-            <div className="rounded-2xl border border-border bg-white p-4">
-              <p className="text-sm font-semibold text-slate-900">Güncel İlanlar</p>
-              <div className="mt-3 space-y-3">
-                {guncelIlanlar.map((p) => (
-                  <Link
-                    key={p.id}
-                    href={`/ilan/${p.id}/${slugify(p.title)}`}
-                    className="flex items-start gap-3 rounded-lg p-2 -mx-2 transition-colors hover:bg-primary/5"
-                  >
-                    <KurumLogo src={p.gorselUrl} alt={p.institutionName} />
-                    <div className="min-w-0">
-                      <p className="text-xs font-medium text-primary">{p.institutionName}</p>
-                      <p className="line-clamp-2 text-sm font-semibold text-slate-900">{p.title}</p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-
           {digerHaberler.length > 0 && (
             <div className="rounded-2xl border border-border bg-white p-4">
               <div className="flex items-center justify-between">
@@ -347,6 +326,27 @@ export default async function HaberDetayPage({
                     <div className="min-w-0">
                       <p className="line-clamp-2 text-sm font-semibold text-slate-900">{h.baslik}</p>
                       <p className="mt-1 text-xs text-muted-foreground">{tarihFormatla(h.yayinTarihi)}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {guncelIlanlar.length > 0 && (
+            <div className="rounded-2xl border border-border bg-white p-4">
+              <p className="text-sm font-semibold text-slate-900">Güncel İlanlar</p>
+              <div className="mt-3 space-y-3">
+                {guncelIlanlar.map((p) => (
+                  <Link
+                    key={p.id}
+                    href={`/ilan/${p.id}/${slugify(p.title)}`}
+                    className="flex items-start gap-3 rounded-lg p-2 -mx-2 transition-colors hover:bg-primary/5"
+                  >
+                    <KurumLogo src={p.gorselUrl} alt={p.institutionName} />
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-primary">{p.institutionName}</p>
+                      <p className="line-clamp-2 text-sm font-semibold text-slate-900">{p.title}</p>
                     </div>
                   </Link>
                 ))}
