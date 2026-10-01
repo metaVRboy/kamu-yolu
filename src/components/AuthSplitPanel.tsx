@@ -3,19 +3,22 @@ import { ShieldCheck, FileCheck2 } from "lucide-react";
 
 // Logodaki gercek altin rengi (kamu-yolu-logo-orijinal.png'den piksel
 // ornegiyle bulundu: #C0A050) - UI'da baska bir sari/amber uydurmak
-// yerine aciklik/koyuluk varyasyonlari BU renkten turetildi.
-const LOGO_ALTIN_ACIK = "#E8DBB8";
+// yerine aciklik/koyuluk/parlaklik varyasyonlari BU renkten turetildi.
+const LOGO_ALTIN_PARLAK = "#FCEFC7";
+const LOGO_ALTIN_ACIK = "#F0D98C";
 const LOGO_ALTIN = "#C0A050";
-const LOGO_ALTIN_KOYU = "#7D6834";
+const LOGO_ALTIN_KOYU = "#8C7128";
+const LOGO_ALTIN_ISIK = "rgba(192, 160, 80, 0.75)";
 
-/** Giris modunun baslik metni - "kamuyolu.com" kismi logonun gercek altin rengiyle/gloss efektli. */
+/** Giris modunun baslik metni - "kamuyolu.com" kismi logonun gercek altin rengiyle/gloss+isik efektli. */
 export function GirisBasligi() {
   return (
     <>
       <span
         className="bg-clip-text text-transparent"
         style={{
-          backgroundImage: `linear-gradient(to bottom, ${LOGO_ALTIN_ACIK}, ${LOGO_ALTIN}, ${LOGO_ALTIN_KOYU})`,
+          backgroundImage: `linear-gradient(to bottom, ${LOGO_ALTIN_PARLAK}, ${LOGO_ALTIN_ACIK} 35%, ${LOGO_ALTIN} 65%, ${LOGO_ALTIN_KOYU})`,
+          filter: `drop-shadow(0 0 14px ${LOGO_ALTIN_ISIK}) drop-shadow(0 0 28px ${LOGO_ALTIN_ISIK})`,
         }}
       >
         kamuyolu.com
@@ -45,12 +48,16 @@ export function AuthSplitPanel({
               arkasinda beyaz bir isik humesi var. */}
           <div className="absolute -top-16 -left-16 h-64 w-64 rounded-full bg-white/25 blur-3xl" />
           <div className="absolute -bottom-20 -right-10 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
+          {/* brightness-0 -> amblemi duz siyah siluete cevirir (invert
+              UYGULANMAZ, aksi halde beyaz olur) - siyah, arka plandaki
+              slate-900'den koyu oldugu icin panelde ondan daha koyu bir
+              lacivert/siyah leke olarak gorunur. */}
           <Image
             src="/brand/kamu-yolu-emblem.png"
             alt=""
             width={360}
             height={360}
-            className="absolute -top-10 -right-14 h-72 w-72 opacity-[0.06] brightness-0 invert"
+            className="absolute -top-10 -right-14 h-72 w-72 opacity-30 brightness-0"
           />
         </div>
 
