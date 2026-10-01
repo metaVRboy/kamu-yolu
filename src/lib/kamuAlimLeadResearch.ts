@@ -101,87 +101,82 @@ export async function researchKamuAlimLeads(
   // gereksiz yere katliyordu. Bu calistirmada bulunamazsa bir sonraki
   // zamanlanmis taramada (3 saat sonra) tekrar denenir - leadler
   // *LeadIslendi tablosuna islenmemis olarak kaldigi icin kaybolmaz.
-  try {
-    const res = await gemini.models.generateContent({
-      model: GEMINI_MODEL,
-      contents: girdiListesi,
-      config: {
-        systemInstruction: SYSTEM_PROMPT,
-        tools: [{ googleSearch: {} }],
-        responseMimeType: "application/json",
-        responseJsonSchema: toGeminiSchema(SonucSchema),
-      },
-    });
+  const res = await gemini.models.generateContent({
+    model: GEMINI_MODEL,
+    contents: girdiListesi,
+    config: {
+      systemInstruction: SYSTEM_PROMPT,
+      tools: [{ googleSearch: {} }],
+      responseMimeType: "application/json",
+      responseJsonSchema: toGeminiSchema(SonucSchema),
+    },
+  });
 
-    const parsedJson = parseGeminiJson(res.text);
-    if (!parsedJson) throw new Error("Gemini yanitindan JSON cikarilamadi.");
+  const parsedJson = parseGeminiJson(res.text);
+  if (!parsedJson) throw new Error("Gemini yanitindan JSON cikarilamadi.");
 
-    const parsed = SonucSchema.safeParse(parsedJson);
-    if (!parsed.success) throw new Error("Gemini yaniti semaya uymuyor.");
+  const parsed = SonucSchema.safeParse(parsedJson);
+  if (!parsed.success) throw new Error("Gemini yaniti semaya uymuyor.");
 
-    return await Promise.all(
-      leads.map(async (lead, i): Promise<KamuAlimHaberSonuc> => {
-        const bos = {
-          externalId: lead.externalId,
-          dogrulandi: false,
-          baslik: null,
-          ozet: null,
-          resmiKaynakUrl: null,
-          gorselUrl: null,
-          gorselLogoMu: false,
-          departmentIds: [],
-          detay: null,
-        };
+  return Promise.all(
+    leads.map(async (lead, i): Promise<KamuAlimHaberSonuc> => {
+      const bos = {
+        externalId: lead.externalId,
+        dogrulandi: false,
+        baslik: null,
+        ozet: null,
+        resmiKaynakUrl: null,
+        gorselUrl: null,
+        gorselLogoMu: false,
+        departmentIds: [],
+        detay: null,
+      };
 
-        const sonuc = parsed.data.sonuclar.find((s) => s.index === i);
-        if (!sonuc || !sonuc.dogrulandi || !sonuc.resmiKaynakUrl || !sonuc.baslik || !sonuc.ozet) return bos;
+      const sonuc = parsed.data.sonuclar.find((s) => s.index === i);
+      if (!sonuc || !sonuc.dogrulandi || !sonuc.resmiKaynakUrl || !sonuc.baslik || !sonuc.ozet) return bos;
 
-        // resmiKaynakUrl, Gemini'nin grounding yonlendirme linki - gercek
-        // kaynak alan adini ancak coz(er)sek gorebiliriz. Toplama sitesi
-        // disleme kontrolu de bu yuzden COZULMUS url uzerinde yapilmali.
-        const cozulmusUrl = await resolveGroundingUrl(sonuc.resmiKaynakUrl);
-        if (!cozulmusUrl || toplamaSitesiMi(cozulmusUrl)) return bos;
+      // resmiKaynakUrl, Gemini'nin grounding yonlendirme linki - gercek
+      // kaynak alan adini ancak coz(er)sek gorebiliriz. Toplama sitesi
+      // disleme kontrolu de bu yuzden COZULMUS url uzerinde yapilmali.
+      const cozulmusUrl = await resolveGroundingUrl(sonuc.resmiKaynakUrl);
+      if (!cozulmusUrl || toplamaSitesiMi(cozulmusUrl)) return bos;
 
-        // Sayfa teknik olarak acilsa bile tamamen alakasiz olabilir -
-        // gercek icerigi tekrar dogrulanmadan hicbir kaynak kabul edilmez.
-        const { destekliyor, metin } = await verifyHaberKaynak({
-          baslik: sonuc.baslik,
-          ozet: sonuc.ozet,
-          url: cozulmusUrl,
-        });
-        if (!destekliyor || !metin) return bos;
+      // Sayfa teknik olarak acilsa bile tamamen alakasiz olabilir -
+      // gercek icerigi tekrar dogrulanmadan hicbir kaynak kabul edilmez.
+      const { destekliyor, metin } = await verifyHaberKaynak({
+        baslik: sonuc.baslik,
+        ozet: sonuc.ozet,
+        url: cozulmusUrl,
+      });
+      if (!destekliyor || !metin) return bos;
 
-        // Bolum eslesmesi ve yapilandirilmis ayrinti cikarimi SADECE kisa
-        // ozete degil, kaynagin tam metnine gore yapilir - ozette gecmeyen
-        // ama haberin icinde gecen bir bolum adi veya kontenjan/tarih gibi
-        // detaylar boylece yakalanir.
-        const [departmentIds, detay] = await Promise.all([
-          haberIcinBolumEslestir({ baslik: sonuc.baslik, ozet: sonuc.ozet, tamMetin: metin }),
-          haberDetayCikar({ baslik: sonuc.baslik, tamMetin: metin }),
-        ]);
+      // Bolum eslesmesi ve yapilandirilmis ayrinti cikarimi SADECE kisa
+      // ozete degil, kaynagin tam metnine gore yapilir - ozette gecmeyen
+      // ama haberin icinde gecen bir bolum adi veya kontenjan/tarih gibi
+      // detaylar boylece yakalanir.
+      const [departmentIds, detay] = await Promise.all([
+        haberIcinBolumEslestir({ baslik: sonuc.baslik, ozet: sonuc.ozet, tamMetin: metin }),
+        haberDetayCikar({ baslik: sonuc.baslik, tamMetin: metin }),
+      ]);
 
-        // Once haberin kendi kaynagindan gercek bir gorsel dene; yoksa
-        // kurumun Wikipedia'daki (acik lisansli) logosuna dus.
-        const ogGorsel = await extractOgImage(cozulmusUrl);
-        const kurumGorseli = ogGorsel
-          ? null
-          : await findInstitutionImage(detay?.kurumAdi ?? lead.kurumAdi ?? lead.baslik);
+      // Once haberin kendi kaynagindan gercek bir gorsel dene; yoksa
+      // kurumun Wikipedia'daki (acik lisansli) logosuna dus.
+      const ogGorsel = await extractOgImage(cozulmusUrl);
+      const kurumGorseli = ogGorsel
+        ? null
+        : await findInstitutionImage(detay?.kurumAdi ?? lead.kurumAdi ?? lead.baslik);
 
-        return {
-          externalId: lead.externalId,
-          dogrulandi: true,
-          baslik: sonuc.baslik,
-          ozet: sonuc.ozet,
-          resmiKaynakUrl: cozulmusUrl,
-          gorselUrl: ogGorsel ?? kurumGorseli,
-          gorselLogoMu: !ogGorsel && !!kurumGorseli,
-          departmentIds,
-          detay,
-        };
-      }),
-    );
-  } catch (err) {
-    console.error("Kamu alimi lead arastirmasi basarisiz:", err);
-    throw err;
-  }
+      return {
+        externalId: lead.externalId,
+        dogrulandi: true,
+        baslik: sonuc.baslik,
+        ozet: sonuc.ozet,
+        resmiKaynakUrl: cozulmusUrl,
+        gorselUrl: ogGorsel ?? kurumGorseli,
+        gorselLogoMu: !ogGorsel && !!kurumGorseli,
+        departmentIds,
+        detay,
+      };
+    }),
+  );
 }

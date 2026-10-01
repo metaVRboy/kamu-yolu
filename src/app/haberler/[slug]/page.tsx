@@ -80,30 +80,29 @@ export default async function HaberDetayPage({
     ? haber.egitimSeviyeleri.map((l) => LEVEL_LABEL[l] ?? l).join(" / ")
     : null;
 
+  const kontenjanLabel = haber.kontenjan ? `${haber.kontenjan} kişi` : null;
+  const basvuruBaslangicLabel = haber.basvuruBaslangic ? tarihFormatla(haber.basvuruBaslangic) : null;
+  const basvuruBitisLabel = haber.basvuruBitis ? tarihFormatla(haber.basvuruBitis) : null;
+
   const bilgiKutulari = [
     { icon: Building2, label: "Kurum", value: haber.kurumAdi },
-    { icon: Users, label: "Kontenjan", value: haber.kontenjan ? `${haber.kontenjan} kişi` : null },
+    { icon: Users, label: "Kontenjan", value: kontenjanLabel },
     { icon: GraduationCap, label: "Eğitim", value: egitimLabel },
     { icon: ListChecks, label: "KPSS Şartı", value: haber.kpssTuru },
-    {
-      icon: CalendarClock,
-      label: "Son Başvuru",
-      value: haber.basvuruBitis ? tarihFormatla(haber.basvuruBitis) : null,
-      vurgu: true,
-    },
+    { icon: CalendarClock, label: "Son Başvuru", value: basvuruBitisLabel, vurgu: true },
   ].filter((k) => k.value);
 
   const tabloSatirlari = [
     { label: "Kurum", value: haber.kurumAdi },
     { label: "Kadro / Pozisyon", value: haber.kadroPozisyon },
-    { label: "Kontenjan", value: haber.kontenjan ? `${haber.kontenjan} kişi` : null },
+    { label: "Kontenjan", value: kontenjanLabel },
     { label: "Kategori", value: haber.kategori },
     { label: "İstihdam Türü", value: haber.istihdamTuru },
     { label: "Eğitim", value: egitimLabel },
     { label: "KPSS Türü", value: haber.kpssTuru },
     { label: "Üst Yaş", value: haber.ustYas ? String(haber.ustYas) : null },
-    { label: "Başvuru Başlangıcı", value: haber.basvuruBaslangic ? tarihFormatla(haber.basvuruBaslangic) : null },
-    { label: "Son Başvuru", value: haber.basvuruBitis ? tarihFormatla(haber.basvuruBitis) : null },
+    { label: "Başvuru Başlangıcı", value: basvuruBaslangicLabel },
+    { label: "Son Başvuru", value: basvuruBitisLabel },
   ].filter((r) => r.value);
 
   const ayrintiBolumleri = [

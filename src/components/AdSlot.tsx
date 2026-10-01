@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import { cn } from "@/lib/utils";
 
 const ADSENSE_CLIENT_ID = "ca-pub-2932226916873749";
 
@@ -37,11 +36,7 @@ export function AdSlot({ side, slotId }: { side: "left" | "right"; slotId?: stri
           data-ad-slot={slotId}
         />
       ) : (
-        <div
-          className={cn(
-            "flex h-full w-full flex-col items-center justify-center gap-2 rounded-2xl border border-primary/20 bg-primary/5 text-center",
-          )}
-        >
+        <div className="flex h-full w-full flex-col items-center justify-center gap-2 rounded-2xl border border-primary/20 bg-primary/5 text-center">
           <span className="text-[11px] font-medium uppercase tracking-wide text-primary/50">
             Reklam
           </span>

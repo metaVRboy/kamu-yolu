@@ -106,18 +106,14 @@ async function runKamuAlimHaberArastir(req: NextRequest) {
     const secmeSonuclari = sonuclar.filter((s) => s.externalId.startsWith("secmeyemektarifleri:"));
 
     await Promise.all([
-      isinolsaSonuclari.length > 0
-        ? prisma.isinolsaLeadIslendi.createMany({
-            data: isinolsaSonuclari.map((s) => ({ externalId: s.externalId, bulundu: s.dogrulandi })),
-            skipDuplicates: true,
-          })
-        : Promise.resolve(),
-      secmeSonuclari.length > 0
-        ? prisma.secmeyemektarifleriLeadIslendi.createMany({
-            data: secmeSonuclari.map((s) => ({ externalId: s.externalId, bulundu: s.dogrulandi })),
-            skipDuplicates: true,
-          })
-        : Promise.resolve(),
+      prisma.isinolsaLeadIslendi.createMany({
+        data: isinolsaSonuclari.map((s) => ({ externalId: s.externalId, bulundu: s.dogrulandi })),
+        skipDuplicates: true,
+      }),
+      prisma.secmeyemektarifleriLeadIslendi.createMany({
+        data: secmeSonuclari.map((s) => ({ externalId: s.externalId, bulundu: s.dogrulandi })),
+        skipDuplicates: true,
+      }),
     ]);
 
     return NextResponse.json({
