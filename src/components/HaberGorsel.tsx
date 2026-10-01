@@ -79,7 +79,7 @@ export function HaberGorsel({
         src="/brand/kamu-yolu-logo.png"
         alt=""
         aria-hidden
-        className="pointer-events-none absolute bottom-[3%] left-1/2 h-auto w-[22%] min-w-[72px] max-w-[220px] -translate-x-1/2"
+        className="pointer-events-none absolute bottom-[3%] left-1/2 h-auto w-[13%] min-w-[56px] max-w-[110px] -translate-x-1/2"
       />
     </div>
   );
