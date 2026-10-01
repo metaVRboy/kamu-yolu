@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -18,8 +18,26 @@ const KOD_GECERLILIK_SANIYE = 120;
 // ayarlanmadiysa) formu tamamen kilitlememek icin dogrulamayi atla.
 const TURNSTILE_ETKIN = !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
+const GOOGLE_HATA_MESAJLARI: Record<string, string> = {
+  google: "Google ile giriş başarısız oldu. Lütfen tekrar deneyin.",
+  "google-email": "Google hesabının e-postası doğrulanmamış görünüyor.",
+  "google-yapilandirma": "Google ile giriş şu anda kullanılamıyor.",
+};
+
+function GoogleIcon() {
+  return (
+    <svg viewBox="0 0 48 48" className="h-4 w-4" aria-hidden>
+      <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.1 8 3l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z" />
+      <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.9 1.1 8 3l5.7-5.7C34.6 6.1 29.6 4 24 4 16.3 4 9.7 8.3 6.3 14.7z" />
+      <path fill="#4CAF50" d="M24 44c5.5 0 10.4-2.1 14.1-5.6l-6.5-5.5C29.5 34.6 26.9 35.5 24 35.5c-5.2 0-9.6-3.3-11.2-7.9l-6.5 5C9.6 39.6 16.3 44 24 44z" />
+      <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.2-4.1 5.6l6.5 5.5C40.9 36.4 44 30.9 44 24c0-1.3-.1-2.7-.4-3.5z" />
+    </svg>
+  );
+}
+
 export function AuthForm({ mode }: { mode: "kayit" | "giris" }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [adSoyad, setAdSoyad] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -31,6 +49,15 @@ export function AuthForm({ mode }: { mode: "kayit" | "giris" }) {
   const [kod, setKod] = useState("");
   const [kalanSaniye, setKalanSaniye] = useState(KOD_GECERLILIK_SANIYE);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    const hata = searchParams.get("hata");
+    if (hata) {
+      toast.error(GOOGLE_HATA_MESAJLARI[hata] ?? "Bir şeyler ters gitti.");
+      router.replace(mode === "kayit" ? "/kayit-ol" : "/giris");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!kodAsamasi || kalanSaniye <= 0) return;
@@ -190,6 +217,34 @@ export function AuthForm({ mode }: { mode: "kayit" | "giris" }) {
       <h1 className="font-sans text-xl font-bold text-primary">
         {mode === "kayit" ? "Kayıt Ol" : "Giriş Yap"}
       </h1>
+
+      <a
+        href="/api/auth/google"
+        className="flex items-center justify-center gap-2.5 rounded-xl border border-border bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+      >
+        <GoogleIcon />
+        Google ile {mode === "kayit" ? "Kayıt Ol" : "Giriş Yap"}
+      </a>
+      {mode === "kayit" && (
+        <p className="-mt-2 text-center text-xs text-muted-foreground">
+          Google ile devam ederek{" "}
+          <Link href="/kvkk" target="_blank" className="underline hover:text-foreground">
+            KVKK
+          </Link>{" "}
+          ve{" "}
+          <Link href="/kullanim-kosullari" target="_blank" className="underline hover:text-foreground">
+            Kullanım Koşulları
+          </Link>
+          &apos;nı kabul etmiş olursun.
+        </p>
+      )}
+
+      <div className="flex items-center gap-3">
+        <div className="h-px flex-1 bg-border" />
+        <span className="text-xs text-muted-foreground">veya e-posta ile</span>
+        <div className="h-px flex-1 bg-border" />
+      </div>
+
       <form onSubmit={mode === "kayit" ? handleKayitSubmit : handleGirisSubmit} className="space-y-4">
         {mode === "kayit" && (
           <div>

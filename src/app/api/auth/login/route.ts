@@ -37,7 +37,14 @@ export async function POST(req: NextRequest) {
 
   try {
     const user = await prisma.user.findUnique({ where: { email } });
-    if (!user || !(await verifyPassword(password, user.passwordHash))) {
+    if (!user || !user.passwordHash) {
+      await recordFailure(email);
+      const mesaj = user && !user.passwordHash
+        ? "Bu hesap Google ile oluşturulmuş. Lütfen \"Google ile Giriş Yap\" butonunu kullanın."
+        : "E-posta veya şifre hatalı.";
+      return NextResponse.json({ error: mesaj }, { status: 401 });
+    }
+    if (!(await verifyPassword(password, user.passwordHash))) {
       await recordFailure(email);
       return NextResponse.json(
         { error: "E-posta veya şifre hatalı." },

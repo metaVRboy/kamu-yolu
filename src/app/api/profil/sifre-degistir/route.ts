@@ -35,6 +35,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: lockoutMessage(lockout.lockedUntil) }, { status: 429 });
   }
 
+  if (!user.passwordHash) {
+    return NextResponse.json(
+      { error: "Bu hesapta şifre yok (Google ile giriş yapıyorsun) - şifre değiştirilemez." },
+      { status: 400 },
+    );
+  }
+
   const dogruMu = await verifyPassword(parsed.data.mevcutSifre, user.passwordHash);
   if (!dogruMu) {
     await recordFailure(abuseIdentifier);

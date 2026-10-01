@@ -121,7 +121,14 @@ model PostingDepartment {
 model User {
   id             String          @id @default(cuid())
   email          String          @unique
-  passwordHash   String
+  // Google ile kayit olan kullanicilarda sifre yoktur (null) - bu durumda
+  // e-posta/sifre ile giris reddedilir, sadece Google OAuth ile giris
+  // yapilabilir.
+  passwordHash   String?
+  // Google hesabinin benzersiz kimligi ("sub" claim'i) - e-posta ile degil
+  // bununla eslestirme yapilir, cunku e-posta kullanici tarafindan Google
+  // disinda da degistirilebilir/yeniden kullanilabilir.
+  googleId       String?         @unique
   adSoyad        String
   telefon        String?
   meslek         String?
