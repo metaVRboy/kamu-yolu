@@ -8,9 +8,8 @@ const LOGO_ALTIN_PARLAK = "#FCEFC7";
 const LOGO_ALTIN_ACIK = "#F0D98C";
 const LOGO_ALTIN = "#C0A050";
 const LOGO_ALTIN_KOYU = "#8C7128";
-const LOGO_ALTIN_ISIK = "rgba(192, 160, 80, 0.75)";
 
-/** Giris modunun baslik metni - "kamuyolu.com" kismi logonun gercek altin rengiyle/gloss+isik efektli. */
+/** Giris modunun baslik metni - "kamuyolu.com" kismi logonun gercek altin rengiyle/gloss efektli. */
 export function GirisBasligi() {
   return (
     <>
@@ -18,7 +17,6 @@ export function GirisBasligi() {
         className="bg-clip-text text-transparent"
         style={{
           backgroundImage: `linear-gradient(to bottom, ${LOGO_ALTIN_PARLAK}, ${LOGO_ALTIN_ACIK} 35%, ${LOGO_ALTIN} 65%, ${LOGO_ALTIN_KOYU})`,
-          filter: `drop-shadow(0 0 14px ${LOGO_ALTIN_ISIK}) drop-shadow(0 0 28px ${LOGO_ALTIN_ISIK})`,
         }}
       >
         kamuyolu.com
