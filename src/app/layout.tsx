@@ -161,8 +161,12 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                 Yasal
               </p>
               <ul className="mt-4 space-y-2.5 text-sm text-slate-400">
-                <li><Link href="/kvkk" className="transition-colors hover:text-white">KVKK ve Kullanım Şartları</Link></li>
+                <li><Link href="/kvkk" className="transition-colors hover:text-white">KVKK &amp; Gizlilik</Link></li>
+                <li><Link href="/kullanim-kosullari" className="transition-colors hover:text-white">Kullanım Koşulları</Link></li>
                 <li><Link href="/cerez-politikasi" className="transition-colors hover:text-white">Çerez Politikası</Link></li>
+                <li><Link href="/iade-politikasi" className="transition-colors hover:text-white">İade Politikası</Link></li>
+                <li><Link href="/mesafeli-satis-sozlesmesi" className="transition-colors hover:text-white">Mesafeli Satış Sözleşmesi</Link></li>
+                <li><Link href="/on-bilgilendirme-formu" className="transition-colors hover:text-white">Ön Bilgilendirme Formu</Link></li>
               </ul>
             </div>
 

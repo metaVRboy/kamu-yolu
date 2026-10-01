@@ -100,7 +100,7 @@ export function AuthForm({ mode }: { mode: "kayit" | "giris" }) {
       return;
     }
     if (!kvkkOnay) {
-      setError("Devam etmek için KVKK Aydınlatma Metni'ni onaylamalısın.");
+      setError("Devam etmek için KVKK Aydınlatma Metni ve Kullanım Koşulları'nı onaylamalısın.");
       return;
     }
 
@@ -256,7 +256,11 @@ export function AuthForm({ mode }: { mode: "kayit" | "giris" }) {
             />
             <span>
               <Link href="/kvkk" target="_blank" className="font-medium text-primary hover:underline">
-                KVKK Aydınlatma Metni ve Kullanım Şartları
+                KVKK Aydınlatma Metni
+              </Link>
+              {" "}ve{" "}
+              <Link href="/kullanim-kosullari" target="_blank" className="font-medium text-primary hover:underline">
+                Kullanım Koşulları
               </Link>
               &apos;nı okudum, kabul ediyorum.
             </span>

@@ -1,12 +1,14 @@
+import Link from "next/link";
+
 export const metadata = {
-  title: "KVKK Aydınlatma Metni ve Kullanım Şartları — Kamu Yolu",
+  title: "KVKK Aydınlatma Metni ve Gizlilik Politikası — Kamu Yolu",
 };
 
 export default function KvkkPage() {
   return (
     <div className="mx-auto max-w-2xl px-4 py-14 sm:px-6 sm:py-20">
       <h1 className="font-sans text-2xl font-bold tracking-tight text-primary sm:text-3xl">
-        KVKK Aydınlatma Metni ve Kullanım Şartları
+        KVKK Aydınlatma Metni ve Gizlilik Politikası
       </h1>
 
       <div className="prose prose-slate mt-6 max-w-none space-y-5 text-sm leading-relaxed text-slate-700">
@@ -62,13 +64,28 @@ export default function KvkkPage() {
         </section>
 
         <section>
-          <h2 className="font-sans text-base font-semibold text-primary">6. Kullanım Şartları</h2>
-          <ul className="list-disc pl-5">
-            <li>Sitede paylaştığınız bilgilerin doğru ve güncel olmasından siz sorumlusunuz.</li>
-            <li>Becayiş modülü yalnızca kamu personeli arasında iletişimi kolaylaştırmak amacıyla sunulur; Kamu Yolu, kullanıcılar arasında gerçekleşen becayiş sürecine taraf değildir ve sonucundan sorumlu tutulamaz.</li>
-            <li>Sahte, yanıltıcı veya kötüye kullanım amaçlı içerik/ilan paylaşmak yasaktır; bu tür hesaplar bildirim üzerine kaldırılabilir.</li>
-            <li>Hesabınızın güvenliğinden (şifrenizi gizli tutmaktan) siz sorumlusunuz.</li>
-          </ul>
+          <h2 className="font-sans text-base font-semibold text-primary">6. Veri Güvenliği</h2>
+          <p>
+            Kişisel verileriniz, yetkisiz erişime, kayba veya kötüye kullanıma karşı makul teknik
+            ve idari tedbirlerle korunur: şifreniz tersine çevrilemeyecek şekilde (hash&apos;lenerek)
+            saklanır, veritabanı bağlantıları şifrelenir (SSL/TLS) ve sadece işin gerektirdiği
+            kişilerin erişebileceği şekilde yetkilendirme uygulanır.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="font-sans text-base font-semibold text-primary">7. Çerezler</h2>
+          <p>
+            Sitenin çalışması için gerekli çerezler ve kullanım tercihleri hakkında ayrıntılı bilgiyi{" "}
+            <Link href="/cerez-politikasi" className="text-primary underline">
+              Çerez Politikası
+            </Link>{" "}
+            sayfasında bulabilirsiniz. Sitenin genel kullanım kuralları ve sorumluluk sınırlamaları için{" "}
+            <Link href="/kullanim-kosullari" className="text-primary underline">
+              Kullanım Koşulları
+            </Link>{" "}
+            sayfasına bakınız.
+          </p>
         </section>
 
         <p className="text-xs text-muted-foreground">
