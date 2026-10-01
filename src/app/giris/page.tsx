@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { AuthForm } from "@/components/AuthForm";
-import { AuthSplitPanel } from "@/components/AuthSplitPanel";
+import { AuthSplitPanel, GirisBasligi } from "@/components/AuthSplitPanel";
 
 export const metadata = { title: "Giriş Yap — Kamu Yolu" };
 
@@ -10,7 +10,7 @@ export default function GirisPage() {
     <div className="my-8 px-4 sm:my-14 sm:px-6">
       <div className="mx-auto max-w-4xl overflow-hidden rounded-3xl border border-border shadow-xl">
         <AuthSplitPanel
-          baslik="Tekrar hoş geldin."
+          baslik={<GirisBasligi />}
           aciklama="Hesabına giriş yap, bölümüne uygun ilanları ve bildirimleri kaldığın yerden takip et."
         >
           <Suspense fallback={null}>

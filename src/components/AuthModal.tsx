@@ -3,7 +3,7 @@
 import { Suspense, createContext, useCallback, useContext, useState } from "react";
 import { X } from "lucide-react";
 import { AuthForm } from "@/components/AuthForm";
-import { AuthSplitPanel } from "@/components/AuthSplitPanel";
+import { AuthSplitPanel, GirisBasligi } from "@/components/AuthSplitPanel";
 
 type Mod = "giris" | "kayit";
 
@@ -16,9 +16,9 @@ export function useAuthModal(): (mod: Mod) => void {
   return ctx;
 }
 
-const PANEL_METNI: Record<Mod, { baslik: string; aciklama: string }> = {
+const PANEL_METNI: Record<Mod, { baslik: React.ReactNode; aciklama: string }> = {
   giris: {
-    baslik: "Tekrar hoş geldin.",
+    baslik: <GirisBasligi />,
     aciklama: "Hesabına giriş yap, bölümüne uygun ilanları ve bildirimleri kaldığın yerden takip et.",
   },
   kayit: {

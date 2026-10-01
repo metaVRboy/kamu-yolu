@@ -1,12 +1,26 @@
 import Image from "next/image";
 import { ShieldCheck, FileCheck2 } from "lucide-react";
 
+/** Giris modunun baslik metni - "kamuyolu.com" kismi altin sarisi/gloss efektli. */
+export function GirisBasligi() {
+  return (
+    <>
+      <span className="bg-gradient-to-b from-amber-200 via-yellow-400 to-amber-600 bg-clip-text text-transparent">
+        kamuyolu.com
+      </span>
+      &apos;a
+      <br />
+      Hoşgeldin.
+    </>
+  );
+}
+
 export function AuthSplitPanel({
   baslik,
   aciklama,
   children,
 }: {
-  baslik: string;
+  baslik: React.ReactNode;
   aciklama: string;
   children: React.ReactNode;
 }) {
