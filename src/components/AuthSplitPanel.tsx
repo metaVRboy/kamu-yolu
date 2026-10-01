@@ -64,8 +64,8 @@ export function AuthSplitPanel({
           </div>
 
           <p className="mt-6 text-xs leading-relaxed text-slate-500">
-            Kamu Yolu, kamu personelinin bölümüne uygun ilan ve haberlere erişimini düzenli,
-            ölçülü ve güven odaklı bir deneyimle sunar.
+            Kamu Yolu, kullanıcıya bölümüne uygun ilan ve haberlere düzenli, ölçülü ve güven
+            odaklı bir erişim imkanı sunar.
           </p>
         </div>
       </div>
