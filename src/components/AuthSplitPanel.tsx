@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { ShieldCheck, FileCheck2, Sparkles } from "lucide-react";
+import { ShieldCheck, FileCheck2 } from "lucide-react";
 
 export function AuthSplitPanel({
   baslik,
@@ -28,17 +28,13 @@ export function AuthSplitPanel({
           />
         </div>
 
-        <div className="relative space-y-5">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-            <Sparkles className="h-3 w-3" />
-            GÜVENLİ ÜYELİK
-          </span>
+        <div className="relative -mt-4">
           <Image
             src="/brand/kamu-yolu-logo.png"
             alt="Kamu Yolu"
-            width={200}
-            height={150}
-            className="h-16 w-auto"
+            width={260}
+            height={195}
+            className="h-24 w-auto"
           />
         </div>
 
