@@ -11,6 +11,7 @@ export const PLAIN_LINKS = [
   { href: "/amacimiz", label: "Hakkımızda" },
   { href: "/haberler", label: "Haberler" },
   { href: "/kpss-puan-hesaplama", label: "KPSS Puan Hesaplama" },
+  { href: "/analiz", label: "Alım Analizi" },
 ];
 
 export const DROPDOWNS = [

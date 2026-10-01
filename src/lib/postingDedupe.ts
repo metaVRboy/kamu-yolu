@@ -1,7 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { normalize } from "@/lib/matching";
 
-function extractHeadcount(title: string): number | null {
+/**
+ * Ilan basliginda gecen (varsa) kontenjan sayisini sezgisel olarak
+ * cikarir (ör. "50 Surekli Isci Alimi" -> 50). Kesin degil - analiz
+ * sayfasinda bu yuzden "tahmini" olarak etiketlenir.
+ */
+export function extractHeadcount(title: string): number | null {
   const m = title.match(/\b(\d{1,4})\b/);
   return m ? Number(m[1]) : null;
 }
