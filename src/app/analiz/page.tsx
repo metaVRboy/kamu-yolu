@@ -71,15 +71,8 @@ export default async function AnalizPage({
                   <td className="py-1.5 pr-4 text-slate-500">
                     {s.netArtis !== null ? `+${s.netArtis.toLocaleString("tr-TR")}` : "—"}
                   </td>
-                  <td className="py-1.5">
-                    <a
-                      href={s.kaynakUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline"
-                    >
-                      kaynak
-                    </a>
+                  <td className="py-1.5 text-xs text-muted-foreground" title={s.kaynakDosya}>
+                    SBB raporu
                   </td>
                 </tr>
               ))}
