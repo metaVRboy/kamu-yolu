@@ -3,7 +3,7 @@ import Link from "next/link";
 import { BarChart3, Landmark, GraduationCap } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getResmiIstihdamSerisi } from "@/lib/resmiIstihdamIstatistikleri";
-import { getKpssBolumListesi, getKpssBolumVerisi } from "@/lib/kpssIstatistik";
+import { getKpssBolumListesi, getKpssBolumVerisi, getKpssVeriAraligi, getBolumSiralamasi } from "@/lib/kpssIstatistik";
 import { acikOgretimdeVarMi } from "@/lib/acikOgretimBolumleri";
 import { getDgsHedefleri } from "@/lib/dgsGecis";
 import { getPostingsForDepartment, normalize } from "@/lib/matching";
@@ -11,6 +11,7 @@ import { getHaberlerForDepartment } from "@/lib/haberler";
 import { ResmiIstihdamGrafik } from "@/components/ResmiIstihdamGrafik";
 import { YillikSutunGrafik } from "@/components/YillikSutunGrafik";
 import { KpssBolumSecici } from "@/components/KpssBolumSecici";
+import { BolumSiralamaFiltre } from "@/components/BolumSiralamaFiltre";
 
 export const metadata = { title: "Kamu Alım Analizi — Kamu Yolu" };
 
@@ -24,11 +25,18 @@ function kpssGridAdimi(maxDeger: number): number {
 export default async function AnalizPage({
   searchParams,
 }: {
-  searchParams: Promise<{ bolum?: string }>;
+  searchParams: Promise<{ bolum?: string; siraBaslangic?: string; siraBitis?: string; siraYon?: string }>;
 }) {
-  const { bolum } = await searchParams;
+  const { bolum, siraBaslangic, siraBitis, siraYon } = await searchParams;
   const resmiSeri = getResmiIstihdamSerisi();
   const bolumler = await getKpssBolumListesi();
+
+  const { ilkYil: siraIlkYil, sonYil: siraSonYil } = await getKpssVeriAraligi();
+  const bolumSiralamasi = await getBolumSiralamasi({
+    baslangicYil: siraBaslangic ? Number(siraBaslangic) : undefined,
+    bitisYil: siraBitis ? Number(siraBitis) : undefined,
+    siralama: siraYon === "az" ? "az" : "cok",
+  });
 
   const seciliBolum = bolum ? bolumler.find((b) => b.id === bolum) : undefined;
   const kpssVerisi = seciliBolum ? await getKpssBolumVerisi(seciliBolum.id) : null;
@@ -71,7 +79,8 @@ export default async function AnalizPage({
         Türkiye genelinde yıllara göre kamu istihdamı ve KPSS ile bölümüne göre yapılan alımlar.
       </p>
 
-      <div className="mt-6 rounded-2xl border border-primary/20 bg-white p-4">
+      <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-[2fr_1fr] lg:items-start">
+      <div className="rounded-2xl border border-primary/20 bg-white p-4">
         <div className="flex items-center gap-2">
           <Landmark className="h-5 w-5 text-primary" />
           <h2 className="text-sm font-semibold text-slate-700">
@@ -121,6 +130,52 @@ export default async function AnalizPage({
             </table>
           </div>
         </details>
+      </div>
+
+      <div className="rounded-2xl border border-primary/20 bg-white p-4">
+        <h2 className="text-sm font-semibold text-slate-700">En Çok Atama Yapılan Bölümler</h2>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Seçilen yıl aralığında bölüm başına yıllık ortalama KPSS kontenjanı (kaynak: ÖSYM KPSS
+          tercih kılavuzları).
+        </p>
+
+        <div className="mt-3">
+          <Suspense fallback={null}>
+            <BolumSiralamaFiltre ilkYil={siraIlkYil} sonYil={siraSonYil} />
+          </Suspense>
+        </div>
+
+        <div className="mt-3 flex gap-1 text-xs">
+          <a
+            href={`?${new URLSearchParams({ ...(siraBaslangic ? { siraBaslangic } : {}), ...(siraBitis ? { siraBitis } : {}), siraYon: "cok" }).toString()}`}
+            className={`rounded-full px-2.5 py-1 font-medium ${siraYon !== "az" ? "bg-primary/10 text-primary" : "text-slate-500 hover:text-primary"}`}
+          >
+            En çok
+          </a>
+          <a
+            href={`?${new URLSearchParams({ ...(siraBaslangic ? { siraBaslangic } : {}), ...(siraBitis ? { siraBitis } : {}), siraYon: "az" }).toString()}`}
+            className={`rounded-full px-2.5 py-1 font-medium ${siraYon === "az" ? "bg-primary/10 text-primary" : "text-slate-500 hover:text-primary"}`}
+          >
+            En az
+          </a>
+        </div>
+
+        <ol className="mt-3 max-h-80 space-y-1.5 overflow-y-auto text-sm">
+          {bolumSiralamasi.length === 0 && (
+            <p className="text-xs text-muted-foreground">Seçilen aralıkta veri bulunamadı.</p>
+          )}
+          {bolumSiralamasi.map((b, i) => (
+            <li key={b.id} className="flex items-baseline justify-between gap-2">
+              <span className="truncate text-slate-700">
+                <span className="text-muted-foreground">{i + 1}.</span> {b.ad}
+              </span>
+              <span className="shrink-0 font-medium text-primary">
+                {b.ortalama.toLocaleString("tr-TR", { maximumFractionDigits: 1 })}
+              </span>
+            </li>
+          ))}
+        </ol>
+      </div>
       </div>
 
       <div className="mt-8 rounded-2xl border border-primary/20 bg-white p-4">

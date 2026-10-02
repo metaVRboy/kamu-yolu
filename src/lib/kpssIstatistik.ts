@@ -40,3 +40,59 @@ export async function getKpssBolumVerisi(id: string): Promise<KpssBolumVerisi | 
     maxPuan: bolum.maxPuan,
   };
 }
+
+/** KPSS yillik alim verisinin kapsadigi gercek yil araligi (secim kutulari ve varsayilan araligi belirlemek icin). */
+export async function getKpssVeriAraligi(): Promise<{ ilkYil: number; sonYil: number }> {
+  const agg = await prisma.kpssYillikAlim.aggregate({ _min: { yil: true }, _max: { yil: true } });
+  return { ilkYil: agg._min.yil ?? 0, sonYil: agg._max.yil ?? 0 };
+}
+
+export type BolumSiralamaSatiri = { id: string; ad: string; ogrenimDuzeyi: OgrenimDuzeyi; ortalama: number };
+
+/**
+ * Secilen yil araliginda (verilmezse verinin kapsadigi TUM yillarda)
+ * bolume dusen YILLIK ORTALAMA kontenjani hesaplar - araliktaki, o
+ * bolum icin kayit OLMAYAN yillar 0 kabul edilir (o yil hic alim
+ * yapilmamis demektir), boylece ortalama hep ayni (bitisYil-baslangicYil+1)
+ * payda ile hesaplanir.
+ */
+export async function getBolumSiralamasi(params: {
+  baslangicYil?: number;
+  bitisYil?: number;
+  siralama: "cok" | "az";
+  limit?: number;
+}): Promise<BolumSiralamaSatiri[]> {
+  const { ilkYil, sonYil } = await getKpssVeriAraligi();
+  const baslangic = params.baslangicYil ?? ilkYil;
+  const bitis = params.bitisYil ?? sonYil;
+  const yilSayisi = Math.max(1, bitis - baslangic + 1);
+
+  const gruplar = await prisma.kpssYillikAlim.groupBy({
+    by: ["bolumId"],
+    where: { yil: { gte: baslangic, lte: bitis } },
+    _sum: { kontenjan: true },
+  });
+
+  const anlamliGruplar = gruplar.filter((g) => (g._sum.kontenjan ?? 0) > 0);
+  const bolumler = await prisma.kpssBolum.findMany({
+    where: { id: { in: anlamliGruplar.map((g) => g.bolumId) } },
+    select: { id: true, ad: true, ogrenimDuzeyi: true },
+  });
+  const bolumById = new Map(bolumler.map((b) => [b.id, b]));
+
+  const satirlar: BolumSiralamaSatiri[] = anlamliGruplar
+    .map((g) => {
+      const b = bolumById.get(g.bolumId);
+      if (!b) return null;
+      return {
+        id: b.id,
+        ad: b.ad,
+        ogrenimDuzeyi: b.ogrenimDuzeyi as OgrenimDuzeyi,
+        ortalama: (g._sum.kontenjan ?? 0) / yilSayisi,
+      };
+    })
+    .filter((s): s is BolumSiralamaSatiri => s !== null);
+
+  satirlar.sort((a, b) => (params.siralama === "az" ? a.ortalama - b.ortalama : b.ortalama - a.ortalama));
+  return satirlar.slice(0, params.limit ?? 10);
+}
