@@ -8,12 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import type { KpssBolum } from "@/lib/kpssIstatistik";
 
-const SEVIYE_LEVEL: Record<KpssBolum["ogrenimDuzeyi"], string> = {
-  lisans: "LISANS",
-  onlisans: "ONLISANS",
-  lise: "LISE",
-};
-
 function normalizeTr(text: string): string {
   return text.trim().toLocaleLowerCase("tr-TR");
 }
@@ -45,7 +39,6 @@ export function KpssBolumSecici({ bolumler, seciliAd }: { bolumler: KpssBolum[];
     setActiveIndex(-1);
     const params = new URLSearchParams(searchParams.toString());
     params.set("bolum", bolum.id);
-    params.set("seviye", bolum.ogrenimDuzeyi);
     router.push(`${pathname}?${params.toString()}`);
   }
 
@@ -53,7 +46,6 @@ export function KpssBolumSecici({ bolumler, seciliAd }: { bolumler: KpssBolum[];
     setQuery("");
     const params = new URLSearchParams(searchParams.toString());
     params.delete("bolum");
-    params.delete("seviye");
     const q = params.toString();
     router.push(q ? `${pathname}?${q}` : pathname);
   }
@@ -112,7 +104,7 @@ export function KpssBolumSecici({ bolumler, seciliAd }: { bolumler: KpssBolum[];
           className="absolute z-50 mt-2 max-h-80 w-full overflow-y-auto rounded-2xl border border-primary/15 bg-white/95 p-1 shadow-lg backdrop-blur-xl"
         >
           {filtered.map((b, i) => (
-            <li key={`${b.ogrenimDuzeyi}-${b.id}`}>
+            <li key={b.id}>
               <button
                 type="button"
                 onMouseDown={(e) => {
@@ -126,7 +118,7 @@ export function KpssBolumSecici({ bolumler, seciliAd }: { bolumler: KpssBolum[];
               >
                 <span>{b.ad}</span>
                 <Badge className="border-primary/15 bg-primary/10 font-normal text-primary">
-                  {LEVEL_LABEL[SEVIYE_LEVEL[b.ogrenimDuzeyi]] ?? b.ogrenimDuzeyi}
+                  {LEVEL_LABEL[b.ogrenimDuzeyi] ?? b.ogrenimDuzeyi}
                 </Badge>
               </button>
             </li>

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { BarChart3, Landmark, GraduationCap } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getResmiIstihdamSerisi } from "@/lib/resmiIstihdamIstatistikleri";
-import { getKpssBolumListesi, getKpssBolumVerisi, type OgrenimDuzeyi } from "@/lib/kpssIstatistik";
+import { getKpssBolumListesi, getKpssBolumVerisi } from "@/lib/kpssIstatistik";
 import { acikOgretimdeVarMi } from "@/lib/acikOgretimBolumleri";
 import { getPostingsForDepartment, normalize } from "@/lib/matching";
 import { getHaberlerForDepartment } from "@/lib/haberler";
@@ -23,35 +23,14 @@ function kpssGridAdimi(maxDeger: number): number {
 export default async function AnalizPage({
   searchParams,
 }: {
-  searchParams: Promise<{ bolum?: string; seviye?: string }>;
+  searchParams: Promise<{ bolum?: string }>;
 }) {
-  const { bolum, seviye } = await searchParams;
+  const { bolum } = await searchParams;
   const resmiSeri = getResmiIstihdamSerisi();
+  const bolumler = await getKpssBolumListesi();
 
-  // memurlar.net disaridan cektigimiz bir kaynak - erisilemez olmasi
-  // (yavas yanit, gecici engelleme, yapi degisikligi) bizim sayfamizi
-  // 500'e dusurmemeli, sadece bolum secici bos/pasif gorunmeli.
-  let bolumler: Awaited<ReturnType<typeof getKpssBolumListesi>> = [];
-  let kpssErisilemiyor = false;
-  try {
-    bolumler = await getKpssBolumListesi();
-  } catch {
-    kpssErisilemiyor = true;
-  }
-
-  const seciliBolum =
-    bolum && seviye
-      ? bolumler.find((b) => b.id === bolum && b.ogrenimDuzeyi === (seviye as OgrenimDuzeyi))
-      : undefined;
-
-  let kpssVerisi: Awaited<ReturnType<typeof getKpssBolumVerisi>> | null = null;
-  if (seciliBolum) {
-    try {
-      kpssVerisi = await getKpssBolumVerisi(seciliBolum.id, seciliBolum.ogrenimDuzeyi);
-    } catch {
-      kpssErisilemiyor = true;
-    }
-  }
+  const seciliBolum = bolum ? bolumler.find((b) => b.id === bolum) : undefined;
+  const kpssVerisi = seciliBolum ? await getKpssBolumVerisi(seciliBolum.id) : null;
 
   let eslesenDepartman: { id: string; name: string; slug: string } | null = null;
   let aktifIlanSayisi = 0;
@@ -150,24 +129,16 @@ export default async function AnalizPage({
           alımlar, işçi alımları ve 2001/3001/4001 nitelik kolu kadroları dahil değildir.
         </p>
 
-        {kpssErisilemiyor ? (
-          <p className="mt-4 text-sm text-muted-foreground">
-            KPSS kadro istatistikleri şu anda alınamıyor. Lütfen daha sonra tekrar dene.
-          </p>
-        ) : (
-          <>
-            <div className="mt-4">
-              <Suspense fallback={null}>
-                <KpssBolumSecici bolumler={bolumler} seciliAd={seciliBolum?.ad} />
-              </Suspense>
-            </div>
+        <div className="mt-4">
+          <Suspense fallback={null}>
+            <KpssBolumSecici bolumler={bolumler} seciliAd={seciliBolum?.ad} />
+          </Suspense>
+        </div>
 
-            {!seciliBolum && (
-              <p className="mt-6 text-sm text-muted-foreground">
-                Yıllara göre alım grafiğini görmek için yukarıdan bir bölüm seç.
-              </p>
-            )}
-          </>
+        {!seciliBolum && (
+          <p className="mt-6 text-sm text-muted-foreground">
+            Yıllara göre alım grafiğini görmek için yukarıdan bir bölüm seç.
+          </p>
         )}
 
         {seciliBolum && kpssVerisi && kpssVerisi.yillikAlimlar.length > 0 && (

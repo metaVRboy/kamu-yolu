@@ -358,3 +358,30 @@ model AuthAbuse {
   lastFailAt  DateTime?
   createdAt   DateTime  @default(now())
 }
+
+// ÖSYM merkezi KPSS tercih kilavuzlarindaki kadro istatistikleri -
+// disaridan CANLI cekilmiyor (kaynak sitenin bot korumasi sunucu
+// taraflii istekleri engelliyor), bir kerelik toplu bir script ile
+// (scripts/kpssScrapeOneShot.ts) buraya aktarildi. Veri zaten gecmise
+// donuk/durgun oldugundan periyodik yenileme gerekmiyor.
+model KpssBolum {
+  id              String           @id
+  ad              String
+  ogrenimDuzeyi   String
+  toplamKontenjan Int
+  minPuan         Float?
+  maxPuan         Float?
+  yillikAlimlar   KpssYillikAlim[]
+
+  @@index([ogrenimDuzeyi])
+}
+
+model KpssYillikAlim {
+  id        String    @id @default(cuid())
+  bolumId   String
+  bolum     KpssBolum @relation(fields: [bolumId], references: [id], onDelete: Cascade)
+  yil       Int
+  kontenjan Int
+
+  @@unique([bolumId, yil])
+}
