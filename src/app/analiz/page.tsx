@@ -70,17 +70,19 @@ export default async function AnalizPage({
     seciliBolum && seciliBolum.ogrenimDuzeyi === "ONLISANS" ? await getDgsHedefleri(seciliBolum.ad) : [];
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
-      <div className="flex items-center gap-2">
-        <BarChart3 className="h-6 w-6 text-primary" />
-        <h1 className="text-2xl font-bold tracking-tight">Kamu Alım Analizi</h1>
+    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      <div className="mx-auto max-w-4xl">
+        <div className="flex items-center gap-2">
+          <BarChart3 className="h-6 w-6 text-primary" />
+          <h1 className="text-2xl font-bold tracking-tight">Kamu Alım Analizi</h1>
+        </div>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Türkiye genelinde yıllara göre kamu istihdamı ve KPSS ile bölümüne göre yapılan alımlar.
+        </p>
       </div>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Türkiye genelinde yıllara göre kamu istihdamı ve KPSS ile bölümüne göre yapılan alımlar.
-      </p>
 
-      <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-[2fr_1fr] lg:items-start">
-      <div className="rounded-2xl border border-primary/20 bg-white p-4">
+      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
+      <div className="min-w-0 rounded-2xl border border-primary/20 bg-white p-4">
         <div className="flex items-center gap-2">
           <Landmark className="h-5 w-5 text-primary" />
           <h2 className="text-sm font-semibold text-slate-700">
@@ -132,7 +134,7 @@ export default async function AnalizPage({
         </details>
       </div>
 
-      <div className="rounded-2xl border border-primary/20 bg-white p-4">
+      <aside className="rounded-2xl border border-primary/20 bg-white p-4 lg:sticky lg:top-6">
         <h2 className="text-sm font-semibold text-slate-700">En Çok Atama Yapılan Bölümler</h2>
         <p className="mt-1 text-xs text-muted-foreground">
           Seçilen yıl aralığında bölüm başına yıllık ortalama KPSS kontenjanı (kaynak: ÖSYM KPSS
@@ -175,9 +177,10 @@ export default async function AnalizPage({
             </li>
           ))}
         </ol>
-      </div>
+      </aside>
       </div>
 
+      <div className="mx-auto max-w-4xl">
       <div className="mt-8 rounded-2xl border border-primary/20 bg-white p-4">
         <div className="flex items-center gap-2">
           <GraduationCap className="h-5 w-5 text-primary" />
@@ -308,6 +311,7 @@ export default async function AnalizPage({
             {seciliBolum.ad} için KPSS kadro istatistiği bulunamadı.
           </p>
         )}
+      </div>
       </div>
     </div>
   );
