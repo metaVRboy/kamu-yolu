@@ -183,19 +183,43 @@ export default async function AnalizPage({
                   "Bu bölüm sitemizdeki bölüm listesiyle eşleşmediği için aktif ilan/haber bilgisi gösterilemiyor."
                 )}
               </p>
-              <p className="pt-1 text-xs text-muted-foreground">
-                Bu bölüme üniversite ile girebilmek için gereken TYT/AYT taban puanı üniversiteden
-                üniversiteye değişir; güncel taban puanlar için{" "}
-                <a
-                  href="https://yokatlas.yok.gov.tr/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline"
-                >
-                  YÖK Atlas
-                </a>
-                &apos;ı kullanabilirsin.
-              </p>
+              {seciliBolum.ogrenimDuzeyi === "LISE" ? (
+                <p className="pt-1 text-xs text-muted-foreground">
+                  Bu kadrolar lise mezunlarına açıktır; üniversite giriş sınavı (TYT/AYT) puanı
+                  aranmaz.
+                </p>
+              ) : (
+                <p className="pt-1 text-xs text-muted-foreground">
+                  Bu bölüme üniversite ile girebilmek için{" "}
+                  {seciliBolum.ogrenimDuzeyi === "ONLISANS" ? "TYT" : "AYT"} puanı gerekir; taban
+                  puan üniversiteden üniversiteye değişir, güncel taban puanlar için{" "}
+                  <a
+                    href="https://yokatlas.yok.gov.tr/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    YÖK Atlas
+                  </a>
+                  &apos;ı kullanabilirsin.
+                  {seciliBolum.ogrenimDuzeyi === "ONLISANS" && (
+                    <>
+                      {" "}
+                      Önlisans mezunu olarak DGS (Dikey Geçiş Sınavı) ile hangi lisans
+                      bölümlerine geçiş yapabileceğini{" "}
+                      <a
+                        href="https://www.osym.gov.tr/2026dgs-kilavuz-ve-basvuru-bilgileri"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline"
+                      >
+                        ÖSYM&apos;nin DGS kılavuzundaki Tablo-2&apos;den
+                      </a>{" "}
+                      kontrol edebilirsin.
+                    </>
+                  )}
+                </p>
+              )}
             </div>
           </>
         )}
