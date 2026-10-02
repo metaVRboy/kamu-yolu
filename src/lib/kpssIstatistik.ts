@@ -18,6 +18,7 @@ async function fetchKpssSayfa(params: Record<string, string>): Promise<string> {
   const url = `${KPSS_BASE}?${new URLSearchParams(params).toString()}`;
   const res = await fetch(url, {
     headers: { "User-Agent": "Mozilla/5.0 (compatible; KamuYoluBot/1.0)" },
+    signal: AbortSignal.timeout(8000),
   });
   if (!res.ok) throw new Error(`KPSS istatistik sayfasi alinamadi: ${res.status}`);
   const buffer = await res.arrayBuffer();

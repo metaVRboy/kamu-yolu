@@ -27,16 +27,31 @@ export default async function AnalizPage({
 }) {
   const { bolum, seviye } = await searchParams;
   const resmiSeri = getResmiIstihdamSerisi();
-  const bolumler = await getKpssBolumListesi();
+
+  // memurlar.net disaridan cektigimiz bir kaynak - erisilemez olmasi
+  // (yavas yanit, gecici engelleme, yapi degisikligi) bizim sayfamizi
+  // 500'e dusurmemeli, sadece bolum secici bos/pasif gorunmeli.
+  let bolumler: Awaited<ReturnType<typeof getKpssBolumListesi>> = [];
+  let kpssErisilemiyor = false;
+  try {
+    bolumler = await getKpssBolumListesi();
+  } catch {
+    kpssErisilemiyor = true;
+  }
 
   const seciliBolum =
     bolum && seviye
       ? bolumler.find((b) => b.id === bolum && b.ogrenimDuzeyi === (seviye as OgrenimDuzeyi))
       : undefined;
 
-  const kpssVerisi = seciliBolum
-    ? await getKpssBolumVerisi(seciliBolum.id, seciliBolum.ogrenimDuzeyi)
-    : null;
+  let kpssVerisi: Awaited<ReturnType<typeof getKpssBolumVerisi>> | null = null;
+  if (seciliBolum) {
+    try {
+      kpssVerisi = await getKpssBolumVerisi(seciliBolum.id, seciliBolum.ogrenimDuzeyi);
+    } catch {
+      kpssErisilemiyor = true;
+    }
+  }
 
   let eslesenDepartman: { id: string; name: string; slug: string } | null = null;
   let aktifIlanSayisi = 0;
@@ -136,16 +151,25 @@ export default async function AnalizPage({
           değildir.
         </p>
 
-        <div className="mt-4">
-          <Suspense fallback={null}>
-            <KpssBolumSecici bolumler={bolumler} seciliAd={seciliBolum?.ad} />
-          </Suspense>
-        </div>
-
-        {!seciliBolum && (
-          <p className="mt-6 text-sm text-muted-foreground">
-            Yıllara göre alım grafiğini görmek için yukarıdan bir bölüm seç.
+        {kpssErisilemiyor ? (
+          <p className="mt-4 text-sm text-muted-foreground">
+            KPSS kadro istatistikleri şu anda memurlar.net&apos;ten alınamıyor. Lütfen daha sonra
+            tekrar dene.
           </p>
+        ) : (
+          <>
+            <div className="mt-4">
+              <Suspense fallback={null}>
+                <KpssBolumSecici bolumler={bolumler} seciliAd={seciliBolum?.ad} />
+              </Suspense>
+            </div>
+
+            {!seciliBolum && (
+              <p className="mt-6 text-sm text-muted-foreground">
+                Yıllara göre alım grafiğini görmek için yukarıdan bir bölüm seç.
+              </p>
+            )}
+          </>
         )}
 
         {seciliBolum && kpssVerisi && kpssVerisi.yillikAlimlar.length > 0 && (
