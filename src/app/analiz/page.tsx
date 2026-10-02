@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getResmiIstihdamSerisi } from "@/lib/resmiIstihdamIstatistikleri";
 import { getKpssBolumListesi, getKpssBolumVerisi } from "@/lib/kpssIstatistik";
 import { acikOgretimdeVarMi } from "@/lib/acikOgretimBolumleri";
+import { getDgsHedefleri } from "@/lib/dgsGecis";
 import { getPostingsForDepartment, normalize } from "@/lib/matching";
 import { getHaberlerForDepartment } from "@/lib/haberler";
 import { ResmiIstihdamGrafik } from "@/components/ResmiIstihdamGrafik";
@@ -56,6 +57,9 @@ export default async function AnalizPage({
   const kpssMaxDeger = kpssVerisi
     ? Math.max(1, ...kpssVerisi.yillikAlimlar.map((y) => y.kontenjan))
     : 1;
+
+  const dgsHedefleri =
+    seciliBolum && seciliBolum.ogrenimDuzeyi === "ONLISANS" ? await getDgsHedefleri(seciliBolum.ad) : [];
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
@@ -202,11 +206,31 @@ export default async function AnalizPage({
                     YÖK Atlas
                   </a>
                   &apos;ı kullanabilirsin.
-                  {seciliBolum.ogrenimDuzeyi === "ONLISANS" && (
+                </p>
+              )}
+
+              {seciliBolum.ogrenimDuzeyi === "ONLISANS" && (
+                <div className="pt-1 text-xs text-muted-foreground">
+                  <span className="font-semibold text-slate-700">DGS ile geçiş:</span>{" "}
+                  {dgsHedefleri.length > 0 ? (
                     <>
-                      {" "}
-                      Önlisans mezunu olarak DGS (Dikey Geçiş Sınavı) ile hangi lisans
-                      bölümlerine geçiş yapabileceğini{" "}
+                      Dikey Geçiş Sınavı (DGS) ile aşağıdaki lisans bölümlerine geçiş
+                      yapabilirsin:
+                      <div className="mt-1.5 flex flex-wrap gap-1.5">
+                        {dgsHedefleri.map((h) => (
+                          <span
+                            key={h.lisansAdi}
+                            className="rounded-full bg-white px-2.5 py-1 text-[11px] text-slate-700 ring-1 ring-primary/15"
+                          >
+                            {h.lisansAdi}{" "}
+                            <span className="text-muted-foreground">({h.puanTuru})</span>
+                          </span>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      Bu bölüm için DGS geçiş listesi bölüm adı eşleşmesiyle bulunamadı;{" "}
                       <a
                         href="https://www.osym.gov.tr/2026dgs-kilavuz-ve-basvuru-bilgileri"
                         target="_blank"
@@ -218,7 +242,7 @@ export default async function AnalizPage({
                       kontrol edebilirsin.
                     </>
                   )}
-                </p>
+                </div>
               )}
             </div>
           </>

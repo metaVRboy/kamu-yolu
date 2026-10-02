@@ -385,3 +385,19 @@ model KpssYillikAlim {
 
   @@unique([bolumId, yil])
 }
+
+// ÖSYM'nin resmi 2026-DGS kilavuzu TABLO-2'sinden (onlisans -> lisans
+// dikey gecis eslesmeleri) bir kerelik aktarildi (scripts/dgsTabloScrapeOneShot.ts).
+// onlisansAdi, KpssBolum.ad (ONLISANS olanlar) ile isim bazli eslestirilerek
+// kullanilir - ayri bir foreign key yok cunku iki kaynagin id sistemleri
+// farkli (biri memurlar.net kaynakli, biri doğrudan ÖSYM kodu).
+model DgsGecis {
+  id            String @id @default(cuid())
+  onlisansKodu  String
+  onlisansAdi   String
+  lisansKodu    String
+  lisansAdi     String
+  puanTuru      String
+
+  @@index([onlisansAdi])
+}
