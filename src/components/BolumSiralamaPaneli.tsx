@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { SlidersHorizontal, X } from "lucide-react";
+import { ArrowUpDown, SlidersHorizontal, X } from "lucide-react";
 import type { BolumSiralamaSatiri } from "@/lib/kpssIstatistik";
 
 const TUMU = "__tumu__";
@@ -25,12 +25,19 @@ export function BolumSiralamaPaneli({
 
   const uygulananBaslangic = searchParams.get("siraBaslangic") ?? TUMU;
   const uygulananBitis = searchParams.get("siraBitis") ?? TUMU;
-  const siraYon = searchParams.get("siraYon") === "az" ? "az" : "cok";
 
   const [filtreAcik, setFiltreAcik] = useState(false);
   // Taslak secimler - "Uygula"ya basilana kadar URL'e (dolayisiyla sorguya) yansimaz.
   const [taslakBaslangic, setTaslakBaslangic] = useState(uygulananBaslangic);
   const [taslakBitis, setTaslakBitis] = useState(uygulananBitis);
+
+  // Siralama yonu sayfa yenilemeden, tamamen client-side degisir (sunucudan
+  // gelen liste zaten "azalan" sirali - "artan" icin sadece ters ceviriyoruz).
+  const [siraYon, setSiraYon] = useState<"cok" | "az">("cok");
+  const siraliListe = useMemo(() => {
+    if (siraYon === "cok") return siralama;
+    return [...siralama].sort((a, b) => a.toplam - b.toplam);
+  }, [siralama, siraYon]);
 
   const yillar = Array.from({ length: sonYil - ilkYil + 1 }, (_, i) => ilkYil + i);
   const filtreAktif = uygulananBaslangic !== TUMU || uygulananBitis !== TUMU;
@@ -51,12 +58,6 @@ export function BolumSiralamaPaneli({
     setFiltreAcik(false);
   }
 
-  function siralamaYonAyarla(yon: "cok" | "az") {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("siraYon", yon);
-    router.push(`${pathname}?${params.toString()}`);
-  }
-
   // Bir bolum secildiginde (ör. KPSS arama kutusundan), siralama listesinde
   // o bolumun satirina otomatik kaydir ve vurgula.
   useEffect(() => {
@@ -70,15 +71,18 @@ export function BolumSiralamaPaneli({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-sm font-semibold text-slate-700">En Çok Atama Yapılan Bölümler</h3>
         <div className="flex items-center gap-1.5">
-          <select
-            value={siraYon}
-            onChange={(e) => siralamaYonAyarla(e.target.value === "az" ? "az" : "cok")}
-            aria-label="Sırala"
-            className="rounded-lg border border-primary/20 bg-white px-2 py-1 text-xs font-medium text-slate-600"
-          >
-            <option value="cok">Azalan</option>
-            <option value="az">Artan</option>
-          </select>
+          <div className="relative">
+            <select
+              value={siraYon}
+              onChange={(e) => setSiraYon(e.target.value === "az" ? "az" : "cok")}
+              aria-label="Sırala"
+              className="appearance-none rounded-lg border border-primary/20 bg-white py-1 pl-2 pr-6 text-xs font-medium text-slate-600"
+            >
+              <option value="cok">Azalan</option>
+              <option value="az">Artan</option>
+            </select>
+            <ArrowUpDown className="pointer-events-none absolute right-1.5 top-1/2 h-3 w-3 -translate-y-1/2 text-slate-400" />
+          </div>
           <button
             type="button"
             onClick={filtreyiAc}
@@ -151,10 +155,10 @@ export function BolumSiralamaPaneli({
         ref={listRef}
         className="max-h-72 space-y-1 overflow-y-auto rounded-b-lg border border-primary/15 p-1 pr-1 text-sm"
       >
-        {siralama.length === 0 && (
+        {siraliListe.length === 0 && (
           <p className="py-2 text-xs text-muted-foreground">Seçilen aralıkta veri bulunamadı.</p>
         )}
-        {siralama.map((b, i) => (
+        {siraliListe.map((b, i) => (
           <li
             key={b.id}
             data-bolum-id={b.id}
