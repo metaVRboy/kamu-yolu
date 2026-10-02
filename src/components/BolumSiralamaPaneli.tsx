@@ -70,22 +70,15 @@ export function BolumSiralamaPaneli({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-sm font-semibold text-slate-700">En Çok Atama Yapılan Bölümler</h3>
         <div className="flex items-center gap-1.5">
-          <div className="flex gap-1 text-xs">
-            <button
-              type="button"
-              onClick={() => siralamaYonAyarla("cok")}
-              className={`rounded-full px-2.5 py-1 font-medium ${siraYon !== "az" ? "bg-primary/10 text-primary" : "text-slate-500 hover:text-primary"}`}
-            >
-              En çok
-            </button>
-            <button
-              type="button"
-              onClick={() => siralamaYonAyarla("az")}
-              className={`rounded-full px-2.5 py-1 font-medium ${siraYon === "az" ? "bg-primary/10 text-primary" : "text-slate-500 hover:text-primary"}`}
-            >
-              En az
-            </button>
-          </div>
+          <select
+            value={siraYon}
+            onChange={(e) => siralamaYonAyarla(e.target.value === "az" ? "az" : "cok")}
+            aria-label="Sırala"
+            className="rounded-lg border border-primary/20 bg-white px-2 py-1 text-xs font-medium text-slate-600"
+          >
+            <option value="cok">Azalan</option>
+            <option value="az">Artan</option>
+          </select>
           <button
             type="button"
             onClick={filtreyiAc}
@@ -150,7 +143,14 @@ export function BolumSiralamaPaneli({
         </div>
       )}
 
-      <ol ref={listRef} className="mt-2.5 max-h-72 space-y-1 overflow-y-auto pr-1 text-sm">
+      <div className="mt-2.5 flex items-center justify-between gap-2 rounded-t-lg border border-b-0 border-primary/15 bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-500">
+        <span>Bölüm Adı</span>
+        <span>Alım Sayısı</span>
+      </div>
+      <ol
+        ref={listRef}
+        className="max-h-72 space-y-1 overflow-y-auto rounded-b-lg border border-primary/15 p-1 pr-1 text-sm"
+      >
         {siralama.length === 0 && (
           <p className="py-2 text-xs text-muted-foreground">Seçilen aralıkta veri bulunamadı.</p>
         )}
@@ -165,9 +165,7 @@ export function BolumSiralamaPaneli({
             <span className="truncate text-slate-700">
               <span className="text-muted-foreground">{i + 1}.</span> {b.ad}
             </span>
-            <span className="shrink-0 font-medium text-primary">
-              {b.ortalama.toLocaleString("tr-TR", { maximumFractionDigits: 1 })}
-            </span>
+            <span className="shrink-0 font-medium text-primary">{b.toplam.toLocaleString("tr-TR")}</span>
           </li>
         ))}
       </ol>
