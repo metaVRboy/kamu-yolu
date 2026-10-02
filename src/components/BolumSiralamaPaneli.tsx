@@ -42,6 +42,11 @@ export function BolumSiralamaPaneli({
   const yillar = Array.from({ length: sonYil - ilkYil + 1 }, (_, i) => ilkYil + i);
   const filtreAktif = uygulananBaslangic !== TUMU || uygulananBitis !== TUMU;
 
+  const efektifBaslangic = uygulananBaslangic === TUMU ? ilkYil : Number(uygulananBaslangic);
+  const efektifBitis = uygulananBitis === TUMU ? sonYil : Number(uygulananBitis);
+  const yilAraligiMetni =
+    efektifBaslangic === efektifBitis ? `${efektifBaslangic}` : `${efektifBaslangic}-${efektifBitis}`;
+
   function filtreyiAc() {
     setTaslakBaslangic(uygulananBaslangic);
     setTaslakBitis(uygulananBitis);
@@ -149,6 +154,7 @@ export function BolumSiralamaPaneli({
 
       <div className="mt-2.5 flex items-center justify-between gap-2 rounded-t-lg border border-b-0 border-primary/15 bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-500">
         <span>Bölüm Adı</span>
+        <span>Yıl Aralığı: {yilAraligiMetni}</span>
         <span>Alım Sayısı</span>
       </div>
       <ol
