@@ -3,6 +3,7 @@ import { BarChart3, Landmark } from "lucide-react";
 import { getBolumAnaliz, getVeriAraligi } from "@/lib/analiz";
 import { getResmiIstihdamSerisi } from "@/lib/resmiIstihdamIstatistikleri";
 import { AnalizFiltre } from "@/components/AnalizFiltre";
+import { ResmiIstihdamGrafik } from "@/components/ResmiIstihdamGrafik";
 
 export const metadata = { title: "Bölüm Bazlı Alım Analizi — Kamu Yolu" };
 
@@ -49,36 +50,45 @@ export default async function AnalizPage({
           Cumhurbaşkanlığı Strateji ve Bütçe Başkanlığı verilerine dayanır; bölüm/kurum kırılımı
           içermez, sadece Türkiye genelinde toplam kamu personeli sayısını gösterir.
         </p>
-        <div className="mt-3 overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-primary/10 text-left text-xs text-muted-foreground">
-                <th className="py-1.5 pr-4 font-medium">Dönem</th>
-                <th className="py-1.5 pr-4 font-medium">Toplam Kamu Personeli</th>
-                <th className="py-1.5 pr-4 font-medium">Yıllık Net Artış</th>
-                <th className="py-1.5 font-medium">Kaynak</th>
-              </tr>
-            </thead>
-            <tbody>
-              {resmiSeri.map((s) => (
-                <tr key={s.yil} className="border-b border-primary/5 last:border-0">
-                  <td className="py-1.5 pr-4 text-slate-800">
-                    {s.yil} {s.donem}
-                  </td>
-                  <td className="py-1.5 pr-4 font-medium text-slate-900">
-                    {s.toplamPersonel.toLocaleString("tr-TR")}
-                  </td>
-                  <td className="py-1.5 pr-4 text-slate-500">
-                    {s.netArtis !== null ? `+${s.netArtis.toLocaleString("tr-TR")}` : "—"}
-                  </td>
-                  <td className="py-1.5 text-xs text-muted-foreground" title={s.kaynakDosya}>
-                    SBB raporu
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="mt-4">
+          <ResmiIstihdamGrafik seri={resmiSeri} />
         </div>
+
+        <details className="mt-4">
+          <summary className="cursor-pointer text-xs font-medium text-primary hover:underline">
+            Tablo olarak görüntüle
+          </summary>
+          <div className="mt-2 overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-primary/10 text-left text-xs text-muted-foreground">
+                  <th className="py-1.5 pr-4 font-medium">Dönem</th>
+                  <th className="py-1.5 pr-4 font-medium">Toplam Kamu Personeli</th>
+                  <th className="py-1.5 pr-4 font-medium">Yıllık Net Artış</th>
+                  <th className="py-1.5 font-medium">Kaynak</th>
+                </tr>
+              </thead>
+              <tbody>
+                {resmiSeri.map((s) => (
+                  <tr key={s.yil} className="border-b border-primary/5 last:border-0">
+                    <td className="py-1.5 pr-4 text-slate-800">
+                      {s.yil} {s.donem}
+                    </td>
+                    <td className="py-1.5 pr-4 font-medium text-slate-900">
+                      {s.toplamPersonel.toLocaleString("tr-TR")}
+                    </td>
+                    <td className="py-1.5 pr-4 text-slate-500">
+                      {s.netArtis !== null ? `+${s.netArtis.toLocaleString("tr-TR")}` : "—"}
+                    </td>
+                    <td className="py-1.5 text-xs text-muted-foreground" title={s.kaynakDosya}>
+                      SBB raporu
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </details>
       </div>
 
       <div className="mt-10 flex items-center gap-2">
