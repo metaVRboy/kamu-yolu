@@ -1,45 +1,79 @@
 import { Suspense } from "react";
-import { BarChart3, Landmark } from "lucide-react";
-import { getBolumAnaliz, getVeriAraligi } from "@/lib/analiz";
+import Link from "next/link";
+import { BarChart3, Landmark, GraduationCap } from "lucide-react";
+import { prisma } from "@/lib/prisma";
 import { getResmiIstihdamSerisi } from "@/lib/resmiIstihdamIstatistikleri";
-import { AnalizFiltre } from "@/components/AnalizFiltre";
+import { getKpssBolumListesi, getKpssBolumVerisi, type OgrenimDuzeyi } from "@/lib/kpssIstatistik";
+import { acikOgretimdeVarMi } from "@/lib/acikOgretimBolumleri";
+import { getPostingsForDepartment, normalize } from "@/lib/matching";
+import { getHaberlerForDepartment } from "@/lib/haberler";
 import { ResmiIstihdamGrafik } from "@/components/ResmiIstihdamGrafik";
+import { YillikSutunGrafik } from "@/components/YillikSutunGrafik";
+import { KpssBolumSecici } from "@/components/KpssBolumSecici";
 
-export const metadata = { title: "Bölüm Bazlı Alım Analizi — Kamu Yolu" };
+export const metadata = { title: "Kamu Alım Analizi — Kamu Yolu" };
 
-function gun(d: Date) {
-  return d.toISOString().slice(0, 10);
-}
-
-function turkceTarih(d: Date) {
-  return d.toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+function kpssGridAdimi(maxDeger: number): number {
+  if (maxDeger <= 50) return 10;
+  if (maxDeger <= 200) return 50;
+  if (maxDeger <= 1000) return 200;
+  return 1000;
 }
 
 export default async function AnalizPage({
   searchParams,
 }: {
-  searchParams: Promise<{ baslangic?: string; bitis?: string; sirala?: string }>;
+  searchParams: Promise<{ bolum?: string; seviye?: string }>;
 }) {
-  const { baslangic, bitis, sirala } = await searchParams;
-  const { ilk, son } = await getVeriAraligi();
-
-  const satirlar = await getBolumAnaliz({
-    baslangic: baslangic ? new Date(baslangic) : undefined,
-    bitis: bitis ? new Date(`${bitis}T23:59:59`) : undefined,
-  });
-
-  const siraliSatirlar = [...satirlar].sort((a, b) =>
-    sirala === "az" ? a.ilanSayisi - b.ilanSayisi : b.ilanSayisi - a.ilanSayisi,
-  );
-
-  const toplamIlan = satirlar.reduce((t, s) => t + s.ilanSayisi, 0);
-  const toplamKontenjan = satirlar.reduce((t, s) => t + s.tahminiKontenjan, 0);
-
+  const { bolum, seviye } = await searchParams;
   const resmiSeri = getResmiIstihdamSerisi();
+  const bolumler = await getKpssBolumListesi();
+
+  const seciliBolum =
+    bolum && seviye
+      ? bolumler.find((b) => b.id === bolum && b.ogrenimDuzeyi === (seviye as OgrenimDuzeyi))
+      : undefined;
+
+  const kpssVerisi = seciliBolum
+    ? await getKpssBolumVerisi(seciliBolum.id, seciliBolum.ogrenimDuzeyi)
+    : null;
+
+  let eslesenDepartman: { id: string; name: string; slug: string } | null = null;
+  let aktifIlanSayisi = 0;
+  let haberSayisi = 0;
+
+  if (seciliBolum) {
+    const tumDepartmanlar = await prisma.department.findMany({
+      select: { id: true, name: true, slug: true },
+    });
+    const norm = normalize(seciliBolum.ad);
+    eslesenDepartman = tumDepartmanlar.find((d) => normalize(d.name) === norm) ?? null;
+
+    if (eslesenDepartman) {
+      const [ilanlar, haberler] = await Promise.all([
+        getPostingsForDepartment(eslesenDepartman.id),
+        getHaberlerForDepartment(eslesenDepartman),
+      ]);
+      aktifIlanSayisi = ilanlar.length;
+      haberSayisi = haberler.length;
+    }
+  }
+
+  const kpssMaxDeger = kpssVerisi
+    ? Math.max(1, ...kpssVerisi.yillikAlimlar.map((y) => y.kontenjan))
+    : 1;
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
-      <div className="rounded-2xl border border-primary/20 bg-white p-4">
+      <div className="flex items-center gap-2">
+        <BarChart3 className="h-6 w-6 text-primary" />
+        <h1 className="text-2xl font-bold tracking-tight">Kamu Alım Analizi</h1>
+      </div>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Türkiye genelinde yıllara göre kamu istihdamı ve KPSS ile bölümüne göre yapılan alımlar.
+      </p>
+
+      <div className="mt-6 rounded-2xl border border-primary/20 bg-white p-4">
         <div className="flex items-center gap-2">
           <Landmark className="h-5 w-5 text-primary" />
           <h2 className="text-sm font-semibold text-slate-700">
@@ -91,78 +125,92 @@ export default async function AnalizPage({
         </details>
       </div>
 
-      <div className="mt-10 flex items-center gap-2">
-        <BarChart3 className="h-6 w-6 text-primary" />
-        <h1 className="text-2xl font-bold tracking-tight">Bölüm Bazlı İlan Analizi (Kamu Yolu Verisi)</h1>
-      </div>
-      {ilk && son && (
-        <p className="mt-2 text-sm text-muted-foreground">
-          Veri kapsamı: {turkceTarih(ilk)} – {turkceTarih(son)} arasında sitemizin taradığı ilanlar.
-          Taramaya yakın zamanda başlandığı için ilanlar yoğunlukla güncel döneme aittir, yukarıdaki
-          resmi istatistik gibi uzun yıllara yayılan bir arşiv değildir.
+      <div className="mt-8 rounded-2xl border border-primary/20 bg-white p-4">
+        <div className="flex items-center gap-2">
+          <GraduationCap className="h-5 w-5 text-primary" />
+          <h2 className="text-sm font-semibold text-slate-700">Bölümüne Göre KPSS İle Yapılan Alımlar</h2>
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Kaynak: memurlar.net KPSS Kadro İstatistikleri (ÖSYM merkezi KPSS tercih kılavuzlarındaki
+          kadrolar). Kurumsal alımlar, işçi alımları ve 2001/3001/4001 nitelik kolu kadroları dahil
+          değildir.
         </p>
-      )}
 
-      <div className="mt-6">
-        <Suspense fallback={null}>
-          <AnalizFiltre ilkTarih={ilk ? gun(ilk) : ""} sonTarih={son ? gun(son) : ""} />
-        </Suspense>
-      </div>
-
-      <div className="mt-6 grid grid-cols-2 gap-4">
-        <div className="rounded-2xl border border-primary/20 bg-white p-4">
-          <p className="text-xs font-medium text-muted-foreground">Toplam ilan</p>
-          <p className="mt-1 text-2xl font-bold text-slate-900">{toplamIlan}</p>
+        <div className="mt-4">
+          <Suspense fallback={null}>
+            <KpssBolumSecici bolumler={bolumler} seciliAd={seciliBolum?.ad} />
+          </Suspense>
         </div>
-        <div className="rounded-2xl border border-primary/20 bg-white p-4">
-          <p className="text-xs font-medium text-muted-foreground">Tahmini toplam kontenjan</p>
-          <p className="mt-1 text-2xl font-bold text-slate-900">{toplamKontenjan}</p>
-          <p className="mt-1 text-[11px] text-muted-foreground">
-            İlan başlıklarından sezgisel olarak çıkarılmıştır, kesin değildir.
+
+        {!seciliBolum && (
+          <p className="mt-6 text-sm text-muted-foreground">
+            Yıllara göre alım grafiğini görmek için yukarıdan bir bölüm seç.
           </p>
-        </div>
-      </div>
+        )}
 
-      <div className="mt-8 overflow-hidden rounded-2xl border border-primary/20 bg-white">
-        <div className="flex items-center justify-between border-b border-primary/10 px-4 py-3">
-          <h2 className="text-sm font-semibold text-slate-700">Bölümlere Göre Dağılım</h2>
-          <div className="flex gap-1 text-xs">
-            <a
-              href={`?${new URLSearchParams({ ...(baslangic ? { baslangic } : {}), ...(bitis ? { bitis } : {}), sirala: "cok" }).toString()}`}
-              className={`rounded-full px-2.5 py-1 font-medium ${sirala !== "az" ? "bg-primary/10 text-primary" : "text-slate-500 hover:text-primary"}`}
-            >
-              En çok
-            </a>
-            <a
-              href={`?${new URLSearchParams({ ...(baslangic ? { baslangic } : {}), ...(bitis ? { bitis } : {}), sirala: "az" }).toString()}`}
-              className={`rounded-full px-2.5 py-1 font-medium ${sirala === "az" ? "bg-primary/10 text-primary" : "text-slate-500 hover:text-primary"}`}
-            >
-              En az
-            </a>
-          </div>
-        </div>
+        {seciliBolum && kpssVerisi && kpssVerisi.yillikAlimlar.length > 0 && (
+          <>
+            <div className="mt-6">
+              <YillikSutunGrafik
+                veriler={kpssVerisi.yillikAlimlar.map((y) => ({ yil: y.yil, deger: y.kontenjan }))}
+                gridAdimi={kpssGridAdimi(kpssMaxDeger)}
+                bicim="sayi"
+              />
+            </div>
 
-        {siraliSatirlar.length === 0 ? (
-          <p className="p-6 text-sm text-muted-foreground">Seçilen aralıkta ilan bulunamadı.</p>
-        ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-primary/10 text-left text-xs text-muted-foreground">
-                <th className="px-4 py-2 font-medium">Bölüm</th>
-                <th className="px-4 py-2 font-medium">İlan Sayısı</th>
-                <th className="px-4 py-2 font-medium">Tahmini Kontenjan</th>
-              </tr>
-            </thead>
-            <tbody>
-              {siraliSatirlar.map((s) => (
-                <tr key={s.departmentId} className="border-b border-primary/5 last:border-0">
-                  <td className="px-4 py-2.5 font-medium text-slate-800">{s.name}</td>
-                  <td className="px-4 py-2.5 text-slate-700">{s.ilanSayisi}</td>
-                  <td className="px-4 py-2.5 text-slate-500">{s.tahminiKontenjan}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+            <div className="mt-5 space-y-2 rounded-xl bg-primary/5 p-4 text-sm text-slate-700">
+              <p>
+                <span className="font-semibold">Nasıl okunur:</span> Her çubuk, o yıl ÖSYM KPSS
+                tercih kılavuzlarında <span className="font-medium">{seciliBolum.ad}</span> mezunlarına
+                açılan toplam kadro (kontenjan) sayısını gösterir.
+              </p>
+              <p>
+                <span className="font-semibold">KPSS puan aralığı:</span>{" "}
+                {kpssVerisi.minPuan !== null && kpssVerisi.maxPuan !== null
+                  ? `Geçmiş yıllarda bu bölümden atananların puanları ${kpssVerisi.minPuan} – ${kpssVerisi.maxPuan} arasında değişmiştir.`
+                  : "Bu bölüm için yeterli puan verisi bulunmuyor."}
+              </p>
+              <p>
+                <span className="font-semibold">Açık öğretim imkanı:</span>{" "}
+                {acikOgretimdeVarMi(seciliBolum.ad)
+                  ? "Evet, Anadolu Üniversitesi Açıköğretim Fakültesi bünyesinde bu bölüm açık öğretimle okunabilir."
+                  : "Bu bölüm, bilinen açıköğretim (AÖF) program listesinde yer almıyor."}
+              </p>
+              <p>
+                <span className="font-semibold">Güncel durum:</span>{" "}
+                {eslesenDepartman ? (
+                  <>
+                    Şu anda sitemizde bu bölümle ilgili{" "}
+                    <Link href={`/bolum/${eslesenDepartman.slug}`} className="text-primary hover:underline">
+                      {aktifIlanSayisi} aktif ilan
+                    </Link>{" "}
+                    ve {haberSayisi} haber bulunuyor.
+                  </>
+                ) : (
+                  "Bu bölüm sitemizdeki bölüm listesiyle eşleşmediği için aktif ilan/haber bilgisi gösterilemiyor."
+                )}
+              </p>
+              <p className="pt-1 text-xs text-muted-foreground">
+                Bu bölüme üniversite ile girebilmek için gereken TYT/AYT taban puanı üniversiteden
+                üniversiteye değişir; güncel taban puanlar için{" "}
+                <a
+                  href="https://memurlar.net/sinav/yks/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  YKS Robotu
+                </a>
+                &apos;nu kullanabilirsin.
+              </p>
+            </div>
+          </>
+        )}
+
+        {seciliBolum && kpssVerisi && kpssVerisi.yillikAlimlar.length === 0 && (
+          <p className="mt-6 text-sm text-muted-foreground">
+            {seciliBolum.ad} için KPSS kadro istatistiği bulunamadı.
+          </p>
         )}
       </div>
     </div>
