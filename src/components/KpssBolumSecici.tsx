@@ -99,31 +99,35 @@ export function KpssBolumSecici({ bolumler, seciliAd }: { bolumler: KpssBolum[];
       </div>
 
       {isOpen && filtered.length > 0 && (
-        <ul
-          ref={listRef}
-          className="absolute z-50 mt-2 max-h-80 w-full overflow-y-auto rounded-2xl border border-primary/15 bg-white/95 p-1 shadow-lg backdrop-blur-xl"
-        >
-          {filtered.map((b, i) => (
-            <li key={b.id}>
-              <button
-                type="button"
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  secBolum(b);
-                }}
-                onMouseEnter={() => setActiveIndex(i)}
-                className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm hover:bg-primary/10 ${
-                  i === activeIndex ? "bg-primary/10" : ""
-                }`}
-              >
-                <span>{b.ad}</span>
-                <Badge className="border-primary/15 bg-primary/10 font-normal text-primary">
-                  {LEVEL_LABEL[b.ogrenimDuzeyi] ?? b.ogrenimDuzeyi}
-                </Badge>
-              </button>
-            </li>
-          ))}
-        </ul>
+        // Yuvarlatma (rounded) ve kaydirma (overflow-y-auto) AYRI katmanlarda:
+        // native scrollbar (ozellikle Windows'ta) kendi koselerini
+        // yuvarlamaz, ayni elemanda ikisi birlikte olursa sag ust/alt
+        // kose "kesilmis" gibi gorunuyordu. Disaridaki kesin kirpiyor,
+        // icerideki sadece kaydiriyor.
+        <div className="absolute z-50 mt-2 w-full overflow-hidden rounded-2xl border border-primary/15 bg-white/95 shadow-lg backdrop-blur-xl">
+          <ul ref={listRef} className="max-h-[26rem] overflow-y-auto p-1">
+            {filtered.map((b, i) => (
+              <li key={b.id}>
+                <button
+                  type="button"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    secBolum(b);
+                  }}
+                  onMouseEnter={() => setActiveIndex(i)}
+                  className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm hover:bg-primary/10 ${
+                    i === activeIndex ? "bg-primary/10" : ""
+                  }`}
+                >
+                  <span>{b.ad}</span>
+                  <Badge className="border-primary/15 bg-primary/10 font-normal text-primary">
+                    {LEVEL_LABEL[b.ogrenimDuzeyi] ?? b.ogrenimDuzeyi}
+                  </Badge>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
       {isOpen && query && filtered.length === 0 && (
         <div className="absolute z-50 mt-2 w-full rounded-2xl border border-primary/15 bg-white/95 px-4 py-3 text-sm text-muted-foreground shadow-lg">
