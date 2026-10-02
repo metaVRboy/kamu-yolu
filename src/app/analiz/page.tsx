@@ -146,15 +146,13 @@ export default async function AnalizPage({
           <h2 className="text-sm font-semibold text-slate-700">Bölümüne Göre KPSS İle Yapılan Alımlar</h2>
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
-          Kaynak: memurlar.net KPSS Kadro İstatistikleri (ÖSYM merkezi KPSS tercih kılavuzlarındaki
-          kadrolar). Kurumsal alımlar, işçi alımları ve 2001/3001/4001 nitelik kolu kadroları dahil
-          değildir.
+          Kaynak: ÖSYM merkezi KPSS tercih kılavuzlarındaki resmi kadro istatistikleri. Kurumsal
+          alımlar, işçi alımları ve 2001/3001/4001 nitelik kolu kadroları dahil değildir.
         </p>
 
         {kpssErisilemiyor ? (
           <p className="mt-4 text-sm text-muted-foreground">
-            KPSS kadro istatistikleri şu anda memurlar.net&apos;ten alınamıyor. Lütfen daha sonra
-            tekrar dene.
+            KPSS kadro istatistikleri şu anda alınamıyor. Lütfen daha sonra tekrar dene.
           </p>
         ) : (
           <>
@@ -218,14 +216,14 @@ export default async function AnalizPage({
                 Bu bölüme üniversite ile girebilmek için gereken TYT/AYT taban puanı üniversiteden
                 üniversiteye değişir; güncel taban puanlar için{" "}
                 <a
-                  href="https://memurlar.net/sinav/yks/"
+                  href="https://yokatlas.yok.gov.tr/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary hover:underline"
                 >
-                  YKS Robotu
+                  YÖK Atlas
                 </a>
-                &apos;nu kullanabilirsin.
+                &apos;ı kullanabilirsin.
               </p>
             </div>
           </>
