@@ -11,7 +11,7 @@ import { getHaberlerForDepartment } from "@/lib/haberler";
 import { ResmiIstihdamGrafik } from "@/components/ResmiIstihdamGrafik";
 import { YillikSutunGrafik } from "@/components/YillikSutunGrafik";
 import { KpssBolumSecici } from "@/components/KpssBolumSecici";
-import { BolumSiralamaFiltre } from "@/components/BolumSiralamaFiltre";
+import { BolumSiralamaPaneli } from "@/components/BolumSiralamaPaneli";
 
 export const metadata = { title: "Kamu Alım Analizi — Kamu Yolu" };
 
@@ -70,19 +70,16 @@ export default async function AnalizPage({
     seciliBolum && seciliBolum.ogrenimDuzeyi === "ONLISANS" ? await getDgsHedefleri(seciliBolum.ad) : [];
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-      <div className="mx-auto max-w-4xl">
-        <div className="flex items-center gap-2">
-          <BarChart3 className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold tracking-tight">Kamu Alım Analizi</h1>
-        </div>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Türkiye genelinde yıllara göre kamu istihdamı ve KPSS ile bölümüne göre yapılan alımlar.
-        </p>
+    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+      <div className="flex items-center gap-2">
+        <BarChart3 className="h-6 w-6 text-primary" />
+        <h1 className="text-2xl font-bold tracking-tight">Kamu Alım Analizi</h1>
       </div>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Türkiye genelinde yıllara göre kamu istihdamı ve KPSS ile bölümüne göre yapılan alımlar.
+      </p>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
-      <div className="min-w-0 rounded-2xl border border-primary/20 bg-white p-4">
+      <div className="mt-6 rounded-2xl border border-primary/20 bg-white p-4">
         <div className="flex items-center gap-2">
           <Landmark className="h-5 w-5 text-primary" />
           <h2 className="text-sm font-semibold text-slate-700">
@@ -134,53 +131,6 @@ export default async function AnalizPage({
         </details>
       </div>
 
-      <aside className="rounded-2xl border border-primary/20 bg-white p-4 lg:sticky lg:top-6">
-        <h2 className="text-sm font-semibold text-slate-700">En Çok Atama Yapılan Bölümler</h2>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Seçilen yıl aralığında bölüm başına yıllık ortalama KPSS kontenjanı (kaynak: ÖSYM KPSS
-          tercih kılavuzları).
-        </p>
-
-        <div className="mt-3">
-          <Suspense fallback={null}>
-            <BolumSiralamaFiltre ilkYil={siraIlkYil} sonYil={siraSonYil} />
-          </Suspense>
-        </div>
-
-        <div className="mt-3 flex gap-1 text-xs">
-          <a
-            href={`?${new URLSearchParams({ ...(siraBaslangic ? { siraBaslangic } : {}), ...(siraBitis ? { siraBitis } : {}), siraYon: "cok" }).toString()}`}
-            className={`rounded-full px-2.5 py-1 font-medium ${siraYon !== "az" ? "bg-primary/10 text-primary" : "text-slate-500 hover:text-primary"}`}
-          >
-            En çok
-          </a>
-          <a
-            href={`?${new URLSearchParams({ ...(siraBaslangic ? { siraBaslangic } : {}), ...(siraBitis ? { siraBitis } : {}), siraYon: "az" }).toString()}`}
-            className={`rounded-full px-2.5 py-1 font-medium ${siraYon === "az" ? "bg-primary/10 text-primary" : "text-slate-500 hover:text-primary"}`}
-          >
-            En az
-          </a>
-        </div>
-
-        <ol className="mt-3 max-h-80 space-y-1.5 overflow-y-auto text-sm">
-          {bolumSiralamasi.length === 0 && (
-            <p className="text-xs text-muted-foreground">Seçilen aralıkta veri bulunamadı.</p>
-          )}
-          {bolumSiralamasi.map((b, i) => (
-            <li key={b.id} className="flex items-baseline justify-between gap-2">
-              <span className="truncate text-slate-700">
-                <span className="text-muted-foreground">{i + 1}.</span> {b.ad}
-              </span>
-              <span className="shrink-0 font-medium text-primary">
-                {b.ortalama.toLocaleString("tr-TR", { maximumFractionDigits: 1 })}
-              </span>
-            </li>
-          ))}
-        </ol>
-      </aside>
-      </div>
-
-      <div className="mx-auto max-w-4xl">
       <div className="mt-8 rounded-2xl border border-primary/20 bg-white p-4">
         <div className="flex items-center gap-2">
           <GraduationCap className="h-5 w-5 text-primary" />
@@ -194,6 +144,17 @@ export default async function AnalizPage({
         <div className="mt-4">
           <Suspense fallback={null}>
             <KpssBolumSecici bolumler={bolumler} seciliAd={seciliBolum?.ad} />
+          </Suspense>
+        </div>
+
+        <div className="mt-4">
+          <Suspense fallback={null}>
+            <BolumSiralamaPaneli
+              siralama={bolumSiralamasi}
+              ilkYil={siraIlkYil}
+              sonYil={siraSonYil}
+              seciliBolumId={seciliBolum?.id}
+            />
           </Suspense>
         </div>
 
@@ -311,7 +272,6 @@ export default async function AnalizPage({
             {seciliBolum.ad} için KPSS kadro istatistiği bulunamadı.
           </p>
         )}
-      </div>
       </div>
     </div>
   );

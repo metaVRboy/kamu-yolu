@@ -94,5 +94,5 @@ export async function getBolumSiralamasi(params: {
     .filter((s): s is BolumSiralamaSatiri => s !== null);
 
   satirlar.sort((a, b) => (params.siralama === "az" ? a.ortalama - b.ortalama : b.ortalama - a.ortalama));
-  return satirlar.slice(0, params.limit ?? 10);
+  return params.limit ? satirlar.slice(0, params.limit) : satirlar;
 }
