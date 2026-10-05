@@ -398,6 +398,49 @@ export const LISANS_SORULARI: SeedSoru[] = [
     aciklama: "Beynin şehir elektrik şebekesine benzetilmesi, açık bir benzetme (analoji) örneğidir.",
   },
   // ---- MATEMATİK (30) ----
+  // Gercek KPSS kitapciklarinda Matematik bolumu once karmasik (kesir+uslu+
+  // koklu+faktoriyel ic ice) islem sorulariyla acilir, ortasinda uzun
+  // senaryolu problemler ve ortak bilgiye dayali (bir setup + birkac soru)
+  // bloklar yer alir, EN SONDA ise her zaman geometri sorulari gelir - bu
+  // sira burada da aynen korunuyor (bkz. getBugununDenemesi: artik rastgele
+  // karistirilmiyor, yazim sirasi esas aliniyor).
+
+  // -- Karmaşık işlemler: kesir + üslü + köklü + faktöriyel (5) --
+  {
+    ders: "MATEMATIK",
+    soruMetni: "[(2 + 1/2) - (1 - 1/2)] / [(3/2) ÷ (3/4)] + 1 işleminin sonucu kaçtır?",
+    secenekler: ["1", "1,5", "2", "2,5", "3"],
+    dogruCevap: 2,
+    aciklama: "Birinci köşeli parantez: 2,5-0,5=2. İkinci köşeli parantez: (3/2)÷(3/4)=2. Sonuç: 2/2+1=2.",
+  },
+  {
+    ders: "MATEMATIK",
+    soruMetni: "(2⁻² + 1/2) × 4 - 3⁻¹ × 6 işleminin sonucu kaçtır?",
+    secenekler: ["0", "1", "2", "3", "4"],
+    dogruCevap: 1,
+    aciklama: "2⁻²+1/2 = 1/4+1/2 = 3/4; 3/4×4=3. 3⁻¹×6 = 6/3=2. Sonuç: 3-2=1.",
+  },
+  {
+    ders: "MATEMATIK",
+    soruMetni: "(10 + √12 + √27) / (2 + √3) işleminin sonucu kaçtır?",
+    secenekler: ["3", "4", "5", "6", "7"],
+    dogruCevap: 2,
+    aciklama: "√12=2√3, √27=3√3 olduğundan pay 10+5√3=5(2+√3) olur; paydaya bölününce sonuç 5'tir.",
+  },
+  {
+    ders: "MATEMATIK",
+    soruMetni: "7! / (5! × 2!) işleminin sonucu kaçtır?",
+    secenekler: ["15", "18", "21", "24", "28"],
+    dogruCevap: 2,
+    aciklama: "7!=5040, 5!=120, 2!=2 olduğundan 5040/(120×2)=5040/240=21.",
+  },
+  {
+    ders: "MATEMATIK",
+    soruMetni: "√(3⁴ × 2²) işleminin sonucu kaçtır?",
+    secenekler: ["12", "15", "18", "21", "24"],
+    dogruCevap: 2,
+    aciklama: "3⁴×2²=81×4=324 ve √324=18.",
+  },
 
   // -- Temel Kavramlar (2) --
   {
@@ -417,22 +460,6 @@ export const LISANS_SORULARI: SeedSoru[] = [
       "Sayı 10a+b, ayna sayısı 10b+a ise toplamları 11(a+b)=121, yani a+b=11. a,b birer basamak (a≥1) olduğundan (a,b) için 8 farklı çözüm vardır (29, 38, 47, 56, 65, 74, 83, 92).",
   },
 
-  // -- Rasyonel Sayılar (2) --
-  {
-    ders: "MATEMATIK",
-    soruMetni: "(0,6 - 0,2) / (0,5 - 0,1) × (0,9) / (0,3 + 0,6) işleminin sonucu kaçtır?",
-    secenekler: ["1/2", "2/3", "1", "3/2", "2"],
-    dogruCevap: 2,
-    aciklama: "(0,4/0,4) × (0,9/0,9) = 1 × 1 = 1.",
-  },
-  {
-    ders: "MATEMATIK",
-    soruMetni: "(3⁻¹ + 6⁻¹) / (3 × 3⁻² + 3⁻¹) işleminin sonucu kaçtır?",
-    secenekler: ["1/2", "3/5", "3/4", "4/5", "1"],
-    dogruCevap: 2,
-    aciklama: "Pay: 1/3+1/6=1/2. Payda: 3×3⁻²=3⁻¹=1/3; 1/3+1/3=2/3. Sonuç: (1/2)/(2/3)=3/4.",
-  },
-
   // -- Basit Eşitsizlikler (1) --
   {
     ders: "MATEMATIK",
@@ -449,31 +476,6 @@ export const LISANS_SORULARI: SeedSoru[] = [
     secenekler: ["2", "4", "6", "8", "10"],
     dogruCevap: 2,
     aciklama: "x-3=5 ⟹ x=8 veya x-3=-5 ⟹ x=-2; toplamları 8+(-2)=6'dır.",
-  },
-
-  // -- Üslü Sayılar (2) --
-  {
-    ders: "MATEMATIK",
-    soruMetni: "2³ × 2⁴ işleminin sonucu kaçtır?",
-    secenekler: ["64", "96", "128", "256", "512"],
-    dogruCevap: 2,
-    aciklama: "Üslü sayılarda çarpma kuralına göre 2³×2⁴=2⁷=128.",
-  },
-  {
-    ders: "MATEMATIK",
-    soruMetni: "(3²)³ işleminin sonucu kaçtır?",
-    secenekler: ["81", "243", "512", "729", "972"],
-    dogruCevap: 3,
-    aciklama: "(3²)³ = 3⁶ = 729.",
-  },
-
-  // -- Köklü Sayılar (1) --
-  {
-    ders: "MATEMATIK",
-    soruMetni: "√75 ifadesinin en sade biçimi aşağıdakilerden hangisidir?",
-    secenekler: ["3√5", "5√3", "15√5", "25√3", "5√5"],
-    dogruCevap: 1,
-    aciklama: "75 = 25×3 olduğundan √75 = 5√3.",
   },
 
   // -- Çarpanlara Ayırma (1) --
@@ -503,44 +505,24 @@ export const LISANS_SORULARI: SeedSoru[] = [
     aciklama: "3x-6+4=3x-2 ve 2x+6-1=2x+5 olduğundan 3x-2=2x+5 ⟹ x=7.",
   },
 
-  // -- Problemler (6) --
+  // -- Problemler (uzun senaryolu, 4) --
   {
     ders: "MATEMATIK",
     soruMetni:
-      "İki basamaklı AB sayısı ile iki basamaklı BA sayısının toplamı 132'dir. A ve B birbirinden farklı rakamlar olduğuna göre, A - B farkının alabileceği en büyük değer kaçtır?",
-    secenekler: ["4", "5", "6", "7", "8"],
+      "Bir kütüphanedeki kitapların başlangıçta %60'ı roman, geri kalanı ise bilimsel içerikli kitaplardan oluşmaktadır. Kütüphaneye bir ay içinde yalnızca bilimsel içerikli 40 kitap daha eklenmiş ve bu eklemeden sonra bilimsel kitapların oranı tüm kitapların %50'sine yükselmiştir.\n\nBuna göre kütüphanedeki başlangıç kitap sayısı kaçtır?",
+    secenekler: ["150", "180", "200", "220", "240"],
     dogruCevap: 2,
     aciklama:
-      "AB+BA=11(A+B)=132 ⟹ A+B=12. A≠B koşuluyla A-B'nin en büyük değeri A=9, B=3 için 6'dır.",
+      "Başlangıç toplamı T olsun; bilimsel kitap sayısı 0,4T idi. 0,4T+40 = 0,5(T+40) ⟹ 0,4T+40=0,5T+20 ⟹ 20=0,1T ⟹ T=200.",
   },
   {
     ders: "MATEMATIK",
     soruMetni:
-      "Bir atölyede çalışan işçilerin %40'ı deneyimsizdir. Bir ay sonra deneyimsiz işçilerin 18'i deneyim kazanmış, geriye kalan deneyimsiz işçi sayısı toplam işçi sayısının %15'ine eşit olmuştur. Buna göre atölyedeki toplam işçi sayısı kaçtır?",
-    secenekler: ["60", "64", "68", "72", "76"],
-    dogruCevap: 3,
-    aciklama: "0,4T - 18 = 0,15T ⟹ 0,25T = 18 ⟹ T = 72.",
-  },
-  {
-    ders: "MATEMATIK",
-    soruMetni: "15 işçi bir işi 12 günde bitiriyor. Aynı işi 9 işçi kaç günde bitirir?",
-    secenekler: ["15", "18", "20", "22", "25"],
+      "İki basamaklı AB sayısının 4 katı, yine iki basamaklı BA sayısının 3 katına 14 fazladır. A ve B birbirinden farklı rakamlar olduğuna göre A + B toplamı kaçtır?",
+    secenekler: ["10", "12", "14", "16", "18"],
     dogruCevap: 2,
-    aciklama: "İşçi-gün sabittir: 15×12=180. 180÷9=20 gün.",
-  },
-  {
-    ders: "MATEMATIK",
-    soruMetni: "Bir otomobil 120 km yolu 2 saatte aldığına göre hızı kaç km/saattir?",
-    secenekler: ["40", "50", "60", "70", "80"],
-    dogruCevap: 2,
-    aciklama: "Hız = yol/zaman = 120/2 = 60 km/saat.",
-  },
-  {
-    ders: "MATEMATIK",
-    soruMetni: "240 km'lik yolu saatte 80 km hızla giden bir araç bu yolu kaç saatte tamamlar?",
-    secenekler: ["2", "2,5", "3", "3,5", "4"],
-    dogruCevap: 2,
-    aciklama: "Zaman = yol/hız = 240/80 = 3 saat.",
+    aciklama:
+      "4(10A+B) = 3(10B+A)+14 ⟹ 37A-26B=14 denklemini sağlayan tek basamak çifti A=6, B=8'dir (4×68=272, 3×86+14=272); A+B=14.",
   },
   {
     ders: "MATEMATIK",
@@ -549,6 +531,13 @@ export const LISANS_SORULARI: SeedSoru[] = [
     secenekler: ["1", "1,5", "2", "2,5", "3"],
     dogruCevap: 2,
     aciklama: "Saatlik doldurma oranları toplanır: 1/6 + 1/3 = 1/2; havuz 2 saatte dolar.",
+  },
+  {
+    ders: "MATEMATIK",
+    soruMetni: "İki sayının toplamı 50, farkı 10'dur. Bu iki sayıdan büyük olanı kaçtır?",
+    secenekler: ["20", "25", "28", "30", "35"],
+    dogruCevap: 3,
+    aciklama: "Büyük sayı = (toplam+fark)/2 = (50+10)/2 = 30.",
   },
 
   // -- Kümeler (1) --
@@ -578,30 +567,6 @@ export const LISANS_SORULARI: SeedSoru[] = [
     aciklama: "17 = 3×5 + 2 olduğundan kalan 2'dir.",
   },
 
-  // -- Sayısal Mantık / tanımlı işlem (3) --
-  {
-    ders: "MATEMATIK",
-    soruMetni: "2, 6, 12, 20, 30, ... dizisinin bir sonraki terimi kaçtır?",
-    secenekler: ["36", "40", "42", "44", "48"],
-    dogruCevap: 2,
-    aciklama: "Terimler n×(n+1) biçimindedir (1×2, 2×3, 3×4, ...); 6. terim 6×7=42'dir.",
-  },
-  {
-    ders: "MATEMATIK",
-    soruMetni: "Bir sayının 3 katının 2 fazlası, aynı sayının 2 katının 7 fazlasına eşittir. Bu sayı kaçtır?",
-    secenekler: ["3", "4", "5", "6", "7"],
-    dogruCevap: 2,
-    aciklama: "3x+2 = 2x+7 ⟹ x = 5.",
-  },
-  {
-    ders: "MATEMATIK",
-    soruMetni:
-      "Pozitif tam sayılar kümesinde ⊗ işlemi, a ⊗ b = a² - b + 1 biçiminde tanımlanıyor.\n\nBuna göre (3 ⊗ 2) ⊗ 1 işleminin sonucu kaçtır?",
-    secenekler: ["56", "60", "62", "64", "68"],
-    dogruCevap: 3,
-    aciklama: "3⊗2 = 9-2+1=8. Ardından 8⊗1 = 64-1+1=64.",
-  },
-
   // -- Permütasyon-Kombinasyon (1) --
   {
     ders: "MATEMATIK",
@@ -620,45 +585,94 @@ export const LISANS_SORULARI: SeedSoru[] = [
     aciklama: "Çift sayılar {2,4,6} olduğundan olasılık 3/6=1/2'dir.",
   },
 
-  // -- Geometri (4, görselli) --
+  // -- Ortak bilgili sorular: tanımlı işlem (2) --
   {
     ders: "MATEMATIK",
     soruMetni:
-      "Şekildeki ABC üçgeninde B açısı dik açıdır. |AB| = 6 cm, |BC| = 8 cm olduğuna göre |AC| kaç cm'dir?",
-    gorselSvg:
-      '<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg"><polygon points="60,60 60,240 260,240" fill="none" stroke="#1e293b" stroke-width="3"/><rect x="60" y="222" width="18" height="18" fill="none" stroke="#1e293b" stroke-width="2"/><text x="38" y="55" font-size="18" fill="#1e293b">A</text><text x="30" y="255" font-size="18" fill="#1e293b">B</text><text x="265" y="255" font-size="18" fill="#1e293b">C</text><text x="18" y="155" font-size="16" fill="#2563eb">6</text><text x="150" y="262" font-size="16" fill="#2563eb">8</text></svg>',
-    secenekler: ["9", "10", "12", "14", "16"],
-    dogruCevap: 1,
-    aciklama: "Pisagor teoremine göre |AC| = √(6²+8²) = √100 = 10 cm.",
-  },
-  {
-    ders: "MATEMATIK",
-    soruMetni:
-      "Şekildeki ABC üçgeni ikizkenar üçgendir; |AB| = |AC| ve taban açısı m(ABC) = 50° olduğuna göre tepe açısı m(BAC) kaç derecedir?",
-    gorselSvg:
-      '<svg viewBox="0 0 320 300" xmlns="http://www.w3.org/2000/svg"><polygon points="160,50 50,250 270,250" fill="none" stroke="#1e293b" stroke-width="3"/><text x="150" y="40" font-size="18" fill="#1e293b">A</text><text x="25" y="265" font-size="18" fill="#1e293b">B</text><text x="275" y="265" font-size="18" fill="#1e293b">C</text><text x="70" y="235" font-size="15" fill="#2563eb">50°</text><line x1="100" y1="145" x2="115" y2="140" stroke="#1e293b" stroke-width="2"/><line x1="210" y1="145" x2="195" y2="140" stroke="#1e293b" stroke-width="2"/></svg>',
-    secenekler: ["60", "70", "80", "90", "100"],
+      "52-53. soruları aşağıdaki bilgiye göre cevaplayınız.\n\nGerçel sayılar kümesinde ⊕ işlemi,\na ⊕ b = 2a - b  (a ≥ b ise)\na ⊕ b = a + b²  (a < b ise)\nbiçiminde tanımlanıyor.\n\n52. Buna göre (5 ⊕ 3) işleminin sonucu kaçtır?",
+    secenekler: ["5", "6", "7", "8", "9"],
     dogruCevap: 2,
-    aciklama: "İkizkenar üçgende taban açıları eşittir (50°+50°=100°); tepe açısı 180°-100°=80°.",
-  },
-  {
-    ders: "MATEMATIK",
-    soruMetni: "Şekildeki ABCD dikdörtgeninin alanı 48 cm²'dir. |AB| = 6 cm olduğuna göre |BC| kaç cm'dir?",
-    gorselSvg:
-      '<svg viewBox="0 0 320 240" xmlns="http://www.w3.org/2000/svg"><rect x="50" y="60" width="200" height="120" fill="#eff6ff" stroke="#1e293b" stroke-width="3"/><text x="30" y="55" font-size="16" fill="#1e293b">A</text><text x="255" y="55" font-size="16" fill="#1e293b">B</text><text x="255" y="195" font-size="16" fill="#1e293b">C</text><text x="30" y="195" font-size="16" fill="#1e293b">D</text><text x="128" y="50" font-size="15" fill="#2563eb">6 cm</text><text x="110" y="125" font-size="16" fill="#1e293b">Alan = 48 cm²</text></svg>',
-    secenekler: ["6", "7", "8", "9", "10"],
-    dogruCevap: 2,
-    aciklama: "Uzun kenar = alan/kısa kenar = 48/6 = 8 cm.",
+    aciklama: "5 ≥ 3 olduğundan birinci kural uygulanır: 2×5-3=7.",
   },
   {
     ders: "MATEMATIK",
     soruMetni:
-      "Şekildeki merkezi O olan çemberin yarıçapı |OA| = 6 cm'dir. (π = 3 alınız) Çemberin alanı kaç cm²'dir?",
-    gorselSvg:
-      '<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg"><circle cx="150" cy="150" r="100" fill="#eff6ff" stroke="#1e293b" stroke-width="3"/><circle cx="150" cy="150" r="3" fill="#1e293b"/><line x1="150" y1="150" x2="250" y2="150" stroke="#1e293b" stroke-width="2"/><text x="135" y="140" font-size="16" fill="#1e293b">O</text><text x="255" y="155" font-size="16" fill="#1e293b">A</text><text x="185" y="140" font-size="15" fill="#2563eb">6 cm</text></svg>',
-    secenekler: ["36", "54", "72", "108", "144"],
+      "52-53. soruları aşağıdaki bilgiye göre cevaplayınız.\n\nGerçel sayılar kümesinde ⊕ işlemi,\na ⊕ b = 2a - b  (a ≥ b ise)\na ⊕ b = a + b²  (a < b ise)\nbiçiminde tanımlanıyor.\n\n53. Buna göre (2 ⊕ 6) işleminin sonucu kaçtır?",
+    secenekler: ["30", "34", "36", "38", "40"],
     dogruCevap: 3,
-    aciklama: "Alan = π×r² = 3×36 = 108 cm².",
+    aciklama: "2 < 6 olduğundan ikinci kural uygulanır: 2+6²=2+36=38.",
+  },
+
+  // -- Ortak bilgili sorular: grup dağıtımı (3) --
+  {
+    ders: "MATEMATIK",
+    soruMetni:
+      "54-56. soruları aşağıdaki bilgiye göre cevaplayınız.\n\n1'den 15'e kadar olan doğal sayılarla numaralandırılmış 15 top üç ayrı gruba (I, II, III) ayrılmaktadır; her sayı tam olarak bir grupta yer almaktadır. I. gruptaki topların numaraları toplamı 20, II. gruptaki topların numaraları toplamı 40'tır.\n\n54. Buna göre III. gruptaki topların numaraları toplamı kaçtır?",
+    secenekler: ["50", "55", "60", "65", "70"],
+    dogruCevap: 2,
+    aciklama: "1'den 15'e kadar sayıların toplamı 120'dir. III = 120 - (20+40) = 60.",
+  },
+  {
+    ders: "MATEMATIK",
+    soruMetni:
+      "54-56. soruları aşağıdaki bilgiye göre cevaplayınız.\n\n1'den 15'e kadar olan doğal sayılarla numaralandırılmış 15 top üç ayrı gruba (I, II, III) ayrılmaktadır; her sayı tam olarak bir grupta yer almaktadır. I. gruptaki topların numaraları toplamı 20, II. gruptaki topların numaraları toplamı 40'tır.\n\n55. Buna göre I. ve III. gruplardaki topların numaraları toplamı kaçtır?",
+    secenekler: ["70", "75", "80", "85", "90"],
+    dogruCevap: 2,
+    aciklama: "I + III = 120 - II = 120 - 40 = 80.",
+  },
+  {
+    ders: "MATEMATIK",
+    soruMetni:
+      "54-56. soruları aşağıdaki bilgiye göre cevaplayınız.\n\n1'den 15'e kadar olan doğal sayılarla numaralandırılmış 15 top üç ayrı gruba (I, II, III) ayrılmaktadır; her sayı tam olarak bir grupta yer almaktadır. I. gruptaki topların numaraları toplamı 20, II. gruptaki topların numaraları toplamı 40'tır.\n\n56. I. grupta birbirinden farklı numaralı toplar bulunduğuna göre, bu grupta en fazla kaç top olabilir?",
+    secenekler: ["3", "4", "5", "6", "7"],
+    dogruCevap: 2,
+    aciklama:
+      "Toplam sayıyı en çok parçaya bölmek için en küçük farklı sayılar kullanılmalıdır: 1+2+3+4+5=15, 6 sayı eklenince (1+2+3+4+5+6=21) toplam 20'yi aşar; 5 top ile (ör. 1+2+3+4+10=20) sağlanabilir, bu yüzden en fazla 5 top olabilir.",
+  },
+
+  // -- Geometri (4, görselli, çok adımlı) --
+  {
+    ders: "MATEMATIK",
+    soruMetni:
+      "Şekildeki ABCD dikdörtgeninde E noktası [AB] kenarı üzerindedir ve |AE| = 2·|EB|'dir. Dikdörtgenin alanı 36 cm² olduğuna göre taralı ADE üçgeninin alanı kaç cm²'dir?",
+    gorselSvg:
+      '<svg viewBox="0 0 350 260" xmlns="http://www.w3.org/2000/svg"><rect x="50" y="60" width="250" height="160" fill="none" stroke="#1e293b" stroke-width="2.5"/><polygon points="50,220 50,60 217,220" fill="#fde68a" stroke="#1e293b" stroke-width="1.5"/><text x="28" y="65" font-size="16" fill="#1e293b">D</text><text x="305" y="65" font-size="16" fill="#1e293b">C</text><text x="28" y="235" font-size="16" fill="#1e293b">A</text><text x="305" y="235" font-size="16" fill="#1e293b">B</text><circle cx="217" cy="220" r="3" fill="#1e293b"/><text x="212" y="240" font-size="15" fill="#1e293b">E</text></svg>',
+    secenekler: ["9", "10", "12", "15", "18"],
+    dogruCevap: 2,
+    aciklama:
+      "Dikdörtgenin kenarları w,h ise alanı w·h=36. |AE|=(2/3)w olduğundan ADE üçgeninin alanı (1/2)·h·(2/3)w = (1/3)·36 = 12 cm²'dir.",
+  },
+  {
+    ders: "MATEMATIK",
+    soruMetni:
+      "Şekildeki ABC üçgeni ikizkenar üçgendir; |AB| = |AC| = 13 cm, |BC| = 10 cm'dir. A köşesinden [BC] kenarına indirilen dikmenin ayağı D noktasıdır.\n\nBuna göre ABC üçgeninin alanı kaç cm²'dir?",
+    gorselSvg:
+      '<svg viewBox="0 0 300 260" xmlns="http://www.w3.org/2000/svg"><polygon points="150,40 40,230 260,230" fill="none" stroke="#1e293b" stroke-width="2.5"/><line x1="150" y1="40" x2="150" y2="230" stroke="#1e293b" stroke-width="1.5" stroke-dasharray="4,3"/><rect x="142" y="222" width="16" height="8" fill="none" stroke="#1e293b" stroke-width="1.5"/><text x="140" y="32" font-size="16" fill="#1e293b">A</text><text x="18" y="245" font-size="16" fill="#1e293b">B</text><text x="265" y="245" font-size="16" fill="#1e293b">C</text><text x="155" y="250" font-size="13" fill="#1e293b">D</text><text x="65" y="140" font-size="14" fill="#2563eb">13 cm</text><text x="195" y="140" font-size="14" fill="#2563eb">13 cm</text><text x="135" y="250" font-size="13" fill="#2563eb">10 cm</text></svg>',
+    secenekler: ["48", "54", "60", "65", "72"],
+    dogruCevap: 2,
+    aciklama:
+      "İkizkenar üçgende apexten inen dikme tabanı ortalar: |BD|=|DC|=5 cm. Pisagor ile |AD|=√(13²-5²)=√144=12 cm. Alan=(1/2)×10×12=60 cm².",
+  },
+  {
+    ders: "MATEMATIK",
+    soruMetni:
+      "Şekildeki merkezi O olan çemberin yarıçapı 10 cm'dir. Merkezin [KL] kirişine olan uzaklığı 6 cm olduğuna göre |KL| kaç cm'dir?",
+    gorselSvg:
+      '<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg"><circle cx="150" cy="150" r="100" fill="#eff6ff" stroke="#1e293b" stroke-width="2.5"/><circle cx="150" cy="150" r="3" fill="#1e293b"/><text x="136" y="140" font-size="15" fill="#1e293b">O</text><line x1="150" y1="150" x2="150" y2="210" stroke="#1e293b" stroke-width="1.5" stroke-dasharray="3,3"/><text x="155" y="185" font-size="13" fill="#2563eb">6 cm</text><line x1="70" y1="210" x2="230" y2="210" stroke="#dc2626" stroke-width="2.5"/><text x="55" y="226" font-size="14" fill="#1e293b">K</text><text x="235" y="226" font-size="14" fill="#1e293b">L</text></svg>',
+    secenekler: ["12", "14", "16", "18", "20"],
+    dogruCevap: 2,
+    aciklama:
+      "Merkezden kirişe inilen dikme kirişi ortalar; yarı kiriş = √(10²-6²) = √64 = 8 cm olduğundan |KL| = 2×8 = 16 cm.",
+  },
+  {
+    ders: "MATEMATIK",
+    soruMetni:
+      "Dik koordinat düzleminde kenarları eksenlere paralel olan bir dikdörtgenin karşılıklı köşeleri A(2, 3) ve C(8, 11) noktalarıdır.\n\nBuna göre bu dikdörtgenin alanı kaç birimkaredir?",
+    gorselSvg:
+      '<svg viewBox="0 0 320 300" xmlns="http://www.w3.org/2000/svg"><line x1="40" y1="260" x2="300" y2="260" stroke="#64748b" stroke-width="1.5"/><line x1="40" y1="260" x2="40" y2="20" stroke="#64748b" stroke-width="1.5"/><text x="295" y="278" font-size="13" fill="#64748b">x</text><text x="22" y="22" font-size="13" fill="#64748b">y</text><rect x="90" y="80" width="140" height="160" fill="#eff6ff" stroke="#1e293b" stroke-width="2.5"/><circle cx="90" cy="240" r="3.5" fill="#dc2626"/><text x="55" y="256" font-size="13" fill="#1e293b">A(2, 3)</text><circle cx="230" cy="80" r="3.5" fill="#dc2626"/><text x="235" y="76" font-size="13" fill="#1e293b">C(8, 11)</text></svg>',
+    secenekler: ["36", "40", "42", "48", "54"],
+    dogruCevap: 3,
+    aciklama: "Kenarlar eksenlere paralel olduğundan genişlik=8-2=6, yükseklik=11-3=8; alan=6×8=48 birimkare.",
   },
 
   // ---- TARİH (27) ----

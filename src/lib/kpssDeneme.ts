@@ -28,21 +28,24 @@ export async function getBugununDenemesi(duzey: EducationLevel) {
   const soruIdler: string[] = [];
   for (const ders of DERS_SIRASI) {
     const adet = DERS_DAGILIMI[ders];
+    // Gercek KPSS kitapciklarinda konu sirasi sabittir (ör. geometri her
+    // zaman Matematik'in son sorulari) - bu yuzden havuzdan secilenler
+    // RASTGELE degil, yazim sirasina (sira alanina) gore diziliyor. "En az
+    // kullanilani sec" stratejisi yine kullanimSayisi'na gore calisir, o
+    // sadece HANGI sorularin secilecegini belirler; sira'yi etkilemez.
     const havuz = await prisma.denemeSoru.findMany({
       where: { duzey, ders },
       orderBy: { kullanimSayisi: "asc" },
       take: adet,
-      select: { id: true },
+      select: { id: true, sira: true },
     });
     if (havuz.length < adet) {
       throw new Error(
         `${DUZEY_LABEL[duzey]} / ${DERS_LABEL[ders]} icin havuzda yeterli soru yok (${havuz.length}/${adet}).`,
       );
     }
-    // Esit kullanim sayisina sahip olanlar arasinda gunden gune hep ayni
-    // siraya dusmesin diye bu adet kadarlik dilimi kendi icinde karistiriyoruz.
-    const karisik = [...havuz].sort(() => Math.random() - 0.5).map((s) => s.id);
-    soruIdler.push(...karisik);
+    const siraliIdler = [...havuz].sort((a, b) => a.sira - b.sira).map((s) => s.id);
+    soruIdler.push(...siraliIdler);
   }
 
   await prisma.denemeSoru.updateMany({

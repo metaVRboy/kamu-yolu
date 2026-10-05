@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "DenemeSoru" ADD COLUMN     "sira" INTEGER NOT NULL DEFAULT 0;

@@ -430,6 +430,11 @@ model DenemeSoru {
   dogruCevap      Int
   aciklama        String?
   olusturmaTarihi DateTime       @default(now())
+  // Gercek KPSS kitapciklarinda sorular konuya gore sabit bir sirada gelir
+  // (ör. geometri her zaman Matematik bolumunun son sorulari, ortak metinli
+  // sorular bir arada) - gunluk deneme olustururken bu yazim sirasi (sira
+  // alaninin kucukten buyuge) korunur, RASTGELE karistirilmaz.
+  sira            Int            @default(0)
   // Gunluk deneme secimi "en az kullanilani oncelikle sec" stratejisiyle
   // calisiyor - tekrar sikligini dusurmek icin.
   kullanimSayisi  Int            @default(0)

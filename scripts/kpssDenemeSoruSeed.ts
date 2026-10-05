@@ -13,12 +13,20 @@ import { LISANS_SORULARI } from "./kpssDenemeSoruVerisi";
 async function main() {
   let eklenen = 0;
   let atlanan = 0;
+  // Her ders icin ayri bir sayac - dizideki yazim sirasi, gercek sinavdaki
+  // konu sirasini (ör. geometri en sonda) birebir yansitir.
+  const dersSirasi: Record<string, number> = {};
   for (const soru of LISANS_SORULARI) {
+    const sira = (dersSirasi[soru.ders] ?? 0);
+    dersSirasi[soru.ders] = sira + 1;
+
     const mevcut = await prisma.denemeSoru.findFirst({
       where: { duzey: "LISANS", soruMetni: soru.soruMetni },
       select: { id: true },
     });
     if (mevcut) {
+      // Icerik rewrite'larinda sira degismis olabilir - guncel sirayla senkron tut.
+      await prisma.denemeSoru.update({ where: { id: mevcut.id }, data: { sira } });
       atlanan++;
       continue;
     }
@@ -31,11 +39,12 @@ async function main() {
         secenekler: soru.secenekler,
         dogruCevap: soru.dogruCevap,
         aciklama: soru.aciklama,
+        sira,
       },
     });
     eklenen++;
   }
-  console.log(`Bitti. ${eklenen} soru eklendi, ${atlanan} soru zaten vardi (atlandi).`);
+  console.log(`Bitti. ${eklenen} soru eklendi, ${atlanan} soru zaten vardi (atlandi, sira guncellendi).`);
   await prisma.$disconnect();
 }
 
