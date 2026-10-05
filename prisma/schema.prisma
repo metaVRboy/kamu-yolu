@@ -421,6 +421,9 @@ model DenemeSoru {
   duzey           EducationLevel
   ders            DenemeDers
   soruMetni       String
+  // Geometri/cografya gibi gorsel gerektiren sorularda inline SVG (ornegin
+  // "<svg viewBox=...>...</svg>") - yoksa null, soru sadece metinle gosterilir.
+  gorselSvg       String?
   // 5 sik (A-E), sirayla
   secenekler      String[]
   // Dogru sikkin secenekler dizisindeki indeksi (0-4)

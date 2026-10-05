@@ -48,4 +48,10 @@ export function gecerliDenemeDuzeyiMi(deger: string): deger is EducationLevel {
   return (DENEME_DUZEYLERI as string[]).includes(deger);
 }
 
-export type ExamSoru = { id: string; ders: DenemeDers; soruMetni: string; secenekler: string[] };
+export type ExamSoru = {
+  id: string;
+  ders: DenemeDers;
+  soruMetni: string;
+  gorselSvg: string | null;
+  secenekler: string[];
+};

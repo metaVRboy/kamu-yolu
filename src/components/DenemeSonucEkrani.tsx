@@ -9,6 +9,7 @@ export type SonucSorusu = {
   id: string;
   ders: DenemeDers;
   soruMetni: string;
+  gorselSvg: string | null;
   secenekler: string[];
   dogruCevap: number;
   aciklama: string | null;
@@ -113,6 +114,12 @@ export function DenemeSonucEkrani({
           </span>
         </div>
         <p className="mt-3 whitespace-pre-line text-base font-medium text-slate-800">{incelenen.soruMetni}</p>
+        {incelenen.gorselSvg && (
+          <div
+            className="mx-auto mt-4 max-w-md [&_svg]:h-auto [&_svg]:w-full"
+            dangerouslySetInnerHTML={{ __html: incelenen.gorselSvg }}
+          />
+        )}
         <div className="mt-4 space-y-2">
           {incelenen.secenekler.map((secenek, i) => {
             const dogruMu = i === incelenen.dogruCevap;

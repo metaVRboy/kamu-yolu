@@ -27,6 +27,7 @@ async function main() {
         duzey: "LISANS",
         ders: soru.ders,
         soruMetni: soru.soruMetni,
+        gorselSvg: soru.gorselSvg,
         secenekler: soru.secenekler,
         dogruCevap: soru.dogruCevap,
         aciklama: soru.aciklama,

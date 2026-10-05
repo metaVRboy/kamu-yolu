@@ -3,20 +3,28 @@
  * Her soru AI tarafindan ozgun olarak yazildi (gercek OSYM sorusu degildir).
  * secenekler: 5 sik (A-E sirayla), dogruCevap: 0-4 index.
  *
+ * Soru tipleri ve zorluk seviyesi, kullanicinin sagladigi gercek KPSS deneme
+ * kitapciklarinin (lisans/onlisans/ortaogretim) formatina gore kalibre
+ * edildi: uzun/numarali (I-V) ifadeli paragraflar, ortak metinli soru
+ * ciftleri, oge dizilisi, tanimli ozel islem/kavram sorulari, basamak-harf
+ * problemleri; geometri ve cografya sorularinda inline SVG gorseller.
+ *
  * Turkce (30) ve Matematik (30) alt konu dagilimi, ÖSYM'nin resmi KPSS
  * Genel Yetenek konu dagilimina uygun hazirlandi:
- *  - Turkce: Paragraf 15, Sozel Mantik 4, Sozcukte Anlam 1, Cumlede Anlam 2,
- *    Sozcuk Turleri 1, Sozcukte Yapi 2, Cumlenin Ogeleri 1, Ses Bilgisi 1,
- *    Yazim Kurallari 1, Noktalama 1, Anlatim Bozuklugu 1 (toplam 30)
+ *  - Turkce: Paragraf/okuma 11, Numarali ifade paragrafi 3, Sozel Mantik 4,
+ *    Sozcukte Anlam 1, Cumlede Anlam 2, Sozcuk Turleri 1, Sozcukte Yapi 2,
+ *    Oge Dizilisi 1, Fiilimsi 1, Ses Bilgisi 1, Yazim Kurallari 1,
+ *    Noktalama/boslukla tamamlama 1, Anlatim Bozuklugu 1 (toplam 30)
  *  - Matematik: Temel Kavramlar 2, Rasyonel Sayilar 2, Basit Esitsizlikler 1,
  *    Mutlak Deger 1, Uslu Sayilar 2, Koklu Sayilar 1, Carpanlara Ayirma 1,
  *    Oran-Oranti 1, Denklem Cozme 1, Problemler 6, Kumeler 1, Fonksiyonlar 1,
- *    Moduler Aritmetik 1, Permutasyon-Kombinasyon 1, Olasilik 1,
- *    Sayisal Mantik 3, Geometri 4 (toplam 30)
+ *    Sayisal Mantik/tanimli islem 3, Permutasyon-Kombinasyon 1, Olasilik 1,
+ *    Geometri 4 - gorselli (toplam 30)
  */
 export type SeedSoru = {
   ders: "TURKCE" | "MATEMATIK" | "TARIH" | "COGRAFYA" | "VATANDASLIK" | "GUNCEL";
   soruMetni: string;
+  gorselSvg?: string;
   secenekler: [string, string, string, string, string];
   dogruCevap: number;
   aciklama: string;
@@ -25,210 +33,89 @@ export type SeedSoru = {
 export const LISANS_SORULARI: SeedSoru[] = [
   // ---- TÜRKÇE (30) ----
 
-  // -- Paragraf (15) --
+  // -- Ortak metinli soru çiftleri (2 parça × 2 soru = 4) --
   {
     ders: "TURKCE",
     soruMetni:
-      'Son yıllarda yapılan araştırmalar, düzenli uyku alışkanlığının yalnızca fiziksel sağlığı değil, zihinsel performansı da doğrudan etkilediğini ortaya koyuyor. Yeterince uyumayan bireylerde dikkat dağınıklığı, unutkanlık ve karar verme güçlüğü gibi sorunların daha sık görüldüğü belirlenmiş. Uzmanlar, günde yedi ile dokuz saat arasında kaliteli uyku almanın öğrenme kapasitesini artırdığını ve stres düzeyini düşürdüğünü vurguluyor. Bu nedenle başarılı bir gün geçirmek isteyenlerin önceliği, uyku düzenini sağlamak olmalıdır.\n\nBu parçanın ana düşüncesi aşağıdakilerden hangisidir?',
+      "20-21. soruları aşağıdaki parçaya göre cevaplayınız.\n\nBir romancının başarısı, yalnızca kurduğu olay örgüsüyle değil, okuru kurmaca dünyanın içine çekebilme becerisiyle de ölçülür. Kimi yazarlar, karakterlerini baştan sona kusursuz çizmeye çalışırken onları gerçeklikten uzaklaştırır; oysa okur, kahramanın zaaflarıyla, tereddütleriyle, hatalarıyla özdeşleşir. Bu yüzden deneyimli bir yazar, karakterine kusursuzluk değil, inandırıcılık kazandırmayı önceler. Anlatılan dünyanın gerçekliği, yazarın kelime seçiminden çok, insana dair çelişkileri ne kadar dürüstçe yansıttığıyla ilgilidir. Bir romanın yıllar sonra bile okunması, genellikle bu dürüstlükten kaynaklanır.\n\n20. Bu parçaya göre bir romanın okur üzerinde kalıcı etki bırakmasının temel nedeni aşağıdakilerden hangisidir?",
     secenekler: [
-      "Stresin azaltılması için düzenli spor yapılmalıdır.",
-      "Kaliteli ve yeterli uyku, zihinsel performansı olumlu etkiler.",
-      "Unutkanlık yalnızca ileri yaşlarda görülen bir sorundur.",
-      "Bilimsel araştırmalar her zaman güvenilir sonuçlar vermez.",
-      "Günde dokuz saatten fazla uyumak zararlıdır.",
-    ],
-    dogruCevap: 1,
-    aciklama: "Parça boyunca uykunun zihinsel performansla ilişkisi anlatılır; sonuç cümlesi de bunu doğrudan vurgular.",
-  },
-  {
-    ders: "TURKCE",
-    soruMetni:
-      "Bal arıları, bir kovanda karmaşık bir iş bölümü içinde yaşar. İşçi arılar yiyecek toplama, kovanı temizleme ve larvaları besleme gibi görevleri üstlenirken, erkek arılar yalnızca kraliçeyle çiftleşmek amacıyla var olur. Kraliçe arı ise kovanın tek üreyen bireyi olarak günde binlerce yumurta bırakabilir. Bu düzenli iş bölümü sayesinde koloni, mevsimler boyunca varlığını sürdürebilir.\n\nBu parçadan aşağıdakilerin hangisi çıkarılamaz?",
-    secenekler: [
-      "İşçi arılar birden fazla görevi yerine getirir.",
-      "Kraliçe arı kovandaki tek üreyen bireydir.",
-      "Erkek arılar kovanın temizliğinden de sorumludur.",
-      "Arı kolonisinde belirgin bir iş bölümü vardır.",
-      "Kraliçe arı günde çok sayıda yumurta bırakabilir.",
+      "Yazarın özenli kelime seçimleri",
+      "Olay örgüsünün karmaşıklığı",
+      "İnsana dair çelişkilerin dürüstçe yansıtılması",
+      "Karakterlerin kusursuz çizilmesi",
+      "Anlatılan dünyanın gerçeklikten tamamen kopuk olması",
     ],
     dogruCevap: 2,
-    aciklama: "Parçaya göre erkek arılar yalnızca çiftleşme amacıyla vardır; temizlik işçi arılara aittir, bu yüzden C çıkarılamaz.",
+    aciklama: "Parça, kalıcılığın 'insana dair çelişkileri dürüstçe yansıtmak'tan kaynaklandığını açıkça belirtir.",
   },
   {
     ders: "TURKCE",
     soruMetni:
-      "Geri dönüşüm, atık malzemelerin yeniden işlenerek üretim sürecine kazandırılmasıdır. Cam, plastik, kâğıt ve metal gibi malzemelerin geri dönüştürülmesi hem doğal kaynakların tüketimini azaltır hem de enerji tasarrufu sağlar. Örneğin geri dönüştürülmüş bir alüminyum kutu, yeni bir kutu üretmek için gereken enerjinin yalnızca yüzde beşini kullanır. Bu da geri dönüşümün çevresel sürdürülebilirlik açısından ne kadar önemli olduğunu gösterir.\n\nBu parçaya en uygun başlık aşağıdakilerden hangisi olabilir?",
+      "20-21. soruları aşağıdaki parçaya göre cevaplayınız.\n\nBir romancının başarısı, yalnızca kurduğu olay örgüsüyle değil, okuru kurmaca dünyanın içine çekebilme becerisiyle de ölçülür. Kimi yazarlar, karakterlerini baştan sona kusursuz çizmeye çalışırken onları gerçeklikten uzaklaştırır; oysa okur, kahramanın zaaflarıyla, tereddütleriyle, hatalarıyla özdeşleşir. Bu yüzden deneyimli bir yazar, karakterine kusursuzluk değil, inandırıcılık kazandırmayı önceler. Anlatılan dünyanın gerçekliği, yazarın kelime seçiminden çok, insana dair çelişkileri ne kadar dürüstçe yansıttığıyla ilgilidir. Bir romanın yıllar sonra bile okunması, genellikle bu dürüstlükten kaynaklanır.\n\n21. Bu parçadan hareketle aşağıdakilerden hangisine ulaşılamaz?",
     secenekler: [
-      "Alüminyumun Keşfi",
-      "Geri Dönüşümün Önemi ve Faydaları",
-      "Enerji Üretiminde Yeni Yöntemler",
-      "Doğal Kaynakların Tükenme Riski",
-      "Plastik Kullanımının Zararları",
-    ],
-    dogruCevap: 1,
-    aciklama: "Parça baştan sona geri dönüşümün çevresel ve ekonomik faydalarını anlatır; en kapsayıcı başlık budur.",
-  },
-  {
-    ders: "TURKCE",
-    soruMetni:
-      "Kitap okumak, bireyin hayal gücünü geliştirirken aynı zamanda kelime dağarcığını da zenginleştirir. Düzenli olarak kitap okuyan kişiler, karşılaştıkları yeni kavramları daha kolay anlamlandırabilir ve farklı bakış açıları kazanabilir. ----. Bu nedenle çocuklara küçük yaşlardan itibaren okuma alışkanlığı kazandırmak büyük önem taşır.\n\nBu parçada boş bırakılan yere aşağıdakilerden hangisi getirilmelidir?",
-    secenekler: [
-      "Televizyon izlemek de benzer faydalar sağlar.",
-      "Üstelik okuma, başkalarını anlama (empati) becerisini de destekler.",
-      "Oysa çoğu insan okumaktan hoşlanmaz.",
-      "Fakat kitaplar oldukça pahalıdır.",
-      "Ancak okumanın hiçbir zararı yoktur.",
-    ],
-    dogruCevap: 1,
-    aciklama: "Boşluktan sonraki 'bu nedenle' bağlacı, okumanın faydalarının sıralanmaya devam ettiğini gösterir; B bu akışa uyar.",
-  },
-  {
-    ders: "TURKCE",
-    soruMetni:
-      "Şehirlerde yeşil alanların azalması yalnızca hava kalitesini düşürmekle kalmıyor, aynı zamanda insanların ruh sağlığını da olumsuz etkiliyor. Parklarda vakit geçiren bireylerin stres düzeylerinin daha düşük olduğu, doğayla iç içe yaşayan toplumlarda depresyon oranlarının azaldığı pek çok çalışmada gösterilmiştir. Bu nedenle kentsel planlama yapılırken yeşil alanlara ayrılan payın artırılması, toplum sağlığı açısından stratejik bir öncelik olmalıdır.\n\nBu parçanın ana düşüncesi aşağıdakilerden hangisidir?",
-    secenekler: [
-      "Kentsel planlama yalnızca ekonomik kaygılarla yapılmalıdır.",
-      "Yeşil alanlar toplum sağlığı için önemli olduğundan kentsel planlamada öncelik verilmelidir.",
-      "Parklarda vakit geçirmek zaman kaybıdır.",
-      "Depresyon yalnızca büyükşehirlerde görülen bir sorundur.",
-      "Hava kalitesi insan sağlığını etkilemez.",
-    ],
-    dogruCevap: 1,
-    aciklama: "Parça, yeşil alanların ruh sağlığına etkisinden yola çıkarak kentsel planlamada öncelik verilmesi gerektiği sonucuna ulaşır.",
-  },
-  {
-    ders: "TURKCE",
-    soruMetni:
-      "Güneş enerjisi, yenilenebilir enerji kaynakları arasında en hızlı büyüyen alanlardan biridir. Güneş panellerinin maliyetinin son on yılda önemli ölçüde düşmesi, bu teknolojinin daha geniş kitlelere ulaşmasını sağlamıştır. Ayrıca güneş enerjisi, fosil yakıtların aksine sera gazı salımına neden olmadığından iklim değişikliğiyle mücadelede önemli bir rol üstlenmektedir. Ancak güneş panellerinin üretimi sırasında da bir miktar çevresel etki oluştuğu unutulmamalıdır.\n\nBu parçaya göre aşağıdakilerden hangisi söylenemez?",
-    secenekler: [
-      "Güneş panellerinin maliyeti zamanla azalmıştır.",
-      "Güneş enerjisi iklim değişikliğiyle mücadelede rol oynar.",
-      "Güneş panellerinin üretiminin hiçbir çevresel etkisi yoktur.",
-      "Güneş enerjisi yenilenebilir bir kaynaktır.",
-      "Fosil yakıtlar sera gazı salımına neden olur.",
-    ],
-    dogruCevap: 2,
-    aciklama: "Parça, panel üretiminin bir miktar çevresel etkisi olduğunu açıkça belirtir; bu yüzden 'hiçbir etkisi yok' yargısı söylenemez.",
-  },
-  {
-    ders: "TURKCE",
-    soruMetni:
-      "İnsan beyni yaklaşık 86 milyar nöron içerir ve bu nöronlar birbirleriyle trilyonlarca bağlantı kurar. Bu karmaşık ağ bir şehrin elektrik şebekesine benzetilebilir; nasıl ki şehirdeki her ev farklı hatlarla ana güç kaynağına bağlıysa beyindeki her nöron da sinapslar aracılığıyla diğer nöronlara bağlanarak bilgi akışını sağlar.\n\nBu parçada düşünceyi geliştirme yollarından öncelikle hangisine başvurulmuştur?",
-    secenekler: ["Örnekleme", "Tanık gösterme", "Benzetme", "Karşıtlıklardan yararlanma", "Tanımlama"],
-    dogruCevap: 2,
-    aciklama: "Beynin şehir elektrik şebekesine benzetilmesi, açık bir benzetme (analoji) örneğidir.",
-  },
-  {
-    ders: "TURKCE",
-    soruMetni:
-      "Yapay zekâ teknolojilerinin günlük hayata entegrasyonu hızla artıyor. Akıllı asistanlardan öneri sistemlerine kadar pek çok alanda karşımıza çıkan bu teknolojiler hayatımızı kolaylaştırırken bazı etik soruları da beraberinde getiriyor. Verilerimizin nasıl kullanıldığı, kararların ne ölçüde şeffaf olduğu gibi konular, teknolojinin gelişimi kadar tartışılması gereken başlıklar arasında yer almalı.\n\nYazarın bu parçadaki temel amacı aşağıdakilerden hangisidir?",
-    secenekler: [
-      "Yapay zekâ teknolojisinin tamamen durdurulması gerektiğini savunmak.",
-      "Yapay zekânın faydalarının yanı sıra etik tartışmaların önemine dikkat çekmek.",
-      "Akıllı asistanların teknik çalışma prensibini açıklamak.",
-      "Veri güvenliği yasalarının tarihsel gelişimini anlatmak.",
-      "Yapay zekânın hiçbir riski olmadığını kanıtlamak.",
-    ],
-    dogruCevap: 1,
-    aciklama: "Yazar, yapay zekânın kolaylıklarını kabul etmekle birlikte etik tartışmaların da önemsenmesi gerektiğini vurgular.",
-  },
-  {
-    ders: "TURKCE",
-    soruMetni:
-      "Deniz kaplumbağaları, yumurtlamak için doğdukları kumsala geri dönme eğilimindedir. Bilim insanları bu davranışın Dünya'nın manyetik alanını algılama yetenekleriyle ilişkili olduğunu düşünüyor. Yavru kaplumbağalar denize ulaştıktan sonra yıllarca açık okyanuslarda dolaşır, ancak üreme zamanı geldiğinde şaşırtıcı bir doğrulukla aynı kumsala dönerler.\n\nBu parça öncelikle hangi konu üzerinde durmaktadır?",
-    secenekler: [
-      "Kaplumbağaların beslenme alışkanlıkları",
-      "Deniz kaplumbağalarının doğum kumsalına dönme davranışı",
-      "Okyanuslardaki kirlilik sorunu",
-      "Kaplumbağa türlerinin sınıflandırılması",
-      "Dünya'nın manyetik alanının oluşumu",
-    ],
-    dogruCevap: 1,
-    aciklama: "Parçanın tamamı, deniz kaplumbağalarının doğdukları kumsala geri dönme davranışı etrafında kurulmuştur.",
-  },
-  {
-    ders: "TURKCE",
-    soruMetni:
-      "Bir şirketin uzun vadeli başarısı yalnızca sunduğu ürünün kalitesiyle değil, çalışanlarının motivasyonuyla da yakından ilişkilidir. Motivasyonu yüksek çalışanlar daha yaratıcı çözümler üretir ve değişen koşullara daha hızlı uyum sağlar. Bu nedenle yöneticilerin yalnızca finansal hedeflere değil, çalışan memnuniyetine de yatırım yapması gerekir.\n\nBu parçadan hareketle aşağıdakilerden hangisi söylenebilir?",
-    secenekler: [
-      "Ürün kalitesi şirket başarısında hiçbir rol oynamaz.",
-      "Çalışan memnuniyeti, şirket başarısını etkileyen unsurlardan biridir.",
-      "Finansal hedefler artık önemini tamamen yitirmiştir.",
-      "Yaratıcı çözümler yalnızca yöneticilerden gelir.",
-      "Motivasyon yalnızca maaş artışıyla sağlanabilir.",
-    ],
-    dogruCevap: 1,
-    aciklama: "Parça, motivasyonun ve çalışan memnuniyetinin şirket başarısındaki rolünü vurgular; bu doğrudan B seçeneğini destekler.",
-  },
-  {
-    ders: "TURKCE",
-    soruMetni:
-      "----. Bu yüzden bir dili öğrenmenin en etkili yollarından biri, o dilin konuşulduğu ortamda zaman geçirmektir. Günlük hayatta dili aktif olarak kullanmak, sözcükleri yalnızca ezberlemekten çok daha kalıcı bir öğrenme sağlar.\n\nBu parçanın başına aşağıdakilerden hangisi getirilmelidir?",
-    secenekler: [
-      "Dil öğrenimi yalnızca kitap okuyarak gerçekleşen bir süreçtir.",
-      "Dil becerileri, pratik yapıldıkça gelişen ve pekişen bir yetenektir.",
-      "Hiç kimse yetişkinlikte yeni bir dil öğrenemez.",
-      "Dil öğrenmenin tek yolu sınavlara girmektir.",
-      "Anadili öğrenmek, sonradan öğrenilen dillerden tamamen farksızdır.",
-    ],
-    dogruCevap: 1,
-    aciklama: "Parçanın devamında pratik yapmanın önemi anlatılır; başa gelecek cümle bu fikri açan B seçeneğidir.",
-  },
-  {
-    ders: "TURKCE",
-    soruMetni:
-      "Uzun süre oturarak çalışmak bel ve boyun ağrılarına yol açabileceği gibi dolaşım sistemini de olumsuz etkileyebilir. Uzmanlar, masa başında çalışanların her saat başı birkaç dakika ayağa kalkıp hareket etmelerini öneriyor. Kısa yürüyüşler ya da basit esneme hareketleri bile uzun vadede sağlık sorunlarının önüne geçmede etkili olabiliyor.\n\nBu parçada asıl anlatılmak istenen nedir?",
-    secenekler: [
-      "Masa başında çalışmak tamamen bırakılmalıdır.",
-      "Düzenli kısa hareketler, oturarak çalışmanın olumsuz etkilerini azaltabilir.",
-      "Yürüyüş yapmak yalnızca sporcular için faydalıdır.",
-      "Boyun ağrıları yalnızca ileri yaşlarda görülür.",
-      "Esneme hareketlerinin dolaşım sistemiyle ilgisi yoktur.",
-    ],
-    dogruCevap: 1,
-    aciklama: "Parça, kısa hareketlerin oturarak çalışmanın olumsuz etkilerini azalttığını anlatır.",
-  },
-  {
-    ders: "TURKCE",
-    soruMetni:
-      "Kahve, dünya genelinde en çok tüketilen içeceklerden biridir ve içerdiği kafein sayesinde uyanıklığı artırır. Ancak aşırı tüketildiğinde uyku düzenini bozabilir, kalp atışını hızlandırabilir ve kaygı düzeyini yükseltebilir. Uzmanlar, günde üç dört fincanı aşmayan ölçülü bir tüketimin çoğu yetişkin için güvenli kabul edildiğini belirtiyor.\n\nBu parçaya göre aşağıdakilerden hangisi yanlıştır?",
-    secenekler: [
-      "Kahvenin içeriğindeki kafein uyanıklığı artırır.",
-      "Aşırı kahve tüketimi uyku düzenini bozabilir.",
-      "Ölçülü kahve tüketimi çoğu yetişkin için güvenli kabul edilir.",
-      "Kahve tüketiminin hiçbir olumsuz etkisi yoktur.",
-      "Aşırı kahve tüketimi kalp atışını hızlandırabilir.",
+      "Okur, kahramanın zaaflarıyla özdeşleşebilir.",
+      "Kusursuz çizilen karakterler gerçeklikten uzaklaşabilir.",
+      "Deneyimli yazarlar inandırıcılığı önceler.",
+      "Bir romanın başarısı yalnızca olay örgüsüyle ölçülür.",
+      "Kelime seçimi, gerçekliği yansıtmada tek belirleyici unsur değildir.",
     ],
     dogruCevap: 3,
-    aciklama: "Parça, aşırı tüketimin olumsuz etkilerini açıkça sayar; bu nedenle 'hiçbir olumsuz etkisi yok' yargısı yanlıştır.",
+    aciklama: "Parça 'yalnızca olay örgüsüyle değil' diyerek bunun tam tersini söyler; bu nedenle D'ye ulaşılamaz.",
   },
   {
     ders: "TURKCE",
     soruMetni:
-      "Ahtapotlar, omurgasızlar arasında en zeki canlılardan biri olarak kabul edilir. Karmaşık problemleri çözebilir, kavanoz kapaklarını açabilir ve hatta bazı deneylerde basit araçlar kullanabildikleri gözlemlenmiştir. Üç kalbi ve mavi kanı olan bu canlılar, renk değiştirme yetenekleriyle de dikkat çeker.\n\nBu parçaya en uygun başlık aşağıdakilerden hangisidir?",
+      "22-23. soruları aşağıdaki parçaya göre cevaplayınız.\n\nŞehirlerin büyümesiyle birlikte toplu taşıma sistemlerine olan bağımlılık da artıyor. Ancak yalnızca metro ve otobüs hatlarını çoğaltmak, trafik sorununu kalıcı olarak çözmüyor. Kentlerin, yayalaştırılmış bölgeleri artırması, bisiklet yollarını güvenli hâle getirmesi ve farklı ulaşım türlerini birbirine entegre etmesi gerekiyor. Aksi hâlde yeni açılan her yol kısa süre içinde yeniden tıkanıyor; çünkü artan kapasite, zamanla daha fazla özel araç kullanımını teşvik ediyor. Bu nedenle sürdürülebilir bir ulaşım politikası, yalnızca yeni yol ve hat inşasına değil, davranış değişikliğine de odaklanmalıdır.\n\n22. Bu parçanın ana düşüncesi aşağıdakilerden hangisidir?",
     secenekler: [
-      "Denizlerin Kirlenmesi",
-      "Ahtapotların Şaşırtıcı Zekâsı ve Özellikleri",
-      "Omurgasızların Sınıflandırılması",
-      "Renk Değiştiren Bitki Türleri",
-      "Deniz Canlılarının Beslenme Şekli",
+      "Metro hatları trafik sorununu tek başına çözer.",
+      "Sürdürülebilir ulaşım için yol inşasının yanında davranış değişikliği de gereklidir.",
+      "Bisiklet yolları şehir trafiğini tamamen ortadan kaldırır.",
+      "Özel araç kullanımı hiçbir koşulda azaltılamaz.",
+      "Kentlerde yaya bölgeleri ekonomik kayba yol açar.",
     ],
     dogruCevap: 1,
-    aciklama: "Parça baştan sona ahtapotların zekâsını ve ilginç özelliklerini konu alır.",
+    aciklama: "Parçanın son cümlesi bu ana düşünceyi doğrudan özetler.",
   },
   {
     ders: "TURKCE",
     soruMetni:
-      "Bir orkestrada onlarca müzisyen aynı anda farklı çalgılar çalar, ancak ortaya uyumlu bir eser çıkar. Bunun sırrı, her müzisyenin kendi payına düşen görevi en iyi şekilde yerine getirirken aynı zamanda şefin yönlendirmesine kulak vermesinde yatar. Bireysel yetenek önemlidir, fakat ortak bir hedefe hizmet eden uyum olmadan başarılı bir performans ortaya çıkmaz.\n\nBu parçadan hareketle aşağıdaki yargılardan hangisine ulaşılabilir?",
+      "22-23. soruları aşağıdaki parçaya göre cevaplayınız.\n\nŞehirlerin büyümesiyle birlikte toplu taşıma sistemlerine olan bağımlılık da artıyor. Ancak yalnızca metro ve otobüs hatlarını çoğaltmak, trafik sorununu kalıcı olarak çözmüyor. Kentlerin, yayalaştırılmış bölgeleri artırması, bisiklet yollarını güvenli hâle getirmesi ve farklı ulaşım türlerini birbirine entegre etmesi gerekiyor. Aksi hâlde yeni açılan her yol kısa süre içinde yeniden tıkanıyor; çünkü artan kapasite, zamanla daha fazla özel araç kullanımını teşvik ediyor. Bu nedenle sürdürülebilir bir ulaşım politikası, yalnızca yeni yol ve hat inşasına değil, davranış değişikliğine de odaklanmalıdır.\n\n23. Bu parçaya göre aşağıdakilerden hangisi söylenemez?",
     secenekler: [
-      "Orkestrada yalnızca şefin yeteneği önemlidir.",
-      "Başarılı bir sonuç için bireysel yetenek kadar uyum da gereklidir.",
-      "Müzisyenlerin bireysel yetenekleri hiçbir fark yaratmaz.",
-      "Orkestra müziği diğer müzik türlerinden üstündür.",
-      "Şefin yönlendirmesi olmadan da tam uyum sağlanabilir.",
+      "Yeni yollar bazen kısa sürede yeniden tıkanabilir.",
+      "Artan yol kapasitesi özel araç kullanımını teşvik edebilir.",
+      "Ulaşım türlerinin entegrasyonu önemlidir.",
+      "Sadece yol ve hat inşası trafik sorununu kalıcı olarak çözer.",
+      "Yayalaştırma, sürdürülebilir ulaşım politikasının bir parçasıdır.",
     ],
-    dogruCevap: 1,
-    aciklama: "Parça, bireysel yetenek kadar uyumun da gerekli olduğunu vurgular; bu doğrudan B seçeneğiyle örtüşür.",
+    dogruCevap: 3,
+    aciklama: "Parça, yalnızca yol/hat inşasının yeterli olmadığını açıkça belirtir; bu yüzden D söylenemez.",
+  },
+
+  // -- Numaralı (I-V) ifade/paragraf soruları (3) --
+  {
+    ders: "TURKCE",
+    soruMetni:
+      '(I) Göçmen kuşlar, binlerce kilometre öteden gelip her yıl aynı sulak alana döner (geri gelmek). (II) Bu dönüş davranışının, kuşların yıldızları ve manyetik alanı kullanarak yön bulmasıyla açıklandığı söylenir (bir görüşle temellendirmek). (III) Bazı araştırmacılar ise kuşların koku duyusunu da kullandığını öne sürer (önceki görüşü tamamen reddetmek). (IV) Yapılan deneyler, her iki yeteneğin de yön bulmada rol oynayabileceğini göstermiştir (kanıt sunmak). (V) Bu bulgular, göç davranışının tek bir mekanizmayla açıklanamayacağını ortaya koymaktadır (sonuca bağlamak).\n\nBu parçadaki numaralı cümlelerden hangisinin anlamı parantez içinde verilen açıklamayla uyuşmamaktadır?',
+    secenekler: ["I", "II", "III", "IV", "V"],
+    dogruCevap: 2,
+    aciklama:
+      "III. cümlede araştırmacılar önceki görüşü reddetmez, ona ek bir açıklama öne sürer; bu yüzden 'reddetmek' ifadesiyle uyuşmaz.",
+  },
+  {
+    ders: "TURKCE",
+    soruMetni:
+      "(I) Bal arıları, çiçekten topladıkları nektarı kovana taşıyarak bal üretimine başlar. (II) Bu süreçte arılar, nektarı ağız organlarıyla işleyerek enzimler katar. (III) Petek gözlerine yerleştirilen bu karışım, suyunu kaybederek koyulaşır. (IV) Arı sokması, vücutta şişlik ve kızarıklığa yol açabilen bir savunma mekanizmasıdır. (V) Son aşamada işçi arılar, peteği ince bir balmumu tabakasıyla kapatarak balı olgunlaştırır.\n\nBu parçadaki numaralı cümlelerden hangisi düşüncenin akışını bozmaktadır?",
+    secenekler: ["I", "II", "III", "IV", "V"],
+    dogruCevap: 3,
+    aciklama: "Diğer cümleler bal üretim sürecini sırayla anlatırken IV. cümle konu dışına çıkıp arı sokmasından söz eder.",
+  },
+  {
+    ders: "TURKCE",
+    soruMetni:
+      "Bitkiler güneş ışığını kullanarak fotosentez yapar ve bu süreçte oksijen üretir. Ancak her bitki bu süreci aynı verimlilikte gerçekleştirmez; yaprak yüzey alanı, klorofil miktarı ve ışık yoğunluğu fotosentez hızını doğrudan etkiler. Kurak bölgelerde yetişen bazı bitkiler, su kaybını azaltmak için gözeneklerini gün boyunca kapalı tutar ve fotosentezi gece gerçekleştirir.\n\nBu parçaya göre,\nI. Fotosentez hızı yalnızca ışık miktarına bağlıdır.\nII. Bazı bitkiler su kaybını önlemek için farklı stratejiler geliştirmiştir.\nIII. Tüm bitkiler fotosentezi aynı verimlilikte yapar.\nIV. Yaprak yüzey alanı fotosentez hızını etkileyen etkenlerden biridir.\n\nyargılarından hangilerine ulaşılabilir?",
+    secenekler: ["I ve II", "I ve III", "II ve III", "II ve IV", "III ve V"],
+    dogruCevap: 3,
+    aciklama: "Parça I ve III'ü (yalnızca/tüm gibi aşırı genellemeleri) desteklemez; II ve IV parçayla doğrudan uyumludur.",
   },
 
   // -- Sözel Mantık (4) --
@@ -338,34 +225,52 @@ export const LISANS_SORULARI: SeedSoru[] = [
     aciklama: '"Hanımeli", "hanım" ve "eli" sözcüklerinin kalıplaşarak birleşmesiyle oluşmuş bir birleşik sözcüktür (bir bitki adı); diğerleri yapım ekiyle türemiştir.',
   },
 
-  // -- Cümlenin Öğeleri (1) --
+  // -- Öge Dizilişi (1) --
   {
     ders: "TURKCE",
-    soruMetni: "Aşağıdaki cümlelerin hangisinde özne gizlidir (ayrıca belirtilmemiştir)?",
+    soruMetni:
+      '"Öğretmen, sınava hazırlanan öğrencilere son tavsiyelerini verdi." cümlesiyle öge dizilişi (özne - dolaylı tümleç - nesne - yüklem) bakımından aynı yapıya sahip cümle aşağıdakilerden hangisidir?',
     secenekler: [
-      "Çocuklar bahçede oynuyor.",
-      "Yarın erken kalkacağım.",
-      "Öğretmen sınıfa girdi.",
-      "Ali kitabı okudu.",
-      "Rüzgâr ağaçları sallıyor.",
+      "Çocuk, markete giden babasına çantasını uzattı.",
+      "Anne, çantasını odada unutan çocuğu azarladı.",
+      "Yorgun öğrenciler erkenden evlerine döndü.",
+      "Komşumuz, bahçesindeki çiçekleri her sabah sular.",
+      "Çocuklar bahçede neşeyle oynuyordu.",
     ],
-    dogruCevap: 1,
-    aciklama: '"Yarın erken kalkacağım" cümlesinde özne, fiildeki kişi ekinden anlaşılır (ben); ayrıca belirtilmediği için gizli öznedir.',
+    dogruCevap: 0,
+    aciklama:
+      '"Çocuk (özne), markete giden babasına (dolaylı tümleç), çantasını (nesne) uzattı (yüklem)" aynı öge sırasını taşır; diğer seçeneklerde öge dizilişi farklıdır.',
+  },
+
+  // -- Fiilimsi (1) --
+  {
+    ders: "TURKCE",
+    soruMetni:
+      "Sabah erkenden kalkıp (I) koşuya çıkan Mert, parkta koşarken (II) gördüğü yaşlı adamla sohbet etti. Adam, gençliğinde yazdığı (III) şiirlerden söz ederken gözleri parlıyordu. Mert, bu şiirleri bir gün okumayı (IV) kendine hedef koydu ve eve dönerken (V) bu karşılaşmayı hiç unutmayacağını düşündü.\n\nNumaralanmış fiilimsilerden hangisi sıfat-fiil (sıfat göreviyle kullanılmış fiilimsi)dir?",
+    secenekler: ["I", "II", "III", "IV", "V"],
+    dogruCevap: 2,
+    aciklama: '"Yazdığı" (-dığı eki) burada "şiirler" sözcüğünü niteleyen bir sıfat-fiildir; diğerleri bağ-fiil (I, II, V) veya isim-fiildir (IV).',
   },
 
   // -- Ses Bilgisi (1) --
   {
     ders: "TURKCE",
-    soruMetni: 'Aşağıdaki cümlelerin hangisinde geçen sözcükte "ünlü düşmesi" (hece kaybı) görülür?',
-    secenekler: [
-      "Kitabı okudu.",
-      "Burnunu sildi.",
-      "Evine gitti.",
-      "Gözünü kapattı.",
-      "Kolunu kaldırdı.",
-    ],
-    dogruCevap: 1,
-    aciklama: '"Burun" sözcüğü ek alırken ikinci hecedeki dar ünlü düşer: burun+u > burnu.',
+    soruMetni:
+      "Ağaçtan ağaca konan bir kelebek, burnuna değil dokunma kıllarına güvenerek çiçeğin kokusunu algılar. Kelebek, ağacın dallarında uzun süre bekliyor ve en uygun çiçeği seçmeye çalışıyor.\n\nBu parçada aşağıdaki ses olaylarından hangisi yoktur?",
+    secenekler: ["Ünsüz yumuşaması", "Ünlü daralması", "Ünsüz benzeşmesi", "Ünlü düşmesi", "Büyük ünlü uyumuna aykırılık"],
+    dogruCevap: 4,
+    aciklama:
+      '"Çiçeğin/ağacın" ünsüz yumuşaması, "bekliyor" ünlü daralması, "ağaçtan" ünsüz benzeşmesi, "burnuna" ünlü düşmesi örnekleridir; parçadaki sözcüklerin hiçbiri büyük ünlü uyumuna aykırı değildir.',
+  },
+
+  // -- İki boşluklu tamamlama (1) --
+  {
+    ders: "TURKCE",
+    soruMetni:
+      "Bilim insanları uzun süre, beynin yalnızca çocukluk döneminde yeni bağlantılar kurabildiğini düşünüyordu. ---- yapılan yeni araştırmalar, yetişkin beyninin de öğrenme yoluyla fiziksel olarak değişebildiğini gösterdi. Bu bulgu, ---- yetişkinlikte yeni bir beceri öğrenmenin beyin yapısını etkileyebileceği anlamına geliyor.\n\nBu parçada boş bırakılan yerlere sırasıyla aşağıdakilerden hangisi getirilmelidir?",
+    secenekler: ["Ancak - aslında", "Çünkü - asla", "Böylece - hiçbir zaman", "Nitekim - kesinlikle", "Üstelik - nadiren"],
+    dogruCevap: 0,
+    aciklama: '"Ancak" eski görüşle yeni bulgu arasında karşıtlık kurar; "aslında" ise sonuç cümlesindeki olasılık ifadesiyle uyumludur.',
   },
 
   // -- Yazım Kuralları (1) --
@@ -413,6 +318,85 @@ export const LISANS_SORULARI: SeedSoru[] = [
     aciklama: '"Sınava hazırlanıyor ve ders çalışıyordu" cümlesinde zaman uyumsuzluğu vardır (biri şimdiki, biri geçmiş zaman).',
   },
 
+  // -- Kalan paragraf soruları (7) --
+  {
+    ders: "TURKCE",
+    soruMetni:
+      "Güneş enerjisi, yenilenebilir enerji kaynakları arasında en hızlı büyüyen alanlardan biridir. Güneş panellerinin maliyetinin son on yılda önemli ölçüde düşmesi, bu teknolojinin daha geniş kitlelere ulaşmasını sağlamıştır. Ayrıca güneş enerjisi, fosil yakıtların aksine sera gazı salımına neden olmadığından iklim değişikliğiyle mücadelede önemli bir rol üstlenmektedir. Ancak güneş panellerinin üretimi sırasında da bir miktar çevresel etki oluştuğu unutulmamalıdır.\n\nBu parçaya göre aşağıdakilerden hangisi söylenemez?",
+    secenekler: [
+      "Güneş panellerinin maliyeti zamanla azalmıştır.",
+      "Güneş enerjisi iklim değişikliğiyle mücadelede rol oynar.",
+      "Güneş panellerinin üretiminin hiçbir çevresel etkisi yoktur.",
+      "Güneş enerjisi yenilenebilir bir kaynaktır.",
+      "Fosil yakıtlar sera gazı salımına neden olur.",
+    ],
+    dogruCevap: 2,
+    aciklama: "Parça, panel üretiminin bir miktar çevresel etkisi olduğunu açıkça belirtir; bu yüzden 'hiçbir etkisi yok' yargısı söylenemez.",
+  },
+  {
+    ders: "TURKCE",
+    soruMetni:
+      "Ahtapotlar, omurgasızlar arasında en zeki canlılardan biri olarak kabul edilir. Karmaşık problemleri çözebilir, kavanoz kapaklarını açabilir ve hatta bazı deneylerde basit araçlar kullanabildikleri gözlemlenmiştir. Üç kalbi ve mavi kanı olan bu canlılar, renk değiştirme yetenekleriyle de dikkat çeker.\n\nBu parçaya en uygun başlık aşağıdakilerden hangisidir?",
+    secenekler: [
+      "Denizlerin Kirlenmesi",
+      "Ahtapotların Şaşırtıcı Zekâsı ve Özellikleri",
+      "Omurgasızların Sınıflandırılması",
+      "Renk Değiştiren Bitki Türleri",
+      "Deniz Canlılarının Beslenme Şekli",
+    ],
+    dogruCevap: 1,
+    aciklama: "Parça baştan sona ahtapotların zekâsını ve ilginç özelliklerini konu alır.",
+  },
+  {
+    ders: "TURKCE",
+    soruMetni:
+      "Bir orkestrada onlarca müzisyen aynı anda farklı çalgılar çalar, ancak ortaya uyumlu bir eser çıkar. Bunun sırrı, her müzisyenin kendi payına düşen görevi en iyi şekilde yerine getirirken aynı zamanda şefin yönlendirmesine kulak vermesinde yatar. Bireysel yetenek önemlidir, fakat ortak bir hedefe hizmet eden uyum olmadan başarılı bir performans ortaya çıkmaz.\n\nBu parçadan hareketle aşağıdaki yargılardan hangisine ulaşılabilir?",
+    secenekler: [
+      "Orkestrada yalnızca şefin yeteneği önemlidir.",
+      "Başarılı bir sonuç için bireysel yetenek kadar uyum da gereklidir.",
+      "Müzisyenlerin bireysel yetenekleri hiçbir fark yaratmaz.",
+      "Orkestra müziği diğer müzik türlerinden üstündür.",
+      "Şefin yönlendirmesi olmadan da tam uyum sağlanabilir.",
+    ],
+    dogruCevap: 1,
+    aciklama: "Parça, bireysel yetenek kadar uyumun da gerekli olduğunu vurgular; bu doğrudan B seçeneğiyle örtüşür.",
+  },
+  {
+    ders: "TURKCE",
+    soruMetni:
+      "Yapay zekâ teknolojilerinin günlük hayata entegrasyonu hızla artıyor. Akıllı asistanlardan öneri sistemlerine kadar pek çok alanda karşımıza çıkan bu teknolojiler hayatımızı kolaylaştırırken bazı etik soruları da beraberinde getiriyor. Verilerimizin nasıl kullanıldığı, kararların ne ölçüde şeffaf olduğu gibi konular, teknolojinin gelişimi kadar tartışılması gereken başlıklar arasında yer almalı.\n\nYazarın bu parçadaki temel amacı aşağıdakilerden hangisidir?",
+    secenekler: [
+      "Yapay zekâ teknolojisinin tamamen durdurulması gerektiğini savunmak.",
+      "Yapay zekânın faydalarının yanı sıra etik tartışmaların önemine dikkat çekmek.",
+      "Akıllı asistanların teknik çalışma prensibini açıklamak.",
+      "Veri güvenliği yasalarının tarihsel gelişimini anlatmak.",
+      "Yapay zekânın hiçbir riski olmadığını kanıtlamak.",
+    ],
+    dogruCevap: 1,
+    aciklama: "Yazar, yapay zekânın kolaylıklarını kabul etmekle birlikte etik tartışmaların da önemsenmesi gerektiğini vurgular.",
+  },
+  {
+    ders: "TURKCE",
+    soruMetni:
+      "Bal arıları, bir kovanda karmaşık bir iş bölümü içinde yaşar. İşçi arılar yiyecek toplama, kovanı temizleme ve larvaları besleme gibi görevleri üstlenirken, erkek arılar yalnızca kraliçeyle çiftleşmek amacıyla var olur. Kraliçe arı ise kovanın tek üreyen bireyi olarak günde binlerce yumurta bırakabilir. Bu düzenli iş bölümü sayesinde koloni, mevsimler boyunca varlığını sürdürebilir.\n\nBu parçadan aşağıdakilerin hangisi çıkarılamaz?",
+    secenekler: [
+      "İşçi arılar birden fazla görevi yerine getirir.",
+      "Kraliçe arı kovandaki tek üreyen bireydir.",
+      "Erkek arılar kovanın temizliğinden de sorumludur.",
+      "Arı kolonisinde belirgin bir iş bölümü vardır.",
+      "Kraliçe arı günde çok sayıda yumurta bırakabilir.",
+    ],
+    dogruCevap: 2,
+    aciklama: "Parçaya göre erkek arılar yalnızca çiftleşme amacıyla vardır; temizlik işçi arılara aittir, bu yüzden C çıkarılamaz.",
+  },
+  {
+    ders: "TURKCE",
+    soruMetni:
+      "İnsan beyni yaklaşık 86 milyar nöron içerir ve bu nöronlar birbirleriyle trilyonlarca bağlantı kurar. Bu karmaşık ağ bir şehrin elektrik şebekesine benzetilebilir; nasıl ki şehirdeki her ev farklı hatlarla ana güç kaynağına bağlıysa beyindeki her nöron da sinapslar aracılığıyla diğer nöronlara bağlanarak bilgi akışını sağlar.\n\nBu parçada düşünceyi geliştirme yollarından öncelikle hangisine başvurulmuştur?",
+    secenekler: ["Örnekleme", "Tanık gösterme", "Benzetme", "Karşıtlıklardan yararlanma", "Tanımlama"],
+    dogruCevap: 2,
+    aciklama: "Beynin şehir elektrik şebekesine benzetilmesi, açık bir benzetme (analoji) örneğidir.",
+  },
   // ---- MATEMATİK (30) ----
 
   // -- Temel Kavramlar (2) --
@@ -425,26 +409,28 @@ export const LISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
-    soruMetni: "İki basamaklı bir sayının birler basamağı 0 veya 5 ise bu sayı kesinlikle hangi sayıya tam bölünür?",
-    secenekler: ["2", "3", "5", "9", "10"],
+    soruMetni:
+      "İki basamaklı bir sayının \"ayna sayısı\", o sayının rakamlarının yer değiştirmesiyle elde edilen sayı olarak tanımlanıyor. Örneğin 24 sayısının ayna sayısı 42'dir.\n\nBuna göre, bir sayı ile ayna sayısının toplamı 121 olan iki basamaklı kaç farklı sayı vardır?",
+    secenekler: ["6", "7", "8", "9", "10"],
     dogruCevap: 2,
-    aciklama: "Birler basamağı 0 veya 5 olan sayılar her zaman 5'e tam bölünür; 10'a bölünme yalnızca 0 ile bitenler için geçerlidir.",
+    aciklama:
+      "Sayı 10a+b, ayna sayısı 10b+a ise toplamları 11(a+b)=121, yani a+b=11. a,b birer basamak (a≥1) olduğundan (a,b) için 8 farklı çözüm vardır (29, 38, 47, 56, 65, 74, 83, 92).",
   },
 
   // -- Rasyonel Sayılar (2) --
   {
     ders: "MATEMATIK",
-    soruMetni: "3/4 ile 5/6 kesirlerinin toplamı kaçtır?",
-    secenekler: ["8/10", "19/12", "15/10", "2/3", "7/12"],
-    dogruCevap: 1,
-    aciklama: "Ortak payda 12 alınırsa 3/4=9/12, 5/6=10/12; toplamları 19/12 olur.",
+    soruMetni: "(0,6 - 0,2) / (0,5 - 0,1) × (0,9) / (0,3 + 0,6) işleminin sonucu kaçtır?",
+    secenekler: ["1/2", "2/3", "1", "3/2", "2"],
+    dogruCevap: 2,
+    aciklama: "(0,4/0,4) × (0,9/0,9) = 1 × 1 = 1.",
   },
   {
     ders: "MATEMATIK",
-    soruMetni: "2/5 kesrinin ondalık gösterimi kaçtır?",
-    secenekler: ["0,2", "0,25", "0,4", "0,5", "0,8"],
+    soruMetni: "(3⁻¹ + 6⁻¹) / (3 × 3⁻² + 3⁻¹) işleminin sonucu kaçtır?",
+    secenekler: ["1/2", "3/5", "3/4", "4/5", "1"],
     dogruCevap: 2,
-    aciklama: "2÷5 = 0,4.",
+    aciklama: "Pay: 1/3+1/6=1/2. Payda: 3×3⁻²=3⁻¹=1/3; 1/3+1/3=2/3. Sonuç: (1/2)/(2/3)=3/4.",
   },
 
   // -- Basit Eşitsizlikler (1) --
@@ -511,26 +497,36 @@ export const LISANS_SORULARI: SeedSoru[] = [
   // -- Denklem Çözme (1) --
   {
     ders: "MATEMATIK",
-    soruMetni: "3x - 5 = 16 denklemine göre x kaçtır?",
+    soruMetni: "3(x-2) + 4 = 2(x+3) - 1 denklemine göre x kaçtır?",
     secenekler: ["5", "6", "7", "8", "9"],
     dogruCevap: 2,
-    aciklama: "3x = 21 ⟹ x = 7.",
+    aciklama: "3x-6+4=3x-2 ve 2x+6-1=2x+5 olduğundan 3x-2=2x+5 ⟹ x=7.",
   },
 
   // -- Problemler (6) --
+  {
+    ders: "MATEMATIK",
+    soruMetni:
+      "İki basamaklı AB sayısı ile iki basamaklı BA sayısının toplamı 132'dir. A ve B birbirinden farklı rakamlar olduğuna göre, A - B farkının alabileceği en büyük değer kaçtır?",
+    secenekler: ["4", "5", "6", "7", "8"],
+    dogruCevap: 2,
+    aciklama:
+      "AB+BA=11(A+B)=132 ⟹ A+B=12. A≠B koşuluyla A-B'nin en büyük değeri A=9, B=3 için 6'dır.",
+  },
+  {
+    ders: "MATEMATIK",
+    soruMetni:
+      "Bir atölyede çalışan işçilerin %40'ı deneyimsizdir. Bir ay sonra deneyimsiz işçilerin 18'i deneyim kazanmış, geriye kalan deneyimsiz işçi sayısı toplam işçi sayısının %15'ine eşit olmuştur. Buna göre atölyedeki toplam işçi sayısı kaçtır?",
+    secenekler: ["60", "64", "68", "72", "76"],
+    dogruCevap: 3,
+    aciklama: "0,4T - 18 = 0,15T ⟹ 0,25T = 18 ⟹ T = 72.",
+  },
   {
     ders: "MATEMATIK",
     soruMetni: "15 işçi bir işi 12 günde bitiriyor. Aynı işi 9 işçi kaç günde bitirir?",
     secenekler: ["15", "18", "20", "22", "25"],
     dogruCevap: 2,
     aciklama: "İşçi-gün sabittir: 15×12=180. 180÷9=20 gün.",
-  },
-  {
-    ders: "MATEMATIK",
-    soruMetni: "İki sayının toplamı 50, farkı 10'dur. Büyük sayı kaçtır?",
-    secenekler: ["20", "25", "28", "30", "35"],
-    dogruCevap: 3,
-    aciklama: "Büyük sayı = (toplam+fark)/2 = (50+10)/2 = 30.",
   },
   {
     ders: "MATEMATIK",
@@ -548,17 +544,11 @@ export const LISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
-    soruMetni: "Bir havuzu bir musluk tek başına 6 saatte, başka bir musluk tek başına 3 saatte dolduruyor. İki musluk birlikte açılırsa havuz kaç saatte dolar?",
+    soruMetni:
+      "Bir havuzu bir musluk tek başına 6 saatte, başka bir musluk tek başına 3 saatte dolduruyor. İki musluk birlikte açılırsa havuz kaç saatte dolar?",
     secenekler: ["1", "1,5", "2", "2,5", "3"],
     dogruCevap: 2,
     aciklama: "Saatlik doldurma oranları toplanır: 1/6 + 1/3 = 1/2; havuz 2 saatte dolar.",
-  },
-  {
-    ders: "MATEMATIK",
-    soruMetni: "Bir sayının yarısının 3 fazlası 18 olduğuna göre bu sayı kaçtır?",
-    secenekler: ["24", "27", "30", "33", "36"],
-    dogruCevap: 2,
-    aciklama: "x/2 + 3 = 18 ⟹ x/2 = 15 ⟹ x = 30.",
   },
 
   // -- Kümeler (1) --
@@ -588,6 +578,30 @@ export const LISANS_SORULARI: SeedSoru[] = [
     aciklama: "17 = 3×5 + 2 olduğundan kalan 2'dir.",
   },
 
+  // -- Sayısal Mantık / tanımlı işlem (3) --
+  {
+    ders: "MATEMATIK",
+    soruMetni: "2, 6, 12, 20, 30, ... dizisinin bir sonraki terimi kaçtır?",
+    secenekler: ["36", "40", "42", "44", "48"],
+    dogruCevap: 2,
+    aciklama: "Terimler n×(n+1) biçimindedir (1×2, 2×3, 3×4, ...); 6. terim 6×7=42'dir.",
+  },
+  {
+    ders: "MATEMATIK",
+    soruMetni: "Bir sayının 3 katının 2 fazlası, aynı sayının 2 katının 7 fazlasına eşittir. Bu sayı kaçtır?",
+    secenekler: ["3", "4", "5", "6", "7"],
+    dogruCevap: 2,
+    aciklama: "3x+2 = 2x+7 ⟹ x = 5.",
+  },
+  {
+    ders: "MATEMATIK",
+    soruMetni:
+      "Pozitif tam sayılar kümesinde ⊗ işlemi, a ⊗ b = a² - b + 1 biçiminde tanımlanıyor.\n\nBuna göre (3 ⊗ 2) ⊗ 1 işleminin sonucu kaçtır?",
+    secenekler: ["56", "60", "62", "64", "68"],
+    dogruCevap: 3,
+    aciklama: "3⊗2 = 9-2+1=8. Ardından 8⊗1 = 64-1+1=64.",
+  },
+
   // -- Permütasyon-Kombinasyon (1) --
   {
     ders: "MATEMATIK",
@@ -606,54 +620,42 @@ export const LISANS_SORULARI: SeedSoru[] = [
     aciklama: "Çift sayılar {2,4,6} olduğundan olasılık 3/6=1/2'dir.",
   },
 
-  // -- Sayısal Mantık (3) --
+  // -- Geometri (4, görselli) --
   {
     ders: "MATEMATIK",
-    soruMetni: "2, 6, 12, 20, 30, ... dizisinin bir sonraki terimi kaçtır?",
-    secenekler: ["36", "40", "42", "44", "48"],
-    dogruCevap: 2,
-    aciklama: "Terimler n×(n+1) biçimindedir (1×2, 2×3, 3×4, ...); 6. terim 6×7=42'dir.",
-  },
-  {
-    ders: "MATEMATIK",
-    soruMetni: "Bir sayının 3 katının 2 fazlası, aynı sayının 2 katının 7 fazlasına eşittir. Bu sayı kaçtır?",
-    secenekler: ["3", "4", "5", "6", "7"],
-    dogruCevap: 2,
-    aciklama: "3x+2 = 2x+7 ⟹ x = 5.",
-  },
-  {
-    ders: "MATEMATIK",
-    soruMetni: "A sayısı B'den 4 fazla, B sayısı C'den 3 fazladır. A+B+C=28 olduğuna göre C kaçtır?",
-    secenekler: ["4", "5", "6", "7", "8"],
-    dogruCevap: 2,
-    aciklama: "B=C+3, A=B+4=C+7 olduğundan toplam: (C+7)+(C+3)+C = 3C+10 = 28 ⟹ C=6.",
-  },
-
-  // -- Geometri (4) --
-  {
-    ders: "MATEMATIK",
-    soruMetni: "Bir dik üçgende dik kenarlar 6 cm ve 8 cm ise hipotenüs kaç cm'dir?",
+    soruMetni:
+      "Şekildeki ABC üçgeninde B açısı dik açıdır. |AB| = 6 cm, |BC| = 8 cm olduğuna göre |AC| kaç cm'dir?",
+    gorselSvg:
+      '<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg"><polygon points="60,60 60,240 260,240" fill="none" stroke="#1e293b" stroke-width="3"/><rect x="60" y="222" width="18" height="18" fill="none" stroke="#1e293b" stroke-width="2"/><text x="38" y="55" font-size="18" fill="#1e293b">A</text><text x="30" y="255" font-size="18" fill="#1e293b">B</text><text x="265" y="255" font-size="18" fill="#1e293b">C</text><text x="18" y="155" font-size="16" fill="#2563eb">6</text><text x="150" y="262" font-size="16" fill="#2563eb">8</text></svg>',
     secenekler: ["9", "10", "12", "14", "16"],
     dogruCevap: 1,
-    aciklama: "Pisagor teoremine göre hipotenüs = √(6²+8²) = √100 = 10 cm.",
+    aciklama: "Pisagor teoremine göre |AC| = √(6²+8²) = √100 = 10 cm.",
   },
   {
     ders: "MATEMATIK",
-    soruMetni: "Bir ikizkenar üçgende taban açılarından biri 50° ise tepe açısı kaç derecedir?",
+    soruMetni:
+      "Şekildeki ABC üçgeni ikizkenar üçgendir; |AB| = |AC| ve taban açısı m(ABC) = 50° olduğuna göre tepe açısı m(BAC) kaç derecedir?",
+    gorselSvg:
+      '<svg viewBox="0 0 320 300" xmlns="http://www.w3.org/2000/svg"><polygon points="160,50 50,250 270,250" fill="none" stroke="#1e293b" stroke-width="3"/><text x="150" y="40" font-size="18" fill="#1e293b">A</text><text x="25" y="265" font-size="18" fill="#1e293b">B</text><text x="275" y="265" font-size="18" fill="#1e293b">C</text><text x="70" y="235" font-size="15" fill="#2563eb">50°</text><line x1="100" y1="145" x2="115" y2="140" stroke="#1e293b" stroke-width="2"/><line x1="210" y1="145" x2="195" y2="140" stroke="#1e293b" stroke-width="2"/></svg>',
     secenekler: ["60", "70", "80", "90", "100"],
     dogruCevap: 2,
     aciklama: "İkizkenar üçgende taban açıları eşittir (50°+50°=100°); tepe açısı 180°-100°=80°.",
   },
   {
     ders: "MATEMATIK",
-    soruMetni: "Bir dikdörtgenin alanı 48 cm², kısa kenarı 6 cm ise uzun kenarı kaç cm'dir?",
+    soruMetni: "Şekildeki ABCD dikdörtgeninin alanı 48 cm²'dir. |AB| = 6 cm olduğuna göre |BC| kaç cm'dir?",
+    gorselSvg:
+      '<svg viewBox="0 0 320 240" xmlns="http://www.w3.org/2000/svg"><rect x="50" y="60" width="200" height="120" fill="#eff6ff" stroke="#1e293b" stroke-width="3"/><text x="30" y="55" font-size="16" fill="#1e293b">A</text><text x="255" y="55" font-size="16" fill="#1e293b">B</text><text x="255" y="195" font-size="16" fill="#1e293b">C</text><text x="30" y="195" font-size="16" fill="#1e293b">D</text><text x="128" y="50" font-size="15" fill="#2563eb">6 cm</text><text x="110" y="125" font-size="16" fill="#1e293b">Alan = 48 cm²</text></svg>',
     secenekler: ["6", "7", "8", "9", "10"],
     dogruCevap: 2,
     aciklama: "Uzun kenar = alan/kısa kenar = 48/6 = 8 cm.",
   },
   {
     ders: "MATEMATIK",
-    soruMetni: "Yarıçapı 6 cm olan bir çemberin alanı kaç cm²'dir? (π=3 alınız)",
+    soruMetni:
+      "Şekildeki merkezi O olan çemberin yarıçapı |OA| = 6 cm'dir. (π = 3 alınız) Çemberin alanı kaç cm²'dir?",
+    gorselSvg:
+      '<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg"><circle cx="150" cy="150" r="100" fill="#eff6ff" stroke="#1e293b" stroke-width="3"/><circle cx="150" cy="150" r="3" fill="#1e293b"/><line x1="150" y1="150" x2="250" y2="150" stroke="#1e293b" stroke-width="2"/><text x="135" y="140" font-size="16" fill="#1e293b">O</text><text x="255" y="155" font-size="16" fill="#1e293b">A</text><text x="185" y="140" font-size="15" fill="#2563eb">6 cm</text></svg>',
     secenekler: ["36", "54", "72", "108", "144"],
     dogruCevap: 3,
     aciklama: "Alan = π×r² = 3×36 = 108 cm².",
@@ -865,17 +867,25 @@ export const LISANS_SORULARI: SeedSoru[] = [
   // ---- COĞRAFYA (18) ----
   {
     ders: "COGRAFYA",
-    soruMetni: "Türkiye'nin nüfus bakımından en kalabalık ili aşağıdakilerden hangisidir?",
-    secenekler: ["Ankara", "İzmir", "İstanbul", "Bursa", "Antalya"],
-    dogruCevap: 2,
-    aciklama: "İstanbul, Türkiye'nin en kalabalık ilidir.",
+    soruMetni:
+      "Yukarıdaki şematik haritada numaralandırılarak gösterilen beş noktadan hangisi, her mevsim yağışlı ve yazları serin geçen bir iklime sahip olması beklenen bölgede yer alır?",
+    gorselSvg:
+      '<svg viewBox="0 0 400 220" xmlns="http://www.w3.org/2000/svg"><path d="M40,120 Q30,70 90,55 Q150,30 220,40 Q300,35 360,70 Q380,100 350,130 Q320,160 250,165 Q180,180 110,170 Q50,160 40,120 Z" fill="#dbeafe" stroke="#1e293b" stroke-width="2.5"/><circle cx="90" cy="65" r="7" fill="#dc2626"/><text x="78" y="50" font-size="16" fill="#1e293b">I</text><circle cx="110" cy="140" r="7" fill="#dc2626"/><text x="95" y="162" font-size="16" fill="#1e293b">II</text><circle cx="200" cy="100" r="7" fill="#dc2626"/><text x="195" y="88" font-size="16" fill="#1e293b">III</text><circle cx="300" cy="130" r="7" fill="#dc2626"/><text x="305" y="150" font-size="16" fill="#1e293b">IV</text><circle cx="310" cy="65" r="7" fill="#dc2626"/><text x="315" y="53" font-size="16" fill="#1e293b">V</text><text x="10" y="210" font-size="12" fill="#64748b">(Şematik gösterim)</text></svg>',
+    secenekler: ["I", "II", "III", "IV", "V"],
+    dogruCevap: 0,
+    aciklama:
+      "Haritada kuzeyde (üstte) yer alan I noktası Karadeniz kıyısını temsil eder; Karadeniz ikliminde her mevsim yağış görülür, yazlar serindir.",
   },
   {
     ders: "COGRAFYA",
-    soruMetni: "Türkiye'nin en yüksek dağı aşağıdakilerden hangisidir?",
-    secenekler: ["Erciyes Dağı", "Uludağ", "Kaçkar Dağı", "Ağrı Dağı", "Nemrut Dağı"],
-    dogruCevap: 3,
-    aciklama: "5137 m yüksekliğindeki Ağrı Dağı, Türkiye'nin en yüksek dağıdır.",
+    soruMetni:
+      'Yukarıdaki kesitte bir volkanik koninin iç yapısı şematik olarak gösterilmiştir. Numaralandırılan "I" ile gösterilen, magmanın yeryüzüne ulaştığı ana çıkış kanalı aşağıdakilerden hangisidir?',
+    gorselSvg:
+      '<svg viewBox="0 0 300 285" xmlns="http://www.w3.org/2000/svg"><polygon points="40,230 150,40 260,230" fill="#e2e8f0" stroke="#1e293b" stroke-width="2.5"/><rect x="142" y="60" width="16" height="150" fill="#fbbf24" stroke="#1e293b" stroke-width="2"/><circle cx="150" cy="205" r="25" fill="#f97316" stroke="#1e293b" stroke-width="2"/><line x1="150" y1="230" x2="150" y2="255" stroke="#1e293b" stroke-width="1.5"/><text x="150" y="270" font-size="13" fill="#1e293b" text-anchor="middle">Magma Odası</text><line x1="158" y1="130" x2="182" y2="130" stroke="#dc2626" stroke-width="1.5"/><text x="188" y="136" font-size="18" fill="#dc2626" font-weight="bold">I</text><path d="M150,40 L133,58 L167,58 Z" fill="#94a3b8" stroke="#1e293b" stroke-width="1.5"/><text x="108" y="32" font-size="12" fill="#1e293b">Krater</text></svg>',
+    secenekler: ["Krater", "Baca", "Lav yastığı", "Kaldera", "Magma odası"],
+    dogruCevap: 1,
+    aciklama:
+      "Magmanın magma odasından yeryüzüne (kratere) ulaştığı dikey kanala baca denir; krater ve magma odası şekilde ayrıca etiketlenmiştir.",
   },
   {
     ders: "COGRAFYA",

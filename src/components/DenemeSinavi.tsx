@@ -109,6 +109,12 @@ export function DenemeSinavi({
           <span className="rounded-full bg-primary/10 px-2.5 py-0.5 font-medium text-primary">{DERS_LABEL[soru.ders]}</span>
         </div>
         <p className="mt-3 whitespace-pre-line text-base font-medium text-slate-800">{soru.soruMetni}</p>
+        {soru.gorselSvg && (
+          <div
+            className="mx-auto mt-4 max-w-md [&_svg]:h-auto [&_svg]:w-full"
+            dangerouslySetInnerHTML={{ __html: soru.gorselSvg }}
+          />
+        )}
         <div className="mt-4 space-y-2">
           {soru.secenekler.map((secenek, i) => (
             <button
