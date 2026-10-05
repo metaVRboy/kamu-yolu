@@ -24,6 +24,10 @@
 export type SeedSoru = {
   ders: "TURKCE" | "MATEMATIK" | "TARIH" | "COGRAFYA" | "VATANDASLIK" | "GUNCEL";
   soruMetni: string;
+  // Ortak metinli (bir parca/bilgi + birden fazla soru) bloklarda kardes
+  // sorulara ayni grupId verilir - "X-Y. sorular..." basligi METNE
+  // GOMULMEZ, gercek sinav sirasina gore arayuzde dinamik hesaplanir.
+  grupId?: string;
   gorselSvg?: string;
   secenekler: [string, string, string, string, string];
   dogruCevap: number;
@@ -37,7 +41,8 @@ export const LISANS_SORULARI: SeedSoru[] = [
   {
     ders: "TURKCE",
     soruMetni:
-      "20-21. soruları aşağıdaki parçaya göre cevaplayınız.\n\nBir romancının başarısı, yalnızca kurduğu olay örgüsüyle değil, okuru kurmaca dünyanın içine çekebilme becerisiyle de ölçülür. Kimi yazarlar, karakterlerini baştan sona kusursuz çizmeye çalışırken onları gerçeklikten uzaklaştırır; oysa okur, kahramanın zaaflarıyla, tereddütleriyle, hatalarıyla özdeşleşir. Bu yüzden deneyimli bir yazar, karakterine kusursuzluk değil, inandırıcılık kazandırmayı önceler. Anlatılan dünyanın gerçekliği, yazarın kelime seçiminden çok, insana dair çelişkileri ne kadar dürüstçe yansıttığıyla ilgilidir. Bir romanın yıllar sonra bile okunması, genellikle bu dürüstlükten kaynaklanır.\n\n20. Bu parçaya göre bir romanın okur üzerinde kalıcı etki bırakmasının temel nedeni aşağıdakilerden hangisidir?",
+      "Bir romancının başarısı, yalnızca kurduğu olay örgüsüyle değil, okuru kurmaca dünyanın içine çekebilme becerisiyle de ölçülür. Kimi yazarlar, karakterlerini baştan sona kusursuz çizmeye çalışırken onları gerçeklikten uzaklaştırır; oysa okur, kahramanın zaaflarıyla, tereddütleriyle, hatalarıyla özdeşleşir. Bu yüzden deneyimli bir yazar, karakterine kusursuzluk değil, inandırıcılık kazandırmayı önceler. Anlatılan dünyanın gerçekliği, yazarın kelime seçiminden çok, insana dair çelişkileri ne kadar dürüstçe yansıttığıyla ilgilidir. Bir romanın yıllar sonra bile okunması, genellikle bu dürüstlükten kaynaklanır.\n\nBu parçaya göre bir romanın okur üzerinde kalıcı etki bırakmasının temel nedeni aşağıdakilerden hangisidir?",
+    grupId: "turkce-parca-roman",
     secenekler: [
       "Yazarın özenli kelime seçimleri",
       "Olay örgüsünün karmaşıklığı",
@@ -51,7 +56,8 @@ export const LISANS_SORULARI: SeedSoru[] = [
   {
     ders: "TURKCE",
     soruMetni:
-      "20-21. soruları aşağıdaki parçaya göre cevaplayınız.\n\nBir romancının başarısı, yalnızca kurduğu olay örgüsüyle değil, okuru kurmaca dünyanın içine çekebilme becerisiyle de ölçülür. Kimi yazarlar, karakterlerini baştan sona kusursuz çizmeye çalışırken onları gerçeklikten uzaklaştırır; oysa okur, kahramanın zaaflarıyla, tereddütleriyle, hatalarıyla özdeşleşir. Bu yüzden deneyimli bir yazar, karakterine kusursuzluk değil, inandırıcılık kazandırmayı önceler. Anlatılan dünyanın gerçekliği, yazarın kelime seçiminden çok, insana dair çelişkileri ne kadar dürüstçe yansıttığıyla ilgilidir. Bir romanın yıllar sonra bile okunması, genellikle bu dürüstlükten kaynaklanır.\n\n21. Bu parçadan hareketle aşağıdakilerden hangisine ulaşılamaz?",
+      "Bir romancının başarısı, yalnızca kurduğu olay örgüsüyle değil, okuru kurmaca dünyanın içine çekebilme becerisiyle de ölçülür. Kimi yazarlar, karakterlerini baştan sona kusursuz çizmeye çalışırken onları gerçeklikten uzaklaştırır; oysa okur, kahramanın zaaflarıyla, tereddütleriyle, hatalarıyla özdeşleşir. Bu yüzden deneyimli bir yazar, karakterine kusursuzluk değil, inandırıcılık kazandırmayı önceler. Anlatılan dünyanın gerçekliği, yazarın kelime seçiminden çok, insana dair çelişkileri ne kadar dürüstçe yansıttığıyla ilgilidir. Bir romanın yıllar sonra bile okunması, genellikle bu dürüstlükten kaynaklanır.\n\nBu parçadan hareketle aşağıdakilerden hangisine ulaşılamaz?",
+    grupId: "turkce-parca-roman",
     secenekler: [
       "Okur, kahramanın zaaflarıyla özdeşleşebilir.",
       "Kusursuz çizilen karakterler gerçeklikten uzaklaşabilir.",
@@ -65,7 +71,8 @@ export const LISANS_SORULARI: SeedSoru[] = [
   {
     ders: "TURKCE",
     soruMetni:
-      "22-23. soruları aşağıdaki parçaya göre cevaplayınız.\n\nŞehirlerin büyümesiyle birlikte toplu taşıma sistemlerine olan bağımlılık da artıyor. Ancak yalnızca metro ve otobüs hatlarını çoğaltmak, trafik sorununu kalıcı olarak çözmüyor. Kentlerin, yayalaştırılmış bölgeleri artırması, bisiklet yollarını güvenli hâle getirmesi ve farklı ulaşım türlerini birbirine entegre etmesi gerekiyor. Aksi hâlde yeni açılan her yol kısa süre içinde yeniden tıkanıyor; çünkü artan kapasite, zamanla daha fazla özel araç kullanımını teşvik ediyor. Bu nedenle sürdürülebilir bir ulaşım politikası, yalnızca yeni yol ve hat inşasına değil, davranış değişikliğine de odaklanmalıdır.\n\n22. Bu parçanın ana düşüncesi aşağıdakilerden hangisidir?",
+      "Şehirlerin büyümesiyle birlikte toplu taşıma sistemlerine olan bağımlılık da artıyor. Ancak yalnızca metro ve otobüs hatlarını çoğaltmak, trafik sorununu kalıcı olarak çözmüyor. Kentlerin, yayalaştırılmış bölgeleri artırması, bisiklet yollarını güvenli hâle getirmesi ve farklı ulaşım türlerini birbirine entegre etmesi gerekiyor. Aksi hâlde yeni açılan her yol kısa süre içinde yeniden tıkanıyor; çünkü artan kapasite, zamanla daha fazla özel araç kullanımını teşvik ediyor. Bu nedenle sürdürülebilir bir ulaşım politikası, yalnızca yeni yol ve hat inşasına değil, davranış değişikliğine de odaklanmalıdır.\n\nBu parçanın ana düşüncesi aşağıdakilerden hangisidir?",
+    grupId: "turkce-parca-ulasim",
     secenekler: [
       "Metro hatları trafik sorununu tek başına çözer.",
       "Sürdürülebilir ulaşım için yol inşasının yanında davranış değişikliği de gereklidir.",
@@ -79,7 +86,8 @@ export const LISANS_SORULARI: SeedSoru[] = [
   {
     ders: "TURKCE",
     soruMetni:
-      "22-23. soruları aşağıdaki parçaya göre cevaplayınız.\n\nŞehirlerin büyümesiyle birlikte toplu taşıma sistemlerine olan bağımlılık da artıyor. Ancak yalnızca metro ve otobüs hatlarını çoğaltmak, trafik sorununu kalıcı olarak çözmüyor. Kentlerin, yayalaştırılmış bölgeleri artırması, bisiklet yollarını güvenli hâle getirmesi ve farklı ulaşım türlerini birbirine entegre etmesi gerekiyor. Aksi hâlde yeni açılan her yol kısa süre içinde yeniden tıkanıyor; çünkü artan kapasite, zamanla daha fazla özel araç kullanımını teşvik ediyor. Bu nedenle sürdürülebilir bir ulaşım politikası, yalnızca yeni yol ve hat inşasına değil, davranış değişikliğine de odaklanmalıdır.\n\n23. Bu parçaya göre aşağıdakilerden hangisi söylenemez?",
+      "Şehirlerin büyümesiyle birlikte toplu taşıma sistemlerine olan bağımlılık da artıyor. Ancak yalnızca metro ve otobüs hatlarını çoğaltmak, trafik sorununu kalıcı olarak çözmüyor. Kentlerin, yayalaştırılmış bölgeleri artırması, bisiklet yollarını güvenli hâle getirmesi ve farklı ulaşım türlerini birbirine entegre etmesi gerekiyor. Aksi hâlde yeni açılan her yol kısa süre içinde yeniden tıkanıyor; çünkü artan kapasite, zamanla daha fazla özel araç kullanımını teşvik ediyor. Bu nedenle sürdürülebilir bir ulaşım politikası, yalnızca yeni yol ve hat inşasına değil, davranış değişikliğine de odaklanmalıdır.\n\nBu parçaya göre aşağıdakilerden hangisi söylenemez?",
+    grupId: "turkce-parca-ulasim",
     secenekler: [
       "Yeni yollar bazen kısa sürede yeniden tıkanabilir.",
       "Artan yol kapasitesi özel araç kullanımını teşvik edebilir.",
@@ -589,7 +597,8 @@ export const LISANS_SORULARI: SeedSoru[] = [
   {
     ders: "MATEMATIK",
     soruMetni:
-      "52-53. soruları aşağıdaki bilgiye göre cevaplayınız.\n\nGerçel sayılar kümesinde ⊕ işlemi,\na ⊕ b = 2a - b  (a ≥ b ise)\na ⊕ b = a + b²  (a < b ise)\nbiçiminde tanımlanıyor.\n\n52. Buna göre (5 ⊕ 3) işleminin sonucu kaçtır?",
+      "Gerçel sayılar kümesinde ⊕ işlemi,\na ⊕ b = 2a - b  (a ≥ b ise)\na ⊕ b = a + b²  (a < b ise)\nbiçiminde tanımlanıyor.\n\nBuna göre (5 ⊕ 3) işleminin sonucu kaçtır?",
+    grupId: "mat-delta-islemi",
     secenekler: ["5", "6", "7", "8", "9"],
     dogruCevap: 2,
     aciklama: "5 ≥ 3 olduğundan birinci kural uygulanır: 2×5-3=7.",
@@ -597,7 +606,8 @@ export const LISANS_SORULARI: SeedSoru[] = [
   {
     ders: "MATEMATIK",
     soruMetni:
-      "52-53. soruları aşağıdaki bilgiye göre cevaplayınız.\n\nGerçel sayılar kümesinde ⊕ işlemi,\na ⊕ b = 2a - b  (a ≥ b ise)\na ⊕ b = a + b²  (a < b ise)\nbiçiminde tanımlanıyor.\n\n53. Buna göre (2 ⊕ 6) işleminin sonucu kaçtır?",
+      "Gerçel sayılar kümesinde ⊕ işlemi,\na ⊕ b = 2a - b  (a ≥ b ise)\na ⊕ b = a + b²  (a < b ise)\nbiçiminde tanımlanıyor.\n\nBuna göre (2 ⊕ 6) işleminin sonucu kaçtır?",
+    grupId: "mat-delta-islemi",
     secenekler: ["30", "34", "36", "38", "40"],
     dogruCevap: 3,
     aciklama: "2 < 6 olduğundan ikinci kural uygulanır: 2+6²=2+36=38.",
@@ -607,7 +617,8 @@ export const LISANS_SORULARI: SeedSoru[] = [
   {
     ders: "MATEMATIK",
     soruMetni:
-      "54-56. soruları aşağıdaki bilgiye göre cevaplayınız.\n\n1'den 15'e kadar olan doğal sayılarla numaralandırılmış 15 top üç ayrı gruba (I, II, III) ayrılmaktadır; her sayı tam olarak bir grupta yer almaktadır. I. gruptaki topların numaraları toplamı 20, II. gruptaki topların numaraları toplamı 40'tır.\n\n54. Buna göre III. gruptaki topların numaraları toplamı kaçtır?",
+      "1'den 15'e kadar olan doğal sayılarla numaralandırılmış 15 top üç ayrı gruba (I, II, III) ayrılmaktadır; her sayı tam olarak bir grupta yer almaktadır. I. gruptaki topların numaraları toplamı 20, II. gruptaki topların numaraları toplamı 40'tır.\n\nBuna göre III. gruptaki topların numaraları toplamı kaçtır?",
+    grupId: "mat-top-gruplari",
     secenekler: ["50", "55", "60", "65", "70"],
     dogruCevap: 2,
     aciklama: "1'den 15'e kadar sayıların toplamı 120'dir. III = 120 - (20+40) = 60.",
@@ -615,7 +626,8 @@ export const LISANS_SORULARI: SeedSoru[] = [
   {
     ders: "MATEMATIK",
     soruMetni:
-      "54-56. soruları aşağıdaki bilgiye göre cevaplayınız.\n\n1'den 15'e kadar olan doğal sayılarla numaralandırılmış 15 top üç ayrı gruba (I, II, III) ayrılmaktadır; her sayı tam olarak bir grupta yer almaktadır. I. gruptaki topların numaraları toplamı 20, II. gruptaki topların numaraları toplamı 40'tır.\n\n55. Buna göre I. ve III. gruplardaki topların numaraları toplamı kaçtır?",
+      "1'den 15'e kadar olan doğal sayılarla numaralandırılmış 15 top üç ayrı gruba (I, II, III) ayrılmaktadır; her sayı tam olarak bir grupta yer almaktadır. I. gruptaki topların numaraları toplamı 20, II. gruptaki topların numaraları toplamı 40'tır.\n\nBuna göre I. ve III. gruplardaki topların numaraları toplamı kaçtır?",
+    grupId: "mat-top-gruplari",
     secenekler: ["70", "75", "80", "85", "90"],
     dogruCevap: 2,
     aciklama: "I + III = 120 - II = 120 - 40 = 80.",
@@ -623,7 +635,8 @@ export const LISANS_SORULARI: SeedSoru[] = [
   {
     ders: "MATEMATIK",
     soruMetni:
-      "54-56. soruları aşağıdaki bilgiye göre cevaplayınız.\n\n1'den 15'e kadar olan doğal sayılarla numaralandırılmış 15 top üç ayrı gruba (I, II, III) ayrılmaktadır; her sayı tam olarak bir grupta yer almaktadır. I. gruptaki topların numaraları toplamı 20, II. gruptaki topların numaraları toplamı 40'tır.\n\n56. I. grupta birbirinden farklı numaralı toplar bulunduğuna göre, bu grupta en fazla kaç top olabilir?",
+      "1'den 15'e kadar olan doğal sayılarla numaralandırılmış 15 top üç ayrı gruba (I, II, III) ayrılmaktadır; her sayı tam olarak bir grupta yer almaktadır. I. gruptaki topların numaraları toplamı 20, II. gruptaki topların numaraları toplamı 40'tır.\n\nI. grupta birbirinden farklı numaralı toplar bulunduğuna göre, bu grupta en fazla kaç top olabilir?",
+    grupId: "mat-top-gruplari",
     secenekler: ["3", "4", "5", "6", "7"],
     dogruCevap: 2,
     aciklama:

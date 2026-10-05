@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import { CheckCircle2, XCircle, MinusCircle } from "lucide-react";
-import { DERS_LABEL } from "@/lib/kpssDenemeSabitler";
+import { DERS_LABEL, grupAraligiHesapla, soruMetniNumarali } from "@/lib/kpssDenemeSabitler";
 import type { DenemeDers } from "@/generated/prisma/client";
 
 export type SonucSorusu = {
   id: string;
   ders: DenemeDers;
   soruMetni: string;
+  grupId: string | null;
   gorselSvg: string | null;
   secenekler: string[];
   dogruCevap: number;
@@ -35,6 +36,7 @@ export function DenemeSonucEkrani({
   const net = dogruSayisi - yanlisSayisi / 4;
   const incelenen = sorular[incelenenIndex];
   const verilenCevap = cevaplar[incelenen.id];
+  const grupAraligi = grupAraligiHesapla(sorular, incelenen.id);
 
   function durum(s: SonucSorusu): "dogru" | "yanlis" | "bos" {
     const verilen = cevaplar[s.id];
@@ -113,7 +115,15 @@ export function DenemeSonucEkrani({
             {DERS_LABEL[incelenen.ders]}
           </span>
         </div>
-        <p className="mt-3 whitespace-pre-line text-base font-medium text-slate-800">{incelenen.soruMetni}</p>
+        {grupAraligi && (
+          <p className="mt-3 text-sm font-semibold text-primary">
+            {grupAraligi.ilk}-{grupAraligi.son}. soruları aşağıdaki {incelenen.ders === "MATEMATIK" ? "bilgiye" : "parçaya"}{" "}
+            göre cevaplayınız.
+          </p>
+        )}
+        <p className="mt-3 whitespace-pre-line text-base font-medium text-slate-800">
+          {grupAraligi ? soruMetniNumarali(incelenen.soruMetni, grupAraligi.bu) : incelenen.soruMetni}
+        </p>
         {incelenen.gorselSvg && (
           <div
             className="mx-auto mt-4 max-w-md [&_svg]:h-auto [&_svg]:w-full"

@@ -25,8 +25,8 @@ async function main() {
       select: { id: true },
     });
     if (mevcut) {
-      // Icerik rewrite'larinda sira degismis olabilir - guncel sirayla senkron tut.
-      await prisma.denemeSoru.update({ where: { id: mevcut.id }, data: { sira } });
+      // Icerik rewrite'larinda sira/grupId degismis olabilir - guncel tut.
+      await prisma.denemeSoru.update({ where: { id: mevcut.id }, data: { sira, grupId: soru.grupId ?? null } });
       atlanan++;
       continue;
     }
@@ -35,6 +35,7 @@ async function main() {
         duzey: "LISANS",
         ders: soru.ders,
         soruMetni: soru.soruMetni,
+        grupId: soru.grupId ?? null,
         gorselSvg: soru.gorselSvg,
         secenekler: soru.secenekler,
         dogruCevap: soru.dogruCevap,

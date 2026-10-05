@@ -78,6 +78,7 @@ export function sinavaGuvenliHaleGetir(sorular: ExamSoru[]): ExamSoru[] {
     id: s.id,
     ders: s.ders,
     soruMetni: s.soruMetni,
+    grupId: s.grupId,
     gorselSvg: s.gorselSvg,
     secenekler: s.secenekler,
   }));

@@ -52,6 +52,44 @@ export type ExamSoru = {
   id: string;
   ders: DenemeDers;
   soruMetni: string;
+  // Ortak metinli (bir parca + birden fazla soru) bloklarda kardes sorular
+  // ayni grupId'yi paylasir; "X-Y. sorular..." basligi METNE GOMULU DEGIL,
+  // bu alan uzerinden gunun GERCEK soru sirasina gore dinamik hesaplanir.
+  grupId: string | null;
   gorselSvg: string | null;
   secenekler: string[];
 };
+
+/**
+ * Bir sorunun, ayni grupId'yi paylasan kardesleri icindeki 1-indexli soru
+ * numarasini ve grubun tam araligini ("52-53" gibi) hesaplar. grupId yoksa
+ * null doner (tekil soru, grup basligi gosterilmez).
+ */
+export function grupAraligiHesapla(
+  sorular: { id: string; grupId: string | null }[],
+  soruId: string,
+): { bu: number; ilk: number; son: number } | null {
+  const soru = sorular.find((s) => s.id === soruId);
+  if (!soru?.grupId) return null;
+  const grupIndeksleri = sorular
+    .map((s, i) => (s.grupId === soru.grupId ? i : -1))
+    .filter((i) => i >= 0);
+  const buIndeks = sorular.findIndex((s) => s.id === soruId);
+  return {
+    bu: buIndeks + 1,
+    ilk: Math.min(...grupIndeksleri) + 1,
+    son: Math.max(...grupIndeksleri) + 1,
+  };
+}
+
+/**
+ * Ortak metinli bir sorunun metni "ortak parca\n\nasil soru" seklinde
+ * saklanir - numara SADECE son (asil soru) satirina eklenir, paylasilan
+ * parcaya degil.
+ */
+export function soruMetniNumarali(soruMetni: string, numara: number): string {
+  const parcalar = soruMetni.split("\n\n");
+  const sonIndeks = parcalar.length - 1;
+  parcalar[sonIndeks] = `${numara}. ${parcalar[sonIndeks]}`;
+  return parcalar.join("\n\n");
+}

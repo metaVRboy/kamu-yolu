@@ -3,7 +3,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Clock } from "lucide-react";
-import { SINAV_SURESI_DK, DERS_LABEL, type ExamSoru } from "@/lib/kpssDenemeSabitler";
+import {
+  SINAV_SURESI_DK,
+  DERS_LABEL,
+  grupAraligiHesapla,
+  soruMetniNumarali,
+  type ExamSoru,
+} from "@/lib/kpssDenemeSabitler";
 
 function sureFormatla(ms: number): string {
   const toplamSaniye = Math.max(0, Math.floor(ms / 1000));
@@ -60,6 +66,7 @@ export function DenemeSinavi({
   }, [bitisZamaniMs, bitir]);
 
   const soru = sorular[index];
+  const grupAraligi = grupAraligiHesapla(sorular, soru.id);
 
   async function cevapSec(secenekIndex: number) {
     setCevaplar((onceki) => ({ ...onceki, [soru.id]: secenekIndex }));
@@ -108,7 +115,15 @@ export function DenemeSinavi({
           </span>
           <span className="rounded-full bg-primary/10 px-2.5 py-0.5 font-medium text-primary">{DERS_LABEL[soru.ders]}</span>
         </div>
-        <p className="mt-3 whitespace-pre-line text-base font-medium text-slate-800">{soru.soruMetni}</p>
+        {grupAraligi && (
+          <p className="mt-3 text-sm font-semibold text-primary">
+            {grupAraligi.ilk}-{grupAraligi.son}. soruları aşağıdaki {soru.ders === "MATEMATIK" ? "bilgiye" : "parçaya"} göre
+            cevaplayınız.
+          </p>
+        )}
+        <p className="mt-3 whitespace-pre-line text-base font-medium text-slate-800">
+          {grupAraligi ? soruMetniNumarali(soru.soruMetni, grupAraligi.bu) : soru.soruMetni}
+        </p>
         {soru.gorselSvg && (
           <div
             className="mx-auto mt-4 max-w-md [&_svg]:h-auto [&_svg]:w-full"

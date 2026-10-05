@@ -421,6 +421,13 @@ model DenemeSoru {
   duzey           EducationLevel
   ders            DenemeDers
   soruMetni       String
+  // Ortak metinli (bir parca/bilgi + birden fazla soru) bloklarda kardes
+  // sorular ayni grupId'yi paylasir. Soru numaralari ("20-21. sorular...")
+  // METNE GOMULMEZ - gunun denemesindeki GERCEK pozisyona gore (bu alan
+  // kullanilarak) arayuzde DINAMIK hesaplanir; aksi halde soru havuzdaki
+  // sirasi degistiginde (ör. yeni soru eklenince) sabit numaralar yanlis
+  // kalirdi.
+  grupId          String?
   // Geometri/cografya gibi gorsel gerektiren sorularda inline SVG (ornegin
   // "<svg viewBox=...>...</svg>") - yoksa null, soru sadece metinle gosterilir.
   gorselSvg       String?
