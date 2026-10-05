@@ -108,7 +108,7 @@ export function DenemeSinavi({
           </span>
           <span className="rounded-full bg-primary/10 px-2.5 py-0.5 font-medium text-primary">{DERS_LABEL[soru.ders]}</span>
         </div>
-        <p className="mt-3 text-base font-medium text-slate-800">{soru.soruMetni}</p>
+        <p className="mt-3 whitespace-pre-line text-base font-medium text-slate-800">{soru.soruMetni}</p>
         <div className="mt-4 space-y-2">
           {soru.secenekler.map((secenek, i) => (
             <button

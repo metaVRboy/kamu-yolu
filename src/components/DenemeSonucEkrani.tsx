@@ -112,7 +112,7 @@ export function DenemeSonucEkrani({
             {DERS_LABEL[incelenen.ders]}
           </span>
         </div>
-        <p className="mt-3 text-base font-medium text-slate-800">{incelenen.soruMetni}</p>
+        <p className="mt-3 whitespace-pre-line text-base font-medium text-slate-800">{incelenen.soruMetni}</p>
         <div className="mt-4 space-y-2">
           {incelenen.secenekler.map((secenek, i) => {
             const dogruMu = i === incelenen.dogruCevap;

@@ -2,6 +2,17 @@
  * KPSS deneme sinavi soru havuzu - Lisans duzeyi, ilk parti.
  * Her soru AI tarafindan ozgun olarak yazildi (gercek OSYM sorusu degildir).
  * secenekler: 5 sik (A-E sirayla), dogruCevap: 0-4 index.
+ *
+ * Turkce (30) ve Matematik (30) alt konu dagilimi, ÖSYM'nin resmi KPSS
+ * Genel Yetenek konu dagilimina uygun hazirlandi:
+ *  - Turkce: Paragraf 15, Sozel Mantik 4, Sozcukte Anlam 1, Cumlede Anlam 2,
+ *    Sozcuk Turleri 1, Sozcukte Yapi 2, Cumlenin Ogeleri 1, Ses Bilgisi 1,
+ *    Yazim Kurallari 1, Noktalama 1, Anlatim Bozuklugu 1 (toplam 30)
+ *  - Matematik: Temel Kavramlar 2, Rasyonel Sayilar 2, Basit Esitsizlikler 1,
+ *    Mutlak Deger 1, Uslu Sayilar 2, Koklu Sayilar 1, Carpanlara Ayirma 1,
+ *    Oran-Oranti 1, Denklem Cozme 1, Problemler 6, Kumeler 1, Fonksiyonlar 1,
+ *    Moduler Aritmetik 1, Permutasyon-Kombinasyon 1, Olasilik 1,
+ *    Sayisal Mantik 3, Geometri 4 (toplam 30)
  */
 export type SeedSoru = {
   ders: "TURKCE" | "MATEMATIK" | "TARIH" | "COGRAFYA" | "VATANDASLIK" | "GUNCEL";
@@ -13,217 +24,247 @@ export type SeedSoru = {
 
 export const LISANS_SORULARI: SeedSoru[] = [
   // ---- TÜRKÇE (30) ----
+
+  // -- Paragraf (15) --
   {
     ders: "TURKCE",
-    soruMetni: '"Mavi" sözcüğü aşağıdaki cümlelerin hangisinde mecaz anlamda kullanılmıştır?',
+    soruMetni:
+      'Son yıllarda yapılan araştırmalar, düzenli uyku alışkanlığının yalnızca fiziksel sağlığı değil, zihinsel performansı da doğrudan etkilediğini ortaya koyuyor. Yeterince uyumayan bireylerde dikkat dağınıklığı, unutkanlık ve karar verme güçlüğü gibi sorunların daha sık görüldüğü belirlenmiş. Uzmanlar, günde yedi ile dokuz saat arasında kaliteli uyku almanın öğrenme kapasitesini artırdığını ve stres düzeyini düşürdüğünü vurguluyor. Bu nedenle başarılı bir gün geçirmek isteyenlerin önceliği, uyku düzenini sağlamak olmalıdır.\n\nBu parçanın ana düşüncesi aşağıdakilerden hangisidir?',
     secenekler: [
-      "Duvarları mavi renge boyadık.",
-      "Gökyüzü bugün çok mavi görünüyor.",
-      "Onun mavi bir geleceği olacağına inanıyorum.",
-      "Mavi gözlü bir çocuktu.",
-      "Masanın üstündeki mavi defteri aldı.",
+      "Stresin azaltılması için düzenli spor yapılmalıdır.",
+      "Kaliteli ve yeterli uyku, zihinsel performansı olumlu etkiler.",
+      "Unutkanlık yalnızca ileri yaşlarda görülen bir sorundur.",
+      "Bilimsel araştırmalar her zaman güvenilir sonuçlar vermez.",
+      "Günde dokuz saatten fazla uyumak zararlıdır.",
     ],
-    dogruCevap: 2,
-    aciklama: '"Mavi gelecek" ifadesinde mavi, somut renk anlamından uzaklaşıp "umut verici" anlamında mecaz kullanılmıştır.',
+    dogruCevap: 1,
+    aciklama: "Parça boyunca uykunun zihinsel performansla ilişkisi anlatılır; sonuç cümlesi de bunu doğrudan vurgular.",
   },
   {
     ders: "TURKCE",
-    soruMetni: "Aşağıdaki cümlelerin hangisinde yazım yanlışı vardır?",
+    soruMetni:
+      "Bal arıları, bir kovanda karmaşık bir iş bölümü içinde yaşar. İşçi arılar yiyecek toplama, kovanı temizleme ve larvaları besleme gibi görevleri üstlenirken, erkek arılar yalnızca kraliçeyle çiftleşmek amacıyla var olur. Kraliçe arı ise kovanın tek üreyen bireyi olarak günde binlerce yumurta bırakabilir. Bu düzenli iş bölümü sayesinde koloni, mevsimler boyunca varlığını sürdürebilir.\n\nBu parçadan aşağıdakilerin hangisi çıkarılamaz?",
     secenekler: [
-      "Yarın akşam size geleceğim.",
-      "Bu konuda haklısın.",
-      "Okula zamanında yetiş.",
-      "Kitabı masanın üzerine bırakdı.",
-      "Hava bugün çok soğuk.",
+      "İşçi arılar birden fazla görevi yerine getirir.",
+      "Kraliçe arı kovandaki tek üreyen bireydir.",
+      "Erkek arılar kovanın temizliğinden de sorumludur.",
+      "Arı kolonisinde belirgin bir iş bölümü vardır.",
+      "Kraliçe arı günde çok sayıda yumurta bırakabilir.",
+    ],
+    dogruCevap: 2,
+    aciklama: "Parçaya göre erkek arılar yalnızca çiftleşme amacıyla vardır; temizlik işçi arılara aittir, bu yüzden C çıkarılamaz.",
+  },
+  {
+    ders: "TURKCE",
+    soruMetni:
+      "Geri dönüşüm, atık malzemelerin yeniden işlenerek üretim sürecine kazandırılmasıdır. Cam, plastik, kâğıt ve metal gibi malzemelerin geri dönüştürülmesi hem doğal kaynakların tüketimini azaltır hem de enerji tasarrufu sağlar. Örneğin geri dönüştürülmüş bir alüminyum kutu, yeni bir kutu üretmek için gereken enerjinin yalnızca yüzde beşini kullanır. Bu da geri dönüşümün çevresel sürdürülebilirlik açısından ne kadar önemli olduğunu gösterir.\n\nBu parçaya en uygun başlık aşağıdakilerden hangisi olabilir?",
+    secenekler: [
+      "Alüminyumun Keşfi",
+      "Geri Dönüşümün Önemi ve Faydaları",
+      "Enerji Üretiminde Yeni Yöntemler",
+      "Doğal Kaynakların Tükenme Riski",
+      "Plastik Kullanımının Zararları",
+    ],
+    dogruCevap: 1,
+    aciklama: "Parça baştan sona geri dönüşümün çevresel ve ekonomik faydalarını anlatır; en kapsayıcı başlık budur.",
+  },
+  {
+    ders: "TURKCE",
+    soruMetni:
+      "Kitap okumak, bireyin hayal gücünü geliştirirken aynı zamanda kelime dağarcığını da zenginleştirir. Düzenli olarak kitap okuyan kişiler, karşılaştıkları yeni kavramları daha kolay anlamlandırabilir ve farklı bakış açıları kazanabilir. ----. Bu nedenle çocuklara küçük yaşlardan itibaren okuma alışkanlığı kazandırmak büyük önem taşır.\n\nBu parçada boş bırakılan yere aşağıdakilerden hangisi getirilmelidir?",
+    secenekler: [
+      "Televizyon izlemek de benzer faydalar sağlar.",
+      "Üstelik okuma, başkalarını anlama (empati) becerisini de destekler.",
+      "Oysa çoğu insan okumaktan hoşlanmaz.",
+      "Fakat kitaplar oldukça pahalıdır.",
+      "Ancak okumanın hiçbir zararı yoktur.",
+    ],
+    dogruCevap: 1,
+    aciklama: "Boşluktan sonraki 'bu nedenle' bağlacı, okumanın faydalarının sıralanmaya devam ettiğini gösterir; B bu akışa uyar.",
+  },
+  {
+    ders: "TURKCE",
+    soruMetni:
+      "Şehirlerde yeşil alanların azalması yalnızca hava kalitesini düşürmekle kalmıyor, aynı zamanda insanların ruh sağlığını da olumsuz etkiliyor. Parklarda vakit geçiren bireylerin stres düzeylerinin daha düşük olduğu, doğayla iç içe yaşayan toplumlarda depresyon oranlarının azaldığı pek çok çalışmada gösterilmiştir. Bu nedenle kentsel planlama yapılırken yeşil alanlara ayrılan payın artırılması, toplum sağlığı açısından stratejik bir öncelik olmalıdır.\n\nBu parçanın ana düşüncesi aşağıdakilerden hangisidir?",
+    secenekler: [
+      "Kentsel planlama yalnızca ekonomik kaygılarla yapılmalıdır.",
+      "Yeşil alanlar toplum sağlığı için önemli olduğundan kentsel planlamada öncelik verilmelidir.",
+      "Parklarda vakit geçirmek zaman kaybıdır.",
+      "Depresyon yalnızca büyükşehirlerde görülen bir sorundur.",
+      "Hava kalitesi insan sağlığını etkilemez.",
+    ],
+    dogruCevap: 1,
+    aciklama: "Parça, yeşil alanların ruh sağlığına etkisinden yola çıkarak kentsel planlamada öncelik verilmesi gerektiği sonucuna ulaşır.",
+  },
+  {
+    ders: "TURKCE",
+    soruMetni:
+      "Güneş enerjisi, yenilenebilir enerji kaynakları arasında en hızlı büyüyen alanlardan biridir. Güneş panellerinin maliyetinin son on yılda önemli ölçüde düşmesi, bu teknolojinin daha geniş kitlelere ulaşmasını sağlamıştır. Ayrıca güneş enerjisi, fosil yakıtların aksine sera gazı salımına neden olmadığından iklim değişikliğiyle mücadelede önemli bir rol üstlenmektedir. Ancak güneş panellerinin üretimi sırasında da bir miktar çevresel etki oluştuğu unutulmamalıdır.\n\nBu parçaya göre aşağıdakilerden hangisi söylenemez?",
+    secenekler: [
+      "Güneş panellerinin maliyeti zamanla azalmıştır.",
+      "Güneş enerjisi iklim değişikliğiyle mücadelede rol oynar.",
+      "Güneş panellerinin üretiminin hiçbir çevresel etkisi yoktur.",
+      "Güneş enerjisi yenilenebilir bir kaynaktır.",
+      "Fosil yakıtlar sera gazı salımına neden olur.",
+    ],
+    dogruCevap: 2,
+    aciklama: "Parça, panel üretiminin bir miktar çevresel etkisi olduğunu açıkça belirtir; bu yüzden 'hiçbir etkisi yok' yargısı söylenemez.",
+  },
+  {
+    ders: "TURKCE",
+    soruMetni:
+      "İnsan beyni yaklaşık 86 milyar nöron içerir ve bu nöronlar birbirleriyle trilyonlarca bağlantı kurar. Bu karmaşık ağ bir şehrin elektrik şebekesine benzetilebilir; nasıl ki şehirdeki her ev farklı hatlarla ana güç kaynağına bağlıysa beyindeki her nöron da sinapslar aracılığıyla diğer nöronlara bağlanarak bilgi akışını sağlar.\n\nBu parçada düşünceyi geliştirme yollarından öncelikle hangisine başvurulmuştur?",
+    secenekler: ["Örnekleme", "Tanık gösterme", "Benzetme", "Karşıtlıklardan yararlanma", "Tanımlama"],
+    dogruCevap: 2,
+    aciklama: "Beynin şehir elektrik şebekesine benzetilmesi, açık bir benzetme (analoji) örneğidir.",
+  },
+  {
+    ders: "TURKCE",
+    soruMetni:
+      "Yapay zekâ teknolojilerinin günlük hayata entegrasyonu hızla artıyor. Akıllı asistanlardan öneri sistemlerine kadar pek çok alanda karşımıza çıkan bu teknolojiler hayatımızı kolaylaştırırken bazı etik soruları da beraberinde getiriyor. Verilerimizin nasıl kullanıldığı, kararların ne ölçüde şeffaf olduğu gibi konular, teknolojinin gelişimi kadar tartışılması gereken başlıklar arasında yer almalı.\n\nYazarın bu parçadaki temel amacı aşağıdakilerden hangisidir?",
+    secenekler: [
+      "Yapay zekâ teknolojisinin tamamen durdurulması gerektiğini savunmak.",
+      "Yapay zekânın faydalarının yanı sıra etik tartışmaların önemine dikkat çekmek.",
+      "Akıllı asistanların teknik çalışma prensibini açıklamak.",
+      "Veri güvenliği yasalarının tarihsel gelişimini anlatmak.",
+      "Yapay zekânın hiçbir riski olmadığını kanıtlamak.",
+    ],
+    dogruCevap: 1,
+    aciklama: "Yazar, yapay zekânın kolaylıklarını kabul etmekle birlikte etik tartışmaların da önemsenmesi gerektiğini vurgular.",
+  },
+  {
+    ders: "TURKCE",
+    soruMetni:
+      "Deniz kaplumbağaları, yumurtlamak için doğdukları kumsala geri dönme eğilimindedir. Bilim insanları bu davranışın Dünya'nın manyetik alanını algılama yetenekleriyle ilişkili olduğunu düşünüyor. Yavru kaplumbağalar denize ulaştıktan sonra yıllarca açık okyanuslarda dolaşır, ancak üreme zamanı geldiğinde şaşırtıcı bir doğrulukla aynı kumsala dönerler.\n\nBu parça öncelikle hangi konu üzerinde durmaktadır?",
+    secenekler: [
+      "Kaplumbağaların beslenme alışkanlıkları",
+      "Deniz kaplumbağalarının doğum kumsalına dönme davranışı",
+      "Okyanuslardaki kirlilik sorunu",
+      "Kaplumbağa türlerinin sınıflandırılması",
+      "Dünya'nın manyetik alanının oluşumu",
+    ],
+    dogruCevap: 1,
+    aciklama: "Parçanın tamamı, deniz kaplumbağalarının doğdukları kumsala geri dönme davranışı etrafında kurulmuştur.",
+  },
+  {
+    ders: "TURKCE",
+    soruMetni:
+      "Bir şirketin uzun vadeli başarısı yalnızca sunduğu ürünün kalitesiyle değil, çalışanlarının motivasyonuyla da yakından ilişkilidir. Motivasyonu yüksek çalışanlar daha yaratıcı çözümler üretir ve değişen koşullara daha hızlı uyum sağlar. Bu nedenle yöneticilerin yalnızca finansal hedeflere değil, çalışan memnuniyetine de yatırım yapması gerekir.\n\nBu parçadan hareketle aşağıdakilerden hangisi söylenebilir?",
+    secenekler: [
+      "Ürün kalitesi şirket başarısında hiçbir rol oynamaz.",
+      "Çalışan memnuniyeti, şirket başarısını etkileyen unsurlardan biridir.",
+      "Finansal hedefler artık önemini tamamen yitirmiştir.",
+      "Yaratıcı çözümler yalnızca yöneticilerden gelir.",
+      "Motivasyon yalnızca maaş artışıyla sağlanabilir.",
+    ],
+    dogruCevap: 1,
+    aciklama: "Parça, motivasyonun ve çalışan memnuniyetinin şirket başarısındaki rolünü vurgular; bu doğrudan B seçeneğini destekler.",
+  },
+  {
+    ders: "TURKCE",
+    soruMetni:
+      "----. Bu yüzden bir dili öğrenmenin en etkili yollarından biri, o dilin konuşulduğu ortamda zaman geçirmektir. Günlük hayatta dili aktif olarak kullanmak, sözcükleri yalnızca ezberlemekten çok daha kalıcı bir öğrenme sağlar.\n\nBu parçanın başına aşağıdakilerden hangisi getirilmelidir?",
+    secenekler: [
+      "Dil öğrenimi yalnızca kitap okuyarak gerçekleşen bir süreçtir.",
+      "Dil becerileri, pratik yapıldıkça gelişen ve pekişen bir yetenektir.",
+      "Hiç kimse yetişkinlikte yeni bir dil öğrenemez.",
+      "Dil öğrenmenin tek yolu sınavlara girmektir.",
+      "Anadili öğrenmek, sonradan öğrenilen dillerden tamamen farksızdır.",
+    ],
+    dogruCevap: 1,
+    aciklama: "Parçanın devamında pratik yapmanın önemi anlatılır; başa gelecek cümle bu fikri açan B seçeneğidir.",
+  },
+  {
+    ders: "TURKCE",
+    soruMetni:
+      "Uzun süre oturarak çalışmak bel ve boyun ağrılarına yol açabileceği gibi dolaşım sistemini de olumsuz etkileyebilir. Uzmanlar, masa başında çalışanların her saat başı birkaç dakika ayağa kalkıp hareket etmelerini öneriyor. Kısa yürüyüşler ya da basit esneme hareketleri bile uzun vadede sağlık sorunlarının önüne geçmede etkili olabiliyor.\n\nBu parçada asıl anlatılmak istenen nedir?",
+    secenekler: [
+      "Masa başında çalışmak tamamen bırakılmalıdır.",
+      "Düzenli kısa hareketler, oturarak çalışmanın olumsuz etkilerini azaltabilir.",
+      "Yürüyüş yapmak yalnızca sporcular için faydalıdır.",
+      "Boyun ağrıları yalnızca ileri yaşlarda görülür.",
+      "Esneme hareketlerinin dolaşım sistemiyle ilgisi yoktur.",
+    ],
+    dogruCevap: 1,
+    aciklama: "Parça, kısa hareketlerin oturarak çalışmanın olumsuz etkilerini azalttığını anlatır.",
+  },
+  {
+    ders: "TURKCE",
+    soruMetni:
+      "Kahve, dünya genelinde en çok tüketilen içeceklerden biridir ve içerdiği kafein sayesinde uyanıklığı artırır. Ancak aşırı tüketildiğinde uyku düzenini bozabilir, kalp atışını hızlandırabilir ve kaygı düzeyini yükseltebilir. Uzmanlar, günde üç dört fincanı aşmayan ölçülü bir tüketimin çoğu yetişkin için güvenli kabul edildiğini belirtiyor.\n\nBu parçaya göre aşağıdakilerden hangisi yanlıştır?",
+    secenekler: [
+      "Kahvenin içeriğindeki kafein uyanıklığı artırır.",
+      "Aşırı kahve tüketimi uyku düzenini bozabilir.",
+      "Ölçülü kahve tüketimi çoğu yetişkin için güvenli kabul edilir.",
+      "Kahve tüketiminin hiçbir olumsuz etkisi yoktur.",
+      "Aşırı kahve tüketimi kalp atışını hızlandırabilir.",
     ],
     dogruCevap: 3,
-    aciklama: '"Bırakdı" yanlıştır; ünsüz benzeşmesi kuralınca "bırak-tı" > "bıraktı" olmalıdır.',
+    aciklama: "Parça, aşırı tüketimin olumsuz etkilerini açıkça sayar; bu nedenle 'hiçbir olumsuz etkisi yok' yargısı yanlıştır.",
   },
   {
     ders: "TURKCE",
-    soruMetni: '"de" bağlacının ayrı yazıldığı cümle aşağıdakilerden hangisidir?',
+    soruMetni:
+      "Ahtapotlar, omurgasızlar arasında en zeki canlılardan biri olarak kabul edilir. Karmaşık problemleri çözebilir, kavanoz kapaklarını açabilir ve hatta bazı deneylerde basit araçlar kullanabildikleri gözlemlenmiştir. Üç kalbi ve mavi kanı olan bu canlılar, renk değiştirme yetenekleriyle de dikkat çeker.\n\nBu parçaya en uygun başlık aşağıdakilerden hangisidir?",
     secenekler: [
-      "Sende bu kitaplardan var mı?",
-      "O da bizimle gelecek.",
-      "Evde kimse yoktu.",
-      "Masada bir kalem duruyordu.",
-      "Bahçede çiçekler açmış.",
+      "Denizlerin Kirlenmesi",
+      "Ahtapotların Şaşırtıcı Zekâsı ve Özellikleri",
+      "Omurgasızların Sınıflandırılması",
+      "Renk Değiştiren Bitki Türleri",
+      "Deniz Canlılarının Beslenme Şekli",
     ],
     dogruCevap: 1,
-    aciklama: '"O da bizimle gelecek" cümlesinde "da" bağlaç olduğu için ayrı yazılır; diğerlerinde "-de" bulunma hâli ekidir.',
+    aciklama: "Parça baştan sona ahtapotların zekâsını ve ilginç özelliklerini konu alır.",
   },
   {
     ders: "TURKCE",
-    soruMetni: "Aşağıdaki cümlelerin hangisinde büyük ünlü uyumu kuralına aykırı bir sözcük vardır?",
-    secenekler: ["Kalemlik", "Gözlükçü", "Yağmurlu", "Anahtarlık", "Televizyon"],
-    dogruCevap: 4,
-    aciklama: '"Televizyon" Türkçe kökenli olmadığı için büyük ünlü uyumuna uymaz; diğerleri uyuma uygundur.',
-  },
-  {
-    ders: "TURKCE",
-    soruMetni: '"Kırmak" sözcüğü aşağıdaki cümlelerin hangisinde "üzmek" anlamında kullanılmıştır?',
+    soruMetni:
+      "Bir orkestrada onlarca müzisyen aynı anda farklı çalgılar çalar, ancak ortaya uyumlu bir eser çıkar. Bunun sırrı, her müzisyenin kendi payına düşen görevi en iyi şekilde yerine getirirken aynı zamanda şefin yönlendirmesine kulak vermesinde yatar. Bireysel yetenek önemlidir, fakat ortak bir hedefe hizmet eden uyum olmadan başarılı bir performans ortaya çıkmaz.\n\nBu parçadan hareketle aşağıdaki yargılardan hangisine ulaşılabilir?",
     secenekler: [
-      "Camı taşla kırdı.",
-      "Sözlerimle onu kırdım.",
-      "Dalı elleriyle kırdı.",
-      "Bardağı yere düşürüp kırdı.",
-      "Kolunu kırarak hastaneye gitti.",
+      "Orkestrada yalnızca şefin yeteneği önemlidir.",
+      "Başarılı bir sonuç için bireysel yetenek kadar uyum da gereklidir.",
+      "Müzisyenlerin bireysel yetenekleri hiçbir fark yaratmaz.",
+      "Orkestra müziği diğer müzik türlerinden üstündür.",
+      "Şefin yönlendirmesi olmadan da tam uyum sağlanabilir.",
     ],
     dogruCevap: 1,
-    aciklama: '"Onu kırdım" cümlesinde kırmak, "üzmek, gönlünü incitmek" anlamında mecaz kullanılmıştır.',
+    aciklama: "Parça, bireysel yetenek kadar uyumun da gerekli olduğunu vurgular; bu doğrudan B seçeneğiyle örtüşür.",
   },
+
+  // -- Sözel Mantık (4) --
   {
     ders: "TURKCE",
-    soruMetni: "Noktalama işaretlerinin kullanımıyla ilgili aşağıdaki cümlelerin hangisinde yanlışlık vardır?",
-    secenekler: [
-      "Ali, Veli ve Ahmet geldi.",
-      "Geldin mi?",
-      "Ne kadar güzel bir manzara!",
-      "Annem dedi ki, yarın misafirimiz var.",
-      "Kitabı, defteri ve kalemi aldım.",
-    ],
-    dogruCevap: 3,
-    aciklama: '"Dedi ki" den sonra virgül değil doğrudan aktarılan söz gelmeli; doğrusu "Annem dedi ki: Yarın misafirimiz var." biçimindedir.',
-  },
-  {
-    ders: "TURKCE",
-    soruMetni: '"Göz" sözcüğü aşağıdakilerin hangisinde gerçek anlamıyla kullanılmıştır?',
-    secenekler: [
-      "Çeşmenin gözünden su akıyordu.",
-      "İğnenin gözünden ipliği geçirdi.",
-      "Doktor gözlerimi muayene etti.",
-      "Dolabın gözüne ayakkabıları koydu.",
-      "Fırının gözünde ekmek pişiyordu.",
-    ],
-    dogruCevap: 2,
-    aciklama: "Diğer seçeneklerde göz sözcüğü mecaz/yan anlamda (kaynak, delik, bölme) kullanılmıştır; sadece bu seçenekte gerçek (organ) anlamındadır.",
-  },
-  {
-    ders: "TURKCE",
-    soruMetni: "Aşağıdaki cümlelerin hangisinde özne gizlidir (vurgulu değildir)?",
-    secenekler: [
-      "Çocuklar bahçede oynuyor.",
-      "Yarın erken kalkacağım.",
-      "Öğretmen sınıfa girdi.",
-      "Ali kitabı okudu.",
-      "Rüzgâr ağaçları sallıyor.",
-    ],
+    soruMetni:
+      "Ali, Veli, Can ve Deniz'in boyları karşılaştırılıyor: Ali, Veli'den uzundur. Deniz, Ali'den uzundur. Can, Veli'den uzun fakat Ali'den kısadır. Buna göre boy sıralamasında en kısa olan kişi kimdir?",
+    secenekler: ["Ali", "Veli", "Can", "Deniz", "Belirlenemez"],
     dogruCevap: 1,
-    aciklama: '"Yarın erken kalkacağım" cümlesinde özne fiildeki kişi ekinden anlaşılır (ben), ayrıca belirtilmemiştir; yani gizli öznedir.',
+    aciklama: "Verilenlerden Veli < Can < Ali < Deniz sıralaması çıkar; en kısa kişi Veli'dir.",
   },
   {
     ders: "TURKCE",
-    soruMetni: "Aşağıdaki cümlelerin hangisinde bir anlatım bozukluğu vardır?",
-    secenekler: [
-      "Bu kitabı okudum ve çok beğendim.",
-      "Sınava hazırlanıyor ve ders çalışıyordu.",
-      "Hem çalışkan hem de dürüst bir insandır.",
-      "Dün akşam eve geç geldim.",
-      "Yağmur yağıyor ve ıslanıyoruz.",
-    ],
-    dogruCevap: 1,
-    aciklama: '"Sınava hazırlanıyor ve ders çalışıyordu" cümlesinde zaman uyumsuzluğu vardır (biri şimdiki, biri geçmiş zaman).',
-  },
-  {
-    ders: "TURKCE",
-    soruMetni: "Aşağıdakilerin hangisinde isim tamlaması yoktur?",
-    secenekler: ["Okul bahçesi", "Kırmızı araba", "Kitabın kapağı", "Masanın ayağı", "Evin kapısı"],
-    dogruCevap: 1,
-    aciklama: '"Kırmızı araba" sıfat tamlamasıdır; diğerleri isim tamlamasıdır (tamlayan-tamlanan eki alır).',
-  },
-  {
-    ders: "TURKCE",
-    soruMetni: '"Koşarak geldi." cümlesindeki altı çizili sözcüğün (koşarak) türü nedir?',
-    secenekler: ["İsim-fiil", "Sıfat-fiil", "Bağ-fiil (zarf-fiil)", "Edat", "Bağlaç"],
-    dogruCevap: 2,
-    aciklama: '"-erek/-arak" eki bağ-fiil (zarf-fiil) ekidir; fiili zarf göreviyle başka bir fiile bağlar.',
-  },
-  {
-    ders: "TURKCE",
-    soruMetni: "Aşağıdaki atasözlerinden hangisi “tedbirli olmanın önemini” vurgular?",
-    secenekler: [
-      "Damlaya damlaya göl olur.",
-      "Ateş olmayan yerden duman çıkmaz.",
-      "Sakla samanı, gelir zamanı.",
-      "Komşu komşunun külüne muhtaçtır.",
-      "Dost acı söyler.",
-    ],
-    dogruCevap: 2,
-    aciklama: '"Sakla samanı, gelir zamanı" sözü ileriyi düşünüp tedbirli davranmayı öğütler.',
-  },
-  {
-    ders: "TURKCE",
-    soruMetni: "Paragrafta anlatımı canlandırmak için başvurulan, bir durumu başka bir şeye benzeterek anlatma yöntemine ne denir?",
-    secenekler: ["Tanımlama", "Karşılaştırma", "Benzetme", "Örnekleme", "Tanık gösterme"],
-    dogruCevap: 2,
-    aciklama: "Bir kavramı ya da durumu ortak özellik üzerinden başka bir şeye benzeterek anlatma yöntemi benzetmedir.",
-  },
-  {
-    ders: "TURKCE",
-    soruMetni: "Bir paragrafın konusunu en kısa biçimde ifade eden cümleye ne ad verilir?",
-    secenekler: ["Ana düşünce cümlesi", "Giriş cümlesi", "Yardımcı düşünce", "Sonuç cümlesi", "Betimleme cümlesi"],
+    soruMetni:
+      "Ayşe, Burak ve Ceren'in meslekleri doktor, mühendis ve öğretmendir (sırasız, her biri farklı bir meslektedir). Ayşe doktor değildir. Burak mühendis değildir. Doktor olan kişi Ceren değildir. Buna göre Burak'ın mesleği nedir?",
+    secenekler: ["Doktor", "Mühendis", "Öğretmen", "Hem doktor hem mühendis", "Belirlenemez"],
     dogruCevap: 0,
-    aciklama: "Yazarın anlatmak istediği temel fikri taşıyan cümle ana düşünce (ana fikir) cümlesidir.",
+    aciklama: "Doktor, Ayşe ve Ceren olamayacağına göre doktor Burak'tır; bu, 'Burak mühendis değildir' ifadesiyle de çelişmez.",
   },
   {
     ders: "TURKCE",
-    soruMetni: "Aşağıdaki cümlelerin hangisinde “ki” bağlacı bitişik yazılmıştır ve doğrudur?",
-    secenekler: [
-      "Sanki hiçbir şey olmamış gibi davrandı.",
-      "Bu ki güzel bir fikir.",
-      "O ki benim en yakın arkadaşımdır.",
-      "Kapıyı açtımki kimse yoktu.",
-      "Bildiğim ki bu doğru değil.",
-    ],
-    dogruCevap: 0,
-    aciklama: '"Sanki" kalıplaşmış bir sözcüktür ve bitişik yazılır; bağlaç olan "ki" genelde ayrı yazılır.',
-  },
-  {
-    ders: "TURKCE",
-    soruMetni: "Aşağıdaki cümlelerin hangisinde pekiştirme sıfatı kullanılmıştır?",
-    secenekler: [
-      "Bu çok güzel bir elbise.",
-      "Masmavi bir deniz gördük.",
-      "İki kalem aldım.",
-      "Kırmızı bir gül kopardı.",
-      "Uzun bir yoldan geldik.",
-    ],
-    dogruCevap: 1,
-    aciklama: '"Masmavi" sözcüğü "mavi" sıfatının pekiştirilmiş biçimidir (m+as ekiyle).',
-  },
-  {
-    ders: "TURKCE",
-    soruMetni: "Aşağıdaki cümlelerin hangisi öznel bir yargı bildirir?",
-    secenekler: [
-      "Bu şehirde yılda ortalama 800 mm yağış düşer.",
-      "Roman 300 sayfadan oluşuyor.",
-      "Bence bu, yazarın en güzel eseri.",
-      "Toplantı saat 10.00’da başladı.",
-      "Türkiye'nin başkenti Ankara'dır.",
-    ],
+    soruMetni: "Bir sayı dizisi şu şekilde ilerliyor: 3, 7, 15, 31, ... Bu diziye göre bir sonraki terim kaçtır?",
+    secenekler: ["47", "55", "63", "71", "79"],
     dogruCevap: 2,
-    aciklama: '"Bence" ifadesiyle kişisel görüş belirtildiği için bu cümle öznel (kanıtlanamaz) bir yargı taşır.',
+    aciklama: "Her terim bir öncekinin 2 katının 1 fazlasıdır (31×2+1=63): 3→7→15→31→63.",
   },
   {
     ders: "TURKCE",
-    soruMetni: "Aşağıdaki cümlelerin hangisinde “ile” sözcüğü bağlaç görevindedir?",
-    secenekler: [
-      "Kalemle yazı yazdı.",
-      "Ahmet ile Mehmet okula gitti.",
-      "Trenle şehre gitti.",
-      "Bıçakla ekmek kesti.",
-      "Arabayla geldi.",
-    ],
-    dogruCevap: 1,
-    aciklama: '"Ahmet ile Mehmet" iki ismi bağladığı için "ile" burada bağlaç görevindedir; diğerlerinde araç/vasıta anlamı taşıyan çekim edatıdır.',
+    soruMetni:
+      "Bir toplantı, Salı gününden iki gün sonra yapılacaktır. Toplantının yapılacağı günden bir gün sonra ise resmî tatil vardır. Buna göre resmî tatil haftanın hangi günündedir?",
+    secenekler: ["Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"],
+    dogruCevap: 2,
+    aciklama: "Salı'dan iki gün sonrası Perşembe'dir (toplantı günü); Perşembe'den bir gün sonrası Cuma'dır.",
   },
-  {
-    ders: "TURKCE",
-    soruMetni: "Bir metinde yazarın okuyucuyu bir konuda ikna etmeye çalıştığı anlatım biçimi aşağıdakilerden hangisidir?",
-    secenekler: ["Öyküleyici anlatım", "Betimleyici anlatım", "Açıklayıcı anlatım", "Tartışmacı anlatım", "Emredici anlatım"],
-    dogruCevap: 3,
-    aciklama: "Yazarın bir görüşü savunup okuyucuyu ikna etmeye çalıştığı anlatım biçimi tartışmacı anlatımdır.",
-  },
+
+  // -- Sözcükte Anlam (1) --
   {
     ders: "TURKCE",
     soruMetni: '"Hukuk" sözcüğü aşağıdaki cümlelerin hangisinde terim anlamıyla kullanılmıştır?',
@@ -237,35 +278,24 @@ export const LISANS_SORULARI: SeedSoru[] = [
     dogruCevap: 1,
     aciklama: '"Hukuk Fakültesi" ifadesinde hukuk, bir bilim dalının adı olarak terim anlamında kullanılmıştır; diğerlerinde "dostluk, bağ" anlamındadır.',
   },
+
+  // -- Cümlede Anlam (2) --
   {
     ders: "TURKCE",
-    soruMetni: "“Yüz” sözcüğü aşağıdaki cümlelerin hangisinde “sayı” anlamında kullanılmıştır?",
+    soruMetni: "Aşağıdaki cümlelerin hangisi öznel bir yargı bildirir?",
     secenekler: [
-      "Yüzünü yıkadı.",
-      "Yüz kişi sınava girdi.",
-      "Yüzünde bir gülümseme vardı.",
-      "Nehirde yüzdü.",
-      "Elbisenin yüzü yırtılmış.",
+      "Bu şehirde yılda ortalama 800 mm yağış düşer.",
+      "Roman 300 sayfadan oluşuyor.",
+      "Bence bu, yazarın en güzel eseri.",
+      "Toplantı saat 10.00'da başladı.",
+      "Türkiye'nin başkenti Ankara'dır.",
     ],
-    dogruCevap: 1,
-    aciklama: '"Yüz" burada 100 sayısı anlamında kullanılmıştır; diğer cümlelerde "yüz" farklı anlamlardadır (eş seslilik örneği).',
+    dogruCevap: 2,
+    aciklama: '"Bence" ifadesiyle kişisel görüş belirtildiği için bu cümle öznel (kanıtlanamaz) bir yargı taşır.',
   },
   {
     ders: "TURKCE",
-    soruMetni: "Aşağıdaki cümlelerin hangisinde amaç-sonuç ilişkisi vardır?",
-    secenekler: [
-      "Yorgun olduğu için erken yattı.",
-      "Kitap okumak için kütüphaneye gitti.",
-      "Yağmur yağınca sokaklar ıslandı.",
-      "Hastalandığından okula gidemedi.",
-      "Param olmadığından alışveriş yapamadım.",
-    ],
-    dogruCevap: 1,
-    aciklama: '"Kitap okumak için" ifadesi amaç bildirir; diğer cümlelerde sebep-sonuç ilişkisi vardır.',
-  },
-  {
-    ders: "TURKCE",
-    soruMetni: "Aşağıdaki cümlelerin hangisi şart (koşul) cümlesidir?",
+    soruMetni: "Aşağıdaki cümlelerin hangisi şart (koşul) anlamı taşır?",
     secenekler: [
       "Çalışırsan başarırsın.",
       "Çalıştı ve başardı.",
@@ -276,119 +306,209 @@ export const LISANS_SORULARI: SeedSoru[] = [
     dogruCevap: 0,
     aciklama: '"-sa/-se" şart ekiyle kurulan "Çalışırsan başarırsın" cümlesi koşul bildirir.',
   },
+
+  // -- Sözcük Türleri (1) --
   {
     ders: "TURKCE",
-    soruMetni: "Aşağıdakilerin hangisinde edat (ilgeç) kullanılmıştır?",
-    secenekler: ["Okula gitti.", "Senin için geldim.", "Hızlı koştu.", "Kitabı okudu.", "Çok güzel bir gün."],
-    dogruCevap: 1,
-    aciklama: '"İçin" sözcüğü tek başına anlamı olmayan, başka sözcüklerle ilişki kuran bir edattır.',
-  },
-  {
-    ders: "TURKCE",
-    soruMetni: "Aşağıdaki cümlelerin hangisinde birleşik zamanlı fiil kullanılmıştır?",
-    secenekler: ["Geldi.", "Gelmişti.", "Gelecek.", "Geliyor.", "Gelir."],
-    dogruCevap: 1,
-    aciklama: '"Gelmişti" (gelmiş+idi) hikâye birleşik zamanı örneğidir; bu yapıda iki zaman eki bir araya gelir.',
-  },
-  {
-    ders: "TURKCE",
-    soruMetni: "Aşağıdaki cümlelerin hangisinde abartma (mübalağa) sanatına başvurulmuştur?",
+    soruMetni: 'Aşağıdaki cümlelerin hangisinde "ile" sözcüğü bağlaç görevindedir?',
     secenekler: [
-      "Bahçede güller açmıştı.",
-      "Gözyaşlarından bir göl oluştu.",
-      "Kuşlar gökyüzünde uçuyordu.",
-      "Çocuklar parkta oynuyordu.",
-      "Rüzgâr yapraklara dokunuyordu.",
+      "Kalemle yazı yazdı.",
+      "Ahmet ile Mehmet okula gitti.",
+      "Trenle şehre gitti.",
+      "Bıçakla ekmek kesti.",
+      "Arabayla geldi.",
     ],
     dogruCevap: 1,
-    aciklama: "Gözyaşının göl oluşturması gerçekte mümkün olmayan bir abartmadır.",
+    aciklama: '"Ahmet ile Mehmet" iki ismi bağladığı için "ile" burada bağlaç görevindedir; diğerlerinde araç bildiren çekim edatıdır.',
   },
+
+  // -- Sözcükte Yapı (2) --
   {
     ders: "TURKCE",
-    soruMetni: "Aşağıdaki cümlelerin hangisinde soru anlamı, soru eki olmadan sağlanmıştır?",
-    secenekler: ["Geldin mi?", "Bunu sen mi yaptın?", "Nereye gidiyorsun?", "Okudun mu?", "Yorgun musun?"],
-    dogruCevap: 2,
-    aciklama: '"Nereye gidiyorsun?" cümlesinde soru, "mi" soru eki değil "nereye" soru sözcüğüyle sağlanmıştır.',
-  },
-  {
-    ders: "TURKCE",
-    soruMetni: "Bir metinde yazarın okuru bilgilendirmek amacıyla nesnel biçimde bilgi verdiği anlatım biçimi nedir?",
-    secenekler: ["Açıklayıcı anlatım", "Öyküleyici anlatım", "Betimleyici anlatım", "Tartışmacı anlatım", "Coşku ve heyecana bağlı anlatım"],
+    soruMetni: "Aşağıdaki sözcüklerden hangisi yapı bakımından türemiş sözcüktür?",
+    secenekler: ["Kitaplık", "Çocuk", "Masa", "Kalem", "Deniz"],
     dogruCevap: 0,
-    aciklama: "Bilgi vermek amacıyla nesnel biçimde yazılan metinlerde açıklayıcı anlatım kullanılır.",
+    aciklama: '"Kitaplık" kök (kitap) ve yapım eki (-lık) içerdiği için türemiş sözcüktür; diğerleri basit (kök hâlinde) sözcüktür.',
   },
   {
     ders: "TURKCE",
-    soruMetni: "Aşağıdaki cümlelerin hangisinde “ünlü düşmesi” örneği vardır?",
-    secenekler: ["Kitap-ı", "Burun-u (burnu)", "Ev-e", "Göz-ü", "Kol-u"],
+    soruMetni: "Aşağıdaki sözcüklerden hangisi birleşik sözcüktür?",
+    secenekler: ["Gözlük", "Başarı", "Hanımeli", "Kalemlik", "Sevgi"],
+    dogruCevap: 2,
+    aciklama: '"Hanımeli", "hanım" ve "eli" sözcüklerinin kalıplaşarak birleşmesiyle oluşmuş bir birleşik sözcüktür (bir bitki adı); diğerleri yapım ekiyle türemiştir.',
+  },
+
+  // -- Cümlenin Öğeleri (1) --
+  {
+    ders: "TURKCE",
+    soruMetni: "Aşağıdaki cümlelerin hangisinde özne gizlidir (ayrıca belirtilmemiştir)?",
+    secenekler: [
+      "Çocuklar bahçede oynuyor.",
+      "Yarın erken kalkacağım.",
+      "Öğretmen sınıfa girdi.",
+      "Ali kitabı okudu.",
+      "Rüzgâr ağaçları sallıyor.",
+    ],
+    dogruCevap: 1,
+    aciklama: '"Yarın erken kalkacağım" cümlesinde özne, fiildeki kişi ekinden anlaşılır (ben); ayrıca belirtilmediği için gizli öznedir.',
+  },
+
+  // -- Ses Bilgisi (1) --
+  {
+    ders: "TURKCE",
+    soruMetni: 'Aşağıdaki cümlelerin hangisinde geçen sözcükte "ünlü düşmesi" (hece kaybı) görülür?',
+    secenekler: [
+      "Kitabı okudu.",
+      "Burnunu sildi.",
+      "Evine gitti.",
+      "Gözünü kapattı.",
+      "Kolunu kaldırdı.",
+    ],
     dogruCevap: 1,
     aciklama: '"Burun" sözcüğü ek alırken ikinci hecedeki dar ünlü düşer: burun+u > burnu.',
   },
+
+  // -- Yazım Kuralları (1) --
   {
     ders: "TURKCE",
-    soruMetni: '"Kitabı masaya koydu." cümlesinde altı çizili "masaya" sözcüğünün cümledeki görevi nedir?',
-    secenekler: ["Özne", "Nesne", "Dolaylı tümleç", "Zarf tümleci", "Yüklem"],
-    dogruCevap: 2,
-    aciklama: '"-e/-a" hâl ekini alan ve yüklemin yöneldiği yeri bildiren "masaya" sözcüğü dolaylı tümleçtir.',
+    soruMetni: "Aşağıdaki cümlelerin hangisinde yazım yanlışı vardır?",
+    secenekler: [
+      "Yarın akşam size geleceğim.",
+      "Bu konuda haklısın.",
+      "Okula zamanında yetiş.",
+      "Kitabı masanın üzerine bırakdı.",
+      "Hava bugün çok soğuk.",
+    ],
+    dogruCevap: 3,
+    aciklama: '"Bırakdı" yanlıştır; ünsüz benzeşmesi kuralınca "bırak-tı" > "bıraktı" olmalıdır.',
+  },
+
+  // -- Noktalama İşaretleri (1) --
+  {
+    ders: "TURKCE",
+    soruMetni: "Noktalama işaretlerinin kullanımıyla ilgili aşağıdaki cümlelerin hangisinde yanlışlık vardır?",
+    secenekler: [
+      "Ali, Veli ve Ahmet geldi.",
+      "Geldin mi?",
+      "Ne kadar güzel bir manzara!",
+      "Annem dedi ki, yarın misafirimiz var.",
+      "Kitabı, defteri ve kalemi aldım.",
+    ],
+    dogruCevap: 3,
+    aciklama: '"Dedi ki" den sonra virgül değil doğrudan aktarılan söz gelmeli; doğrusu "Annem dedi ki: Yarın misafirimiz var." biçimindedir.',
+  },
+
+  // -- Anlatım Bozuklukları (1) --
+  {
+    ders: "TURKCE",
+    soruMetni: "Aşağıdaki cümlelerin hangisinde bir anlatım bozukluğu vardır?",
+    secenekler: [
+      "Bu kitabı okudum ve çok beğendim.",
+      "Sınava hazırlanıyor ve ders çalışıyordu.",
+      "Hem çalışkan hem de dürüst bir insandır.",
+      "Dün akşam eve geç geldim.",
+      "Yağmur yağıyor ve ıslanıyoruz.",
+    ],
+    dogruCevap: 1,
+    aciklama: '"Sınava hazırlanıyor ve ders çalışıyordu" cümlesinde zaman uyumsuzluğu vardır (biri şimdiki, biri geçmiş zaman).',
   },
 
   // ---- MATEMATİK (30) ----
+
+  // -- Temel Kavramlar (2) --
   {
     ders: "MATEMATIK",
-    soruMetni: "3 + 5 × 2 - 4 işleminin sonucu kaçtır?",
-    secenekler: ["9", "12", "16", "6", "11"],
-    dogruCevap: 0,
-    aciklama: "İşlem önceliğine göre önce çarpma yapılır: 5×2=10, sonra 3+10-4=9.",
+    soruMetni: "240 sayısının kaç farklı asal çarpanı vardır?",
+    secenekler: ["2", "3", "4", "5", "6"],
+    dogruCevap: 1,
+    aciklama: "240 = 2⁴×3×5 olduğundan farklı asal çarpanlar 2, 3 ve 5'tir; toplam 3 tanedir.",
   },
   {
     ders: "MATEMATIK",
-    soruMetni: "Bir sayının %20'si 40 olduğuna göre bu sayı kaçtır?",
-    secenekler: ["160", "180", "200", "220", "240"],
+    soruMetni: "İki basamaklı bir sayının birler basamağı 0 veya 5 ise bu sayı kesinlikle hangi sayıya tam bölünür?",
+    secenekler: ["2", "3", "5", "9", "10"],
     dogruCevap: 2,
-    aciklama: "x × 0,20 = 40 ⟹ x = 200.",
+    aciklama: "Birler basamağı 0 veya 5 olan sayılar her zaman 5'e tam bölünür; 10'a bölünme yalnızca 0 ile bitenler için geçerlidir.",
+  },
+
+  // -- Rasyonel Sayılar (2) --
+  {
+    ders: "MATEMATIK",
+    soruMetni: "3/4 ile 5/6 kesirlerinin toplamı kaçtır?",
+    secenekler: ["8/10", "19/12", "15/10", "2/3", "7/12"],
+    dogruCevap: 1,
+    aciklama: "Ortak payda 12 alınırsa 3/4=9/12, 5/6=10/12; toplamları 19/12 olur.",
   },
   {
     ders: "MATEMATIK",
-    soruMetni: "15 işçi bir işi 12 günde bitiriyor. Aynı işi 9 işçi kaç günde bitirir?",
-    secenekler: ["15", "18", "20", "22", "25"],
+    soruMetni: "2/5 kesrinin ondalık gösterimi kaçtır?",
+    secenekler: ["0,2", "0,25", "0,4", "0,5", "0,8"],
     dogruCevap: 2,
-    aciklama: "İşçi-gün sabittir: 15×12=180. 180÷9=20 gün.",
+    aciklama: "2÷5 = 0,4.",
+  },
+
+  // -- Basit Eşitsizlikler (1) --
+  {
+    ders: "MATEMATIK",
+    soruMetni: "2x - 3 < 7 eşitsizliğini sağlayan en büyük tam sayı x kaçtır?",
+    secenekler: ["3", "4", "5", "6", "7"],
+    dogruCevap: 1,
+    aciklama: "2x < 10 ⟹ x < 5; bu eşitsizliği sağlayan en büyük tam sayı 4'tür.",
+  },
+
+  // -- Mutlak Değer (1) --
+  {
+    ders: "MATEMATIK",
+    soruMetni: "|x - 3| = 5 denklemini sağlayan x değerlerinin toplamı kaçtır?",
+    secenekler: ["2", "4", "6", "8", "10"],
+    dogruCevap: 2,
+    aciklama: "x-3=5 ⟹ x=8 veya x-3=-5 ⟹ x=-2; toplamları 8+(-2)=6'dır.",
+  },
+
+  // -- Üslü Sayılar (2) --
+  {
+    ders: "MATEMATIK",
+    soruMetni: "2³ × 2⁴ işleminin sonucu kaçtır?",
+    secenekler: ["64", "96", "128", "256", "512"],
+    dogruCevap: 2,
+    aciklama: "Üslü sayılarda çarpma kuralına göre 2³×2⁴=2⁷=128.",
   },
   {
     ders: "MATEMATIK",
-    soruMetni: "İki basamaklı en büyük asal sayı kaçtır?",
-    secenekler: ["89", "91", "93", "97", "99"],
+    soruMetni: "(3²)³ işleminin sonucu kaçtır?",
+    secenekler: ["81", "243", "512", "729", "972"],
     dogruCevap: 3,
-    aciklama: "91=7×13 ve 93, 99 asal değildir; 97 iki basamaklı en büyük asal sayıdır.",
+    aciklama: "(3²)³ = 3⁶ = 729.",
   },
+
+  // -- Köklü Sayılar (1) --
   {
     ders: "MATEMATIK",
-    soruMetni: "24 ve 36 sayılarının EBOB'u (en büyük ortak bölen) kaçtır?",
-    secenekler: ["4", "6", "8", "12", "18"],
-    dogruCevap: 3,
-    aciklama: "24=2³×3, 36=2²×3²; ortak asal çarpanların en küçük üslüleri çarpılır: 2²×3=12.",
+    soruMetni: "√75 ifadesinin en sade biçimi aşağıdakilerden hangisidir?",
+    secenekler: ["3√5", "5√3", "15√5", "25√3", "5√5"],
+    dogruCevap: 1,
+    aciklama: "75 = 25×3 olduğundan √75 = 5√3.",
   },
+
+  // -- Çarpanlara Ayırma (1) --
   {
     ders: "MATEMATIK",
-    soruMetni: "8 ve 12 sayılarının EKOK'u (en küçük ortak kat) kaçtır?",
-    secenekler: ["16", "20", "24", "36", "48"],
-    dogruCevap: 2,
-    aciklama: "8=2³, 12=2²×3; en büyük üslüler çarpılır: 2³×3=24.",
-  },
-  {
-    ders: "MATEMATIK",
-    soruMetni: "Bir ürünün fiyatı önce %10 artırılıyor, sonra yeni fiyat %10 indiriliyor. Son fiyat ilk fiyata göre nasıl değişmiştir?",
-    secenekler: ["%1 azalmıştır", "%1 artmıştır", "Değişmemiştir", "%10 artmıştır", "%20 azalmıştır"],
+    soruMetni: "x² - 9 ifadesinin çarpanlarına ayrılmış hâli aşağıdakilerden hangisidir?",
+    secenekler: ["(x-3)(x+3)", "(x-9)(x+1)", "(x-3)²", "(x+3)²", "(x-9)(x+9)"],
     dogruCevap: 0,
-    aciklama: "1,10 × 0,90 = 0,99 olduğundan son fiyat ilk fiyatın %99'udur, yani %1 azalmıştır.",
+    aciklama: "İki kare farkı özdeşliğine göre x²-9 = (x-3)(x+3).",
   },
+
+  // -- Oran-Orantı (1) --
   {
     ders: "MATEMATIK",
-    soruMetni: "x + 7 = 15 denklemine göre x kaçtır?",
-    secenekler: ["6", "7", "8", "9", "10"],
-    dogruCevap: 2,
-    aciklama: "x = 15 - 7 = 8.",
+    soruMetni: "3 kalemin fiyatı 18 TL ise 7 kalemin fiyatı kaç TL'dir?",
+    secenekler: ["36", "38", "40", "42", "44"],
+    dogruCevap: 3,
+    aciklama: "Bir kalem 18/3=6 TL; 7 kalem 7×6=42 TL.",
   },
+
+  // -- Denklem Çözme (1) --
   {
     ders: "MATEMATIK",
     soruMetni: "3x - 5 = 16 denklemine göre x kaçtır?",
@@ -396,47 +516,14 @@ export const LISANS_SORULARI: SeedSoru[] = [
     dogruCevap: 2,
     aciklama: "3x = 21 ⟹ x = 7.",
   },
+
+  // -- Problemler (6) --
   {
     ders: "MATEMATIK",
-    soruMetni: "Uzun kenarı 12 cm, kısa kenarı 7 cm olan bir dikdörtgenin çevresi kaç cm'dir?",
-    secenekler: ["19", "32", "38", "42", "84"],
+    soruMetni: "15 işçi bir işi 12 günde bitiriyor. Aynı işi 9 işçi kaç günde bitirir?",
+    secenekler: ["15", "18", "20", "22", "25"],
     dogruCevap: 2,
-    aciklama: "Çevre = 2×(12+7) = 38 cm.",
-  },
-  {
-    ders: "MATEMATIK",
-    soruMetni: "Alanı 49 cm² olan bir karenin bir kenarı kaç cm'dir?",
-    secenekler: ["6", "6,5", "7", "7,5", "8"],
-    dogruCevap: 2,
-    aciklama: "√49 = 7 cm.",
-  },
-  {
-    ders: "MATEMATIK",
-    soruMetni: "Yarıçapı 7 cm olan bir dairenin çevresi kaç cm'dir? (π=22/7 alınız)",
-    secenekler: ["22", "33", "44", "49", "154"],
-    dogruCevap: 2,
-    aciklama: "Çevre = 2πr = 2×(22/7)×7 = 44 cm.",
-  },
-  {
-    ders: "MATEMATIK",
-    soruMetni: "5 sayısının küpü (5³) kaçtır?",
-    secenekler: ["15", "25", "75", "100", "125"],
-    dogruCevap: 4,
-    aciklama: "5³ = 5×5×5 = 125.",
-  },
-  {
-    ders: "MATEMATIK",
-    soruMetni: "√144 kaçtır?",
-    secenekler: ["10", "11", "12", "13", "14"],
-    dogruCevap: 2,
-    aciklama: "12×12=144 olduğundan √144=12.",
-  },
-  {
-    ders: "MATEMATIK",
-    soruMetni: "Bir sınıfta 20 erkek, 15 kız öğrenci vardır. Kız öğrencilerin tüm sınıfa oranı kaçtır?",
-    secenekler: ["3/7", "3/5", "15/20", "4/7", "1/3"],
-    dogruCevap: 0,
-    aciklama: "Toplam öğrenci 35; kızların oranı 15/35 = 3/7.",
+    aciklama: "İşçi-gün sabittir: 15×12=180. 180÷9=20 gün.",
   },
   {
     ders: "MATEMATIK",
@@ -461,10 +548,10 @@ export const LISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
-    soruMetni: "100 sayısının %35'i kaçtır?",
-    secenekler: ["25", "30", "35", "40", "45"],
+    soruMetni: "Bir havuzu bir musluk tek başına 6 saatte, başka bir musluk tek başına 3 saatte dolduruyor. İki musluk birlikte açılırsa havuz kaç saatte dolar?",
+    secenekler: ["1", "1,5", "2", "2,5", "3"],
     dogruCevap: 2,
-    aciklama: "100 × 0,35 = 35.",
+    aciklama: "Saatlik doldurma oranları toplanır: 1/6 + 1/3 = 1/2; havuz 2 saatte dolar.",
   },
   {
     ders: "MATEMATIK",
@@ -473,34 +560,44 @@ export const LISANS_SORULARI: SeedSoru[] = [
     dogruCevap: 2,
     aciklama: "x/2 + 3 = 18 ⟹ x/2 = 15 ⟹ x = 30.",
   },
+
+  // -- Kümeler (1) --
   {
     ders: "MATEMATIK",
-    soruMetni: "2, 4, 6, 8, ... şeklinde devam eden dizinin 10. terimi kaçtır?",
-    secenekler: ["16", "18", "20", "22", "24"],
-    dogruCevap: 2,
-    aciklama: "Genel terim 2n'dir; n=10 için 2×10=20.",
+    soruMetni: "A = {1,2,3,4,5} ve B = {3,4,5,6,7} kümeleri için A∩B kümesinin eleman sayısı kaçtır?",
+    secenekler: ["2", "3", "4", "5", "6"],
+    dogruCevap: 1,
+    aciklama: "A∩B = {3,4,5} olduğundan eleman sayısı 3'tür.",
   },
+
+  // -- Fonksiyonlar (1) --
   {
     ders: "MATEMATIK",
-    soruMetni: "3 kalemin fiyatı 18 TL ise 7 kalemin fiyatı kaç TL'dir?",
-    secenekler: ["36", "38", "40", "42", "44"],
+    soruMetni: "f(x) = 2x + 3 fonksiyonuna göre f(4) kaçtır?",
+    secenekler: ["7", "8", "9", "10", "11"],
+    dogruCevap: 4,
+    aciklama: "f(4) = 2×4+3 = 11.",
+  },
+
+  // -- Modüler Aritmetik (1) --
+  {
+    ders: "MATEMATIK",
+    soruMetni: "17 sayısının 5'e bölümünden kalan kaçtır?",
+    secenekler: ["0", "1", "2", "3", "4"],
+    dogruCevap: 2,
+    aciklama: "17 = 3×5 + 2 olduğundan kalan 2'dir.",
+  },
+
+  // -- Permütasyon-Kombinasyon (1) --
+  {
+    ders: "MATEMATIK",
+    soruMetni: "4 farklı kitap bir rafa yan yana kaç farklı şekilde dizilebilir?",
+    secenekler: ["12", "16", "20", "24", "28"],
     dogruCevap: 3,
-    aciklama: "Bir kalem 18/3=6 TL; 7 kalem 7×6=42 TL.",
+    aciklama: "4 farklı nesnenin sıralama sayısı 4! = 24'tür.",
   },
-  {
-    ders: "MATEMATIK",
-    soruMetni: "Bir havuzu bir musluk tek başına 6 saatte, başka bir musluk tek başına 3 saatte dolduruyor. İki musluk birlikte açılırsa havuz kaç saatte dolar?",
-    secenekler: ["1", "1,5", "2", "2,5", "3"],
-    dogruCevap: 2,
-    aciklama: "Saatlik doldurma oranları toplanır: 1/6 + 1/3 = 1/2; havuz 2 saatte dolar.",
-  },
-  {
-    ders: "MATEMATIK",
-    soruMetni: "7! (7 faktöriyel) işleminin sonucu kaçtır?",
-    secenekler: ["720", "2520", "5040", "40320", "120"],
-    dogruCevap: 2,
-    aciklama: "7! = 7×6×5×4×3×2×1 = 5040.",
-  },
+
+  // -- Olasılık (1) --
   {
     ders: "MATEMATIK",
     soruMetni: "Hileli olmayan bir zarın bir kez atılmasında çift sayı gelme olasılığı kaçtır?",
@@ -508,40 +605,58 @@ export const LISANS_SORULARI: SeedSoru[] = [
     dogruCevap: 2,
     aciklama: "Çift sayılar {2,4,6} olduğundan olasılık 3/6=1/2'dir.",
   },
+
+  // -- Sayısal Mantık (3) --
   {
     ders: "MATEMATIK",
-    soruMetni: "45 sayısının asal çarpanlarına ayrılmış hâli aşağıdakilerden hangisidir?",
-    secenekler: ["3²×5", "3×5²", "3×15", "5×9", "2×3²×5"],
-    dogruCevap: 0,
-    aciklama: "45 = 9×5 = 3²×5.",
-  },
-  {
-    ders: "MATEMATIK",
-    soruMetni: "Bir üçgenin iç açıları toplamı kaç derecedir?",
-    secenekler: ["90", "120", "180", "270", "360"],
+    soruMetni: "2, 6, 12, 20, 30, ... dizisinin bir sonraki terimi kaçtır?",
+    secenekler: ["36", "40", "42", "44", "48"],
     dogruCevap: 2,
-    aciklama: "Her üçgende iç açılar toplamı 180 derecedir.",
+    aciklama: "Terimler n×(n+1) biçimindedir (1×2, 2×3, 3×4, ...); 6. terim 6×7=42'dir.",
   },
   {
     ders: "MATEMATIK",
-    soruMetni: "Yarıçapı 5 cm olan bir dairenin alanı kaç cm²'dir? (π=3 alınız)",
-    secenekler: ["15", "30", "45", "75", "100"],
-    dogruCevap: 3,
-    aciklama: "Alan = π×r² = 3×5² = 3×25 = 75 cm².",
+    soruMetni: "Bir sayının 3 katının 2 fazlası, aynı sayının 2 katının 7 fazlasına eşittir. Bu sayı kaçtır?",
+    secenekler: ["3", "4", "5", "6", "7"],
+    dogruCevap: 2,
+    aciklama: "3x+2 = 2x+7 ⟹ x = 5.",
   },
   {
     ders: "MATEMATIK",
-    soruMetni: "5 sayısının 3 fazlasının 2 katı kaçtır?",
-    secenekler: ["10", "13", "14", "16", "18"],
-    dogruCevap: 3,
-    aciklama: "(5+3)×2 = 8×2 = 16.",
+    soruMetni: "A sayısı B'den 4 fazla, B sayısı C'den 3 fazladır. A+B+C=28 olduğuna göre C kaçtır?",
+    secenekler: ["4", "5", "6", "7", "8"],
+    dogruCevap: 2,
+    aciklama: "B=C+3, A=B+4=C+7 olduğundan toplam: (C+7)+(C+3)+C = 3C+10 = 28 ⟹ C=6.",
+  },
+
+  // -- Geometri (4) --
+  {
+    ders: "MATEMATIK",
+    soruMetni: "Bir dik üçgende dik kenarlar 6 cm ve 8 cm ise hipotenüs kaç cm'dir?",
+    secenekler: ["9", "10", "12", "14", "16"],
+    dogruCevap: 1,
+    aciklama: "Pisagor teoremine göre hipotenüs = √(6²+8²) = √100 = 10 cm.",
   },
   {
     ders: "MATEMATIK",
-    soruMetni: "Bir sayının 4 katının 5 eksiği 27 olduğuna göre bu sayı kaçtır?",
+    soruMetni: "Bir ikizkenar üçgende taban açılarından biri 50° ise tepe açısı kaç derecedir?",
+    secenekler: ["60", "70", "80", "90", "100"],
+    dogruCevap: 2,
+    aciklama: "İkizkenar üçgende taban açıları eşittir (50°+50°=100°); tepe açısı 180°-100°=80°.",
+  },
+  {
+    ders: "MATEMATIK",
+    soruMetni: "Bir dikdörtgenin alanı 48 cm², kısa kenarı 6 cm ise uzun kenarı kaç cm'dir?",
     secenekler: ["6", "7", "8", "9", "10"],
     dogruCevap: 2,
-    aciklama: "4x - 5 = 27 ⟹ 4x = 32 ⟹ x = 8.",
+    aciklama: "Uzun kenar = alan/kısa kenar = 48/6 = 8 cm.",
+  },
+  {
+    ders: "MATEMATIK",
+    soruMetni: "Yarıçapı 6 cm olan bir çemberin alanı kaç cm²'dir? (π=3 alınız)",
+    secenekler: ["36", "54", "72", "108", "144"],
+    dogruCevap: 3,
+    aciklama: "Alan = π×r² = 3×36 = 108 cm².",
   },
 
   // ---- TARİH (27) ----
