@@ -25,18 +25,22 @@ function kpssGridAdimi(maxDeger: number): number {
 export default async function AnalizPage({
   searchParams,
 }: {
-  searchParams: Promise<{ bolum?: string; siraBaslangic?: string; siraBitis?: string }>;
+  searchParams: Promise<{ bolum?: string; siraBaslangic?: string; siraBitis?: string; siraDuzey?: string }>;
 }) {
-  const { bolum, siraBaslangic, siraBitis } = await searchParams;
+  const { bolum, siraBaslangic, siraBitis, siraDuzey } = await searchParams;
   const resmiSeri = getResmiIstihdamSerisi();
   const bolumler = await getKpssBolumListesi();
 
   // Siralama yonu (artan/azalan) tamamen client-side degistiriliyor (bkz.
   // BolumSiralamaPaneli) - burada her zaman "cok" (azalan) ile cekilir.
   const { ilkYil: siraIlkYil, sonYil: siraSonYil } = await getKpssVeriAraligi();
+  const gecerliDuzeyler = ["LISE", "ONLISANS", "LISANS"];
   const bolumSiralamasi = await getBolumSiralamasi({
     baslangicYil: siraBaslangic ? Number(siraBaslangic) : undefined,
     bitisYil: siraBitis ? Number(siraBitis) : undefined,
+    ogrenimDuzeyi: gecerliDuzeyler.includes(siraDuzey ?? "")
+      ? (siraDuzey as "LISE" | "ONLISANS" | "LISANS")
+      : undefined,
     siralama: "cok",
   });
 

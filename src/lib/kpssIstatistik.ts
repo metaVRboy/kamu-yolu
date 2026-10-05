@@ -57,6 +57,7 @@ export async function getBolumSiralamasi(params: {
   baslangicYil?: number;
   bitisYil?: number;
   siralama: "cok" | "az";
+  ogrenimDuzeyi?: OgrenimDuzeyi;
   limit?: number;
 }): Promise<BolumSiralamaSatiri[]> {
   const { ilkYil, sonYil } = await getKpssVeriAraligi();
@@ -71,7 +72,10 @@ export async function getBolumSiralamasi(params: {
 
   const anlamliGruplar = gruplar.filter((g) => (g._sum.kontenjan ?? 0) > 0);
   const bolumler = await prisma.kpssBolum.findMany({
-    where: { id: { in: anlamliGruplar.map((g) => g.bolumId) } },
+    where: {
+      id: { in: anlamliGruplar.map((g) => g.bolumId) },
+      ...(params.ogrenimDuzeyi ? { ogrenimDuzeyi: params.ogrenimDuzeyi } : {}),
+    },
     select: { id: true, ad: true, ogrenimDuzeyi: true },
   });
   const bolumById = new Map(bolumler.map((b) => [b.id, b]));

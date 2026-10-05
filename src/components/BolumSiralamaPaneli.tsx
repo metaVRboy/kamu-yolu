@@ -25,11 +25,13 @@ export function BolumSiralamaPaneli({
 
   const uygulananBaslangic = searchParams.get("siraBaslangic") ?? TUMU;
   const uygulananBitis = searchParams.get("siraBitis") ?? TUMU;
+  const uygulananDuzey = searchParams.get("siraDuzey") ?? TUMU;
 
   const [filtreAcik, setFiltreAcik] = useState(false);
   // Taslak secimler - "Uygula"ya basilana kadar URL'e (dolayisiyla sorguya) yansimaz.
   const [taslakBaslangic, setTaslakBaslangic] = useState(uygulananBaslangic);
   const [taslakBitis, setTaslakBitis] = useState(uygulananBitis);
+  const [taslakDuzey, setTaslakDuzey] = useState(uygulananDuzey);
 
   // Siralama yonu sayfa yenilemeden, tamamen client-side degisir (sunucudan
   // gelen liste zaten "azalan" sirali - "artan" icin sadece ters ceviriyoruz).
@@ -40,7 +42,7 @@ export function BolumSiralamaPaneli({
   }, [siralama, siraYon]);
 
   const yillar = Array.from({ length: sonYil - ilkYil + 1 }, (_, i) => ilkYil + i);
-  const filtreAktif = uygulananBaslangic !== TUMU || uygulananBitis !== TUMU;
+  const filtreAktif = uygulananBaslangic !== TUMU || uygulananBitis !== TUMU || uygulananDuzey !== TUMU;
 
   const efektifBaslangic = uygulananBaslangic === TUMU ? ilkYil : Number(uygulananBaslangic);
   const efektifBitis = uygulananBitis === TUMU ? sonYil : Number(uygulananBitis);
@@ -50,6 +52,7 @@ export function BolumSiralamaPaneli({
   function filtreyiAc() {
     setTaslakBaslangic(uygulananBaslangic);
     setTaslakBitis(uygulananBitis);
+    setTaslakDuzey(uygulananDuzey);
     setFiltreAcik((v) => !v);
   }
 
@@ -59,6 +62,8 @@ export function BolumSiralamaPaneli({
     else params.set("siraBaslangic", taslakBaslangic);
     if (taslakBitis === TUMU) params.delete("siraBitis");
     else params.set("siraBitis", taslakBitis);
+    if (taslakDuzey === TUMU) params.delete("siraDuzey");
+    else params.set("siraDuzey", taslakDuzey);
     router.push(`${pathname}?${params.toString()}`);
     setFiltreAcik(false);
   }
@@ -132,6 +137,19 @@ export function BolumSiralamaPaneli({
                   {y}
                 </option>
               ))}
+            </select>
+          </label>
+          <label className="flex flex-col gap-1 text-[11px] text-muted-foreground">
+            Öğrenim Düzeyi
+            <select
+              value={taslakDuzey}
+              onChange={(e) => setTaslakDuzey(e.target.value)}
+              className="rounded-lg border border-primary/20 px-1.5 py-1 text-xs"
+            >
+              <option value={TUMU}>Tümü</option>
+              <option value="LISE">Lise</option>
+              <option value="ONLISANS">Önlisans</option>
+              <option value="LISANS">Lisans</option>
             </select>
           </label>
           <button
