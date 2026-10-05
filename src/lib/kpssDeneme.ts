@@ -89,8 +89,9 @@ export async function girisVeyaDevamEt(userId: string, gunlukDenemeId: string) {
   });
 }
 
-export function sinavSuresiDoldu(baslangicZamani: Date): boolean {
-  return Date.now() >= baslangicZamani.getTime() + SINAV_SURESI_DK * 60_000;
+/** Sunucu saatine gore sinavin kalan suresi (ms); <= 0 ise sure dolmustur. */
+export function kalanSureMs(baslangicZamani: Date): number {
+  return baslangicZamani.getTime() + SINAV_SURESI_DK * 60_000 - Date.now();
 }
 
 export async function cevapKaydet(katilimId: string, userId: string, soruId: string, secenekIndex: number) {
@@ -103,7 +104,7 @@ export async function cevapKaydet(katilimId: string, userId: string, soruId: str
   if (!katilim || katilim.userId !== userId || !katilim.gunlukDeneme.soruIdler.includes(soruId)) {
     throw new Error("UNAUTHORIZED");
   }
-  if (katilim.bitisZamani || sinavSuresiDoldu(katilim.baslangicZamani)) {
+  if (katilim.bitisZamani || kalanSureMs(katilim.baslangicZamani) <= 0) {
     throw new Error("SINAV_BITTI");
   }
   // Oku-degistir-yaz DEGIL, tek atomik jsonb birlestirme: art arda hizli

@@ -3,26 +3,28 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Clock } from "lucide-react";
-import { SINAV_SURESI_DK, DERS_LABEL, type ExamSoru } from "@/lib/kpssDenemeSabitler";
+import { DERS_LABEL, type ExamSoru } from "@/lib/kpssDenemeSabitler";
 import { SoruGovdesi } from "@/components/SoruGovdesi";
 
 export function DenemeSinavi({
   katilimId,
-  baslangicZamaniIso,
+  ilkKalanMs,
   sorular,
   ilkCevaplar,
 }: {
   katilimId: string;
-  baslangicZamaniIso: string;
+  ilkKalanMs: number;
   sorular: ExamSoru[];
   ilkCevaplar: Record<string, number>;
 }) {
   const router = useRouter();
-  const bitisZamaniMs = new Date(baslangicZamaniIso).getTime() + SINAV_SURESI_DK * 60_000;
+  // Bitis ani, sunucunun verdigi KALAN sureden cihazin kendi saatinde bir kez
+  // kurulur - baslangic zamanindan hesaplansaydi cihaz saati kayiksa sayac da kayardi.
+  const [bitisZamaniMs] = useState(() => Date.now() + ilkKalanMs);
 
   const [index, setIndex] = useState(0);
   const [cevaplar, setCevaplar] = useState<Record<string, number>>(ilkCevaplar);
-  const [kalanMs, setKalanMs] = useState(() => bitisZamaniMs - Date.now());
+  const [kalanMs, setKalanMs] = useState(ilkKalanMs);
   const bittiRef = useRef(false);
 
   const bitir = useCallback(async () => {

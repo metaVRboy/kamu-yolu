@@ -7,7 +7,7 @@ import {
   getDenemeSorulari,
   getKatilim,
   denemeyiBitir,
-  sinavSuresiDoldu,
+  kalanSureMs,
   sinavaGuvenliHaleGetir,
 } from "@/lib/kpssDeneme";
 import {
@@ -69,7 +69,7 @@ export default async function KpssDenemesiDuzeyPage({ params }: { params: Promis
   let katilim = await getKatilim(user.id, gunlukDeneme.id);
 
   // Sure dolmus ama hic bitirilmemis (ör. sekme kapatildi) - otomatik sonuclandir.
-  if (katilim && !katilim.bitisZamani && sinavSuresiDoldu(katilim.baslangicZamani)) {
+  if (katilim && !katilim.bitisZamani && kalanSureMs(katilim.baslangicZamani) <= 0) {
     katilim = await denemeyiBitir(katilim.id, user.id);
   }
 
@@ -122,7 +122,7 @@ export default async function KpssDenemesiDuzeyPage({ params }: { params: Promis
   return (
     <DenemeSinavi
       katilimId={katilim.id}
-      baslangicZamaniIso={katilim.baslangicZamani.toISOString()}
+      ilkKalanMs={kalanSureMs(katilim.baslangicZamani)}
       sorular={sinavaGuvenliHaleGetir(sorular)}
       ilkCevaplar={katilim.cevaplar as Record<string, number>}
     />
