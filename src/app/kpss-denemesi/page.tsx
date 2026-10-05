@@ -6,8 +6,6 @@ import { DENEME_DUZEYLERI, DUZEY_LABEL, SINAV_SURESI_DK, TOPLAM_SORU } from "@/l
 export const metadata = { title: "KPSS Deneme Sınavı — Kamu Yolu" };
 export const revalidate = 60;
 
-const DUZEY_SLUG: Record<string, string> = { LISE: "lise", ONLISANS: "onlisans", LISANS: "lisans" };
-
 export default async function KpssDenemesiHubPage() {
   const havuzSayilari = await prisma.denemeSoru.groupBy({ by: ["duzey"], _count: { _all: true } });
   const sayiByDuzey = new Map(havuzSayilari.map((h) => [h.duzey, h._count._all]));
@@ -41,7 +39,7 @@ export default async function KpssDenemesiHubPage() {
               </div>
               {hazirMi ? (
                 <Link
-                  href={`/kpss-denemesi/${DUZEY_SLUG[duzey]}`}
+                  href={`/kpss-denemesi/${duzey.toLowerCase()}`}
                   className="mt-4 inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
                 >
                   Sınava Başla

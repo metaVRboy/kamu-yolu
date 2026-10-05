@@ -61,30 +61,6 @@ export type ExamSoru = {
 };
 
 /**
- * Bir sorunun, ayni grupId'yi paylasan kardesleri icindeki 1-indexli soru
- * numarasini ve grubun tam araligini ("52-53" gibi) hesaplar. grupId yoksa
- * null doner (tekil soru, grup basligi gosterilmez).
- */
-export type GrupAraligi = { bu: number; ilk: number; son: number };
-
-export function grupAraligiHesapla(
-  sorular: { id: string; grupId: string | null }[],
-  soruId: string,
-): GrupAraligi | null {
-  const buIndeks = sorular.findIndex((s) => s.id === soruId);
-  const grupId = sorular[buIndeks]?.grupId;
-  if (!grupId) return null;
-  const grupIndeksleri = sorular
-    .map((s, i) => (s.grupId === grupId ? i : -1))
-    .filter((i) => i >= 0);
-  return {
-    bu: buIndeks + 1,
-    ilk: Math.min(...grupIndeksleri) + 1,
-    son: Math.max(...grupIndeksleri) + 1,
-  };
-}
-
-/**
  * Ortak metinli bir sorunun metni "ortak parca\n\nasil soru" seklinde
  * saklanir - numara SADECE son (asil soru) satirina eklenir, paylasilan
  * parcaya degil.

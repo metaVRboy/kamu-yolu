@@ -1,19 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Clock } from "lucide-react";
-import { SINAV_SURESI_DK, DERS_LABEL, grupAraligiHesapla, type ExamSoru } from "@/lib/kpssDenemeSabitler";
+import { SINAV_SURESI_DK, DERS_LABEL, type ExamSoru } from "@/lib/kpssDenemeSabitler";
 import { SoruGovdesi } from "@/components/SoruGovdesi";
-
-function sureFormatla(ms: number): string {
-  const toplamSaniye = Math.max(0, Math.floor(ms / 1000));
-  const saat = Math.floor(toplamSaniye / 3600);
-  const dakika = Math.floor((toplamSaniye % 3600) / 60);
-  const saniye = toplamSaniye % 60;
-  const iki = (n: number) => n.toString().padStart(2, "0");
-  return saat > 0 ? `${saat}:${iki(dakika)}:${iki(saniye)}` : `${iki(dakika)}:${iki(saniye)}`;
-}
 
 export function DenemeSinavi({
   katilimId,
@@ -27,10 +18,7 @@ export function DenemeSinavi({
   ilkCevaplar: Record<string, number>;
 }) {
   const router = useRouter();
-  const bitisZamaniMs = useMemo(
-    () => new Date(baslangicZamaniIso).getTime() + SINAV_SURESI_DK * 60_000,
-    [baslangicZamaniIso],
-  );
+  const bitisZamaniMs = new Date(baslangicZamaniIso).getTime() + SINAV_SURESI_DK * 60_000;
 
   const [index, setIndex] = useState(0);
   const [cevaplar, setCevaplar] = useState<Record<string, number>>(ilkCevaplar);
@@ -61,7 +49,6 @@ export function DenemeSinavi({
   }, [bitisZamaniMs, bitir]);
 
   const soru = sorular[index];
-  const grupAraligi = grupAraligiHesapla(sorular, soru.id);
 
   async function cevapSec(secenekIndex: number) {
     setCevaplar((onceki) => ({ ...onceki, [soru.id]: secenekIndex }));
@@ -92,7 +79,7 @@ export function DenemeSinavi({
           className={`flex items-center gap-1.5 font-mono text-lg font-semibold ${sureAzaldiMi ? "text-destructive" : "text-primary"}`}
         >
           <Clock className="h-5 w-5" />
-          {sureFormatla(kalanMs)}
+          {new Date(Math.max(0, kalanMs)).toISOString().slice(11, 19)}
         </div>
         <button
           type="button"
@@ -110,7 +97,7 @@ export function DenemeSinavi({
           </span>
           <span className="rounded-full bg-primary/10 px-2.5 py-0.5 font-medium text-primary">{DERS_LABEL[soru.ders]}</span>
         </div>
-        <SoruGovdesi soru={soru} grupAraligi={grupAraligi} />
+        <SoruGovdesi sorular={sorular} index={index} />
         <div className="mt-4 space-y-2">
           {soru.secenekler.map((secenek, i) => (
             <button

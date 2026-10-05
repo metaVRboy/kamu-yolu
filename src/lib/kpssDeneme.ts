@@ -72,14 +72,7 @@ export async function getDenemeSorulari(soruIdler: string[]) {
  * cevap ve aciklama ASLA buna dahil edilmez (RSC payload'ini inceleyerek
  * kopya cekmeyi onlemek icin). */
 export function sinavaGuvenliHaleGetir(sorular: ExamSoru[]): ExamSoru[] {
-  return sorular.map((s) => ({
-    id: s.id,
-    ders: s.ders,
-    soruMetni: s.soruMetni,
-    grupId: s.grupId,
-    gorselSvg: s.gorselSvg,
-    secenekler: s.secenekler,
-  }));
+  return sorular.map(({ id, ders, soruMetni, grupId, gorselSvg, secenekler }) => ({ id, ders, soruMetni, grupId, gorselSvg, secenekler }));
 }
 
 /** Kullanicinin bu gunluk deneme icin kaydi var mi (olusturmadan sadece okur). */
@@ -96,35 +89,29 @@ export async function girisVeyaDevamEt(userId: string, gunlukDenemeId: string) {
   });
 }
 
-export function sinavBitisZamani(baslangicZamani: Date): Date {
-  return new Date(baslangicZamani.getTime() + SINAV_SURESI_DK * 60_000);
-}
-
 export function sinavSuresiDoldu(baslangicZamani: Date): boolean {
-  return Date.now() >= sinavBitisZamani(baslangicZamani).getTime();
+  return Date.now() >= baslangicZamani.getTime() + SINAV_SURESI_DK * 60_000;
 }
 
-export async function cevapKaydet(katilimId: string, userId: string, soruId: string, secenekIndex: number | null) {
-  const katilim = await prisma.denemeKatilim.findUnique({ where: { id: katilimId } });
-  if (!katilim || katilim.userId !== userId) throw new Error("UNAUTHORIZED");
+export async function cevapKaydet(katilimId: string, userId: string, soruId: string, secenekIndex: number) {
+  const katilim = await prisma.denemeKatilim.findUnique({
+    where: { id: katilimId },
+    include: { gunlukDeneme: { select: { soruIdler: true } } },
+  });
+  // soruId istemciden gelir - gunun sorusu degilse yazilmaz, yoksa cevaplar
+  // JSON'u keyfi anahtarlarla sinirsiz sisirilebilir.
+  if (!katilim || katilim.userId !== userId || !katilim.gunlukDeneme.soruIdler.includes(soruId)) {
+    throw new Error("UNAUTHORIZED");
+  }
   if (katilim.bitisZamani || sinavSuresiDoldu(katilim.baslangicZamani)) {
     throw new Error("SINAV_BITTI");
   }
-  const cevaplar = { ...(katilim.cevaplar as Record<string, number>) };
-  if (secenekIndex === null) delete cevaplar[soruId];
-  else cevaplar[soruId] = secenekIndex;
-  await prisma.denemeKatilim.update({ where: { id: katilimId }, data: { cevaplar } });
+  // Oku-degistir-yaz DEGIL, tek atomik jsonb birlestirme: art arda hizli
+  // cevaplarda es zamanli iki istek birbirinin uzerine yazip cevap kaybettiriyordu.
+  await prisma.$executeRaw`UPDATE "DenemeKatilim" SET cevaplar = cevaplar || jsonb_build_object(${soruId}::text, ${secenekIndex}::int) WHERE id = ${katilimId}`;
 }
 
-export type DenemeSonucu = {
-  dogruSayisi: number;
-  yanlisSayisi: number;
-  bosSayisi: number;
-  net: number;
-  puan: number;
-};
-
-function sonucuHesapla(cevaplar: Record<string, number>, sorular: { id: string; dogruCevap: number }[]): DenemeSonucu {
+function sonucuHesapla(cevaplar: Record<string, number>, sorular: { id: string; dogruCevap: number }[]) {
   let dogru = 0;
   let yanlis = 0;
   for (const s of sorular) {
@@ -139,7 +126,7 @@ function sonucuHesapla(cevaplar: Record<string, number>, sorular: { id: string; 
   // dagilimina dayanir - bizde o havuz olmadigi icin burada SADECE net'in
   // 100 uzerinden basit bir olcegi hesaplaniyor; resmi puan DEGILDIR.
   const puan = Math.max(0, Math.round((net / sorular.length) * 10000) / 100);
-  return { dogruSayisi: dogru, yanlisSayisi: yanlis, bosSayisi: bos, net, puan };
+  return { dogruSayisi: dogru, yanlisSayisi: yanlis, bosSayisi: bos, puan };
 }
 
 /** Sinavi bitirir (butonla veya sure dolunca) ve sonucu hesaplayip kaydeder. */
@@ -155,16 +142,9 @@ export async function denemeyiBitir(katilimId: string, userId: string) {
     where: { id: { in: katilim.gunlukDeneme.soruIdler } },
     select: { id: true, dogruCevap: true },
   });
-  const sonuc = sonucuHesapla(katilim.cevaplar as Record<string, number>, sorular);
 
   return prisma.denemeKatilim.update({
     where: { id: katilimId },
-    data: {
-      bitisZamani: new Date(),
-      dogruSayisi: sonuc.dogruSayisi,
-      yanlisSayisi: sonuc.yanlisSayisi,
-      bosSayisi: sonuc.bosSayisi,
-      puan: sonuc.puan,
-    },
+    data: { bitisZamani: new Date(), ...sonucuHesapla(katilim.cevaplar as Record<string, number>, sorular) },
   });
 }

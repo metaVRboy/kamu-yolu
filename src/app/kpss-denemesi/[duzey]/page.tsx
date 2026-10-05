@@ -10,18 +10,23 @@ import {
   sinavSuresiDoldu,
   sinavaGuvenliHaleGetir,
 } from "@/lib/kpssDeneme";
-import { DUZEY_LABEL, SINAV_SURESI_DK, TOPLAM_SORU, DERS_DAGILIMI, DERS_LABEL } from "@/lib/kpssDenemeSabitler";
-import type { EducationLevel } from "@/generated/prisma/client";
+import {
+  DUZEY_LABEL,
+  SINAV_SURESI_DK,
+  TOPLAM_SORU,
+  DERS_DAGILIMI,
+  DERS_LABEL,
+  DERS_SIRASI,
+  gecerliDenemeDuzeyiMi,
+} from "@/lib/kpssDenemeSabitler";
 import { DenemeBaslaButonu } from "@/components/DenemeBaslaButonu";
 import { DenemeSinavi } from "@/components/DenemeSinavi";
 import { DenemeSonucEkrani } from "@/components/DenemeSonucEkrani";
 
-const SLUG_TO_DUZEY: Record<string, EducationLevel> = { lise: "LISE", onlisans: "ONLISANS", lisans: "LISANS" };
-
 export default async function KpssDenemesiDuzeyPage({ params }: { params: Promise<{ duzey: string }> }) {
   const { duzey: slug } = await params;
-  const duzey = SLUG_TO_DUZEY[slug];
-  if (!duzey) notFound();
+  const duzey = slug.toUpperCase();
+  if (!gecerliDenemeDuzeyiMi(duzey)) notFound();
 
   const user = await getCurrentUser();
 
@@ -69,7 +74,6 @@ export default async function KpssDenemesiDuzeyPage({ params }: { params: Promis
   }
 
   if (!katilim) {
-    const dersSatirlari = Object.entries(DERS_DAGILIMI) as [keyof typeof DERS_DAGILIMI, number][];
     return (
       <div className="mx-auto max-w-2xl px-4 py-16 text-center sm:px-6">
         <h1 className="text-xl font-semibold text-slate-800">{DUZEY_LABEL[duzey]} KPSS Denemesi</h1>
@@ -82,10 +86,10 @@ export default async function KpssDenemesiDuzeyPage({ params }: { params: Promis
           </span>
         </div>
         <ul className="mx-auto mt-4 max-w-xs space-y-1 text-left text-sm text-muted-foreground">
-          {dersSatirlari.map(([ders, adet]) => (
+          {DERS_SIRASI.map((ders) => (
             <li key={ders} className="flex items-center justify-between">
               <span>{DERS_LABEL[ders]}</span>
-              <span className="font-medium text-slate-600">{adet} soru</span>
+              <span className="font-medium text-slate-600">{DERS_DAGILIMI[ders]} soru</span>
             </li>
           ))}
         </ul>

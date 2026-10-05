@@ -1,24 +1,19 @@
-import { soruMetniNumarali, type GrupAraligi } from "@/lib/kpssDenemeSabitler";
-import type { DenemeDers } from "@/generated/prisma/client";
+import { soruMetniNumarali, type ExamSoru } from "@/lib/kpssDenemeSabitler";
 
 /** Sinav ve sonuc ekranlarinda ortak: grup basligi + numarali soru metni + gorsel. */
-export function SoruGovdesi({
-  soru,
-  grupAraligi,
-}: {
-  soru: { ders: DenemeDers; soruMetni: string; gorselSvg: string | null };
-  grupAraligi: GrupAraligi | null;
-}) {
+export function SoruGovdesi({ sorular, index }: { sorular: ExamSoru[]; index: number }) {
+  const soru = sorular[index];
+  const ayniGrup = (s: ExamSoru) => s.grupId === soru.grupId;
   return (
     <>
-      {grupAraligi && (
+      {soru.grupId && (
         <p className="mt-3 text-sm font-semibold text-primary">
-          {grupAraligi.ilk}-{grupAraligi.son}. soruları aşağıdaki {soru.ders === "MATEMATIK" ? "bilgiye" : "parçaya"} göre
-          cevaplayınız.
+          {sorular.findIndex(ayniGrup) + 1}-{sorular.findLastIndex(ayniGrup) + 1}. soruları aşağıdaki{" "}
+          {soru.ders === "MATEMATIK" ? "bilgiye" : "parçaya"} göre cevaplayınız.
         </p>
       )}
       <p className="mt-3 whitespace-pre-line text-base font-medium text-slate-800">
-        {grupAraligi ? soruMetniNumarali(soru.soruMetni, grupAraligi.bu) : soru.soruMetni}
+        {soru.grupId ? soruMetniNumarali(soru.soruMetni, index + 1) : soru.soruMetni}
       </p>
       {soru.gorselSvg && (
         <div

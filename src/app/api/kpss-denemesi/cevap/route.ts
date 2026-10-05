@@ -6,8 +6,7 @@ import { cevapKaydet } from "@/lib/kpssDeneme";
 const bodySchema = z.object({
   katilimId: z.string().min(1),
   soruId: z.string().min(1),
-  // null = cevabi temizle (bos birak)
-  secenekIndex: z.number().int().min(0).max(4).nullable(),
+  secenekIndex: z.number().int().min(0).max(4),
 });
 
 export async function POST(req: NextRequest) {

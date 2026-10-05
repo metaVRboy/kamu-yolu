@@ -2,20 +2,10 @@
 
 import { useState } from "react";
 import { CheckCircle2, XCircle, MinusCircle } from "lucide-react";
-import { DERS_LABEL, grupAraligiHesapla } from "@/lib/kpssDenemeSabitler";
+import { DERS_LABEL, type ExamSoru } from "@/lib/kpssDenemeSabitler";
 import { SoruGovdesi } from "@/components/SoruGovdesi";
-import type { DenemeDers } from "@/generated/prisma/client";
 
-export type SonucSorusu = {
-  id: string;
-  ders: DenemeDers;
-  soruMetni: string;
-  grupId: string | null;
-  gorselSvg: string | null;
-  secenekler: string[];
-  dogruCevap: number;
-  aciklama: string | null;
-};
+type SonucSorusu = ExamSoru & { dogruCevap: number; aciklama: string | null };
 
 export function DenemeSonucEkrani({
   sorular,
@@ -32,12 +22,10 @@ export function DenemeSonucEkrani({
   bosSayisi: number;
   puan: number;
 }) {
-  const ilkYanlisIndex = sorular.findIndex((s) => cevaplar[s.id] !== undefined && cevaplar[s.id] !== s.dogruCevap);
-  const [incelenenIndex, setIncelenenIndex] = useState(ilkYanlisIndex >= 0 ? ilkYanlisIndex : 0);
+  const [incelenenIndex, setIncelenenIndex] = useState(Math.max(0, sorular.findIndex((s) => durum(s) === "yanlis")));
   const net = dogruSayisi - yanlisSayisi / 4;
   const incelenen = sorular[incelenenIndex];
   const verilenCevap = cevaplar[incelenen.id];
-  const grupAraligi = grupAraligiHesapla(sorular, incelenen.id);
 
   function durum(s: SonucSorusu): "dogru" | "yanlis" | "bos" {
     const verilen = cevaplar[s.id];
@@ -116,7 +104,7 @@ export function DenemeSonucEkrani({
             {DERS_LABEL[incelenen.ders]}
           </span>
         </div>
-        <SoruGovdesi soru={incelenen} grupAraligi={grupAraligi} />
+        <SoruGovdesi sorular={sorular} index={incelenenIndex} />
         <div className="mt-4 space-y-2">
           {incelenen.secenekler.map((secenek, i) => {
             const dogruMu = i === incelenen.dogruCevap;
