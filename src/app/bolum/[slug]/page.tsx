@@ -1,12 +1,13 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Bell } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import {
   getAvailableFiltersForDepartment,
   getPostingsForDepartment,
 } from "@/lib/matching";
 import { getHaberlerForDepartment } from "@/lib/haberler";
+import { getCurrentUser } from "@/lib/auth";
 import { PostingCard } from "@/components/PostingCard";
 import { FilterBar } from "@/components/FilterBar";
 import { HaberlerSection } from "@/components/HaberlerSection";
@@ -29,7 +30,7 @@ export default async function DepartmentResultsPage({
   const department = await prisma.department.findUnique({ where: { slug } });
   if (!department) notFound();
 
-  const [postings, filterOptions, ilgiliHaberler] = await Promise.all([
+  const [postings, filterOptions, ilgiliHaberler, user] = await Promise.all([
     getPostingsForDepartment(department.id, {
       institutionType: kurum,
       ilanTuru,
@@ -38,10 +39,38 @@ export default async function DepartmentResultsPage({
     }),
     getAvailableFiltersForDepartment(department.id),
     getHaberlerForDepartment(department),
+    getCurrentUser(),
   ]);
+  // SMS ile anlik ilan bildirimi Pro ozelligi (bkz. AbonelikPlanlari) - bu
+  // yuzden Pro/Pro+ uyelere yukseltme kartini gostermiyoruz.
+  const yukseltmeKartiGoster = user?.abonelikPlani !== "PRO" && user?.abonelikPlani !== "PRO_PLUS";
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+      {yukseltmeKartiGoster && (
+        <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-slate-700">
+          <Bell className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+          <p>
+            {department.name} ile ilgili yayınlanan ilanlardan anında haberdar olmak için{" "}
+            <Link
+              href={user ? "/profilim/abonelik" : "/kayit-ol"}
+              className="font-semibold text-primary underline-offset-2 hover:underline"
+            >
+              üyeliğini yükselt
+            </Link>
+            {!user && (
+              <>
+                . Henüz hesabın yoksa{" "}
+                <Link href="/kayit-ol" className="font-semibold text-primary underline-offset-2 hover:underline">
+                  kayıt ol
+                </Link>
+              </>
+            )}
+            .
+          </p>
+        </div>
+      )}
+
       <Link
         href="/"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
