@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { CheckCircle2, XCircle, MinusCircle } from "lucide-react";
-import { DERS_LABEL, grupAraligiHesapla, soruMetniNumarali } from "@/lib/kpssDenemeSabitler";
+import { DERS_LABEL, grupAraligiHesapla } from "@/lib/kpssDenemeSabitler";
+import { SoruGovdesi } from "@/components/SoruGovdesi";
 import type { DenemeDers } from "@/generated/prisma/client";
 
 export type SonucSorusu = {
@@ -115,21 +116,7 @@ export function DenemeSonucEkrani({
             {DERS_LABEL[incelenen.ders]}
           </span>
         </div>
-        {grupAraligi && (
-          <p className="mt-3 text-sm font-semibold text-primary">
-            {grupAraligi.ilk}-{grupAraligi.son}. soruları aşağıdaki {incelenen.ders === "MATEMATIK" ? "bilgiye" : "parçaya"}{" "}
-            göre cevaplayınız.
-          </p>
-        )}
-        <p className="mt-3 whitespace-pre-line text-base font-medium text-slate-800">
-          {grupAraligi ? soruMetniNumarali(incelenen.soruMetni, grupAraligi.bu) : incelenen.soruMetni}
-        </p>
-        {incelenen.gorselSvg && (
-          <div
-            className="mx-auto mt-4 max-w-md [&_svg]:h-auto [&_svg]:w-full"
-            dangerouslySetInnerHTML={{ __html: incelenen.gorselSvg }}
-          />
-        )}
+        <SoruGovdesi soru={incelenen} grupAraligi={grupAraligi} />
         <div className="mt-4 space-y-2">
           {incelenen.secenekler.map((secenek, i) => {
             const dogruMu = i === incelenen.dogruCevap;

@@ -2,8 +2,6 @@ import { prisma } from "@/lib/prisma";
 import type { EducationLevel } from "@/generated/prisma/client";
 import { DERS_SIRASI, DERS_DAGILIMI, DERS_LABEL, DUZEY_LABEL, SINAV_SURESI_DK, type ExamSoru } from "@/lib/kpssDenemeSabitler";
 
-export * from "@/lib/kpssDenemeSabitler";
-
 /** Turkiye takvim gunu (sunucu hangi saat diliminde calisirsa calissin). */
 function bugununTarihi(): Date {
   const parcalar = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Istanbul" }).formatToParts(new Date());

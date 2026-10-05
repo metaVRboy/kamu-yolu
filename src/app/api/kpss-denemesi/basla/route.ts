@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
-import { getBugununDenemesi, girisVeyaDevamEt, gecerliDenemeDuzeyiMi } from "@/lib/kpssDeneme";
+import { getBugununDenemesi, girisVeyaDevamEt } from "@/lib/kpssDeneme";
+import { gecerliDenemeDuzeyiMi } from "@/lib/kpssDenemeSabitler";
 
 const bodySchema = z.object({ duzey: z.string() });
 

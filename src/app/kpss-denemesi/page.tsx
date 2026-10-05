@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { GraduationCap, Clock, ListChecks } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { DENEME_DUZEYLERI, DUZEY_LABEL, SINAV_SURESI_DK, TOPLAM_SORU } from "@/lib/kpssDeneme";
+import { DENEME_DUZEYLERI, DUZEY_LABEL, SINAV_SURESI_DK, TOPLAM_SORU } from "@/lib/kpssDenemeSabitler";
 
 export const metadata = { title: "KPSS Deneme Sınavı — Kamu Yolu" };
 export const revalidate = 60;

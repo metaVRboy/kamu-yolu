@@ -100,8 +100,9 @@ export default async function KpssDenemesiDuzeyPage({ params }: { params: Promis
     );
   }
 
+  const sorular = await getDenemeSorulari(gunlukDeneme.soruIdler);
+
   if (katilim.bitisZamani) {
-    const sorular = await getDenemeSorulari(gunlukDeneme.soruIdler);
     return (
       <DenemeSonucEkrani
         sorular={sorular}
@@ -114,7 +115,6 @@ export default async function KpssDenemesiDuzeyPage({ params }: { params: Promis
     );
   }
 
-  const sorular = await getDenemeSorulari(gunlukDeneme.soruIdler);
   return (
     <DenemeSinavi
       katilimId={katilim.id}
