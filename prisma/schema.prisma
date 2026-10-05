@@ -159,6 +159,7 @@ model User {
   gonderdigiMesajlar BecayisMesaj[] @relation("MesajGonderen")
   bildirimler      Bildirim[]
   sifreSifirlamaTokenlari PasswordResetToken[]
+  denemeKatilimlari DenemeKatilim[]
 }
 
 model PasswordResetToken {
@@ -400,4 +401,68 @@ model DgsGecis {
   puanTuru      String
 
   @@index([onlisansAdi])
+}
+
+enum DenemeDers {
+  TURKCE
+  MATEMATIK
+  TARIH
+  COGRAFYA
+  VATANDASLIK
+  GUNCEL
+}
+
+// KPSS deneme sinavi soru havuzu - AI tarafindan uretilen ozgun sorular
+// (gercek OSYM sorulari degil, telif/bot-korumasi riskleri nedeniyle).
+// Her gun GunlukDeneme bu havuzdan ornekleme yaparak o gunun sabit soru
+// setini olusturur - sorular kullaniciya ozel degil, herkese ayni yayinlanir.
+model DenemeSoru {
+  id              String         @id @default(cuid())
+  duzey           EducationLevel
+  ders            DenemeDers
+  soruMetni       String
+  // 5 sik (A-E), sirayla
+  secenekler      String[]
+  // Dogru sikkin secenekler dizisindeki indeksi (0-4)
+  dogruCevap      Int
+  aciklama        String?
+  olusturmaTarihi DateTime       @default(now())
+  // Gunluk deneme secimi "en az kullanilani oncelikle sec" stratejisiyle
+  // calisiyor - tekrar sikligini dusurmek icin.
+  kullanimSayisi  Int            @default(0)
+
+  @@index([duzey, ders, kullanimSayisi])
+}
+
+// Bir duzey+tarih icin SABIT soru seti - olusturulduktan sonra degismez,
+// o gun giren TUM kullanicilar ayni 120 soruyu ayni sirada gorur.
+model GunlukDeneme {
+  id         String          @id @default(cuid())
+  duzey      EducationLevel
+  tarih      DateTime        @db.Date
+  // 120 DenemeSoru id'si, sinavdaki gosterim sirasiyla
+  soruIdler  String[]
+  katilimlar DenemeKatilim[]
+
+  @@unique([duzey, tarih])
+}
+
+model DenemeKatilim {
+  id              String       @id @default(cuid())
+  userId          String
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gunlukDenemeId  String
+  gunlukDeneme    GunlukDeneme @relation(fields: [gunlukDenemeId], references: [id], onDelete: Cascade)
+  baslangicZamani DateTime     @default(now())
+  // Doluyken sinav bitmis sayilir (sureyi doldurma veya "Bitir" butonu).
+  bitisZamani     DateTime?
+  // { [soruId]: secilenSecenekIndex }
+  cevaplar        Json         @default("{}")
+  dogruSayisi     Int?
+  yanlisSayisi    Int?
+  bosSayisi       Int?
+  puan            Float?
+
+  // Kullanici basina, gunluk deneme basina tek deneme hakki.
+  @@unique([userId, gunlukDenemeId])
 }
