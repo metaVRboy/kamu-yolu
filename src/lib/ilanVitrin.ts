@@ -1,3 +1,4 @@
+import { findInstitutionImageCached } from "@/lib/findInstitutionImage";
 import type { Posting } from "@/generated/prisma/client";
 
 const KUCUK_KALAN = new Set(["ve", "ile", "veya", "için", "ya", "da", "de"]);
@@ -75,7 +76,45 @@ export function kurumaGoreGrupla(ilanlar: Posting[], adet: number, simdi = Date.
     ilk,
     ilanSayisi: g.length,
     kadroSayisi: new Set(g.map((i) => kadroAdi(i.title, i.institutionName).toLocaleLowerCase("tr-TR"))).size,
-    yeni: !!ilk.publishedAt && simdi - ilk.publishedAt.getTime() < 2 * GUN_MS,
-    kalanGun: ilk.applicationEnd ? Math.ceil((ilk.applicationEnd.getTime() - simdi) / GUN_MS) : null,
+    ...zamanBilgisi(ilk, simdi),
   }));
+}
+
+/** Liste sayfalari: gruplama yok, her ilan kendi karti. */
+export function tekIlanKartlari(ilanlar: Posting[], simdi = Date.now()): IlanVitrinGrubu[] {
+  return ilanlar.map((ilk) => ({ ilk, ilanSayisi: 1, kadroSayisi: 1, ...zamanBilgisi(ilk, simdi) }));
+}
+
+function zamanBilgisi(ilan: Posting, simdi: number) {
+  return {
+    yeni: !!ilan.publishedAt && simdi - ilan.publishedAt.getTime() < 2 * GUN_MS,
+    kalanGun: ilan.applicationEnd ? Math.ceil((ilan.applicationEnd.getTime() - simdi) / GUN_MS) : null,
+  };
+}
+
+/**
+ * Kartlardaki kurum logolari (kurum adi -> logo URL). Liste sayfalarinda
+ * onlarca farkli kurum olabildigi icin Wikipedia'ya ayni anda en fazla 6
+ * sorgu gider; arama once duzgun harfli, bulamazsa kaynaktaki ham adla yapilir.
+ * Sayfa logo yuzunden beklemesin diye ~3 sn'lik butce asilinca yeni parti
+ * baslatilmaz - kalan kurumlar bu render'da logosuz (tur ikonu) gosterilir;
+ * bulunanlar 7 gun onbellekte kaldigi icin birkac ziyarette hepsi dolar.
+ */
+export async function kurumLogolari(ilanlar: Posting[], butceMs = 3000): Promise<Map<string, string | null>> {
+  const adlar = [...new Set(ilanlar.map((i) => i.institutionName))];
+  const logolar = new Map<string, string | null>();
+  const kuyruk = [...adlar];
+  const bitis = performance.now() + butceMs;
+  // 6 isci kuyruktan sirayla ceker: yavas/takilan bir sorgu sadece bir isciyi
+  // mesgul eder, digerleri devam eder.
+  const isci = async () => {
+    while (kuyruk.length && performance.now() < bitis) {
+      const ad = kuyruk.shift()!;
+      logolar.set(ad, (await findInstitutionImageCached(aramaAdi(ad))) ?? (await findInstitutionImageCached(ad)));
+    }
+  };
+  // Butce dolunca beklenmez; yetismeyen sonuc bu render'a girmez ama arka
+  // planda tamamlanirsa onbellege yazilir.
+  await Promise.race([Promise.all(Array.from({ length: 6 }, isci)), new Promise((coz) => setTimeout(coz, butceMs))]);
+  return new Map(logolar);
 }

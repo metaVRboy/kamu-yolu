@@ -4,8 +4,7 @@ import { getLatestPostings, getHomepageStats, getDepartmentPostingCounts } from 
 import { getLatestHaberler } from "@/lib/haberler";
 import { prisma } from "@/lib/prisma";
 import { IlanVitrinKarti } from "@/components/IlanVitrinKarti";
-import { aramaAdi, kurumaGoreGrupla } from "@/lib/ilanVitrin";
-import { findInstitutionImageCached } from "@/lib/findInstitutionImage";
+import { kurumaGoreGrupla, kurumLogolari } from "@/lib/ilanVitrin";
 import { DepartmentSearch } from "@/components/DepartmentSearch";
 import { HaberlerSection } from "@/components/HaberlerSection";
 import { HeroHaberCarousel } from "@/components/HeroHaberCarousel";
@@ -33,14 +32,7 @@ export default async function Home() {
   }));
 
   const ilanGruplari = kurumaGoreGrupla(latestPostings, 6);
-  // Wikipedia aramasi once duzgun harfli adla, bulamazsa kaynaktaki ham adla denenir.
-  const ilanLogolari = await Promise.all(
-    ilanGruplari.map(
-      async (g) =>
-        (await findInstitutionImageCached(aramaAdi(g.ilk.institutionName))) ??
-        (await findInstitutionImageCached(g.ilk.institutionName)),
-    ),
-  );
+  const ilanLogolari = await kurumLogolari(ilanGruplari.map((g) => g.ilk));
 
   const haberlerMapped = haberler.map((h) => ({ ...h, yayinTarihi: h.yayinTarihi.toISOString() }));
 
@@ -114,8 +106,8 @@ export default async function Home() {
         </div>
         <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {ilanGruplari.length === 0 && <p className="text-sm text-muted-foreground">Henüz ilan bulunmuyor.</p>}
-          {ilanGruplari.map((grup, i) => (
-            <IlanVitrinKarti key={grup.ilk.id} grup={grup} logoUrl={ilanLogolari[i]} />
+          {ilanGruplari.map((grup) => (
+            <IlanVitrinKarti key={grup.ilk.id} grup={grup} logoUrl={ilanLogolari.get(grup.ilk.institutionName) ?? null} />
           ))}
         </div>
       </section>

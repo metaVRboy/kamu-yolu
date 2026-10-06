@@ -5,8 +5,20 @@ import { INSTITUTION_TYPE_LABEL, LEVEL_LABEL } from "@/lib/labels";
 import { duzgunHarf, kadroAdi, konumMetni, type IlanVitrinGrubu } from "@/lib/ilanVitrin";
 import { slugify } from "@/lib/slug";
 
-/** Ana sayfa "Yeni Eklenen Ilanlar" vitrini icin kurum bazli ilan karti. */
-export function IlanVitrinKarti({ grup, logoUrl }: { grup: IlanVitrinGrubu; logoUrl: string | null }) {
+/**
+ * Gorselli ilan karti: ana sayfa vitrini (kurum bazli grup) ve ilan
+ * listeleri (tek ilan). Listelerde ayni kurumun kadrolarini ayirt etmek
+ * icin `nitelikOzeti` (aranan nitelik metni) gosterilir.
+ */
+export function IlanVitrinKarti({
+  grup,
+  logoUrl,
+  nitelikOzeti = false,
+}: {
+  grup: IlanVitrinGrubu;
+  logoUrl: string | null;
+  nitelikOzeti?: boolean;
+}) {
   const { ilk, ilanSayisi, kadroSayisi, yeni, kalanGun } = grup;
   const kurum = duzgunHarf(ilk.institutionName);
   const href =
@@ -49,6 +61,11 @@ export function IlanVitrinKarti({ grup, logoUrl }: { grup: IlanVitrinGrubu; logo
         {kadroSayisi > 1 && (
           <p className="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-slate-500">
             <Layers className="h-3.5 w-3.5" />+{kadroSayisi - 1} farklı kadro daha
+          </p>
+        )}
+        {nitelikOzeti && ilk.departmentRequirementRaw && (
+          <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-slate-500">
+            {ilk.departmentRequirementRaw.replace(/\s+/g, " ").trim()}
           </p>
         )}
 
