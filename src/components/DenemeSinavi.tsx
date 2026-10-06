@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
-import { Clock } from "lucide-react";
+import { Clock, Flag } from "lucide-react";
 import { DERS_LABEL, type ExamSoru } from "@/lib/kpssDenemeSabitler";
 import { SoruGovdesi } from "@/components/SoruGovdesi";
+import { SoruHaritasi } from "@/components/SoruHaritasi";
 
 export function DenemeSinavi({
   katilimId,
@@ -26,6 +27,23 @@ export function DenemeSinavi({
   const [cevaplar, setCevaplar] = useState<Record<string, number>>(ilkCevaplar);
   const [kalanMs, setKalanMs] = useState(ilkKalanMs);
   const bittiRef = useRef(false);
+  // "Sonra doneceğim" isaretleri sadece bu tarayicida, bu katilima ozel tutulur.
+  const isaretAnahtari = `deneme-isaret-${katilimId}`;
+  const isaretJson = useSyncExternalStore(
+    (bildir) => {
+      window.addEventListener("storage", bildir);
+      return () => window.removeEventListener("storage", bildir);
+    },
+    () => {
+      try {
+        return localStorage.getItem(isaretAnahtari) ?? "[]";
+      } catch {
+        return "[]";
+      }
+    },
+    () => "[]",
+  );
+  const isaretliler: string[] = JSON.parse(isaretJson);
 
   const bitir = useCallback(async () => {
     if (bittiRef.current) return;
@@ -72,10 +90,20 @@ export function DenemeSinavi({
     if (onay) bitir();
   }
 
+  function isaretDegistir() {
+    const yeni = isaretliler.includes(soru.id) ? isaretliler.filter((id) => id !== soru.id) : [...isaretliler, soru.id];
+    try {
+      localStorage.setItem(isaretAnahtari, JSON.stringify(yeni));
+      // Ayni sekmedeki yazma "storage" olayini tetiklemez - store'u elle uyar.
+      window.dispatchEvent(new Event("storage"));
+    } catch {}
+  }
+
   const sureAzaldiMi = kalanMs < 5 * 60_000;
+  const isaretliMi = isaretliler.includes(soru.id);
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6">
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/15 bg-slate-50/60 px-4 py-3">
         <div
           className={`flex items-center gap-1.5 font-mono text-lg font-semibold ${sureAzaldiMi ? "text-destructive" : "text-primary"}`}
@@ -92,12 +120,25 @@ export function DenemeSinavi({
         </button>
       </div>
 
-      <div className="mt-4 rounded-xl border border-primary/15 bg-white p-5">
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
+      <div className="mt-4 lg:grid lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-start lg:gap-4">
+      <div className="rounded-xl border border-primary/15 bg-white p-5">
+        <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
           <span>
             Soru {index + 1} / {sorular.length}
           </span>
-          <span className="rounded-full bg-primary/10 px-2.5 py-0.5 font-medium text-primary">{DERS_LABEL[soru.ders]}</span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={isaretDegistir}
+              className={`flex items-center gap-1 rounded-full border px-2.5 py-0.5 font-medium transition-colors ${
+                isaretliMi ? "border-amber-400 bg-amber-50 text-amber-700" : "border-primary/20 text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              <Flag className="h-3.5 w-3.5" />
+              {isaretliMi ? "İşareti kaldır" : "İşaretle"}
+            </button>
+            <span className="rounded-full bg-primary/10 px-2.5 py-0.5 font-medium text-primary">{DERS_LABEL[soru.ders]}</span>
+          </div>
         </div>
         <SoruGovdesi sorular={sorular} index={index} />
         <div className="mt-4 space-y-2">
@@ -138,30 +179,23 @@ export function DenemeSinavi({
         </div>
       </div>
 
-      <div className="mt-4 rounded-xl border border-primary/15 bg-white p-4">
-        <p className="mb-2 text-xs font-medium text-muted-foreground">
-          Soru numarasına tıklayarak o soruya gidebilir, cevabını değiştirebilirsin.
-        </p>
-        <div className="grid grid-cols-10 gap-1.5 sm:grid-cols-12">
-          {sorular.map((s, i) => {
-            const cevaplandi = cevaplar[s.id] !== undefined;
-            const aktif = i === index;
-            return (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => setIndex(i)}
-                className={`flex h-8 w-8 items-center justify-center rounded-md text-xs font-medium transition-colors ${
-                  aktif
-                    ? "ring-2 ring-primary ring-offset-1"
-                    : ""
-                } ${cevaplandi ? "bg-primary text-primary-foreground" : "bg-slate-100 text-slate-500 hover:bg-slate-200"}`}
-              >
-                {i + 1}
-              </button>
-            );
-          })}
-        </div>
+      <aside className="mt-4 lg:sticky lg:top-20 lg:mt-0 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
+        <SoruHaritasi
+          sorular={sorular}
+          aktifIndex={index}
+          onSec={setIndex}
+          butonSinifi={(i) =>
+            `${cevaplar[sorular[i].id] !== undefined ? "bg-primary text-primary-foreground" : "bg-slate-100 text-slate-600 hover:bg-slate-200"} ${
+              isaretliler.includes(sorular[i].id) ? "outline-2 outline-amber-400" : ""
+            }`
+          }
+          aciklamalar={[
+            { etiket: "Cevaplanmış", sinif: "bg-primary" },
+            { etiket: "İşaretli", sinif: "bg-white outline-2 outline-amber-400" },
+            { etiket: "Boş", sinif: "bg-slate-100" },
+          ]}
+        />
+      </aside>
       </div>
     </div>
   );

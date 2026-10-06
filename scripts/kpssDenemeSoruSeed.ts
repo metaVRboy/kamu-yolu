@@ -25,8 +25,11 @@ async function main() {
       select: { id: true },
     });
     if (mevcut) {
-      // Icerik rewrite'larinda sira/grupId degismis olabilir - guncel tut.
-      await prisma.denemeSoru.update({ where: { id: mevcut.id }, data: { sira, grupId: soru.grupId ?? null } });
+      // Icerik rewrite'larinda sira/grupId/geometri degismis olabilir - guncel tut.
+      await prisma.denemeSoru.update({
+        where: { id: mevcut.id },
+        data: { sira, grupId: soru.grupId ?? null, geometri: soru.geometri ?? false },
+      });
       atlanan++;
       continue;
     }
@@ -36,6 +39,7 @@ async function main() {
         ders: soru.ders,
         soruMetni: soru.soruMetni,
         grupId: soru.grupId ?? null,
+        geometri: soru.geometri ?? false,
         gorselSvg: soru.gorselSvg,
         secenekler: soru.secenekler,
         dogruCevap: soru.dogruCevap,

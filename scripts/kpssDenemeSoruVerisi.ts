@@ -36,6 +36,7 @@ export type SeedSoru = {
   // sorulara ayni grupId verilir - "X-Y. sorular..." basligi METNE
   // GOMULMEZ, gercek sinav sirasina gore arayuzde dinamik hesaplanir.
   grupId?: string;
+  geometri?: boolean;
   gorselSvg?: string;
   secenekler: [string, string, string, string, string];
   dogruCevap: number;
@@ -713,6 +714,7 @@ export const LISANS_SORULARI: SeedSoru[] = [
   // -- Geometri (4, görselli, çok adımlı) --
   {
     ders: "MATEMATIK",
+    geometri: true,
     soruMetni:
       "Şekildeki ABCD dikdörtgeninde E noktası [AB] kenarı üzerindedir ve |AE| = 2·|EB|'dir. Dikdörtgenin alanı 36 cm² olduğuna göre taralı ADE üçgeninin alanı kaç cm²'dir?",
     gorselSvg:
@@ -724,6 +726,7 @@ export const LISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    geometri: true,
     soruMetni:
       "Şekildeki ABC üçgeni ikizkenar üçgendir; |AB| = |AC| = 13 cm, |BC| = 10 cm'dir. A köşesinden [BC] kenarına indirilen dikmenin ayağı D noktasıdır.\n\nBuna göre ABC üçgeninin alanı kaç cm²'dir?",
     gorselSvg:
@@ -735,6 +738,7 @@ export const LISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    geometri: true,
     soruMetni:
       "Şekildeki merkezi O olan çemberin yarıçapı 10 cm'dir. Merkezin [KL] kirişine olan uzaklığı 6 cm olduğuna göre |KL| kaç cm'dir?",
     gorselSvg:
@@ -746,6 +750,7 @@ export const LISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    geometri: true,
     soruMetni:
       "Dik koordinat düzleminde kenarları eksenlere paralel olan bir dikdörtgenin karşılıklı köşeleri A(2, 3) ve C(8, 11) noktalarıdır.\n\nBuna göre bu dikdörtgenin alanı kaç birimkaredir?",
     gorselSvg:

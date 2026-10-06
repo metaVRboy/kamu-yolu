@@ -72,7 +72,15 @@ export async function getDenemeSorulari(soruIdler: string[]) {
  * cevap ve aciklama ASLA buna dahil edilmez (RSC payload'ini inceleyerek
  * kopya cekmeyi onlemek icin). */
 export function sinavaGuvenliHaleGetir(sorular: ExamSoru[]): ExamSoru[] {
-  return sorular.map(({ id, ders, soruMetni, grupId, gorselSvg, secenekler }) => ({ id, ders, soruMetni, grupId, gorselSvg, secenekler }));
+  return sorular.map(({ id, ders, soruMetni, grupId, geometri, gorselSvg, secenekler }) => ({
+    id,
+    ders,
+    soruMetni,
+    grupId,
+    geometri,
+    gorselSvg,
+    secenekler,
+  }));
 }
 
 /** Kullanicinin bu gunluk deneme icin kaydi var mi (olusturmadan sadece okur). */

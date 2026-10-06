@@ -431,6 +431,9 @@ model DenemeSoru {
   // Geometri/cografya gibi gorsel gerektiren sorularda inline SVG (ornegin
   // "<svg viewBox=...>...</svg>") - yoksa null, soru sadece metinle gosterilir.
   gorselSvg       String?
+  // Matematik bolumundeki geometri sorulari - soru haritasinda ayri
+  // "Geometri" grubu olarak gosterilir.
+  geometri        Boolean        @default(false)
   // 5 sik (A-E), sirayla
   secenekler      String[]
   // Dogru sikkin secenekler dizisindeki indeksi (0-4)

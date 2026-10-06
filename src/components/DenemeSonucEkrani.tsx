@@ -4,8 +4,15 @@ import { useState } from "react";
 import { CheckCircle2, XCircle, MinusCircle } from "lucide-react";
 import { DERS_LABEL, type ExamSoru } from "@/lib/kpssDenemeSabitler";
 import { SoruGovdesi } from "@/components/SoruGovdesi";
+import { SoruHaritasi } from "@/components/SoruHaritasi";
 
 type SonucSorusu = ExamSoru & { dogruCevap: number; aciklama: string | null };
+
+const DURUM_SINIFI = {
+  dogru: "bg-emerald-500 text-white",
+  yanlis: "bg-red-500 text-white",
+  bos: "bg-slate-200 text-slate-600",
+};
 
 export function DenemeSonucEkrani({
   sorular,
@@ -34,7 +41,7 @@ export function DenemeSonucEkrani({
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6">
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
       <div className="rounded-xl border border-primary/15 bg-slate-50/60 p-5">
         <h2 className="text-lg font-semibold text-slate-800">Sınav Sonucun</h2>
         <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
@@ -65,37 +72,11 @@ export function DenemeSonucEkrani({
         </p>
       </div>
 
-      <div className="mt-4 rounded-xl border border-primary/15 bg-white p-4">
-        <p className="mb-2 text-xs font-medium text-muted-foreground">
-          Bir soruya tıklayarak doğru cevabı ve açıklamasını görebilirsin. Kırmızı: yanlış, yeşil: doğru, gri: boş.
-        </p>
-        <div className="grid grid-cols-10 gap-1.5 sm:grid-cols-12">
-          {sorular.map((s, i) => {
-            const d = durum(s);
-            const aktif = i === incelenenIndex;
-            const renk =
-              d === "dogru"
-                ? "bg-emerald-500 text-white"
-                : d === "yanlis"
-                  ? "bg-red-500 text-white"
-                  : "bg-slate-200 text-slate-600";
-            return (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => setIncelenenIndex(i)}
-                className={`flex h-8 w-8 items-center justify-center rounded-md text-xs font-medium ${renk} ${
-                  aktif ? "ring-2 ring-primary ring-offset-1" : ""
-                }`}
-              >
-                {i + 1}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="mt-4 rounded-xl border border-primary/15 bg-white p-5">
+      <p className="mt-4 text-xs font-medium text-muted-foreground">
+        Haritada bir soruya tıklayarak doğru cevabı ve açıklamasını görebilirsin.
+      </p>
+      <div className="mt-2 lg:grid lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-start lg:gap-4">
+      <div className="rounded-xl border border-primary/15 bg-white p-5">
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>
             Soru {incelenenIndex + 1} / {sorular.length}
@@ -136,6 +117,20 @@ export function DenemeSonucEkrani({
         {incelenen.aciklama && (
           <p className="mt-3 rounded-lg bg-slate-50 p-3 text-sm text-slate-600">{incelenen.aciklama}</p>
         )}
+      </div>
+      <aside className="mt-4 lg:sticky lg:top-20 lg:mt-0 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
+        <SoruHaritasi
+          sorular={sorular}
+          aktifIndex={incelenenIndex}
+          onSec={setIncelenenIndex}
+          butonSinifi={(i) => DURUM_SINIFI[durum(sorular[i])]}
+          aciklamalar={[
+            { etiket: "Doğru", sinif: DURUM_SINIFI.dogru },
+            { etiket: "Yanlış", sinif: DURUM_SINIFI.yanlis },
+            { etiket: "Boş", sinif: DURUM_SINIFI.bos },
+          ]}
+        />
+      </aside>
       </div>
     </div>
   );

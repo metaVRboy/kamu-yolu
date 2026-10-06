@@ -56,6 +56,7 @@ export type ExamSoru = {
   // ayni grupId'yi paylasir; "X-Y. sorular..." basligi METNE GOMULU DEGIL,
   // bu alan uzerinden gunun GERCEK soru sirasina gore dinamik hesaplanir.
   grupId: string | null;
+  geometri: boolean;
   gorselSvg: string | null;
   secenekler: string[];
 };
