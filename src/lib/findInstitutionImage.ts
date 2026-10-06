@@ -53,6 +53,13 @@ function anlamliKelimeler(metin: string): Set<string> {
   );
 }
 
+const TUR_KELIMELERI = ["belediye", "üniversite", "bakanlığ", "müdürlüğ", "başkanlığ", "kurum", "hastane", "ajans", "müze"];
+
+function turKelimeleriniAl(metin: string): Set<string> {
+  const kucuk = metin.toLocaleLowerCase("tr-TR");
+  return new Set(TUR_KELIMELERI.filter((k) => kucuk.includes(k)));
+}
+
 /** Tam baslik eslesmesi basarisiz olursa en yakin sayfa basligini bulur. */
 async function enYakinBasligiBul(kurumAdi: string): Promise<string | null> {
   const res = await wikiGetir(
@@ -71,7 +78,14 @@ async function enYakinBasligiBul(kurumAdi: string): Promise<string | null> {
   const baslikKelimeleri = anlamliKelimeler(bulunanBaslik);
   const ortusuyorMu = [...kurumKelimeleri].some((k) => baslikKelimeleri.has(k));
 
-  return ortusuyorMu ? bulunanBaslik : null;
+  // Kurum adinda tur kelimesi (belediyesi, universitesi, bakanligi...) varsa
+  // bulunan sayfada da olmali - "Bahce Belediyesi" aramasi "Bahce, Osmaniye"
+  // ilce sayfasina dusup logo yerine ilce haritasini getiriyordu.
+  const turKelimeleri = turKelimeleriniAl(kurumAdi);
+  const baslikTurler = turKelimeleriniAl(bulunanBaslik);
+  const turUyuyorMu = turKelimeleri.size === 0 || [...turKelimeleri].some((k) => baslikTurler.has(k));
+
+  return ortusuyorMu && turUyuyorMu ? bulunanBaslik : null;
 }
 
 async function gorselAra(kurumAdi: string): Promise<string | null> {
@@ -102,7 +116,7 @@ export async function findInstitutionImage(kurumAdi: string): Promise<string | n
   }
 }
 
-const gorselAraOnbellekli = unstable_cache(gorselAra, ["institution-image-v2"], { revalidate: 60 * 60 * 24 * 7 });
+const gorselAraOnbellekli = unstable_cache(gorselAra, ["institution-image-v3"], { revalidate: 60 * 60 * 24 * 7 });
 
 /**
  * findInstitutionImage'in onbellekli hali - ilanlar sayfalarda tekrar

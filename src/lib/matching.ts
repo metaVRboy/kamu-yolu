@@ -116,9 +116,8 @@ function summarizeFilters(
 
 /**
  * Belirli bir ogrenim derecesindeki TUM aktif ilanlari getirir (bolum
- * sarti olan/olmayan farketmez - PostingCard her ilanda bunu zaten ayrica
- * gosterir). Sohbet asistaninin ve /seviye/[level] sayfasinin ortak
- * kaynagi.
+ * sarti olan/olmayan farketmez). Sohbet asistaninin ve /seviye/[level]
+ * sayfasinin ortak kaynagi.
  */
 export async function getPostingsForLevel(
   level: EducationLevel,

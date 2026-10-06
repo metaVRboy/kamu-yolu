@@ -7,7 +7,8 @@ import {
 } from "@/lib/matching";
 import { LEVEL_SLUG_TO_ENUM } from "@/lib/levels";
 import { LEVEL_LABEL } from "@/lib/labels";
-import { PostingCard } from "@/components/PostingCard";
+import { IlanVitrinKarti } from "@/components/IlanVitrinKarti";
+import { kurumLogolari, tekIlanKartlari } from "@/lib/ilanVitrin";
 import { FilterBar } from "@/components/FilterBar";
 import { Badge } from "@/components/ui/badge";
 
@@ -32,6 +33,7 @@ export default async function LevelResultsPage({
     getPostingsForLevel(level, { institutionType: kurum, ilanTuru, il, departmentRequirement }),
     getAvailableFiltersForLevel(level),
   ]);
+  const logolar = await kurumLogolari(postings);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
@@ -61,15 +63,20 @@ export default async function LevelResultsPage({
         <FilterBar options={filterOptions} />
       </div>
 
-      <div className="mt-8 space-y-4">
+      <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {postings.length === 0 && (
-          <div className="rounded-2xl border border-dashed border-primary/25 bg-primary/5 p-8 text-center text-sm text-muted-foreground">
+          <div className="rounded-2xl border border-dashed border-primary/25 bg-primary/5 p-8 text-center text-sm text-muted-foreground sm:col-span-2 lg:col-span-3">
             Şu anda bu düzeyde aktif bir ilan bulunmuyor.
             Daha sonra tekrar kontrol edebilirsin.
           </div>
         )}
-        {postings.map((posting) => (
-          <PostingCard key={posting.id} posting={posting} />
+        {tekIlanKartlari(postings).map((grup) => (
+          <IlanVitrinKarti
+            key={grup.ilk.id}
+            grup={grup}
+            logoUrl={logolar.get(grup.ilk.institutionName) ?? null}
+            nitelikOzeti
+          />
         ))}
       </div>
     </div>

@@ -6,7 +6,8 @@ import { getOkunmamisIlgilendiklerimSayisi, getOkunmamisMesajSayisi, getTalepler
 import { getPostingsForDepartment, getPostingsForLevel } from "@/lib/matching";
 import { ProfilLayout } from "@/components/ProfilLayout";
 import { LogoutButton } from "@/components/LogoutButton";
-import { PostingCard } from "@/components/PostingCard";
+import { IlanVitrinKarti } from "@/components/IlanVitrinKarti";
+import { kurumLogolari, tekIlanKartlari } from "@/lib/ilanVitrin";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -45,6 +46,8 @@ export default async function ProfilimPage() {
     : user.educationLevel
       ? await getPostingsForLevel(user.educationLevel)
       : [];
+  const gosterilenIlanlar = kisiselIlanlar.slice(0, 4);
+  const logolar = await kurumLogolari(gosterilenIlanlar);
 
   return (
     <ProfilLayout
@@ -166,8 +169,13 @@ export default async function ProfilimPage() {
                 !isPremium && "pointer-events-none blur-sm select-none",
               )}
             >
-              {kisiselIlanlar.slice(0, 4).map((posting) => (
-                <PostingCard key={posting.id} posting={posting} />
+              {tekIlanKartlari(gosterilenIlanlar).map((grup) => (
+                <IlanVitrinKarti
+                  key={grup.ilk.id}
+                  grup={grup}
+                  logoUrl={logolar.get(grup.ilk.institutionName) ?? null}
+                  nitelikOzeti
+                />
               ))}
             </div>
 
