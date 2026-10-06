@@ -72,7 +72,9 @@ export function iklimGrafigi(sicaklik: number[], yagis: number[]) {
     `<polyline points="${sicaklik.map((v, i) => nokta(y, v, i)).join(" ")}" fill="none" stroke="#dc2626" stroke-width="2"/>` +
     sicaklik.map((v, i) => `<circle cx="${ayX(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="3" fill="#dc2626"/>`).join(""),
   );
-  const yagisPaneli = panel(196, 0, 300, 100, "Aylık ortalama yağış (mm)", (y) =>
+  // Kurak istasyonlarda (Erzurum vb. <100 mm) sutunlar okunabilsin diye eksen 0-100'e iner.
+  const yagisMax = Math.max(...yagis) <= 100 ? 100 : 300;
+  const yagisPaneli = panel(196, 0, yagisMax, yagisMax === 100 ? 20 : 100, "Aylık ortalama yağış (mm)", (y) =>
     yagis.map((v, i) => `<rect x="${(ayX(i) - 10).toFixed(1)}" y="${y(v).toFixed(1)}" width="20" height="${(y(0) - y(v)).toFixed(1)}" fill="#2563eb"/>`).join(""),
   );
   return `<svg viewBox="0 0 420 340" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif" fill="#1e293b">${sicaklikPaneli}${yagisPaneli}</svg>`;

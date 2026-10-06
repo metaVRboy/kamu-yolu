@@ -148,7 +148,7 @@ export function DenemeSinavi({
               key={i}
               type="button"
               onClick={() => cevapSec(i)}
-              className={`flex w-full items-start gap-2.5 rounded-lg border px-3.5 py-2.5 text-left text-sm transition-colors ${
+              className={`flex w-full items-center gap-2.5 rounded-lg border px-3.5 py-2.5 text-left text-sm transition-colors ${
                 cevaplar[soru.id] === i
                   ? "border-primary bg-primary/10 text-primary"
                   : "border-primary/15 text-slate-700 hover:bg-slate-50"

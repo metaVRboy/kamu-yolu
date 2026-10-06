@@ -6,7 +6,7 @@ const BASIT_KESIR = new RegExp(`(${TERIM})/(${TERIM})`, "g");
 
 function Kesir({ pay, payda }: { pay: ReactNode; payda: ReactNode }) {
   return (
-    <span className="mx-0.5 inline-flex flex-col items-center text-center align-middle leading-tight">
+    <span className="mx-0.5 inline-flex flex-col items-center gap-0.5 py-0.5 text-center align-middle leading-tight">
       <span className="px-0.5">{pay}</span>
       <span aria-hidden className="self-stretch border-t-[1.5px] border-current" />
       <span className="px-0.5">{payda}</span>

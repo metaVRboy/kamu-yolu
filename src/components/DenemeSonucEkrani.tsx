@@ -94,7 +94,7 @@ export function DenemeSonucEkrani({
             return (
               <div
                 key={i}
-                className={`flex items-start gap-2.5 rounded-lg border px-3.5 py-2.5 text-sm ${
+                className={`flex items-center gap-2.5 rounded-lg border px-3.5 py-2.5 text-sm ${
                   dogruMu
                     ? "border-emerald-500 bg-emerald-50 text-emerald-800"
                     : verilenMi
