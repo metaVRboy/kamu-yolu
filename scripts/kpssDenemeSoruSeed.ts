@@ -20,33 +20,28 @@ async function main() {
     const sira = (dersSirasi[soru.ders] ?? 0);
     dersSirasi[soru.ders] = sira + 1;
 
+    const veri = {
+      ders: soru.ders,
+      grupId: soru.grupId ?? null,
+      geometri: soru.geometri ?? false,
+      gorselSvg: soru.gorselSvg ?? null,
+      secenekler: soru.secenekler,
+      dogruCevap: soru.dogruCevap,
+      aciklama: soru.aciklama,
+      sira,
+    };
     const mevcut = await prisma.denemeSoru.findFirst({
       where: { duzey: "LISANS", soruMetni: soru.soruMetni },
       select: { id: true },
     });
+    // Ayni metinli soru varsa id'si (ve kullanimSayisi) korunur, icerigi
+    // (siklar, cevap, aciklama, sira...) veri dosyasiyla esitlenir.
     if (mevcut) {
-      // Icerik rewrite'larinda sira/grupId/geometri degismis olabilir - guncel tut.
-      await prisma.denemeSoru.update({
-        where: { id: mevcut.id },
-        data: { sira, grupId: soru.grupId ?? null, geometri: soru.geometri ?? false },
-      });
+      await prisma.denemeSoru.update({ where: { id: mevcut.id }, data: veri });
       atlanan++;
       continue;
     }
-    await prisma.denemeSoru.create({
-      data: {
-        duzey: "LISANS",
-        ders: soru.ders,
-        soruMetni: soru.soruMetni,
-        grupId: soru.grupId ?? null,
-        geometri: soru.geometri ?? false,
-        gorselSvg: soru.gorselSvg,
-        secenekler: soru.secenekler,
-        dogruCevap: soru.dogruCevap,
-        aciklama: soru.aciklama,
-        sira,
-      },
-    });
+    await prisma.denemeSoru.create({ data: { duzey: "LISANS", soruMetni: soru.soruMetni, ...veri } });
     eklenen++;
   }
   // Veri dosyasindan cikarilan/yeniden yazilan sorular havuzda kalmasin -
@@ -54,7 +49,7 @@ async function main() {
   const silinen = await prisma.denemeSoru.deleteMany({
     where: { duzey: "LISANS", soruMetni: { notIn: LISANS_SORULARI.map((s) => s.soruMetni) } },
   });
-  console.log(`Bitti. ${eklenen} soru eklendi, ${atlanan} soru zaten vardi (sira guncellendi), ${silinen.count} eski soru silindi.`);
+  console.log(`Bitti. ${eklenen} soru eklendi, ${atlanan} soru guncellendi, ${silinen.count} eski soru silindi.`);
   await prisma.$disconnect();
 }
 
