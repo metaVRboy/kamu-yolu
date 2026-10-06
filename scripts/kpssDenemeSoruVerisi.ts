@@ -20,7 +20,15 @@
  *    Oran-Oranti 1, Denklem Cozme 1, Problemler 6, Kumeler 1, Fonksiyonlar 1,
  *    Sayisal Mantik/tanimli islem 3, Permutasyon-Kombinasyon 1, Olasilik 1,
  *    Geometri 4 - gorselli (toplam 30)
+ *  - Genel Kultur (2022 KPSS GK kitapcigi + 2026 lisans/onlisans ornekleri
+ *    referans alinarak): Tarih 27 (Islamiyet oncesi -> cagdas, resmi konu
+ *    sirasiyla; oncullu, kisi/yer/olay/kavram, parca, eslestirme, kronoloji;
+ *    sadece tarih soran soru yok), Cografya 18 (4 gercek Turkiye haritasi +
+ *    MGM verili iklim grafigi), Vatandaslik 9 (2017 sonrasi 1982 Anayasasi),
+ *    Guncel 6 (her bilgi web'den dogrulandi).
  */
+import { HARITA_VIEWBOX, projeksiyon, TURKIYE_SINIRI, GOLLER, IL_SINIRLARI } from "./turkiyeHaritaVerisi";
+
 export type SeedSoru = {
   ders: "TURKCE" | "MATEMATIK" | "TARIH" | "COGRAFYA" | "VATANDASLIK" | "GUNCEL";
   soruMetni: string;
@@ -33,6 +41,65 @@ export type SeedSoru = {
   dogruCevap: number;
   aciklama: string;
 };
+
+type HaritaNoktasi = { etiket: string; boylam: number; enlem: number };
+
+/**
+ * Gercek sinir verisiyle (Natural Earth, bkz. turkiyeHaritaVerisi.ts) Turkiye
+ * haritasi: gercek boylam/enlemdeki numarali kirmizi noktalar ve/veya tarali iller.
+ */
+function turkiyeHaritasi({ noktalar = [], taraliIller = [] }: { noktalar?: HaritaNoktasi[]; taraliIller?: string[] }) {
+  const taraliYol = taraliIller
+    .map((il) => {
+      if (!IL_SINIRLARI[il]) throw new Error(`Harita verisinde il yok: ${il}`);
+      return IL_SINIRLARI[il];
+    })
+    .join("");
+  const isaretler = noktalar
+    .map(({ etiket, boylam, enlem }) => {
+      const [x, y] = projeksiyon(boylam, enlem);
+      return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.6" fill="#dc2626" stroke="#7f1d1d" stroke-width="0.8"/><text x="${(x + 5).toFixed(1)}" y="${(y - 4).toFixed(1)}" font-size="12" font-weight="700">${etiket}</text>`;
+    })
+    .join("");
+  return (
+    `<svg viewBox="${HARITA_VIEWBOX}" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif" fill="#1e293b">` +
+    `<defs><pattern id="tarali" patternUnits="userSpaceOnUse" width="4" height="4" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="4" stroke="#1e293b" stroke-width="1.4"/></pattern></defs>` +
+    `<path d="${TURKIYE_SINIRI}" fill="#e2e8f0" stroke="#1e293b" stroke-width="1.1" stroke-linejoin="round"/>` +
+    (taraliYol ? `<path d="${taraliYol}" fill="url(#tarali)" stroke="#1e293b" stroke-width="0.6"/>` : "") +
+    `<path d="${GOLLER}" fill="#7dd3fc" stroke="#1e293b" stroke-width="0.6"/>` +
+    isaretler +
+    `</svg>`
+  );
+}
+
+const AY_HARFLERI = ["O", "Ş", "M", "N", "M", "H", "T", "A", "E", "E", "K", "A"];
+
+/** Iki panelli iklim grafigi: ustte aylik ortalama sicaklik (cizgi), altta aylik ortalama yagis (sutun). */
+function iklimGrafigi(sicaklik: number[], yagis: number[]) {
+  const sol = 44;
+  const genislik = 360;
+  const yukseklik = 110;
+  const ayX = (i: number) => sol + (genislik * (i + 0.5)) / 12;
+  const panel = (ust: number, max: number, adim: number, baslik: string, ciz: (y: (v: number) => number) => string) => {
+    const y = (v: number) => ust + yukseklik - (v / max) * yukseklik;
+    let s = `<text x="${sol}" y="${ust - 10}" font-size="12" font-weight="700">${baslik}</text>`;
+    for (let v = 0; v <= max; v += adim) {
+      s += `<line x1="${sol}" y1="${y(v)}" x2="${sol + genislik}" y2="${y(v)}" stroke="#cbd5e1" stroke-width="0.7"/><text x="${sol - 6}" y="${y(v) + 4}" font-size="10" text-anchor="end" fill="#475569">${v}</text>`;
+    }
+    s += ciz(y);
+    s += `<line x1="${sol}" y1="${ust + yukseklik}" x2="${sol + genislik}" y2="${ust + yukseklik}" stroke="#1e293b" stroke-width="1.2"/>`;
+    return s + AY_HARFLERI.map((a, i) => `<text x="${ayX(i)}" y="${ust + yukseklik + 15}" font-size="10" text-anchor="middle" fill="#475569">${a}</text>`).join("");
+  };
+  const nokta = (y: (v: number) => number, v: number, i: number) => `${ayX(i).toFixed(1)},${y(v).toFixed(1)}`;
+  const sicaklikPaneli = panel(28, 30, 10, "Aylık ortalama sıcaklık (°C)", (y) =>
+    `<polyline points="${sicaklik.map((v, i) => nokta(y, v, i)).join(" ")}" fill="none" stroke="#dc2626" stroke-width="2"/>` +
+    sicaklik.map((v, i) => `<circle cx="${ayX(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="3" fill="#dc2626"/>`).join(""),
+  );
+  const yagisPaneli = panel(196, 300, 100, "Aylık ortalama yağış (mm)", (y) =>
+    yagis.map((v, i) => `<rect x="${(ayX(i) - 10).toFixed(1)}" y="${y(v).toFixed(1)}" width="20" height="${(y(0) - y(v)).toFixed(1)}" fill="#2563eb"/>`).join(""),
+  );
+  return `<svg viewBox="0 0 420 340" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif" fill="#1e293b">${sicaklikPaneli}${yagisPaneli}</svg>`;
+}
 
 export const LISANS_SORULARI: SeedSoru[] = [
   // ---- TÜRKÇE (30) ----
@@ -689,486 +756,744 @@ export const LISANS_SORULARI: SeedSoru[] = [
   },
 
   // ---- TARİH (27) ----
+  // Resmi konu sirasi: Islamiyet oncesi -> Turk-Islam -> Osmanli siyasi/kultur
+  // -> XX. yy basi -> Milli Mucadele -> inkilaplar -> Ataturk donemi -> cagdas.
   {
     ders: "TARIH",
-    soruMetni: "Türkiye Büyük Millet Meclisi (TBMM) hangi tarihte açılmıştır?",
-    secenekler: ["19 Mayıs 1919", "23 Nisan 1920", "29 Ekim 1923", "20 Ocak 1921", "11 Ekim 1922"],
-    dogruCevap: 1,
-    aciklama: "TBMM 23 Nisan 1920'de Ankara'da açılmıştır.",
-  },
-  {
-    ders: "TARIH",
-    soruMetni: "Türkiye Cumhuriyeti hangi tarihte ilan edilmiştir?",
-    secenekler: ["1 Kasım 1922", "24 Temmuz 1923", "29 Ekim 1923", "3 Mart 1924", "30 Ağustos 1922"],
-    dogruCevap: 2,
-    aciklama: "Cumhuriyet, 29 Ekim 1923'te ilan edilmiştir.",
-  },
-  {
-    ders: "TARIH",
-    soruMetni: "Lozan Barış Antlaşması hangi tarihte imzalanmıştır?",
-    secenekler: ["11 Ekim 1922", "24 Temmuz 1923", "29 Ekim 1923", "20 Kasım 1922", "21 Haziran 1923"],
-    dogruCevap: 1,
-    aciklama: "Lozan Barış Antlaşması 24 Temmuz 1923'te imzalanmıştır.",
-  },
-  {
-    ders: "TARIH",
-    soruMetni: "Saltanat hangi tarihte kaldırılmıştır?",
-    secenekler: ["1 Kasım 1922", "29 Ekim 1923", "3 Mart 1924", "11 Ekim 1922", "30 Ekim 1918"],
-    dogruCevap: 0,
-    aciklama: "Saltanat, TBMM kararıyla 1 Kasım 1922'de kaldırılmıştır.",
-  },
-  {
-    ders: "TARIH",
-    soruMetni: "Halifelik hangi tarihte kaldırılmıştır?",
-    secenekler: ["1 Kasım 1922", "29 Ekim 1923", "3 Mart 1924", "20 Nisan 1924", "1 Kasım 1928"],
-    dogruCevap: 2,
-    aciklama: "Halifelik 3 Mart 1924'te kaldırılmıştır.",
-  },
-  {
-    ders: "TARIH",
-    soruMetni: "Mustafa Kemal Atatürk, Kurtuluş Savaşı'nın başlangıcı kabul edilen Samsun'a hangi tarihte çıkmıştır?",
-    secenekler: ["19 Mayıs 1919", "23 Temmuz 1919", "4 Eylül 1919", "22 Haziran 1919", "15 Mayıs 1919"],
-    dogruCevap: 0,
-    aciklama: "Mustafa Kemal, 19 Mayıs 1919'da Samsun'a çıkmıştır.",
-  },
-  {
-    ders: "TARIH",
-    soruMetni: "Aşağıdakilerden hangisi Kurtuluş Savaşı'nda Yunan ordusunun geri çekilmeye başladığı dönüm noktası olan meydan muharebesidir?",
-    secenekler: ["I. İnönü Muharebesi", "II. İnönü Muharebesi", "Sakarya Meydan Muharebesi", "Büyük Taarruz", "Çanakkale Muharebeleri"],
-    dogruCevap: 2,
-    aciklama: "Sakarya Meydan Muharebesi (1921) sonrası Yunan ordusu savunmaya ve geri çekilmeye yönelmiştir.",
-  },
-  {
-    ders: "TARIH",
-    soruMetni: "Büyük Taarruz hangi tarihte başlamıştır?",
-    secenekler: ["23 Ağustos 1921", "26 Ağustos 1922", "30 Ağustos 1922", "9 Eylül 1922", "11 Ekim 1922"],
-    dogruCevap: 1,
-    aciklama: "Büyük Taarruz 26 Ağustos 1922'de başlamıştır.",
-  },
-  {
-    ders: "TARIH",
-    soruMetni: "Başkomutanlık Meydan Muharebesi (Dumlupınar Meydan Muharebesi) hangi tarihte kazanılmıştır?",
-    secenekler: ["26 Ağustos 1922", "30 Ağustos 1922", "9 Eylül 1922", "11 Ekim 1922", "19 Mayıs 1919"],
-    dogruCevap: 1,
-    aciklama: "Başkomutanlık Meydan Muharebesi 30 Ağustos 1922'de kazanılmıştır; bu gün Zafer Bayramı olarak kutlanır.",
-  },
-  {
-    ders: "TARIH",
-    soruMetni: "İzmir, düşman işgalinden hangi tarihte kurtarılmıştır?",
-    secenekler: ["26 Ağustos 1922", "30 Ağustos 1922", "9 Eylül 1922", "11 Ekim 1922", "24 Temmuz 1923"],
-    dogruCevap: 2,
-    aciklama: "İzmir 9 Eylül 1922'de kurtarılmıştır.",
-  },
-  {
-    ders: "TARIH",
-    soruMetni: "Mudanya Ateşkes (Mütarekesi) Antlaşması hangi tarihte imzalanmıştır?",
-    secenekler: ["9 Eylül 1922", "11 Ekim 1922", "20 Kasım 1922", "24 Temmuz 1923", "1 Kasım 1922"],
-    dogruCevap: 1,
-    aciklama: "Mudanya Ateşkes Antlaşması 11 Ekim 1922'de imzalanmıştır.",
-  },
-  {
-    ders: "TARIH",
-    soruMetni: "Erzurum Kongresi hangi yıl toplanmıştır?",
-    secenekler: ["1918", "1919", "1920", "1921", "1922"],
-    dogruCevap: 1,
-    aciklama: "Erzurum Kongresi 23 Temmuz - 7 Ağustos 1919 tarihleri arasında toplanmıştır.",
-  },
-  {
-    ders: "TARIH",
-    soruMetni: "Sivas Kongresi hangi tarihler arasında toplanmıştır?",
-    secenekler: ["23 Temmuz - 7 Ağustos 1919", "4-11 Eylül 1919", "22 Haziran 1919", "28 Ocak 1920", "20 Ocak 1921"],
-    dogruCevap: 1,
-    aciklama: "Sivas Kongresi 4-11 Eylül 1919 tarihleri arasında toplanmıştır.",
-  },
-  {
-    ders: "TARIH",
-    soruMetni: "Kurtuluş Savaşı'nın hazırlık (örgütlenme) sürecinin başlangıcı kabul edilen genelge aşağıdakilerden hangisidir?",
-    secenekler: ["Amasya Genelgesi", "Misak-ı Milli", "Teşkilat-ı Esasiye", "Sivas Kongresi Bildirisi", "Lozan Antlaşması"],
-    dogruCevap: 0,
-    aciklama: "22 Haziran 1919'da yayımlanan Amasya Genelgesi, milli mücadelenin örgütlenme sürecinin başlangıcı sayılır.",
-  },
-  {
-    ders: "TARIH",
-    soruMetni: "Misak-ı Millî (Millî Ant) hangi tarihte kabul edilmiştir?",
-    secenekler: ["22 Haziran 1919", "4 Eylül 1919", "28 Ocak 1920", "23 Nisan 1920", "20 Ocak 1921"],
-    dogruCevap: 2,
-    aciklama: "Misak-ı Millî, son Osmanlı Mebuslar Meclisi'nce 28 Ocak 1920'de kabul edilmiştir.",
-  },
-  {
-    ders: "TARIH",
-    soruMetni: "TBMM'nin ilk anayasası olan Teşkilat-ı Esasiye Kanunu hangi tarihte kabul edilmiştir?",
-    secenekler: ["23 Nisan 1920", "20 Ocak 1921", "29 Ekim 1923", "20 Nisan 1924", "1 Kasım 1922"],
-    dogruCevap: 1,
-    aciklama: "Teşkilat-ı Esasiye Kanunu 20 Ocak 1921'de kabul edilmiştir.",
-  },
-  {
-    ders: "TARIH",
-    soruMetni: "Türkiye Cumhuriyeti'nin ilk Cumhurbaşkanı kimdir?",
-    secenekler: ["İsmet İnönü", "Mustafa Kemal Atatürk", "Celal Bayar", "Fevzi Çakmak", "Kazım Karabekir"],
-    dogruCevap: 1,
-    aciklama: "Cumhuriyet'in ilanıyla birlikte 29 Ekim 1923'te Mustafa Kemal Atatürk ilk Cumhurbaşkanı seçilmiştir.",
-  },
-  {
-    ders: "TARIH",
-    soruMetni: "Soyadı Kanunu hangi yıl kabul edilmiştir?",
-    secenekler: ["1928", "1930", "1932", "1934", "1936"],
-    dogruCevap: 3,
-    aciklama: "Soyadı Kanunu 21 Haziran 1934'te kabul edilmiştir.",
-  },
-  {
-    ders: "TARIH",
-    soruMetni: "Türkiye'de kadınlara milletvekili seçme ve seçilme hakkı hangi yıl tanınmıştır?",
-    secenekler: ["1930", "1933", "1934", "1935", "1938"],
-    dogruCevap: 2,
-    aciklama: "Kadınlara milletvekili seçme ve seçilme hakkı 5 Aralık 1934'te tanınmıştır.",
-  },
-  {
-    ders: "TARIH",
-    soruMetni: "Yeni Türk alfabesinin (Latin harflerinin) kabulü hangi yıl gerçekleşmiştir?",
-    secenekler: ["1923", "1924", "1925", "1928", "1930"],
-    dogruCevap: 3,
-    aciklama: "Harf İnkılabı ile yeni Türk alfabesi 1 Kasım 1928'de kabul edilmiştir.",
-  },
-  {
-    ders: "TARIH",
-    soruMetni: "Mustafa Kemal Atatürk hangi tarihte vefat etmiştir?",
-    secenekler: ["10 Kasım 1938", "19 Mayıs 1938", "29 Ekim 1938", "1 Kasım 1938", "23 Nisan 1938"],
-    dogruCevap: 0,
-    aciklama: "Atatürk, 10 Kasım 1938'de Dolmabahçe Sarayı'nda vefat etmiştir.",
-  },
-  {
-    ders: "TARIH",
-    soruMetni: "Osmanlı Devleti geleneksel olarak hangi yılda kurulmuş kabul edilir?",
-    secenekler: ["1071", "1299", "1453", "1512", "1326"],
-    dogruCevap: 1,
-    aciklama: "Osmanlı Devleti'nin kuruluşu geleneksel olarak 1299 kabul edilir.",
-  },
-  {
-    ders: "TARIH",
-    soruMetni: "İstanbul'un fethi hangi tarihte, hangi padişah tarafından gerçekleştirilmiştir?",
+    soruMetni:
+      "İslamiyet öncesi Türk devletlerinde hükümdarlık yetkisinin (kut) Tanrı tarafından hükümdar ailesine verildiğine inanılırdı. Bu anlayışa göre ülke, hanedan üyelerinin ortak malı sayılır; tahta geçişte belirli bir veraset kuralı bulunmaz ve hanedanın her erkek üyesi hükümdar olmayı kendi hakkı olarak görürdü.\n\nBu anlayışın İslamiyet öncesi Türk devletleri üzerindeki etkisi aşağıdakilerden hangisidir?",
     secenekler: [
-      "1453, Fatih Sultan Mehmet",
-      "1453, II. Bayezid",
-      "1517, Yavuz Sultan Selim",
-      "1389, I. Murad",
-      "1402, Yıldırım Bayezid",
+      "Merkezî otoritenin uzun süre güçlü kalmasını sağlamıştır.",
+      "Hükümdarın yetkilerinin kurultay tarafından sınırlandırılmasına neden olmuştur.",
+      "Devlet yönetiminde dinî liderlerin söz sahibi olmasını sağlamıştır.",
+      "Çin'in Türk devletleri üzerindeki etkisini tamamen ortadan kaldırmıştır.",
+      "Taht kavgalarına ve devletlerin kısa sürede parçalanmasına zemin hazırlamıştır.",
+    ],
+    dogruCevap: 4,
+    aciklama:
+      "Ülkenin hanedanın ortak malı sayılması ve belirli bir veraset kuralının olmaması, hükümdarın ölümünden sonra taht kavgalarına yol açmış; bu durum İslamiyet öncesi Türk devletlerinin kısa sürede bölünüp yıkılmasının başlıca nedenlerinden biri olmuştur.",
+  },
+  {
+    ders: "TARIH",
+    soruMetni:
+      "Uygurlarla ilgili;\n\nI. Mani dinini benimsemelerinin etkisiyle yerleşik hayata geçmişlerdir.\nII. Kendilerine özgü bir alfabe kullanarak yazılı eserler vermişlerdir.\nIII. \"Türk\" adını ilk kez resmî devlet adı olarak kullanmışlardır.\n\nbilgilerinden hangileri doğrudur?",
+    secenekler: ["Yalnız I", "Yalnız II", "I ve II", "II ve III", "I, II ve III"],
+    dogruCevap: 2,
+    aciklama:
+      "Uygurlar Maniheizm'in etkisiyle yerleşik hayata geçmiş ve Uygur alfabesini kullanarak yazılı eserler vermişlerdir. \"Türk\" adını ilk kez resmî devlet adı olarak kullananlar ise Göktürklerdir; bu nedenle III yanlıştır.",
+  },
+  {
+    ders: "TARIH",
+    soruMetni:
+      "Karahanlılar döneminde yazılan; Türkçenin Arapça kadar zengin bir dil olduğunu kanıtlamak ve Araplara Türkçeyi öğretmek amacıyla hazırlanan, Türk boylarının yaşadığı yerleri gösteren bir dünya haritasını da içeren eser aşağıdakilerden hangisidir?",
+    secenekler: ["Kutadgu Bilig", "Atabetü'l-Hakayık", "Divan-ı Hikmet", "Divan-ı Lügati't-Türk", "Muhakemetü'l-Lügateyn"],
+    dogruCevap: 3,
+    aciklama:
+      "Kaşgarlı Mahmud'un Divan-ı Lügati't-Türk'ü, Araplara Türkçeyi öğretmek amacıyla yazılmış bir sözlüktür ve Türk boylarının yerleşim yerlerini gösteren bir dünya haritası içerir. Kutadgu Bilig siyasetname, Divan-ı Hikmet tasavvufi şiir kitabı, Muhakemetü'l-Lügateyn ise Timurlu döneminde Ali Şir Nevai'nin eseridir.",
+  },
+  {
+    ders: "TARIH",
+    soruMetni:
+      "Büyük Selçukluların Gaznelilere karşı kazandığı; Horasan'daki egemenliklerini kesinleştirerek devletin resmen kurulmasını sağlayan savaş aşağıdakilerden hangisidir?",
+    secenekler: ["Dandanakan Savaşı", "Pasinler Savaşı", "Malazgirt Savaşı", "Katvan Savaşı", "Miryokefalon Savaşı"],
+    dogruCevap: 0,
+    aciklama:
+      "1040 Dandanakan Savaşı'nda Gazneliler yenilmiş ve Büyük Selçuklu Devleti resmen kurulmuştur. Pasinler (1048) Bizans'a karşı kazanılan ilk büyük zafer, Malazgirt (1071) Anadolu'nun kapılarını açan savaş, Katvan (1141) Karahıtaylara karşı alınan yenilgi, Miryokefalon (1176) ise Türkiye Selçuklularının Bizans'a karşı kazandığı savaştır.",
+  },
+  {
+    ders: "TARIH",
+    soruMetni:
+      "1243 yılında Moğollara karşı kaybedilen; Türkiye Selçuklu Devleti'nin Moğol (İlhanlı) egemenliğine girmesine, Anadolu'daki siyasi birliğin bozularak beyliklerin güçlenmesine yol açan savaş aşağıdakilerden hangisidir?",
+    secenekler: ["Miryokefalon Savaşı", "Yassıçemen Savaşı", "Malazgirt Savaşı", "Ankara Savaşı", "Kösedağ Savaşı"],
+    dogruCevap: 4,
+    aciklama:
+      "Kösedağ Savaşı (1243) sonrasında Türkiye Selçuklu Devleti Moğolların denetimine girmiş, merkezî otorite zayıflamış ve Anadolu'da beyliklerin güçlenmesinin zemini hazırlanmıştır. Yassıçemen (1230) Harezmşahlara karşı kazanılmış, Ankara Savaşı (1402) ise Osmanlı ile Timur arasında yapılmıştır.",
+  },
+  {
+    ders: "TARIH",
+    soruMetni:
+      "Osmanlı Beyliği'nin kısa sürede büyüyerek bir devlete dönüşmesinde;\n\nI. Bizans İmparatorluğu'nun iç karışıklıklar nedeniyle zayıflamış olması,\nII. Anadolu'daki Türk beylikleriyle uzun süre mücadele etmek yerine fetihleri Bizans ve Balkanlar yönünde sürdürmesi,\nIII. Ahiler, dervişler ve ilim adamlarından destek görmesi\n\ndurumlarından hangileri etkili olmuştur?",
+    secenekler: ["Yalnız I", "Yalnız II", "I ve III", "II ve III", "I, II ve III"],
+    dogruCevap: 4,
+    aciklama:
+      "Bizans'ın zayıflığı, fetihlerin Rumeli'ye yöneltilmesi ve Ahi, derviş ve âlimlerin desteği, Osmanlı'nın kısa sürede büyümesinin başlıca nedenleri arasındadır.",
+  },
+  {
+    ders: "TARIH",
+    soruMetni:
+      "Döneminde Mohaç Meydan Muharebesi kazanılarak Macaristan'ın büyük bölümü Osmanlı egemenliğine girmiş, Barbaros Hayreddin Paşa komutasındaki donanma Preveze'de Haçlı donanmasını yenmiş ve Akdeniz'de Osmanlı üstünlüğü sağlanmıştır.\n\nBu bilgiler aşağıdaki padişahlardan hangisinin dönemine aittir?",
+    secenekler: ["Fatih Sultan Mehmet", "Kanuni Sultan Süleyman", "Yavuz Sultan Selim", "II. Bayezid", "II. Selim"],
+    dogruCevap: 1,
+    aciklama:
+      "Mohaç (1526) ve Preveze (1538) zaferleri Kanuni Sultan Süleyman dönemindedir. Yavuz döneminde Çaldıran ve Mısır seferi, II. Selim döneminde ise Kıbrıs'ın fethi ve İnebahtı yenilgisi yaşanmıştır.",
+  },
+  {
+    ders: "TARIH",
+    soruMetni:
+      "Osmanlı Devleti'nde, belirli bir bölgenin vergilerini toplama hakkının açık artırma yoluyla ve peşin para karşılığında, genellikle bir ile üç yıl gibi kısa süreler için kişilere verilmesi uygulaması aşağıdakilerden hangisidir?",
+    secenekler: ["Tımar", "İltizam", "Müsadere", "Malikâne", "Esham"],
+    dogruCevap: 1,
+    aciklama:
+      "İltizam, vergi toplama hakkının kısa süreli olarak ve peşin para karşılığında mültezimlere verilmesidir. Malikâne bu hakkın ömür boyu verilmesi, esham vergi gelirine dayalı iç borçlanma senedi, müsadere devlet görevlilerinin mallarına el konulması, tımar ise hizmet karşılığı verilen dirliktir.",
+  },
+  {
+    ders: "TARIH",
+    soruMetni:
+      "Osmanlı Devleti'nde Divan-ı Hümayun'da görev alan devlet adamları ile sorumlu oldukları alanlar eşleştirilmiştir.\n\nBu eşleştirmelerden hangisi yanlıştır?",
+    secenekler: [
+      "Sadrazam – Padişahın mutlak vekili olarak devlet işlerini yürütme",
+      "Kazasker – Adalet ve eğitim işleri, kadı ve müderrislerin atanması",
+      "Defterdar – Mali işler ve devlet bütçesi",
+      "Nişancı – Fermanlara tuğra çekme ve toprak kayıtlarını tutma",
+      "Kaptan-ı Derya – Yabancı devletlerle yazışmalar ve elçilik işleri",
+    ],
+    dogruCevap: 4,
+    aciklama:
+      "Kaptan-ı Derya donanmanın komutanıdır. Yabancı devletlerle yazışmalardan Reisülküttap sorumludur; bu görev zamanla Hariciye Nazırlığına dönüşmüştür.",
+  },
+  {
+    ders: "TARIH",
+    soruMetni:
+      "Osmanlı Devleti'nde esnaf ve zanaatkârlar loncalar hâlinde örgütlenmişti. Loncalar; malın kalitesini ve satış fiyatını denetler, hammaddenin üyeler arasında adil dağıtılmasını sağlar, üretimin ihtiyaç kadar yapılmasını gözetirdi. Çıraklıktan kalfalığa, kalfalıktan ustalığa belirli bir eğitim ve sınav sürecinden geçmeyen kimse dükkân açamazdı.\n\nBu bilgilere göre lonca teşkilatıyla ilgili aşağıdakilerden hangisi söylenemez?",
+    secenekler: [
+      "Serbest rekabete dayalı bir üretim anlayışını desteklediği",
+      "Tüketicinin korunmasına önem verildiği",
+      "Mesleki eğitimin belirli bir düzen içinde verildiği",
+      "Üretimde kalite standardının gözetildiği",
+      "Üretim miktarının ihtiyaca göre düzenlendiği",
     ],
     dogruCevap: 0,
-    aciklama: "İstanbul, 29 Mayıs 1453'te Fatih Sultan Mehmet tarafından fethedilmiştir.",
+    aciklama:
+      "Fiyat, kalite ve üretim miktarının denetlenmesi serbest rekabeti değil, denetimli ve dengeli bir üretim düzenini yansıtır. Diğer seçenekler parçadaki bilgilerle doğrulanır.",
   },
   {
     ders: "TARIH",
-    soruMetni: "Malazgirt Meydan Muharebesi hangi yıl, hangi Selçuklu hükümdarı önderliğinde kazanılmıştır?",
+    soruMetni:
+      "XVII. yüzyılda saltanat süren; içki ve tütünü yasaklayarak sert önlemlerle devlet otoritesini yeniden kurmaya çalışan, Bağdat'ı Safevilerden geri alan ve imzalanan Kasr-ı Şirin Antlaşması ile bugünkü Türkiye-İran sınırının temelinin atılmasını sağlayan padişah aşağıdakilerden hangisidir?",
+    secenekler: ["II. Osman", "I. Ahmed", "IV. Murad", "IV. Mehmed", "III. Ahmed"],
+    dogruCevap: 2,
+    aciklama:
+      "IV. Murad, Bağdat Seferi (1638) ve Kasr-ı Şirin Antlaşması (1639) ile tanınır; bu antlaşmayla çizilen sınır bugünkü Türkiye-İran sınırının temelini oluşturur. II. Osman Yeniçeri Ocağını kaldırmak isterken öldürülmüş, III. Ahmed dönemi ise Lale Devri olarak bilinir.",
+  },
+  {
+    ders: "TARIH",
+    soruMetni:
+      "Lale Devri'nde;\n\nI. İbrahim Müteferrika ile Said Mehmed Efendi tarafından ilk Türk matbaasının kurulması,\nII. İstanbul'da yangınlarla mücadele için Tulumbacı Ocağı'nın oluşturulması,\nIII. Avrupa başkentlerinde ilk kez sürekli (daimî) elçiliklerin açılması\n\ngelişmelerinden hangileri gerçekleşmiştir?",
+    secenekler: ["Yalnız I", "Yalnız II", "Yalnız III", "I ve II", "II ve III"],
+    dogruCevap: 3,
+    aciklama:
+      "Matbaa (1727) ve Tulumbacı Ocağı Lale Devri'nin yeniliklerindendir; bu dönemde Avrupa'ya yalnızca geçici elçiler gönderilmiştir. Daimî elçilikler ilk kez III. Selim döneminde açılmıştır.",
+  },
+  {
+    ders: "TARIH",
+    soruMetni:
+      "Osmanlı Devleti'nde ilk anayasa olan Kanun-i Esasi'nin ilan edildiği; Ayan ve Mebusan meclislerinden oluşan Meclis-i Umumi'nin açılarak halkın yönetime ilk kez seçilmiş temsilcileri aracılığıyla katıldığı gelişme aşağıdakilerden hangisidir?",
     secenekler: [
-      "1071, Alparslan",
-      "1176, II. Kılıçarslan",
-      "1243, II. Gıyaseddin Keyhüsrev",
-      "1040, Tuğrul Bey",
-      "1299, Osman Bey",
+      "Sened-i İttifak'ın imzalanması",
+      "Tanzimat Fermanı'nın ilanı",
+      "Islahat Fermanı'nın ilanı",
+      "I. Meşrutiyet'in ilanı",
+      "II. Meşrutiyet'in ilanı",
+    ],
+    dogruCevap: 3,
+    aciklama:
+      "Kanun-i Esasi 1876'da ilan edilmiş ve Meclis-i Umumi açılmıştır; bu süreç I. Meşrutiyet olarak adlandırılır. Sened-i İttifak padişahla ayanlar arasındaki bir sözleşme, Tanzimat ve Islahat fermanları ise anayasa niteliği taşımayan reform belgeleridir; II. Meşrutiyet'te (1908) anayasa yeniden yürürlüğe konmuştur.",
+  },
+  {
+    ders: "TARIH",
+    soruMetni:
+      "Mısır Valisi Kavalalı Mehmet Ali Paşa'nın isyanı sırasında Osmanlı Devleti'nin Rusya'dan yardım almasının ardından imzalanan; Rusya bir saldırıya uğradığında Osmanlı Devleti'nin Boğazları Rus savaş gemileri dışındaki yabancı savaş gemilerine kapatmasını öngören antlaşma aşağıdakilerden hangisidir?",
+    secenekler: [
+      "Kütahya Antlaşması",
+      "Hünkâr İskelesi Antlaşması",
+      "Balta Limanı Ticaret Antlaşması",
+      "Londra Boğazlar Sözleşmesi",
+      "Edirne Antlaşması",
+    ],
+    dogruCevap: 1,
+    aciklama:
+      "1833 Hünkâr İskelesi Antlaşması ile Rusya Boğazlar üzerinde ayrıcalıklı bir konum elde etmiştir. Kütahya (1833) Mehmet Ali Paşa ile yapılan anlaşma, Balta Limanı (1838) İngiltere ile ticaret antlaşması, Londra Boğazlar Sözleşmesi (1841) ise Boğazları uluslararası denetime açan sözleşmedir.",
+  },
+  {
+    ders: "TARIH",
+    soruMetni:
+      "Osmanlı Devleti'nin İtalya ile yaptığı ve Balkan Savaşları'nın başlaması üzerine sona erdirmek zorunda kaldığı Trablusgarp Savaşı'nın ardından imzalanan; Osmanlı Devleti'nin Kuzey Afrika'daki son toprağını kaybetmesiyle sonuçlanan antlaşma aşağıdakilerden hangisidir?",
+    secenekler: ["Uşi Antlaşması", "Londra Antlaşması", "Bükreş Antlaşması", "Atina Antlaşması", "İstanbul Antlaşması"],
+    dogruCevap: 0,
+    aciklama:
+      "1912 Uşi (Ouchy) Antlaşması ile Trablusgarp ve Bingazi İtalya'ya bırakılmıştır. Londra (1913) I. Balkan Savaşı'nı, Bükreş (1913) II. Balkan Savaşı'nı sona erdirmiş; Atina ve İstanbul antlaşmaları ise Balkan Savaşları'ndan sonra Yunanistan ve Bulgaristan ile imzalanmıştır.",
+  },
+  {
+    ders: "TARIH",
+    soruMetni:
+      "I. Dünya Savaşı'nda Çanakkale Cephesi'nde kazanılan başarının sonuçları arasında;\n\nI. İtilaf Devletleri'nin Rusya'ya yardım ulaştıramaması nedeniyle Rusya'da Bolşevik İhtilali'nin kolaylaşması,\nII. I. Dünya Savaşı'nın uzaması,\nIII. Bulgaristan'ın İtilaf Devletleri'nin yanında savaşa katılması\n\ndurumlarından hangileri yer alır?",
+    secenekler: ["Yalnız I", "Yalnız II", "I ve II", "I ve III", "II ve III"],
+    dogruCevap: 2,
+    aciklama:
+      "Çanakkale başarısıyla Boğazlar kapalı kalmış, Rusya'ya yardım ulaştırılamamış ve bu durum Bolşevik İhtilali'ni kolaylaştırmış; savaş da uzamıştır. Bulgaristan ise bu başarının da etkisiyle İttifak Devletleri'nin yanında savaşa girmiştir.",
+  },
+  {
+    ders: "TARIH",
+    soruMetni:
+      "Mondros Ateşkes Antlaşması'nın aşağıdaki hükümlerinden hangisi, İtilaf Devletleri'ne Anadolu'nun herhangi bir yerini işgal etme olanağı vermiştir?",
+    secenekler: [
+      "Boğazların açılması ve Çanakkale ile İstanbul istihkâmlarının İtilaf Devletleri'nce işgal edilmesi",
+      "Osmanlı ordusunun terhis edilmesi",
+      "Toros tünellerinin İtilaf Devletleri'nce işgal edilmesi",
+      "İtilaf Devletleri'nin güvenliklerini tehdit eden bir durum çıkması hâlinde herhangi bir stratejik noktayı işgal edebilmesi",
+      "Doğu Anadolu'daki altı ilde karışıklık çıkması hâlinde bu illerin işgal edilebilmesi",
+    ],
+    dogruCevap: 3,
+    aciklama:
+      "Mondros'un 7. maddesi, güvenliklerini tehdit eden bir durum çıkması hâlinde İtilaf Devletleri'ne herhangi bir stratejik noktayı işgal hakkı tanıyarak Anadolu'nun tamamını işgale açık hâle getirmiştir. 24. madde ise yalnızca altı doğu ilini (Vilayet-i Sitte) kapsar.",
+  },
+  {
+    ders: "TARIH",
+    soruMetni:
+      "Erzurum Kongresi'nde alınan kararlar arasında;\n\nI. Millî sınırlar içinde vatan bir bütündür, parçalanamaz.\nII. Manda ve himaye kabul olunamaz.\nIII. Bütün millî cemiyetler Anadolu ve Rumeli Müdafaa-i Hukuk Cemiyeti adı altında birleştirilmiştir.\n\nifadelerinden hangileri yer alır?",
+    secenekler: ["Yalnız I", "Yalnız III", "I ve II", "I ve III", "II ve III"],
+    dogruCevap: 2,
+    aciklama:
+      "\"Millî sınırlar içinde vatan bir bütündür\" ve \"Manda ve himaye kabul olunamaz\" kararları Erzurum Kongresi'nde alınmıştır. Bütün cemiyetlerin tek çatı altında birleştirilmesi ise Sivas Kongresi kararıdır.",
+  },
+  {
+    ders: "TARIH",
+    soruMetni:
+      "Amasya Genelgesi'nde yer alan \"Milletin istiklalini yine milletin azim ve kararı kurtaracaktır.\" ifadesiyle aşağıdakilerden hangisi vurgulanmıştır?",
+    secenekler: [
+      "Kurtuluşun ancak millî irade ve kararlılıkla gerçekleşebileceği",
+      "Manda yönetiminin kabul edilmesi gerektiği",
+      "Saltanat ve halifeliğin kaldırılacağı",
+      "İstanbul Hükümeti'nin millî mücadeleye öncülük edeceği",
+      "Düzenli ordunun kurulduğu",
     ],
     dogruCevap: 0,
-    aciklama: "Malazgirt Meydan Muharebesi 1071'de Büyük Selçuklu Sultanı Alparslan önderliğinde kazanılmış, Anadolu'nun kapıları Türklere açılmıştır.",
+    aciklama:
+      "Bu ifade, kurtuluşun dış yardımla ya da İstanbul Hükümeti eliyle değil, millî irade ile gerçekleşeceğini vurgular ve millî egemenlik anlayışının ilk işaretlerinden biridir.",
   },
   {
     ders: "TARIH",
-    soruMetni: "Osmanlı Devleti'nde ilan edilen Tanzimat Fermanı hangi yüzyılda gerçekleşmiştir?",
-    secenekler: ["17. yüzyıl", "18. yüzyıl", "19. yüzyıl", "20. yüzyıl başı", "16. yüzyıl"],
-    dogruCevap: 2,
-    aciklama: "Tanzimat Fermanı 1839'da, 19. yüzyılda ilan edilmiştir.",
+    soruMetni:
+      "Sakarya Meydan Muharebesi'nden sonra imzalanan; Güney Cephesi'nde savaşın sona ermesini sağlayan ve TBMM'nin bir İtilaf devletiyle imzaladığı ilk antlaşma olma özelliği taşıyan antlaşma aşağıdakilerden hangisidir?",
+    secenekler: [
+      "Gümrü Antlaşması",
+      "Moskova Antlaşması",
+      "Kars Antlaşması",
+      "Ankara Antlaşması",
+      "Mudanya Ateşkes Antlaşması",
+    ],
+    dogruCevap: 3,
+    aciklama:
+      "1921 Ankara Antlaşması ile Fransa TBMM'yi tanımış ve Güney Cephesi kapanmıştır; bu, TBMM'nin bir İtilaf devletiyle yaptığı ilk antlaşmadır. Gümrü (1920) Ermenistan ile, Moskova (1921) Sovyet Rusya ile, Kars (1921) Kafkas cumhuriyetleriyle imzalanmıştır; Mudanya ise Büyük Taarruz sonrasındaki ateşkestir.",
   },
   {
     ders: "TARIH",
-    soruMetni: "Osmanlı'da ilk kez bir anayasanın (Kanun-i Esasi) ilan edildiği I. Meşrutiyet hangi yıl ilan edilmiştir?",
-    secenekler: ["1839", "1856", "1876", "1908", "1909"],
-    dogruCevap: 2,
-    aciklama: "I. Meşrutiyet 1876'da ilan edilmiştir.",
+    soruMetni:
+      "Sakarya Meydan Muharebesi'nin kazanılmasının ardından TBMM tarafından Mustafa Kemal Paşa'ya verilen rütbe ve unvan aşağıdakilerden hangisidir?",
+    secenekler: [
+      "Başkomutanlık yetkisi",
+      "Mareşal rütbesi ve Gazi unvanı",
+      "Ferik rütbesi ve Paşa unvanı",
+      "TBMM Başkanlığı",
+      "Cumhurbaşkanlığı",
+    ],
+    dogruCevap: 1,
+    aciklama:
+      "Sakarya zaferinden sonra (19 Eylül 1921) TBMM, Mustafa Kemal'e Mareşal rütbesi ve Gazi unvanı vermiştir. Başkomutanlık yetkisi ise muharebeden önce, Başkomutanlık Kanunu ile verilmiştir.",
   },
   {
     ders: "TARIH",
-    soruMetni: "Osmanlı Devleti, I. Dünya Savaşı'na hangi yıl fiilen katılmıştır?",
-    secenekler: ["1912", "1913", "1914", "1917", "1918"],
+    soruMetni:
+      "Lozan Barış Antlaşması'nda;\n\nI. kapitülasyonların tamamen kaldırılması,\nII. Osmanlı Devleti'nin borçlarının Osmanlı'dan ayrılan devletler arasında paylaştırılması,\nIII. Musul meselesinin Türkiye ile İngiltere arasında yapılacak ikili görüşmelere bırakılması\n\nkonularından hangileri karara bağlanmıştır?",
+    secenekler: ["Yalnız I", "Yalnız II", "I ve II", "II ve III", "I, II ve III"],
+    dogruCevap: 4,
+    aciklama:
+      "Lozan'da kapitülasyonlar kaldırılmış, Osmanlı borçları ayrılan devletler arasında paylaştırılmış ve Musul sorunu Türkiye ile İngiltere arasında çözülmek üzere ikili görüşmelere bırakılmıştır.",
+  },
+  {
+    ders: "TARIH",
+    soruMetni:
+      "I. Yeni Türk harflerinin kabul edilmesi\nII. Tevhid-i Tedrisat Kanunu'nun kabul edilmesi\nIII. Soyadı Kanunu'nun kabul edilmesi\n\nYukarıdaki inkılapların kronolojik sıralaması aşağıdakilerden hangisinde doğru verilmiştir?",
+    secenekler: ["I, II, III", "I, III, II", "II, I, III", "II, III, I", "III, II, I"],
     dogruCevap: 2,
-    aciklama: "Osmanlı Devleti, 1914 yılının sonlarında I. Dünya Savaşı'na katılmıştır.",
+    aciklama:
+      "Tevhid-i Tedrisat Kanunu 1924'te, yeni Türk harfleri 1928'de, Soyadı Kanunu ise 1934'te kabul edilmiştir.",
+  },
+  {
+    ders: "TARIH",
+    soruMetni: "Aşağıdaki gelişmelerden hangisi doğrudan laiklik ilkesiyle ilişkilendirilemez?",
+    secenekler: [
+      "Aşar vergisinin kaldırılması",
+      "Halifeliğin kaldırılması",
+      "Tevhid-i Tedrisat Kanunu'nun kabulü",
+      "Türk Medeni Kanunu'nun kabulü",
+      "Şer'iye ve Evkaf Vekâleti'nin kaldırılması",
+    ],
+    dogruCevap: 0,
+    aciklama:
+      "Aşar vergisinin 1925'te kaldırılması köylünün ekonomik yükünü hafifletmeye yönelik olup halkçılık ilkesiyle ilgilidir. Halifeliğin ve Şer'iye Vekâleti'nin kaldırılması, eğitimin birleştirilmesi ve Medeni Kanun ise devlet ve toplum yaşamının laikleşmesini sağlamıştır.",
+  },
+  {
+    ders: "TARIH",
+    soruMetni:
+      "Mustafa Kemal'in isteğiyle, çok partili hayata geçiş denemesi olarak 1930'da Ali Fethi (Okyar) Bey tarafından kurulan; kısa sürede halktan büyük ilgi görmesine rağmen yaklaşık üç ay sonra kendini feshederek siyasi hayattan çekilen parti aşağıdakilerden hangisidir?",
+    secenekler: [
+      "Terakkiperver Cumhuriyet Fırkası",
+      "Serbest Cumhuriyet Fırkası",
+      "Demokrat Parti",
+      "Millî Kalkınma Partisi",
+      "Halk Fırkası",
+    ],
+    dogruCevap: 1,
+    aciklama:
+      "Serbest Cumhuriyet Fırkası 1930'da Ali Fethi Bey tarafından kurulmuş ve aynı yıl kendini feshetmiştir. Terakkiperver Cumhuriyet Fırkası 1924'te Kâzım Karabekir ve arkadaşlarınca kurulmuş, 1925'te kapatılmıştır; Millî Kalkınma Partisi (1945) ve Demokrat Parti (1946) Atatürk sonrası döneme aittir.",
+  },
+  {
+    ders: "TARIH",
+    soruMetni:
+      "Atatürk'ün \"şahsi meselem\" olarak nitelendirdiği; Ankara Antlaşması (1921) ile Fransız mandası altındaki Suriye sınırları içinde kalan, 1938'de bağımsız bir devlet olduktan sonra 1939'da kendi meclisinin kararıyla Türkiye'ye katılan yer aşağıdakilerden hangisidir?",
+    secenekler: ["Musul", "Kerkük", "Batum", "Hatay", "Kars"],
+    dogruCevap: 3,
+    aciklama:
+      "Hatay, 1921 Ankara Antlaşması ile özel bir yönetimle Suriye'ye bırakılmış; 1938'de bağımsız Hatay Devleti kurulmuş ve 1939'da Hatay Meclisi'nin kararıyla Türkiye'ye katılmıştır. Musul ve Kerkük Irak'ta kalmış, Batum Moskova Antlaşması ile Gürcistan'a bırakılmış, Kars ise 1921'de Türkiye sınırlarına dâhil edilmiştir.",
+  },
+  {
+    ders: "TARIH",
+    soruMetni:
+      "İkinci Dünya Savaşı'ndan sonra Sovyetler Birliği'nin Boğazlar ve Doğu Anadolu üzerindeki taleplerine karşı Batı bloğuna yakınlaşan Türkiye;\n\nI. Truman Doktrini kapsamında ABD'nin askerî ve ekonomik yardımından yararlanma,\nII. Marshall Planı'na dâhil olma,\nIII. Varşova Paktı'na üye olma\n\ngelişmelerinden hangilerini yaşamıştır?",
+    secenekler: ["Yalnız I", "Yalnız II", "I ve II", "I ve III", "II ve III"],
+    dogruCevap: 2,
+    aciklama:
+      "Türkiye, SSCB tehdidine karşı Truman Doktrini (1947) ve Marshall Planı (1948) yardımlarından yararlanmış, 1952'de NATO'ya katılmıştır. Varşova Paktı ise SSCB önderliğindeki Doğu bloğunun askerî örgütüdür.",
   },
 
   // ---- COĞRAFYA (18) ----
+  // Sira: konum -> yer sekilleri -> iklim -> bitki/su -> nufus/yerlesme ->
+  // ekonomi (tarim, hayvancilik, maden, enerji, turizm). Haritalar gercek
+  // sinir verisiyle, iklim grafigi MGM verisiyle cizilir.
+  {
+    ders: "COGRAFYA",
+    soruMetni: "Türkiye'ye ait aşağıdaki özelliklerden hangisi matematik (mutlak) konumunun doğrudan bir sonucudur?",
+    secenekler: [
+      "Güneye bakan yamaçların, kuzeye bakan yamaçlara göre daha sıcak olması",
+      "Kıyıdan iç kesimlere doğru gidildikçe karasallığın artması",
+      "Doğudan batıya doğru gidildikçe ortalama yükseltinin azalması",
+      "Üç tarafının denizlerle çevrili olması",
+      "Asya ile Avrupa arasında köprü konumunda bulunması",
+    ],
+    dogruCevap: 0,
+    aciklama:
+      "Türkiye Kuzey Yarım Küre'nin orta kuşağında yer aldığından güneş ışınları güneyden gelir; bu nedenle güneye bakan yamaçlar daha sıcaktır (bakı etkisi). Bu, matematik konumun sonucudur. Diğer seçenekler özel (göreceli) konumla ilgilidir.",
+  },
   {
     ders: "COGRAFYA",
     soruMetni:
-      "Yukarıdaki şematik haritada numaralandırılarak gösterilen beş noktadan hangisi, her mevsim yağışlı ve yazları serin geçen bir iklime sahip olması beklenen bölgede yer alır?",
-    gorselSvg:
-      '<svg viewBox="0 0 400 220" xmlns="http://www.w3.org/2000/svg"><path d="M40,120 Q30,70 90,55 Q150,30 220,40 Q300,35 360,70 Q380,100 350,130 Q320,160 250,165 Q180,180 110,170 Q50,160 40,120 Z" fill="#dbeafe" stroke="#1e293b" stroke-width="2.5"/><circle cx="90" cy="65" r="7" fill="#dc2626"/><text x="78" y="50" font-size="16" fill="#1e293b">I</text><circle cx="110" cy="140" r="7" fill="#dc2626"/><text x="95" y="162" font-size="16" fill="#1e293b">II</text><circle cx="200" cy="100" r="7" fill="#dc2626"/><text x="195" y="88" font-size="16" fill="#1e293b">III</text><circle cx="300" cy="130" r="7" fill="#dc2626"/><text x="305" y="150" font-size="16" fill="#1e293b">IV</text><circle cx="310" cy="65" r="7" fill="#dc2626"/><text x="315" y="53" font-size="16" fill="#1e293b">V</text><text x="10" y="210" font-size="12" fill="#64748b">(Şematik gösterim)</text></svg>',
+      "Türkiye'nin en doğu ucu ile en batı ucu arasında yaklaşık 19 boylam (meridyen) farkı bulunmaktadır.\n\nBu durumun sonuçları arasında aşağıdakilerden hangisi yer almaz?",
+    secenekler: [
+      "Doğu ve batı uçları arasında yaklaşık 76 dakikalık yerel saat farkı olması",
+      "Güneşin Iğdır'da Edirne'den daha önce doğması",
+      "Ülke genelinde ortak bir ulusal saat uygulamasına ihtiyaç duyulması",
+      "Kuzey ve güney kıyıları arasında gündüz sürelerinin farklı olması",
+      "Güneşin batıdaki illerde, doğudaki illere göre daha geç batması",
+    ],
+    dogruCevap: 3,
+    aciklama:
+      "Her 1° boylam farkı 4 dakikalık yerel saat farkı oluşturur (19 × 4 ≈ 76 dk); bu nedenle Güneş doğuda daha erken doğar, batıda daha geç batar ve ortak saat kullanımı gerekir. Kuzey ile güney arasında gündüz sürelerinin farklı olması ise enlem farkının sonucudur.",
+  },
+  {
+    ders: "COGRAFYA",
+    soruMetni:
+      "Ege Bölgesi'nde dağlar kıyıya dik uzanır; dağların arasında yer alan çöküntü ovaları (grabenler) denizden iç kesimlere doğru sokulur.\n\nBu durumun bir sonucu olarak Ege Bölgesi'nde aşağıdakilerden hangisinin görülmesi beklenmez?",
+    secenekler: [
+      "Deniz etkisinin iç kesimlere kadar sokulması",
+      "Kıyı ile iç kesimler arasında iklim özelliklerinin belirgin biçimde farklılaşması",
+      "Kıyıdan iç kesimlere ulaşımın kolay olması",
+      "Kıyı çizgisinin girintili çıkıntılı olması",
+      "Kıyıda çok sayıda körfez ve yarımada bulunması",
+    ],
+    dogruCevap: 1,
+    aciklama:
+      "Enine kıyılarda deniz etkisi vadiler boyunca iç kesimlere sokulduğundan kıyı ile iç kesimler arasındaki iklim farkı, dağların kıyıya paralel uzandığı Karadeniz ve Akdeniz'e göre azdır. Diğer seçenekler enine kıyı tipinin sonuçlarıdır.",
+  },
+  {
+    ders: "COGRAFYA",
+    soruMetni: "Haritada numaralandırılarak gösterilen dağlardan hangisi volkanik kökenli değildir?",
+    gorselSvg: turkiyeHaritasi({
+      noktalar: [
+        { etiket: "I", boylam: 34.17, enlem: 38.13 }, // Hasan Dagi
+        { etiket: "II", boylam: 29.22, enlem: 40.07 }, // Uludag
+        { etiket: "III", boylam: 35.45, enlem: 38.53 }, // Erciyes
+        { etiket: "IV", boylam: 42.23, enlem: 38.65 }, // Nemrut (Bitlis)
+        { etiket: "V", boylam: 44.3, enlem: 39.7 }, // Agri Dagi
+      ],
+    }),
     secenekler: ["I", "II", "III", "IV", "V"],
-    dogruCevap: 0,
+    dogruCevap: 1,
     aciklama:
-      "Haritada kuzeyde (üstte) yer alan I noktası Karadeniz kıyısını temsil eder; Karadeniz ikliminde her mevsim yağış görülür, yazlar serindir.",
+      "I Hasan Dağı, III Erciyes, IV Nemrut ve V Ağrı Dağı volkanik kökenlidir. II numaralı Bursa'daki Uludağ ise volkanik değil, kırılma hareketleriyle yükselmiş granit çekirdekli bir kütle dağıdır.",
   },
   {
     ders: "COGRAFYA",
     soruMetni:
-      'Yukarıdaki kesitte bir volkanik koninin iç yapısı şematik olarak gösterilmiştir. Numaralandırılan "I" ile gösterilen, magmanın yeryüzüne ulaştığı ana çıkış kanalı aşağıdakilerden hangisidir?',
-    gorselSvg:
-      '<svg viewBox="0 0 300 285" xmlns="http://www.w3.org/2000/svg"><polygon points="40,230 150,40 260,230" fill="#e2e8f0" stroke="#1e293b" stroke-width="2.5"/><rect x="142" y="60" width="16" height="150" fill="#fbbf24" stroke="#1e293b" stroke-width="2"/><circle cx="150" cy="205" r="25" fill="#f97316" stroke="#1e293b" stroke-width="2"/><line x1="150" y1="230" x2="150" y2="255" stroke="#1e293b" stroke-width="1.5"/><text x="150" y="270" font-size="13" fill="#1e293b" text-anchor="middle">Magma Odası</text><line x1="158" y1="130" x2="182" y2="130" stroke="#dc2626" stroke-width="1.5"/><text x="188" y="136" font-size="18" fill="#dc2626" font-weight="bold">I</text><path d="M150,40 L133,58 L167,58 Z" fill="#94a3b8" stroke="#1e293b" stroke-width="1.5"/><text x="108" y="32" font-size="12" fill="#1e293b">Krater</text></svg>',
-    secenekler: ["Krater", "Baca", "Lav yastığı", "Kaldera", "Magma odası"],
+      "Kalker, jips ve kaya tuzu gibi kolay eriyebilen kayaçların yaygın olduğu alanlarda, suyun kimyasal çözme (eritme) etkisiyle karstik şekiller oluşur.\n\nAşağıdakilerden hangisi bu şekillerden biri değildir?",
+    secenekler: ["Polye", "Lapya", "Dolin", "Traverten", "Peribacası"],
+    dogruCevap: 4,
+    aciklama:
+      "Polye, lapya ve dolin karstik aşınım; traverten (ör. Pamukkale) ise karstik birikim şeklidir. Peribacaları, volkanik tüflerin akarsu ve sel sularıyla aşındırılmasıyla oluşur ve karstik değildir.",
+  },
+  {
+    ders: "COGRAFYA",
+    soruMetni:
+      "Türkiye'nin en aktif fay hatlarından biri olan Kuzey Anadolu Fay Hattı, Marmara Denizi'nden Doğu Anadolu'ya kadar uzanır ve bu hat üzerinde tarih boyunca çok sayıda yıkıcı deprem meydana gelmiştir.\n\nAşağıdaki illerden hangisi bu fay hattı üzerinde yer almaz?",
+    secenekler: ["Düzce", "Bolu", "Konya", "Erzincan", "Tokat"],
+    dogruCevap: 2,
+    aciklama:
+      "Düzce, Bolu, Tokat (Niksar-Erbaa) ve Erzincan Kuzey Anadolu Fay Hattı üzerinde yer alır. Konya ise bu hattın oldukça güneyinde, deprem riski görece düşük bir alanda bulunur.",
+  },
+  {
+    ders: "COGRAFYA",
+    soruMetni:
+      "Birbirine yakın enlemlerde bulunan Rize ile Kars'ta ocak ayı ortalama sıcaklıkları arasında 15 °C'yi aşan bir fark bulunur; kışlar Rize'de ılık, Kars'ta ise çok soğuk geçer.\n\nBu farkın temel nedenleri aşağıdakilerin hangisinde birlikte verilmiştir?",
+    secenekler: [
+      "Yükselti ve denize olan uzaklık",
+      "Enlem ve boylam farkı",
+      "Bakı ve bitki örtüsü",
+      "Nüfus yoğunluğu ve sanayileşme",
+      "Toprak türü ve akarsu rejimi",
+    ],
+    dogruCevap: 0,
+    aciklama:
+      "MGM uzun yıllar verilerine göre ocak ortalaması Rize'de 6,9 °C, Kars'ta -10,7 °C'dir. Rize deniz kıyısında ve alçakta, Kars ise denizden uzak ve yaklaşık 1750 m yükseltidedir; yükselti arttıkça sıcaklık düşer, denizden uzaklaştıkça karasallık artar.",
+  },
+  {
+    ders: "COGRAFYA",
+    soruMetni:
+      "Haritada numaralandırılarak gösterilen merkezlerden hangisinde, yaz mevsiminde de bol yağış görüldüğü için tarımda sulamaya en az ihtiyaç duyulur?",
+    gorselSvg: turkiyeHaritasi({
+      noktalar: [
+        { etiket: "I", boylam: 27.14, enlem: 38.42 }, // Izmir
+        { etiket: "II", boylam: 32.48, enlem: 37.87 }, // Konya
+        { etiket: "III", boylam: 40.23, enlem: 37.91 }, // Diyarbakir
+        { etiket: "IV", boylam: 40.52, enlem: 41.02 }, // Rize
+        { etiket: "V", boylam: 30.7, enlem: 36.89 }, // Antalya
+      ],
+    }),
+    secenekler: ["I", "II", "III", "IV", "V"],
+    dogruCevap: 3,
+    aciklama:
+      "IV numaralı merkez Rize'dir. Karadeniz ikliminin görüldüğü Rize her mevsim yağışlıdır ve yaz kuraklığı yaşanmaz. İzmir ve Antalya'da (Akdeniz iklimi) yazlar kurak, Konya ve Diyarbakır'da (karasal iklim) ise yazlar sıcak ve kuraktır.",
+  },
+  {
+    ders: "COGRAFYA",
+    soruMetni:
+      "Grafiklerde bir meteoroloji istasyonuna ait uzun yıllar aylık ortalama sıcaklık ve aylık ortalama yağış değerleri verilmiştir.\n\nBu istasyonun bulunduğu yörede aşağıdakilerden hangisinin görülmesi beklenmez?",
+    // MGM, Antalya uzun yillar (1930-2025) aylik ortalamalari.
+    gorselSvg: iklimGrafigi(
+      [10.1, 10.7, 12.9, 16.4, 20.7, 25.4, 28.6, 28.5, 25.3, 20.6, 15.6, 11.7],
+      [225.5, 148.1, 90.8, 48.5, 33.3, 10.7, 4.7, 4.3, 16.7, 70.6, 127.7, 250.9],
+    ),
+    secenekler: [
+      "Doğal bitki örtüsünün maki olması",
+      "Yaz aylarında sulama ihtiyacının artması",
+      "Kış aylarında don olaylarının ve kar yağışının sık yaşanması",
+      "Seracılık faaliyetlerinin yaygın olması",
+      "Turizm sezonunun uzun sürmesi",
+    ],
+    dogruCevap: 2,
+    aciklama:
+      "Grafikte kışlar ılık (en soğuk ay ortalaması 10 °C'nin üzerinde) ve yağışlı, yazlar sıcak ve kurak olduğundan Akdeniz iklimi görülmektedir (veriler: MGM, Antalya 1930-2025). Bu iklimde don ve kar yağışı nadirdir; maki, yaz kuraklığına bağlı sulama ihtiyacı, seracılık ve uzun turizm sezonu ise beklenen özelliklerdir.",
+  },
+  {
+    ders: "COGRAFYA",
+    soruMetni:
+      "Türkiye'deki doğal bitki örtüsü türleri ile yaygın oldukları alanlar eşleştirilmiştir:\n\nI. Maki – Akdeniz ve Ege kıyı kuşağı\nII. Bozkır – İç Anadolu'nun alçak düzlükleri\nIII. Gür (nemli) orman – Doğu Karadeniz kıyı kuşağı\nIV. Alpin çayır – Ergene Havzası\n\nBu eşleştirmelerden hangileri doğrudur?",
+    secenekler: ["Yalnız I", "I ve II", "I, II ve III", "II, III ve IV", "I, II, III ve IV"],
+    dogruCevap: 2,
+    aciklama:
+      "Maki Akdeniz ikliminin, bozkır yarı kurak İç Anadolu'nun, gür ormanlar her mevsim yağışlı Doğu Karadeniz'in bitki örtüsüdür. Alpin çayırlar ise yüksek dağlarda orman üst sınırının üzerinde görülür; Ergene Havzası alçak bir düzlüktür.",
+  },
+  {
+    ders: "COGRAFYA",
+    soruMetni:
+      "Türkiye'deki akarsuların büyük bölümünün akım miktarı yıl içinde büyük değişiklikler gösterir; bu akarsular ilkbaharda taşar, yaz sonunda ise suları oldukça azalır.\n\nTürkiye'deki akarsuların rejimlerinin genellikle düzensiz olmasının temel nedeni aşağıdakilerden hangisidir?",
+    secenekler: [
+      "Yer şekillerinin engebeli olması",
+      "Yağışların mevsimlere dağılışının düzensiz olması",
+      "Akarsu boylarının kısa olması",
+      "Bitki örtüsünün cılız olması",
+      "Kapalı havzaların bulunması",
+    ],
     dogruCevap: 1,
     aciklama:
-      "Magmanın magma odasından yeryüzüne (kratere) ulaştığı dikey kanala baca denir; krater ve magma odası şekilde ayrıca etiketlenmiştir.",
+      "Akarsuların rejimi büyük ölçüde onları besleyen yağışa bağlıdır. Türkiye'de yağışın mevsimlere dağılışı düzensiz olduğundan (özellikle yaz kuraklığı) akarsuların çoğu düzensiz rejimlidir; her mevsim yağış alan Karadeniz'deki akarsular ise daha düzenlidir.",
   },
   {
     ders: "COGRAFYA",
-    soruMetni: "Türkiye'nin sınırları içinde en uzun akan nehri aşağıdakilerden hangisidir?",
-    secenekler: ["Fırat", "Sakarya", "Kızılırmak", "Yeşilırmak", "Dicle"],
-    dogruCevap: 2,
-    aciklama: "Kızılırmak, tamamı Türkiye sınırları içinde akan en uzun nehirdir.",
+    soruMetni:
+      "Türkiye'de özellikle 1950'den sonra kırsal kesimden kentlere yoğun göçler yaşanmıştır.\n\nAşağıdakilerden hangisi bu göçlerin nedenlerinden biri değildir?",
+    secenekler: [
+      "Tarımda makineleşmenin artması",
+      "Kentlerde sanayinin gelişmesi",
+      "Miras yoluyla tarım arazilerinin küçülmesi",
+      "Eğitim ve sağlık hizmetlerinin kentlerde yoğunlaşması",
+      "Kırsal kesimde nüfus artış hızının düşük olması",
+    ],
+    dogruCevap: 4,
+    aciklama:
+      "Tarımda makineleşme, arazilerin miras yoluyla bölünmesi, kentlerdeki iş olanakları ve hizmetler göçü hızlandırmıştır. O dönemde kırsal kesimde nüfus artış hızı düşük değil, yüksekti; toprağın artan nüfusu besleyememesi göçü artırmıştır.",
   },
   {
     ders: "COGRAFYA",
-    soruMetni: "Türkiye'nin en büyük gölü aşağıdakilerden hangisidir?",
-    secenekler: ["Tuz Gölü", "Beyşehir Gölü", "Eğirdir Gölü", "Van Gölü", "İznik Gölü"],
-    dogruCevap: 3,
-    aciklama: "Van Gölü, yüzölçümü bakımından Türkiye'nin en büyük gölüdür.",
-  },
-  {
-    ders: "COGRAFYA",
-    soruMetni: "Türkiye'nin kara sınırı komşusu olan ülke sayısı kaçtır?",
-    secenekler: ["6", "7", "8", "9", "10"],
-    dogruCevap: 2,
-    aciklama: "Türkiye; Yunanistan, Bulgaristan, Gürcistan, Ermenistan, Azerbaycan (Nahçıvan), İran, Irak ve Suriye olmak üzere 8 ülkeyle kara sınırı komşusudur.",
-  },
-  {
-    ders: "COGRAFYA",
-    soruMetni: "Türkiye kaç coğrafi bölgeye ayrılmıştır?",
-    secenekler: ["5", "6", "7", "8", "9"],
-    dogruCevap: 2,
-    aciklama: "Türkiye; Marmara, Ege, Akdeniz, İç Anadolu, Karadeniz, Doğu Anadolu ve Güneydoğu Anadolu olmak üzere 7 coğrafi bölgeye ayrılmıştır.",
-  },
-  {
-    ders: "COGRAFYA",
-    soruMetni: "Yazları sıcak ve kurak, kışları ılık ve yağışlı geçen iklim tipi Türkiye'de en belirgin biçimde hangi kıyılarda görülür?",
-    secenekler: ["Karadeniz kıyıları", "Marmara kıyıları", "Akdeniz ve Ege kıyıları", "Doğu Anadolu", "İç Anadolu"],
-    dogruCevap: 2,
-    aciklama: "Akdeniz iklimi, Akdeniz ve Ege kıyılarında görülür; yazlar sıcak-kurak, kışlar ılık-yağışlıdır.",
-  },
-  {
-    ders: "COGRAFYA",
-    soruMetni: "Her mevsim yağışlı, yazları serin kışları ılıman geçen iklim tipi Türkiye'de hangi bölgede görülür?",
-    secenekler: ["İç Anadolu", "Karadeniz Bölgesi", "Güneydoğu Anadolu", "Akdeniz Bölgesi", "Doğu Anadolu"],
+    soruMetni:
+      "Doğu Karadeniz Bölümü'nde kırsal yerleşmeler genellikle dağınık bir görünüm sunar; evler birbirinden uzak, kendi bahçe ve tarlalarının içinde kurulmuştur.\n\nBu durumun ortaya çıkmasında;\n\nI. arazinin çok engebeli olması,\nII. yağışın bol olması nedeniyle su kaynaklarına hemen her yerde ulaşılabilmesi,\nIII. tarım alanlarının küçük ve parçalı olması,\nIV. büyük ölçekli sanayi tesislerinin yaygın olması\n\ndurumlarından hangileri etkili olmuştur?",
+    secenekler: ["I ve II", "I, II ve III", "I, III ve IV", "II, III ve IV", "I, II, III ve IV"],
     dogruCevap: 1,
-    aciklama: "Karadeniz iklimi her mevsim yağışlıdır; yazlar serin, kışlar ise diğer iç kesimlere göre ılımandır.",
+    aciklama:
+      "Engebeli arazi, su kaynaklarının her yerde bulunması ve küçük, parçalı tarım alanları evlerin dağınık kurulmasına yol açmıştır. Büyük sanayi tesislerinin varlığı ise dağınık kırsal yerleşmenin değil, toplu kentsel yerleşmenin nedenidir.",
   },
   {
     ders: "COGRAFYA",
-    soruMetni: "Yüzölçümü bakımından Türkiye'nin en büyük coğrafi bölgesi aşağıdakilerden hangisidir?",
-    secenekler: ["Karadeniz Bölgesi", "İç Anadolu Bölgesi", "Doğu Anadolu Bölgesi", "Akdeniz Bölgesi", "Ege Bölgesi"],
+    soruMetni: "Haritada taralı olarak gösterilen illerin tamamında yaygın olarak yetiştirilen tarım ürünü aşağıdakilerden hangisidir?",
+    gorselSvg: turkiyeHaritasi({ taraliIller: ["Şanlıurfa", "Aydın", "Adana", "Hatay"] }),
+    secenekler: ["Çay", "Fındık", "Pamuk", "Şeker pancarı", "Haşhaş"],
     dogruCevap: 2,
-    aciklama: "Doğu Anadolu Bölgesi, yüzölçümü bakımından Türkiye'nin en büyük bölgesidir.",
+    aciklama:
+      "Taralı iller Şanlıurfa (Harran Ovası), Aydın (Büyük Menderes - Söke Ovası), Adana (Çukurova) ve Hatay'dır (Amik Ovası). Yetişme döneminde bol sıcaklık ve sulama isteyen pamuk bu ovaların başlıca ürünüdür. Çay ve fındık Karadeniz'de, şeker pancarı İç Anadolu'da, haşhaş ise Afyonkarahisar çevresinde yoğunlaşır.",
   },
   {
     ders: "COGRAFYA",
-    soruMetni: "Yüzölçümü bakımından Türkiye'nin en küçük coğrafi bölgesi aşağıdakilerden hangisidir?",
-    secenekler: ["Ege Bölgesi", "Marmara Bölgesi", "Güneydoğu Anadolu Bölgesi", "Akdeniz Bölgesi", "Karadeniz Bölgesi"],
-    dogruCevap: 1,
-    aciklama: "Marmara Bölgesi, yüzölçümü bakımından Türkiye'nin en küçük coğrafi bölgesidir.",
-  },
-  {
-    ders: "COGRAFYA",
-    soruMetni: "Türkiye Cumhuriyeti'nin başkenti aşağıdakilerden hangisidir?",
-    secenekler: ["İstanbul", "İzmir", "Ankara", "Bursa", "Konya"],
-    dogruCevap: 2,
-    aciklama: "Türkiye'nin başkenti Ankara'dır (13 Ekim 1923'te başkent ilan edilmiştir).",
-  },
-  {
-    ders: "COGRAFYA",
-    soruMetni: "Fırat ve Dicle nehirleri birleşerek hangi körfeze dökülür?",
-    secenekler: ["Basra Körfezi", "Kızıldeniz", "Umman Denizi", "Hazar Denizi", "Akabe Körfezi"],
+    soruMetni:
+      "Erzurum-Kars Bölümü'nde büyükbaş hayvancılık, ekonominin en önemli faaliyetlerinden biridir.\n\nBu bölümde büyükbaş hayvancılığın gelişmiş olmasının temel nedeni aşağıdakilerden hangisidir?",
+    secenekler: [
+      "Yaz yağışlarıyla gür çayırların oluşması",
+      "Kışların uzun ve sert geçmesi",
+      "Tarım alanlarının geniş olması",
+      "Nüfusun az olması",
+      "Ulaşım olanaklarının gelişmiş olması",
+    ],
     dogruCevap: 0,
-    aciklama: "Fırat ve Dicle, Irak topraklarında birleşip Şattularab adıyla Basra Körfezi'ne dökülür.",
+    aciklama:
+      "Erzurum-Kars Platosu'nda ilkbahar ve yaz başında düşen yağışlarla gür çayırlar ve meralar oluşur; bu doğal otlaklar büyükbaş hayvancılığın temel kaynağıdır. Uzun ve sert kışlar tarımı kısıtlar, hayvancılığın nedeni değildir.",
   },
   {
     ders: "COGRAFYA",
-    soruMetni: "Türkiye'de nüfus yoğunluğunun en fazla olduğu coğrafi bölge aşağıdakilerden hangisidir?",
-    secenekler: ["Ege Bölgesi", "Marmara Bölgesi", "Akdeniz Bölgesi", "Karadeniz Bölgesi", "İç Anadolu Bölgesi"],
-    dogruCevap: 1,
-    aciklama: "Sanayi ve İstanbul'un yoğun nüfusu nedeniyle Marmara Bölgesi en yüksek nüfus yoğunluğuna sahiptir.",
+    soruMetni:
+      "Haritada numaralandırılarak gösterilen yerler ile bu yerlerde çıkarılan başlıca maden ve enerji kaynakları eşleştirilmiştir.\n\nBu eşleştirmelerden hangisi yanlıştır?",
+    gorselSvg: turkiyeHaritasi({
+      noktalar: [
+        { etiket: "I", boylam: 28.13, enlem: 39.39 }, // Balikesir-Bigadic
+        { etiket: "II", boylam: 31.79, enlem: 41.45 }, // Zonguldak
+        { etiket: "III", boylam: 37.0, enlem: 38.25 }, // Afsin-Elbistan
+        { etiket: "IV", boylam: 39.86, enlem: 38.47 }, // Elazig-Guleman
+        { etiket: "V", boylam: 41.13, enlem: 37.89 }, // Batman
+      ],
+    }),
+    secenekler: ["I – Bor", "II – Taş kömürü", "III – Linyit", "IV – Krom", "V – Bakır"],
+    dogruCevap: 4,
+    aciklama:
+      "I Balıkesir-Bigadiç (bor), II Zonguldak (taş kömürü), III Kahramanmaraş Afşin-Elbistan (linyit), IV Elazığ-Guleman (krom) doğru eşleşmelerdir. V numaralı Batman ise bakırla değil, petrol üretimiyle öne çıkar; Türkiye'de bakır daha çok Artvin-Murgul ve Kastamonu-Küre'de çıkarılır.",
   },
   {
     ders: "COGRAFYA",
-    soruMetni: "İstanbul Boğazı hangi iki denizi birbirine bağlar?",
+    soruMetni:
+      "Türkiye'de jeotermal enerji santralleri büyük ölçüde Denizli, Aydın ve Manisa gibi Ege Bölgesi illerinde yoğunlaşmıştır.\n\nBu yoğunlaşmanın temel nedeni aşağıdakilerden hangisidir?",
     secenekler: [
-      "Ege Denizi - Akdeniz",
-      "Karadeniz - Marmara Denizi",
-      "Marmara Denizi - Ege Denizi",
-      "Akdeniz - Kızıldeniz",
-      "Karadeniz - Ege Denizi",
+      "Kırıklı (faylı) yapının yaygın olması",
+      "Güneşlenme süresinin uzun olması",
+      "Akarsuların düzenli rejimli olması",
+      "Nüfus yoğunluğunun fazla olması",
+      "Sanayinin gelişmiş olması",
     ],
-    dogruCevap: 1,
-    aciklama: "İstanbul Boğazı, Karadeniz ile Marmara Denizi'ni birbirine bağlar.",
+    dogruCevap: 0,
+    aciklama:
+      "Jeotermal kaynaklar, yer altındaki sıcak suların kırık (fay) hatları boyunca yüzeye yaklaştığı alanlarda bulunur. Ege'de horst-graben sistemine bağlı fay hatlarının yaygın olması jeotermal potansiyeli artırmıştır.",
   },
   {
     ders: "COGRAFYA",
-    soruMetni: "Çanakkale Boğazı hangi iki denizi birbirine bağlar?",
+    soruMetni:
+      "Türkiye'de inanç turizmi açısından önemli bazı yapılar ile bulundukları iller eşleştirilmiştir.\n\nBu eşleştirmelerden hangisi yanlıştır?",
     secenekler: [
-      "Karadeniz - Marmara Denizi",
-      "Marmara Denizi - Ege Denizi",
-      "Ege Denizi - Akdeniz",
-      "Akdeniz - Marmara Denizi",
-      "Karadeniz - Ege Denizi",
+      "Meryem Ana Evi – İzmir",
+      "Sümela Manastırı – Trabzon",
+      "Mevlâna Müzesi – Konya",
+      "Akdamar Kilisesi – Bitlis",
+      "Aziz Nikolaos Kilisesi – Antalya",
     ],
-    dogruCevap: 1,
-    aciklama: "Çanakkale Boğazı, Marmara Denizi ile Ege Denizi'ni birbirine bağlar.",
-  },
-  {
-    ders: "COGRAFYA",
-    soruMetni: "Türkiye'nin en büyük adası aşağıdakilerden hangisidir?",
-    secenekler: ["Bozcaada", "Marmara Adası", "Gökçeada", "Avşa Adası", "Büyükada"],
-    dogruCevap: 2,
-    aciklama: "Gökçeada, yüzölçümü bakımından Türkiye'nin en büyük adasıdır.",
-  },
-  {
-    ders: "COGRAFYA",
-    soruMetni: "Türkiye'de il sayısı kaçtır?",
-    secenekler: ["73", "77", "79", "81", "83"],
     dogruCevap: 3,
-    aciklama: "Türkiye'de 81 il bulunmaktadır.",
-  },
-  {
-    ders: "COGRAFYA",
-    soruMetni: "Denizden uzak, karasal iklim özellikleri nedeniyle yazları sıcak-kurak, kışları soğuk ve kar yağışlı geçen, yağışın en az olduğu bölgelerden biri aşağıdakilerden hangisidir?",
-    secenekler: ["Karadeniz Bölgesi", "Marmara Bölgesi", "Ege Bölgesi", "İç Anadolu Bölgesi", "Akdeniz Bölgesi"],
-    dogruCevap: 3,
-    aciklama: "İç Anadolu Bölgesi karasal iklimin etkisiyle en az yağış alan bölgelerden biridir.",
+    aciklama:
+      "Akdamar Kilisesi, Van Gölü'ndeki Akdamar Adası'nda, Van ilinde yer alır. Meryem Ana Evi İzmir'in Selçuk ilçesinde, Sümela Manastırı Trabzon'un Maçka ilçesinde, Aziz Nikolaos Kilisesi Antalya'nın Demre ilçesindedir.",
   },
 
   // ---- VATANDAŞLIK (9) ----
   {
     ders: "VATANDASLIK",
-    soruMetni: "Türkiye Cumhuriyeti Anayasası'na göre yasama yetkisi hangi organa aittir?",
-    secenekler: [
-      "Cumhurbaşkanlığı",
-      "Türkiye Büyük Millet Meclisi",
-      "Bakanlar Kurulu",
-      "Anayasa Mahkemesi",
-      "Yargıtay",
-    ],
-    dogruCevap: 1,
-    aciklama: "Anayasa'nın 7. maddesine göre yasama yetkisi Türk Milleti adına TBMM'ye aittir.",
-  },
-  {
-    ders: "VATANDASLIK",
-    soruMetni: "Türkiye'de yargı yetkisi kimin/kimlerin adına kullanılır?",
-    secenekler: ["Cumhurbaşkanı adına", "TBMM adına", "Türk Milleti adına", "Anayasa Mahkemesi adına", "Hükûmet adına"],
+    soruMetni:
+      "Ahmet ile Mehmet arasında, kanunun emredici bir hükmüne aykırı içerikte bir sözleşme yapılmıştır.\n\nBu sözleşmeye uygulanacak hukuki yaptırım aşağıdakilerden hangisidir?",
+    secenekler: ["Cebri icra", "Tazminat", "Kesin hükümsüzlük (butlan)", "İptal edilebilirlik", "Disiplin cezası"],
     dogruCevap: 2,
-    aciklama: "Anayasa'nın 9. maddesine göre yargı yetkisi Türk Milleti adına bağımsız mahkemelerce kullanılır.",
+    aciklama:
+      "Kanunun emredici hükümlerine, kamu düzenine veya ahlaka aykırı sözleşmeler kesin hükümsüzdür; baştan itibaren hiçbir hüküm doğurmaz. İptal edilebilirlik yanılma, aldatma veya korkutma gibi irade sakatlıklarında; cebri icra borcun zorla yerine getirilmesinde; tazminat ise zararın giderilmesinde söz konusudur.",
   },
   {
     ders: "VATANDASLIK",
-    soruMetni: "Türkiye Cumhuriyeti Anayasası'na göre Türkiye Devleti'nin şekli nedir?",
-    secenekler: ["Monarşi", "Cumhuriyet", "Teokrasi", "Konfederasyon", "Federasyon"],
-    dogruCevap: 1,
-    aciklama: "Anayasa'nın 1. maddesine göre Türkiye Devleti bir Cumhuriyettir.",
-  },
-  {
-    ders: "VATANDASLIK",
-    soruMetni: "TBMM üyeleri kaç yılda bir yapılan seçimlerle belirlenir?",
-    secenekler: ["3", "4", "5", "6", "7"],
-    dogruCevap: 2,
-    aciklama: "Türkiye Büyük Millet Meclisi seçimleri beş yılda bir yapılır.",
-  },
-  {
-    ders: "VATANDASLIK",
-    soruMetni: "Anayasa Mahkemesi öncelikle hangi görevi yerine getirir?",
-    secenekler: [
-      "Kanunların Anayasaya uygunluğunu denetlemek",
-      "Yerel yönetimleri denetlemek",
-      "Milletvekili seçimlerini yönetmek",
-      "Bakanlar Kurulunu atamak",
-      "Belediye bütçelerini onaylamak",
-    ],
-    dogruCevap: 0,
-    aciklama: "Anayasa Mahkemesi'nin temel görevi, kanunların ve Cumhurbaşkanlığı kararnamelerinin Anayasaya uygunluğunu denetlemektir.",
-  },
-  {
-    ders: "VATANDASLIK",
-    soruMetni: "Türkiye'de milletvekili seçilebilmek için gereken asgari yaş Anayasa'ya göre kaçtır?",
-    secenekler: ["18", "21", "25", "30", "35"],
-    dogruCevap: 0,
-    aciklama: "2017 Anayasa değişikliğiyle milletvekili seçilme yaşı 18'e indirilmiştir.",
-  },
-  {
-    ders: "VATANDASLIK",
-    soruMetni: "Seçme hakkı Türkiye'de kaç yaşını dolduran vatandaşlara tanınmıştır?",
-    secenekler: ["16", "17", "18", "20", "21"],
-    dogruCevap: 2,
-    aciklama: "Anayasa'ya göre 18 yaşını dolduran her Türk vatandaşı seçme hakkına sahiptir.",
-  },
-  {
-    ders: "VATANDASLIK",
-    soruMetni: "Mahalli idareler (yerel yönetimler) aşağıdakilerden hangisini kapsamaz?",
-    secenekler: ["İl özel idaresi", "Belediye", "Köy", "Bakanlık", "Büyükşehir belediyesi"],
+    soruMetni:
+      "Türk Medeni Kanunu'na göre hak ehliyeti ile ilgili;\n\nI. Sağ doğmak koşuluyla ana rahmine düşülen andan itibaren kazanılır.\nII. Ayırt etme gücüne sahip olmayı ve ergin olmayı gerektirir.\nIII. Bütün insanlar, hukuk düzeninin sınırları içinde haklara ve borçlara ehil olmada eşittir.\n\nifadelerinden hangileri doğrudur?",
+    secenekler: ["Yalnız I", "Yalnız II", "I ve II", "I ve III", "II ve III"],
     dogruCevap: 3,
-    aciklama: "Bakanlıklar merkezi yönetime bağlıdır; il özel idaresi, belediye ve köy mahalli idare birimleridir.",
+    aciklama:
+      "Çocuk, sağ doğmak koşuluyla ana rahmine düştüğü andan itibaren hak ehliyetine sahip olur (TMK md. 28) ve herkes hak ehliyetinde eşittir (TMK md. 8). Ayırt etme gücü ve erginlik ise fiil ehliyetinin koşullarıdır.",
   },
   {
     ders: "VATANDASLIK",
-    soruMetni: "Anayasa'ya göre temel hak ve hürriyetler hangi durumda sınırlandırılabilir?",
+    soruMetni:
+      "Türk anayasa tarihinde \"Hâkimiyet bilakaydüşart milletindir.\" (Egemenlik kayıtsız şartsız milletindir.) ilkesine ilk kez yer veren anayasa aşağıdakilerden hangisidir?",
     secenekler: [
-      "Hiçbir şekilde sınırlandırılamaz",
-      "Sadece cumhurbaşkanı kararıyla",
-      "Anayasada öngörülen sebeplere bağlı olarak kanunla",
-      "Belediye meclisi kararıyla",
-      "Herhangi bir yönetmelikle",
+      "1876 Kanun-i Esasi",
+      "1921 Teşkilat-ı Esasiye Kanunu",
+      "1924 Teşkilat-ı Esasiye Kanunu",
+      "1961 Anayasası",
+      "1982 Anayasası",
     ],
+    dogruCevap: 1,
+    aciklama:
+      "Millî egemenlik ilkesi ilk kez 1921 Teşkilat-ı Esasiye Kanunu'nun 1. maddesinde yer almıştır. 1876 Kanun-i Esasi'de egemenlik padişaha aitti; 1924, 1961 ve 1982 anayasaları bu ilkeyi korumuştur.",
+  },
+  {
+    ders: "VATANDASLIK",
+    soruMetni:
+      "2017 Anayasa değişikliği sonrasında 1982 Anayasası'na göre Cumhurbaşkanlığı kararnameleri ile ilgili aşağıdakilerden hangisi yanlıştır?",
+    secenekler: [
+      "Anayasaya aykırılığı iddiasıyla Danıştayda iptal davası açılır.",
+      "Yürütme yetkisine ilişkin konularda çıkarılabilir.",
+      "Temel haklar, kişi hakları ve siyasi haklar Cumhurbaşkanlığı kararnamesiyle düzenlenemez.",
+      "Kanunda açıkça düzenlenen konularda Cumhurbaşkanlığı kararnamesi çıkarılamaz.",
+      "Kararname ile kanunlarda farklı hükümler bulunması hâlinde kanun hükümleri uygulanır.",
+    ],
+    dogruCevap: 0,
+    aciklama:
+      "Anayasa md. 104'e göre Cumhurbaşkanlığı kararnameleri yürütme yetkisine ilişkin konularda çıkarılır; temel haklar, kişi hakları ve siyasi haklar bunlarla düzenlenemez, kanunda açıkça düzenlenen konularda kararname çıkarılamaz ve çatışma hâlinde kanun uygulanır. Anayasaya aykırılık iddiasıyla iptal davası ise Danıştayda değil, Anayasa Mahkemesinde açılır (md. 148).",
+  },
+  {
+    ders: "VATANDASLIK",
+    soruMetni:
+      "2017 Anayasa değişikliğiyle TBMM'nin bilgi edinme ve denetim yollarında değişikliğe gidilmiştir.\n\nAşağıdakilerden hangisi bu değişiklikle kaldırılan denetim yollarından biridir?",
+    secenekler: ["Meclis araştırması", "Genel görüşme", "Meclis soruşturması", "Yazılı soru", "Gensoru"],
+    dogruCevap: 4,
+    aciklama:
+      "Yürütmenin Cumhurbaşkanlığı hükûmet sistemiyle tek başlı hâle gelmesi üzerine gensoru ve sözlü soru kaldırılmıştır. TBMM; meclis araştırması, genel görüşme, meclis soruşturması ve yazılı soru yollarıyla denetim yetkisini kullanmaya devam eder (md. 98).",
+  },
+  {
+    ders: "VATANDASLIK",
+    soruMetni: "1982 Anayasası'na göre Anayasa Mahkemesi ile ilgili aşağıdaki ifadelerden hangisi yanlıştır?",
+    secenekler: [
+      "On beş üyeden oluşur.",
+      "Üyelerinden üçünü TBMM, on ikisini Cumhurbaşkanı seçer.",
+      "Üyeler on iki yıl için seçilir ve bir kimse iki defa üye seçilemez.",
+      "Kararlarına karşı Yargıtaya itiraz edilebilir.",
+      "Yüce Divan sıfatıyla Cumhurbaşkanını, TBMM Başkanını, Cumhurbaşkanı yardımcılarını ve bakanları yargılar.",
+    ],
+    dogruCevap: 3,
+    aciklama:
+      "Anayasa Mahkemesi kararları kesindir; bu kararlara karşı başka bir yargı merciine başvurulamaz (md. 153). Mahkeme 15 üyeden oluşur, üyelerin 3'ünü TBMM, 12'sini Cumhurbaşkanı seçer; üyeler 12 yıl için seçilir ve iki kez seçilemez.",
+  },
+  {
+    ders: "VATANDASLIK",
+    soruMetni: "Aşağıdakilerden hangisi hizmet yönünden yerinden yönetim kuruluşlarına örnektir?",
+    secenekler: ["Belediye", "İl özel idaresi", "Devlet üniversitesi", "Köy", "Valilik"],
     dogruCevap: 2,
-    aciklama: "Anayasa'nın 13. maddesine göre temel hak ve hürriyetler, ancak Anayasanın ilgili maddelerinde belirtilen sebeplere bağlı olarak ve kanunla sınırlanabilir.",
+    aciklama:
+      "Belli bir kamu hizmetini yürütmek için kurulan, tüzel kişiliğe ve özerkliğe sahip devlet üniversiteleri hizmet yönünden yerinden yönetim kuruluşudur. Belediye, il özel idaresi ve köy yer yönünden yerinden yönetim (mahallî idare), valilik ise merkezî yönetimin taşra teşkilatıdır.",
+  },
+  {
+    ders: "VATANDASLIK",
+    soruMetni: "Aşağıdakilerden hangisi idari işlemlerin özelliklerinden biri değildir?",
+    secenekler: [
+      "İdarenin tek yanlı iradesiyle yapılması",
+      "Yargı denetimi dışında kalması",
+      "Kamu gücüne dayanması",
+      "Hukuka uygun olduğunun varsayılması",
+      "İdare tarafından doğrudan (re'sen) uygulanabilmesi",
+    ],
+    dogruCevap: 1,
+    aciklama:
+      "Anayasa md. 125'e göre idarenin her türlü eylem ve işlemine karşı yargı yolu açıktır; bu nedenle idari işlemler yargı denetimine tabidir. Tek yanlılık, kamu gücüne dayanma, hukuka uygunluk karinesi ve re'sen uygulanabilme idari işlemlerin temel özellikleridir.",
+  },
+  {
+    ders: "VATANDASLIK",
+    soruMetni:
+      "1982 Anayasası'nda temel hak ve ödevler; kişinin hakları ve ödevleri, sosyal ve ekonomik haklar ve ödevler, siyasi haklar ve ödevler olmak üzere üç grupta düzenlenmiştir.\n\nAşağıdakilerden hangisi siyasi haklar ve ödevler arasında yer alır?",
+    secenekler: ["Dilekçe hakkı", "Mülkiyet hakkı", "Eğitim ve öğrenim hakkı", "Konut dokunulmazlığı", "Sendika kurma hakkı"],
+    dogruCevap: 0,
+    aciklama:
+      "Dilekçe hakkı (md. 74) siyasi haklar ve ödevler bölümünde düzenlenmiştir. Mülkiyet hakkı ve konut dokunulmazlığı kişinin hakları; eğitim ve öğrenim hakkı ile sendika kurma hakkı ise sosyal ve ekonomik haklar arasındadır.",
   },
 
   // ---- GÜNCEL BİLGİLER (6) ----
+  // Her bilgi 2026-10 itibariyla web kaynaklarindan dogrulandi.
   {
     ders: "GUNCEL",
-    soruMetni: "Türkiye, NATO'ya (Kuzey Atlantik Antlaşması Örgütü'ne) hangi yıl üye olmuştur?",
-    secenekler: ["1945", "1949", "1952", "1960", "1987"],
-    dogruCevap: 2,
-    aciklama: "Türkiye, 1952 yılında NATO'ya üye olmuştur.",
-  },
-  {
-    ders: "GUNCEL",
-    soruMetni: "Birleşmiş Milletler (BM) hangi yıl kurulmuştur ve Türkiye bu kuruluşun kurucu üyelerinden midir?",
+    soruMetni:
+      "Birleşmiş Milletler İklim Değişikliği Çerçeve Sözleşmesi'nin 31. Taraflar Konferansı (COP31) ile ilgili aşağıdaki bilgilerden hangisi doğrudur?",
     secenekler: [
-      "1920, kurucu üyesidir",
-      "1945, kurucu üyesidir",
-      "1952, kurucu üyesi değildir",
-      "1961, kurucu üyesidir",
-      "1945, kurucu üyesi değildir",
+      "Brezilya'nın Belem kentinde düzenlenmiştir.",
+      "Paris İklim Anlaşması'nın kabul edildiği konferanstır.",
+      "Azerbaycan'ın başkenti Bakü'de düzenlenmiştir.",
+      "Kasım 2026'da Türkiye'nin ev sahipliğinde Antalya'da düzenlenecek; müzakerelerin başkanlığını Avustralya üstlenecektir.",
+      "Mısır'ın Şarm El-Şeyh kentinde düzenlenmiştir.",
     ],
-    dogruCevap: 1,
-    aciklama: "Birleşmiş Milletler 1945'te kurulmuştur ve Türkiye kurucu üyelerinden biridir.",
+    dogruCevap: 3,
+    aciklama:
+      "COP30'da (Belem, 2025) varılan uzlaşıyla COP31'in 9-20 Kasım 2026'da Türkiye'nin ev sahipliğinde Antalya'da yapılması, müzakere başkanlığının ise Avustralya'da olması kararlaştırılmıştır. COP29 Bakü'de (2024), COP27 Şarm El-Şeyh'te (2022) yapılmış; Paris Anlaşması COP21'de (2015) kabul edilmiştir.",
   },
   {
     ders: "GUNCEL",
-    soruMetni: "Türkiye Cumhuriyeti'nin resmi para birimi aşağıdakilerden hangisidir?",
-    secenekler: ["Türk Lirası", "Osmanlı Lirası", "Euro", "Kuruş", "Altın Lira"],
-    dogruCevap: 0,
-    aciklama: "Türkiye'nin resmi para birimi Türk Lirasıdır.",
-  },
-  {
-    ders: "GUNCEL",
-    soruMetni: "Türkiye Cumhuriyeti Anayasası'na göre devletin resmi dili nedir?",
-    secenekler: ["Osmanlıca", "Türkçe", "Arapça", "Kürtçe", "Farsça"],
-    dogruCevap: 1,
-    aciklama: "Anayasa'nın 3. maddesine göre Türkiye Devleti'nin dili Türkçedir.",
-  },
-  {
-    ders: "GUNCEL",
-    soruMetni: "Türkiye, Avrupa Birliği'ne (o dönemki adıyla Avrupa Ekonomik Topluluğu'na) tam üyelik başvurusunu hangi yıl yapmıştır?",
-    secenekler: ["1963", "1976", "1987", "1999", "2005"],
+    soruMetni:
+      "Temmuz 2025'te UNESCO Dünya Mirası Listesi'ne alınan; dünyada ilk madeni paranın basıldığı Lidya Krallığı'nın başkenti olan antik kent ile bu kente ait Bin Tepe tümülüslerinin (mezar tepelerinin) bulunduğu il aşağıdakilerden hangisidir?",
+    secenekler: ["Aydın", "Denizli", "Manisa", "Uşak", "İzmir"],
     dogruCevap: 2,
-    aciklama: "Türkiye, tam üyelik başvurusunu 1987 yılında yapmıştır.",
+    aciklama:
+      "\"Sardes Antik Kenti ve Bin Tepe Lidya Tümülüsleri\", UNESCO Dünya Miras Komitesi'nin Paris'teki 47. oturumunda (Temmuz 2025) listeye alınarak Türkiye'nin 22. dünya mirası olmuştur. Sardes, Manisa'nın Salihli ilçesi sınırlarındadır.",
   },
   {
     ders: "GUNCEL",
-    soruMetni: "Türkiye'nin de kurucu üyeleri arasında bulunduğu, 1949'da kurulan ve insan hakları, demokrasi alanlarında çalışan kuruluş aşağıdakilerden hangisidir?",
-    secenekler: ["Avrupa Birliği", "Avrupa Konseyi", "NATO", "Birleşmiş Milletler", "D-8"],
+    soruMetni:
+      "\"Sátántangó\" romanıyla tanınan ve 2025 Nobel Edebiyat Ödülü'ne layık görülen Macar yazar aşağıdakilerden hangisidir?",
+    secenekler: ["Han Kang", "Jon Fosse", "Annie Ernaux", "Imre Kertész", "László Krasznahorkai"],
+    dogruCevap: 4,
+    aciklama:
+      "2025 Nobel Edebiyat Ödülü Macar yazar László Krasznahorkai'ye verilmiştir. Han Kang 2024'te, Jon Fosse 2023'te, Annie Ernaux 2022'de bu ödülü almış; Imre Kertész ise 2002'de ödülü kazanan ilk Macar yazardır.",
+  },
+  {
+    ders: "GUNCEL",
+    soruMetni:
+      "Eylül 2025'te Letonya'nın başkenti Riga'da oynanan Avrupa Basketbol Şampiyonası (EuroBasket 2025) finalinde Türkiye A Millî Erkek Basketbol Takımı'nı yenerek şampiyon olan ülke aşağıdakilerden hangisidir?",
+    secenekler: ["Almanya", "Sırbistan", "Yunanistan", "Fransa", "İspanya"],
+    dogruCevap: 0,
+    aciklama:
+      "EuroBasket 2025 finalinde Almanya, Türkiye'yi 88-83 yenerek ikinci kez Avrupa şampiyonu olmuştur. Türkiye gümüş madalya kazanarak 2001'deki en iyi derecesini tekrarlamıştır.",
+  },
+  {
+    ders: "GUNCEL",
+    soruMetni:
+      "2025 Nobel Barış Ödülü, ülkesinde demokratik hakların korunması ve diktatörlükten demokrasiye barışçıl bir geçiş için yürüttüğü mücadele nedeniyle María Corina Machado'ya verilmiştir.\n\nMachado aşağıdaki ülkelerden hangisinin muhalefet lideridir?",
+    secenekler: ["Belarus", "Venezuela", "İran", "Rusya", "Myanmar"],
     dogruCevap: 1,
-    aciklama: "Avrupa Konseyi 1949'da kurulmuştur; Türkiye kurucu üyeleri arasındadır.",
+    aciklama:
+      "María Corina Machado, Venezuela'daki demokrasi hareketinin lideridir; 2025 Nobel Barış Ödülü kendisine Venezuela halkının demokratik hakları için verdiği mücadele nedeniyle verilmiştir.",
+  },
+  {
+    ders: "GUNCEL",
+    soruMetni:
+      "2025 yılının \"Aile Yılı\" olarak ilan edilmesinin ardından Cumhurbaşkanı Recep Tayyip Erdoğan, 2026-2035 dönemi için yeni bir ilanda bulunmuştur.\n\nBu dönem için yapılan ilan aşağıdakilerden hangisidir?",
+    secenekler: [
+      "Aile ve Gençlik 10 Yılı",
+      "Aile ve Eğitim 10 Yılı",
+      "Aile ve Kalkınma 10 Yılı",
+      "Aile ve Nüfus 10 Yılı",
+      "Aile ve Toplum 10 Yılı",
+    ],
+    dogruCevap: 3,
+    aciklama:
+      "2025'in \"Aile Yılı\" ilan edilmesinin ardından 2026-2035 dönemi \"Aile ve Nüfus 10 Yılı\" olarak ilan edilmiştir; dönemin öncelikleri arasında doğurganlık oranının artırılması ve aile kurumunun güçlendirilmesi yer alır.",
   },
 ];

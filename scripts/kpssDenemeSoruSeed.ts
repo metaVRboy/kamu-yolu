@@ -45,7 +45,12 @@ async function main() {
     });
     eklenen++;
   }
-  console.log(`Bitti. ${eklenen} soru eklendi, ${atlanan} soru zaten vardi (atlandi, sira guncellendi).`);
+  // Veri dosyasindan cikarilan/yeniden yazilan sorular havuzda kalmasin -
+  // havuz = veri dosyasi.
+  const silinen = await prisma.denemeSoru.deleteMany({
+    where: { duzey: "LISANS", soruMetni: { notIn: LISANS_SORULARI.map((s) => s.soruMetni) } },
+  });
+  console.log(`Bitti. ${eklenen} soru eklendi, ${atlanan} soru zaten vardi (sira guncellendi), ${silinen.count} eski soru silindi.`);
   await prisma.$disconnect();
 }
 
