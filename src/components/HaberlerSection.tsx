@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarDays, Newspaper, ArrowRight } from "lucide-react";
+import { CalendarDays, ArrowRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -48,7 +48,6 @@ export function HaberlerSection({
     <section>
       {!basliksiz && (
         <BolumBasligi
-          ikon={Newspaper}
           etiket={etiket}
           baslik={baslik}
           aciklama={aciklama}

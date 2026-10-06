@@ -1,4 +1,3 @@
-import { ClipboardList } from "lucide-react";
 import { getLatestPostings, getHomepageStats, getDepartmentPostingCounts } from "@/lib/matching";
 import { getYayindakiHaberler } from "@/lib/haberler";
 import { BolumBasligi } from "@/components/BolumBasligi";
@@ -87,7 +86,6 @@ export default async function Home() {
 
       <section className="mt-16">
         <BolumBasligi
-          ikon={ClipboardList}
           etiket="Yeni eklenenler"
           baslik="Yeni Eklenen İlanlar"
           aciklama="Sisteme en son eklenen kamu ilanları; aynı kurumun toplu ilanları tek kartta."

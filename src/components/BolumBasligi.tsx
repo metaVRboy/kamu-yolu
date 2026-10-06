@@ -1,13 +1,28 @@
+import type { CSSProperties } from "react";
 import Link from "next/link";
-import { ArrowRight, type LucideIcon } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+
+// Amblem sekli x soldan saga solma: iki maske katmaninin kesisimi, zemin rengi (bg-primary) gorunur.
+const MASKE = "url(/brand/kamu-yolu-emblem.png), linear-gradient(to right, black 30%, transparent)";
+const AMBLEM_MASKESI: CSSProperties = {
+  maskImage: MASKE,
+  WebkitMaskImage: MASKE,
+  maskComposite: "intersect",
+  WebkitMaskComposite: "source-in",
+  maskSize: "contain, 100% 100%",
+  WebkitMaskSize: "contain, 100% 100%",
+  maskRepeat: "no-repeat",
+  WebkitMaskRepeat: "no-repeat",
+  maskPosition: "left center",
+  WebkitMaskPosition: "left center",
+};
 
 /**
  * Sayfa ici bolum basligi (ana sayfa "Haberler", "Yeni Eklenen Ilanlar" vb.):
- * gradyanli ikon karosu, canli etiket, baslik/aciklama ve sayacli "tumu" butonu.
- * SayfaBasligi ile ayni gorsel dili kullanir.
+ * arkada baslik yuksekliginde, soldan saga kaybolan soluk Kamu Yolu amblemi;
+ * etiket/baslik/aciklama amblemin tam ustune biner. Sagda sayacli "tumu" butonu.
  */
 export function BolumBasligi({
-  ikon: Ikon,
   etiket,
   baslik,
   aciklama,
@@ -15,7 +30,6 @@ export function BolumBasligi({
   tumuEtiket = "Tümünü gör",
   sayac,
 }: {
-  ikon: LucideIcon;
   etiket?: string;
   baslik: string;
   aciklama?: string;
@@ -26,11 +40,12 @@ export function BolumBasligi({
   return (
     <div className="relative pb-5">
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="flex items-start gap-4">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg shadow-primary/25">
-            <Ikon className="h-6 w-6" />
-          </span>
-          <div>
+        <div className="flex items-stretch">
+          {/* Amblem site mavisinde tek renk, soldan saga kaybolur; tam kayboldugu yerde dik cizgi yaziyi ayirir.
+              ponytail: sabit kare boyut ~ yazi blogu yuksekligi; CSS esnetilen yukseklikten genislik turetemiyor. */}
+          <span aria-hidden className="size-14 shrink-0 self-center bg-primary opacity-25 sm:size-24" style={AMBLEM_MASKESI} />
+          <span aria-hidden className="w-[3px] shrink-0 rounded-full bg-gradient-to-b from-primary to-primary/40" />
+          <div className="self-center py-1 pl-3 sm:pl-4">
             {etiket && (
               <p className="mb-1 inline-flex items-center gap-1.5 text-[11px] font-bold tracking-widest text-primary uppercase">
                 <span className="relative flex h-2 w-2">
