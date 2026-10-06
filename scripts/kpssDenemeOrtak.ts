@@ -34,7 +34,7 @@ export function turkiyeHaritasi({ noktalar = [], taraliIller = [] }: { noktalar?
   const isaretler = noktalar
     .map(({ etiket, boylam, enlem }) => {
       const [x, y] = projeksiyon(boylam, enlem);
-      return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.6" fill="#dc2626" stroke="#7f1d1d" stroke-width="0.8"/><text x="${(x + 5).toFixed(1)}" y="${(y - 4).toFixed(1)}" font-size="12" font-weight="700">${etiket}</text>`;
+      return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.6" fill="#dc2626" stroke="#7f1d1d" stroke-width="0.8"/><text x="${(x + 5).toFixed(1)}" y="${(y - 4).toFixed(1)}" font-size="12" font-weight="700" stroke="#fff" stroke-width="3" paint-order="stroke">${etiket}</text>`;
     })
     .join("");
   return (
