@@ -11,10 +11,12 @@ import { prisma } from "../src/lib/prisma";
 import type { EducationLevel } from "../src/generated/prisma/client";
 import { LISANS_SORULARI, type SeedSoru } from "./kpssDenemeSoruVerisi";
 import { ONLISANS_SORULARI } from "./kpssDenemeSoruVerisiOnlisans";
+import { ORTAOGRETIM_SORULARI } from "./kpssDenemeSoruVerisiOrtaogretim";
 
 const HAVUZLAR: [EducationLevel, SeedSoru[]][] = [
   ["LISANS", LISANS_SORULARI],
   ["ONLISANS", ONLISANS_SORULARI],
+  ["LISE", ORTAOGRETIM_SORULARI],
 ];
 
 async function havuzuYaz(duzey: EducationLevel, sorular: SeedSoru[]) {

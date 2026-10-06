@@ -1,7 +1,7 @@
 import { Fragment, type ReactNode } from "react";
 
-// Kesrin bir tarafi: rakam/harf/kok/faktoriyel/ust simgeleri, istege bagli ondalik kismi ("0,03").
-const TERIM = "[0-9A-Za-z√!¹²³⁰⁴-⁹⁺⁻ˣ]+(?:,[0-9]+)?";
+// Kesrin bir tarafi: rakam/harf/kok/faktoriyel/ust simgeleri, binlik ayrac ("500.000") ve ondalik kismi ("0,03").
+const TERIM = "[0-9A-Za-z√!¹²³⁰⁴-⁹⁺⁻ˣ]+(?:\\.[0-9]{3})*(?:,[0-9]+)?";
 const BASIT_KESIR = new RegExp(`(${TERIM})/(${TERIM})`, "g");
 
 function Kesir({ pay, payda }: { pay: ReactNode; payda: ReactNode }) {
