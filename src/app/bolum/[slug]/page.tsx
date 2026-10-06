@@ -1,15 +1,19 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Bell } from "lucide-react";
+import { Bell, Building2, GraduationCap, Hourglass } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import {
   getAvailableFiltersForDepartment,
+  getDepartmentPostingCounts,
   getPostingsForDepartment,
 } from "@/lib/matching";
 import { getHaberlerForDepartment } from "@/lib/haberler";
 import { getCurrentUser } from "@/lib/auth";
 import { IlanVitrinKarti } from "@/components/IlanVitrinKarti";
-import { kurumLogolari, tekIlanKartlari } from "@/lib/ilanVitrin";
+import { kurumLogolari, tekIlanKartlari, yakindaBitenler } from "@/lib/ilanVitrin";
+import { SayfaBasligi } from "@/components/SayfaBasligi";
+import { FarkliBolumAra } from "@/components/FarkliBolumAra";
+import { LEVEL_SLUG_TO_ENUM } from "@/lib/levels";
 import { FilterBar } from "@/components/FilterBar";
 import { HaberlerSection } from "@/components/HaberlerSection";
 import { Badge } from "@/components/ui/badge";
@@ -22,16 +26,16 @@ export default async function DepartmentResultsPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ kurum?: string; ilanTuru?: string; il?: string; bolumSarti?: string }>;
+  searchParams: Promise<{ kurum?: string; ilanTuru?: string; il?: string; bolumSarti?: string; yakinda?: string }>;
 }) {
   const { slug } = await params;
-  const { kurum, ilanTuru, il, bolumSarti } = await searchParams;
+  const { kurum, ilanTuru, il, bolumSarti, yakinda } = await searchParams;
   const departmentRequirement = bolumSarti === "var" || bolumSarti === "yok" ? bolumSarti : undefined;
 
   const department = await prisma.department.findUnique({ where: { slug } });
   if (!department) notFound();
 
-  const [postings, filterOptions, ilgiliHaberler, user] = await Promise.all([
+  const [tumIlanlar, filterOptions, ilgiliHaberler, user, bolumSatirlari, bolumIlanSayilari] = await Promise.all([
     getPostingsForDepartment(department.id, {
       institutionType: kurum,
       ilanTuru,
@@ -41,7 +45,18 @@ export default async function DepartmentResultsPage({
     getAvailableFiltersForDepartment(department.id),
     getHaberlerForDepartment(department),
     getCurrentUser(),
+    prisma.department.findMany({ select: { id: true, slug: true, name: true, level: true }, orderBy: { name: "asc" } }),
+    getDepartmentPostingCounts(),
   ]);
+  const bitecekler = yakindaBitenler(tumIlanlar);
+  const postings = yakinda === "1" ? bitecekler : tumIlanlar;
+  const kurumSayisi = new Set(tumIlanlar.map((p) => p.institutionName)).size;
+  const bolumler = bolumSatirlari.map((d) => ({ slug: d.slug, name: d.name, level: d.level, ilanSayisi: bolumIlanSayilari.get(d.id) ?? 0 }));
+  const seviyeSlug = Object.entries(LEVEL_SLUG_TO_ENUM).find(([, v]) => v === department.level)?.[0];
+  // yakinda filtresini ac/kapa ederken diger filtreler korunur.
+  const yakindaParam = new URLSearchParams(Object.entries({ kurum, ilanTuru, il, bolumSarti }).filter((e): e is [string, string] => !!e[1]));
+  if (yakinda !== "1") yakindaParam.set("yakinda", "1");
+  const yakindaHref = `/bolum/${slug}${yakindaParam.size ? `?${yakindaParam}` : ""}`;
   const logolar = await kurumLogolari(postings);
   // SMS ile anlik ilan bildirimi Pro ozelligi (bkz. AbonelikPlanlari) - bu
   // yuzden Pro/Pro+ uyelere yukseltme kartini gostermiyoruz.
@@ -49,54 +64,58 @@ export default async function DepartmentResultsPage({
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-      {yukseltmeKartiGoster && (
-        <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-slate-700">
-          <Bell className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-          <p>
-            {department.name} ile ilgili yayınlanan ilanlardan anında haberdar olmak için{" "}
-            <Link
-              href={user ? "/profilim/abonelik" : "/kayit-ol"}
-              className="font-semibold text-primary underline-offset-2 hover:underline"
-            >
-              üyeliğini yükselt
-            </Link>
-            {!user && (
-              <>
-                . Henüz hesabın yoksa{" "}
-                <Link href="/kayit-ol" className="font-semibold text-primary underline-offset-2 hover:underline">
-                  kayıt ol
-                </Link>
-              </>
+      <SayfaBasligi
+        ikon={GraduationCap}
+        tema={department.level === "LISANS" || department.level === "ONLISANS" || department.level === "LISE" ? department.level : "varsayilan"}
+        breadcrumb={[
+          { ad: "Ana Sayfa", href: "/" },
+          { ad: `${LEVEL_LABEL[department.level] ?? department.level} Mezunları`, href: seviyeSlug ? `/seviye/${seviyeSlug}` : undefined },
+          { ad: department.name },
+        ]}
+        baslik={
+          <>
+            <span className="text-primary">{department.name}</span> mezunları için ilanlar
+          </>
+        }
+        rozet={
+          <Badge variant="outline" className="border-primary/30 text-primary">
+            {LEVEL_LABEL[department.level] ?? department.level}
+          </Badge>
+        }
+        aciklama="Sadece bu bölüme özel şart koşan güncel kamu ilanları listelenir."
+        cipler={[
+          { etiket: `${tumIlanlar.length} aktif ilan` },
+          { etiket: `${kurumSayisi} kurum`, ikon: Building2, href: "#filtreler" },
+          ...(bitecekler.length > 0
+            ? [
+                {
+                  etiket: yakinda === "1" ? "Yakında bitenler gösteriliyor ✕" : `${bitecekler.length} ilan bu hafta bitiyor`,
+                  ikon: Hourglass,
+                  href: yakindaHref,
+                  durum: yakinda === "1" ? ("aktif" as const) : ("vurgu" as const),
+                },
+              ]
+            : []),
+        ]}
+        aksiyonlar={
+          <>
+            {yukseltmeKartiGoster && (
+              <Link
+                href={user ? "/profilim/abonelik" : "/kayit-ol"}
+                className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
+              >
+                <Bell className="h-4 w-4" />
+                Yeni ilan çıkınca haber ver
+              </Link>
             )}
-            .
-          </p>
-        </div>
-      )}
+            <FarkliBolumAra departments={bolumler} />
+          </>
+        }
+        mobilBaslik={`${department.name} ilanları`}
+        filtreHedefi="#filtreler"
+      />
 
-      <Link
-        href="/"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" />
-        Farklı bir bölüm ara
-      </Link>
-
-      <div className="mt-4 flex flex-wrap items-center gap-3">
-        <h1 className="font-sans text-2xl font-bold tracking-tight text-primary sm:text-3xl">
-          {department.name} mezunları için ilanlar
-        </h1>
-        <Badge variant="outline" className="border-primary/30 text-primary">
-          {LEVEL_LABEL[department.level] ?? department.level}
-        </Badge>
-        <Badge className="border-transparent bg-primary text-primary-foreground">
-          {postings.length} İlan
-        </Badge>
-      </div>
-      <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-        Sadece bu bölüme özel şart koşan ilanlar listelenir.
-      </p>
-
-      <div className="mt-6">
+      <div id="filtreler" className="mt-6 scroll-mt-32">
         <FilterBar options={filterOptions} />
       </div>
 

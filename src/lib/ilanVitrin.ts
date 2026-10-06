@@ -118,3 +118,12 @@ export async function kurumLogolari(ilanlar: Posting[], butceMs = 3000): Promise
   await Promise.race([Promise.all(Array.from({ length: 6 }, isci)), new Promise((coz) => setTimeout(coz, butceMs))]);
   return new Map(logolar);
 }
+
+/** Son basvurusu bugunden itibaren `gun` gun icinde biten ilanlar. */
+export function yakindaBitenler<T extends Pick<Posting, "applicationEnd">>(ilanlar: T[], gun = 7, simdi = Date.now()): T[] {
+  return ilanlar.filter((i) => {
+    if (!i.applicationEnd) return false;
+    const kalan = i.applicationEnd.getTime() - simdi;
+    return kalan >= -GUN_MS && kalan <= gun * GUN_MS;
+  });
+}
