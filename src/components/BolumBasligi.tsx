@@ -44,7 +44,7 @@ export function BolumBasligi({
           {/* Amblem site mavisinde tek renk, soldan saga kaybolur; tam kayboldugu yerde dik cizgi yaziyi ayirir.
               ponytail: sabit kare boyut ~ yazi blogu yuksekligi; CSS esnetilen yukseklikten genislik turetemiyor. */}
           <span aria-hidden className="size-14 shrink-0 self-center bg-primary opacity-25 sm:size-24" style={AMBLEM_MASKESI} />
-          <span aria-hidden className="w-[3px] shrink-0 rounded-full bg-gradient-to-b from-primary to-primary/40" />
+          <span aria-hidden className="w-[3px] shrink-0 rounded-full bg-primary" />
           <div className="self-center py-1 pl-3 sm:pl-4">
             {etiket && (
               <p className="mb-1 inline-flex items-center gap-1.5 text-[11px] font-bold tracking-widest text-primary uppercase">

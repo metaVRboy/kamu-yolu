@@ -4,14 +4,6 @@ import { Building2, ChevronRight, Hourglass, type LucideIcon } from "lucide-reac
 import { cn } from "@/lib/utils";
 import { MobilSabitBaslik } from "@/components/MobilSabitBaslik";
 
-// Ogrenim duzeyine (ya da sayfaya) gore sag taraftaki dekoratif renk.
-const TEMA = {
-  LISANS: "from-indigo-500 to-violet-600",
-  ONLISANS: "from-sky-500 to-blue-600",
-  LISE: "from-emerald-500 to-teal-600",
-  varsayilan: "from-blue-600 to-indigo-600",
-} as const;
-
 export type BaslikCipi = {
   etiket: string;
   ikon?: LucideIcon;
@@ -21,7 +13,7 @@ export type BaslikCipi = {
 };
 
 /**
- * Sayfa ust basligi: breadcrumb, ikon karosu, baslik + aciklama, gercek
+ * Sayfa ust basligi: breadcrumb, mavi cizgili baslik + aciklama, gercek
  * veriden hesaplanan bilgi cipleri ve aksiyonlar. Haber bolumu basligi ve
  * ilan kartlarindaki gorsel dili (nokta deseni + soluk buyuk ikon) tasir.
  */
@@ -33,7 +25,6 @@ export function SayfaBasligi({
   aciklama,
   cipler = [],
   aksiyonlar,
-  tema = "varsayilan",
   mobilBaslik,
   filtreHedefi,
   kompakt = false,
@@ -45,7 +36,6 @@ export function SayfaBasligi({
   aciklama?: ReactNode;
   cipler?: BaslikCipi[];
   aksiyonlar?: ReactNode;
-  tema?: keyof typeof TEMA;
   // Verilirse mobilde baslik kaybolunca sabit ince cubukta gosterilir.
   mobilBaslik?: string;
   filtreHedefi?: string;
@@ -59,14 +49,9 @@ export function SayfaBasligi({
         kompakt ? "rounded-2xl p-5" : "rounded-3xl p-6 sm:p-8",
       )}
     >
-      {/* Sag tarafta tema renginde soluk desenli alan - icerigin arkasinda kalir. */}
+      {/* Sag tarafta site mavisinde soluk desenli alan - icerigin arkasinda kalir. */}
       <div aria-hidden className={cn("pointer-events-none absolute inset-y-0 right-0 hidden w-2/5", !kompakt && "sm:block")}>
-        <div
-          className={cn(
-            "absolute inset-0 bg-gradient-to-l opacity-[0.14] [mask-image:linear-gradient(to_left,black_30%,transparent)]",
-            TEMA[tema],
-          )}
-        />
+        <div className="absolute inset-0 bg-gradient-to-l from-blue-600 to-indigo-600 opacity-[0.14] [mask-image:linear-gradient(to_left,black_30%,transparent)]" />
         <div className="absolute inset-0 opacity-40 [background-image:radial-gradient(circle,rgb(99_102_241/0.35)_1px,transparent_1.5px)] [background-size:18px_18px] [mask-image:linear-gradient(to_left,black,transparent)]" />
         <Ikon className="absolute -right-8 -bottom-10 h-56 w-56 text-primary/[0.07]" strokeWidth={1.25} />
       </div>
@@ -89,21 +74,14 @@ export function SayfaBasligi({
           </nav>
         )}
 
-        <div className="flex items-start gap-4">
-          <span
-            className={cn(
-              "flex shrink-0 items-center justify-center bg-gradient-to-br text-white shadow-lg shadow-primary/25",
-              kompakt ? "h-10 w-10 rounded-xl" : "h-12 w-12 rounded-2xl",
-              TEMA[tema],
-            )}
-          >
-            <Ikon className={kompakt ? "h-5 w-5" : "h-6 w-6"} />
-          </span>
-          <div className="min-w-0">
+        {/* Bolum basliklariyla ayni dil: solda mavi dik cizgi; baslik site mavisinin bir ton koyusu (link sanilmasin). */}
+        <div className="flex min-w-0 items-stretch gap-3 sm:gap-4">
+          <span aria-hidden className="w-[3px] shrink-0 rounded-full bg-primary" />
+          <div className="min-w-0 py-0.5">
             <div className="flex flex-wrap items-center gap-2">
               <h1
                 className={cn(
-                  "font-sans font-bold tracking-tight text-slate-900",
+                  "font-sans font-bold tracking-tight text-[color-mix(in_oklch,var(--primary),black_22%)]",
                   kompakt ? "text-xl sm:text-2xl" : "text-2xl sm:text-3xl",
                 )}
               >

@@ -61,17 +61,12 @@ export default async function DepartmentResultsPage({
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <SayfaBasligi
         ikon={GraduationCap}
-        tema={department.level === "LISANS" || department.level === "ONLISANS" || department.level === "LISE" ? department.level : "varsayilan"}
         breadcrumb={[
           { ad: "Ana Sayfa", href: "/" },
           { ad: `${LEVEL_LABEL[department.level] ?? department.level} Mezunları`, href: seviyeSlug ? `/seviye/${seviyeSlug}` : undefined },
           { ad: department.name },
         ]}
-        baslik={
-          <>
-            <span className="text-primary">{department.name}</span> mezunları için ilanlar
-          </>
-        }
+        baslik={`${department.name} mezunları için ilanlar`}
         rozet={
           <Badge variant="outline" className="border-primary/30 text-primary">
             {LEVEL_LABEL[department.level] ?? department.level}

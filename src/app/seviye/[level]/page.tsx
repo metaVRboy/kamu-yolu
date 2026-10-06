@@ -41,13 +41,8 @@ export default async function LevelResultsPage({
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <SayfaBasligi
         ikon={GraduationCap}
-        tema={level === "LISANS" || level === "ONLISANS" || level === "LISE" ? level : "varsayilan"}
         breadcrumb={[{ ad: "Ana Sayfa", href: "/" }, { ad: `${duzey} Mezunları` }]}
-        baslik={
-          <>
-            <span className="text-primary">{duzey}</span> mezunları için ilanlar
-          </>
-        }
+        baslik={`${duzey} mezunları için ilanlar`}
         aciklama={`${duzey} mezunlarının başvurabileceği güncel kamu ilanları. Bazı ilanlar belirli bir bölüm mezunu olmayı şart koşar, bazıları koşmaz — her ilan kartında bunu ayrıca görebilirsin.`}
         cipler={ilanCipleri(tumIlanlar, yakindaDurumu)}
         mobilBaslik={`${duzey} mezunları ilanları`}
