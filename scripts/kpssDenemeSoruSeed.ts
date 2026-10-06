@@ -1,25 +1,31 @@
 /**
- * KPSS deneme soru havuzunu veritabanina yazar. Ayni soru metninin tekrar
- * eklenmesini onlemek icin (duzey, soruMetni) zaten varsa atlanir - bu
- * sayede script birden fazla kez (yeni partiler eklendikce) guvenle
- * calistirilabilir.
+ * KPSS deneme soru havuzlarini (Lisans, Onlisans, Ortaogretim) veritabanina
+ * yazar. Havuz = veri dosyasi: ayni metinli soru varsa id'si (ve
+ * kullanimSayisi) korunup icerigi esitlenir, veri dosyasinda olmayanlar
+ * silinir. Script birden fazla kez guvenle calistirilabilir.
  *
  * Calistirma: npx tsx scripts/kpssDenemeSoruSeed.ts
  */
 import "dotenv/config";
 import { prisma } from "../src/lib/prisma";
-import { LISANS_SORULARI } from "./kpssDenemeSoruVerisi";
+import type { EducationLevel } from "../src/generated/prisma/client";
+import { LISANS_SORULARI, type SeedSoru } from "./kpssDenemeSoruVerisi";
+import { ONLISANS_SORULARI } from "./kpssDenemeSoruVerisiOnlisans";
 
-async function main() {
+const HAVUZLAR: [EducationLevel, SeedSoru[]][] = [
+  ["LISANS", LISANS_SORULARI],
+  ["ONLISANS", ONLISANS_SORULARI],
+];
+
+async function havuzuYaz(duzey: EducationLevel, sorular: SeedSoru[]) {
   let eklenen = 0;
-  let atlanan = 0;
-  // Her ders icin ayri bir sayac - dizideki yazim sirasi, gercek sinavdaki
-  // konu sirasini (ör. geometri en sonda) birebir yansitir.
+  let guncellenen = 0;
+  // Her ders icin ayri sayac - dizideki yazim sirasi, gercek sinavdaki konu
+  // sirasini (ör. geometri en sonda) birebir yansitir.
   const dersSirasi: Record<string, number> = {};
-  for (const soru of LISANS_SORULARI) {
-    const sira = (dersSirasi[soru.ders] ?? 0);
+  for (const soru of sorular) {
+    const sira = dersSirasi[soru.ders] ?? 0;
     dersSirasi[soru.ders] = sira + 1;
-
     const veri = {
       ders: soru.ders,
       grupId: soru.grupId ?? null,
@@ -30,26 +36,23 @@ async function main() {
       aciklama: soru.aciklama,
       sira,
     };
-    const mevcut = await prisma.denemeSoru.findFirst({
-      where: { duzey: "LISANS", soruMetni: soru.soruMetni },
-      select: { id: true },
-    });
-    // Ayni metinli soru varsa id'si (ve kullanimSayisi) korunur, icerigi
-    // (siklar, cevap, aciklama, sira...) veri dosyasiyla esitlenir.
+    const mevcut = await prisma.denemeSoru.findFirst({ where: { duzey, soruMetni: soru.soruMetni }, select: { id: true } });
     if (mevcut) {
       await prisma.denemeSoru.update({ where: { id: mevcut.id }, data: veri });
-      atlanan++;
-      continue;
+      guncellenen++;
+    } else {
+      await prisma.denemeSoru.create({ data: { duzey, soruMetni: soru.soruMetni, ...veri } });
+      eklenen++;
     }
-    await prisma.denemeSoru.create({ data: { duzey: "LISANS", soruMetni: soru.soruMetni, ...veri } });
-    eklenen++;
   }
-  // Veri dosyasindan cikarilan/yeniden yazilan sorular havuzda kalmasin -
-  // havuz = veri dosyasi.
   const silinen = await prisma.denemeSoru.deleteMany({
-    where: { duzey: "LISANS", soruMetni: { notIn: LISANS_SORULARI.map((s) => s.soruMetni) } },
+    where: { duzey, soruMetni: { notIn: sorular.map((s) => s.soruMetni) } },
   });
-  console.log(`Bitti. ${eklenen} soru eklendi, ${atlanan} soru guncellendi, ${silinen.count} eski soru silindi.`);
+  console.log(`${duzey}: ${eklenen} eklendi, ${guncellenen} guncellendi, ${silinen.count} eski soru silindi.`);
+}
+
+async function main() {
+  for (const [duzey, sorular] of HAVUZLAR) await havuzuYaz(duzey, sorular);
   await prisma.$disconnect();
 }
 

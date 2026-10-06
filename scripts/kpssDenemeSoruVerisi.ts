@@ -27,80 +27,9 @@
  *    MGM verili iklim grafigi), Vatandaslik 9 (2017 sonrasi 1982 Anayasasi),
  *    Guncel 6 (her bilgi web'den dogrulandi).
  */
-import { HARITA_VIEWBOX, projeksiyon, TURKIYE_SINIRI, GOLLER, IL_SINIRLARI } from "./turkiyeHaritaVerisi";
+import { iklimGrafigi, turkiyeHaritasi, type SeedSoru } from "./kpssDenemeOrtak";
 
-export type SeedSoru = {
-  ders: "TURKCE" | "MATEMATIK" | "TARIH" | "COGRAFYA" | "VATANDASLIK" | "GUNCEL";
-  soruMetni: string;
-  // Ortak metinli (bir parca/bilgi + birden fazla soru) bloklarda kardes
-  // sorulara ayni grupId verilir - "X-Y. sorular..." basligi METNE
-  // GOMULMEZ, gercek sinav sirasina gore arayuzde dinamik hesaplanir.
-  grupId?: string;
-  geometri?: boolean;
-  gorselSvg?: string;
-  secenekler: [string, string, string, string, string];
-  dogruCevap: number;
-  aciklama: string;
-};
-
-type HaritaNoktasi = { etiket: string; boylam: number; enlem: number };
-
-/**
- * Gercek sinir verisiyle (Natural Earth, bkz. turkiyeHaritaVerisi.ts) Turkiye
- * haritasi: gercek boylam/enlemdeki numarali kirmizi noktalar ve/veya tarali iller.
- */
-function turkiyeHaritasi({ noktalar = [], taraliIller = [] }: { noktalar?: HaritaNoktasi[]; taraliIller?: string[] }) {
-  const taraliYol = taraliIller
-    .map((il) => {
-      if (!IL_SINIRLARI[il]) throw new Error(`Harita verisinde il yok: ${il}`);
-      return IL_SINIRLARI[il];
-    })
-    .join("");
-  const isaretler = noktalar
-    .map(({ etiket, boylam, enlem }) => {
-      const [x, y] = projeksiyon(boylam, enlem);
-      return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.6" fill="#dc2626" stroke="#7f1d1d" stroke-width="0.8"/><text x="${(x + 5).toFixed(1)}" y="${(y - 4).toFixed(1)}" font-size="12" font-weight="700">${etiket}</text>`;
-    })
-    .join("");
-  return (
-    `<svg viewBox="${HARITA_VIEWBOX}" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif" fill="#1e293b">` +
-    `<defs><pattern id="tarali" patternUnits="userSpaceOnUse" width="4" height="4" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="4" stroke="#1e293b" stroke-width="1.4"/></pattern></defs>` +
-    `<path d="${TURKIYE_SINIRI}" fill="#e2e8f0" stroke="#1e293b" stroke-width="1.1" stroke-linejoin="round"/>` +
-    (taraliYol ? `<path d="${taraliYol}" fill="url(#tarali)" stroke="#1e293b" stroke-width="0.6"/>` : "") +
-    `<path d="${GOLLER}" fill="#7dd3fc" stroke="#1e293b" stroke-width="0.6"/>` +
-    isaretler +
-    `</svg>`
-  );
-}
-
-const AY_HARFLERI = ["O", "Ş", "M", "N", "M", "H", "T", "A", "E", "E", "K", "A"];
-
-/** Iki panelli iklim grafigi: ustte aylik ortalama sicaklik (cizgi), altta aylik ortalama yagis (sutun). */
-function iklimGrafigi(sicaklik: number[], yagis: number[]) {
-  const sol = 44;
-  const genislik = 360;
-  const yukseklik = 110;
-  const ayX = (i: number) => sol + (genislik * (i + 0.5)) / 12;
-  const panel = (ust: number, max: number, adim: number, baslik: string, ciz: (y: (v: number) => number) => string) => {
-    const y = (v: number) => ust + yukseklik - (v / max) * yukseklik;
-    let s = `<text x="${sol}" y="${ust - 10}" font-size="12" font-weight="700">${baslik}</text>`;
-    for (let v = 0; v <= max; v += adim) {
-      s += `<line x1="${sol}" y1="${y(v)}" x2="${sol + genislik}" y2="${y(v)}" stroke="#cbd5e1" stroke-width="0.7"/><text x="${sol - 6}" y="${y(v) + 4}" font-size="10" text-anchor="end" fill="#475569">${v}</text>`;
-    }
-    s += ciz(y);
-    s += `<line x1="${sol}" y1="${ust + yukseklik}" x2="${sol + genislik}" y2="${ust + yukseklik}" stroke="#1e293b" stroke-width="1.2"/>`;
-    return s + AY_HARFLERI.map((a, i) => `<text x="${ayX(i)}" y="${ust + yukseklik + 15}" font-size="10" text-anchor="middle" fill="#475569">${a}</text>`).join("");
-  };
-  const nokta = (y: (v: number) => number, v: number, i: number) => `${ayX(i).toFixed(1)},${y(v).toFixed(1)}`;
-  const sicaklikPaneli = panel(28, 30, 10, "Aylık ortalama sıcaklık (°C)", (y) =>
-    `<polyline points="${sicaklik.map((v, i) => nokta(y, v, i)).join(" ")}" fill="none" stroke="#dc2626" stroke-width="2"/>` +
-    sicaklik.map((v, i) => `<circle cx="${ayX(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="3" fill="#dc2626"/>`).join(""),
-  );
-  const yagisPaneli = panel(196, 300, 100, "Aylık ortalama yağış (mm)", (y) =>
-    yagis.map((v, i) => `<rect x="${(ayX(i) - 10).toFixed(1)}" y="${y(v).toFixed(1)}" width="20" height="${(y(0) - y(v)).toFixed(1)}" fill="#2563eb"/>`).join(""),
-  );
-  return `<svg viewBox="0 0 420 340" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif" fill="#1e293b">${sicaklikPaneli}${yagisPaneli}</svg>`;
-}
+export type { SeedSoru };
 
 // Matematik 52-53 ortak bilgisi: 360 kitap -> roman 120°, tarih 90°, bilim 60°, şiir 90°.
 const DAIRE_GRAFIGI =
@@ -525,7 +454,7 @@ export const LISANS_SORULARI: SeedSoru[] = [
   // perm/olasilik -> ortak bilgili gruplar -> geometri (en sonda).
   {
     ders: "MATEMATIK",
-    soruMetni: "[(2 + 1/2) - (1 - 1/2)] / [(3/2) ÷ (3/4)] + 1 işleminin sonucu kaçtır?",
+    soruMetni: "{(2 + 1/2) − (1 − 1/2)|3/2 ÷ 3/4} + 1\n\nişleminin sonucu kaçtır?",
     secenekler: ["2", "2,5", "3", "3,5", "4"],
     dogruCevap: 0,
     aciklama: "Birinci köşeli parantez: 2,5-0,5=2. İkinci köşeli parantez: (3/2)÷(3/4)=2. Sonuç: 2/2+1=2.",
@@ -539,7 +468,7 @@ export const LISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
-    soruMetni: "(10 + √12 + √27) / (2 + √3) işleminin sonucu kaçtır?",
+    soruMetni: "{10 + √12 + √27|2 + √3}\n\nişleminin sonucu kaçtır?",
     secenekler: ["1", "2", "3", "4", "5"],
     dogruCevap: 4,
     aciklama: "√12=2√3, √27=3√3 olduğundan pay 10+5√3=5(2+√3) olur; paydaya bölününce sonuç 5'tir.",
@@ -553,11 +482,11 @@ export const LISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
-    soruMetni: "(n + 1)! − n! = 25 · (n − 1)! olduğuna göre n! / (n − 2)! ifadesinin değeri kaçtır?",
+    soruMetni: "(n + 1)! − n! = 25 · (n − 1)! olduğuna göre {n!|(n − 2)!} ifadesinin değeri kaçtır?",
     secenekler: ["12", "20", "30", "42", "56"],
     dogruCevap: 1,
     aciklama:
-      "(n + 1)! − n! = n!(n + 1 − 1) = n · n! = n · n · (n − 1)!. Buna göre n² · (n − 1)! = 25 · (n − 1)! ⇒ n = 5. n!/(n − 2)! = 5!/3! = 5 · 4 = 20.",
+      "(n + 1)! − n! = n!(n + 1 − 1) = n · n! = n · n · (n − 1)!. Buna göre n² · (n − 1)! = 25 · (n − 1)! ⇒ n = 5. {n!|(n − 2)!} = 5!/3! = 5 · 4 = 20.",
   },
   {
     ders: "MATEMATIK",
@@ -596,11 +525,11 @@ export const LISANS_SORULARI: SeedSoru[] = [
   {
     ders: "MATEMATIK",
     soruMetni:
-      "x ≠ −3, x ≠ 2 ve x ≠ 3 olmak üzere\n\n[(x² − 9) / (x² + x − 6)] ÷ [(x² − 6x + 9) / (x² − 4x + 4)]\n\nifadesinin en sade biçimi aşağıdakilerden hangisidir?",
-    secenekler: ["(x − 2) / (x − 3)", "(x + 3) / (x − 2)", "(x − 3) / (x − 2)", "(x + 2) / (x + 3)", "1"],
+      "x ≠ −3, x ≠ 2 ve x ≠ 3 olmak üzere\n\n{x² − 9|x² + x − 6} ÷ {x² − 6x + 9|x² − 4x + 4}\n\nifadesinin en sade biçimi aşağıdakilerden hangisidir?",
+    secenekler: ["{x − 2|x − 3}", "{x + 3|x − 2}", "{x − 3|x − 2}", "{x + 2|x + 3}", "1"],
     dogruCevap: 0,
     aciklama:
-      "(x² − 9)/(x² + x − 6) = (x − 3)(x + 3)/[(x + 3)(x − 2)] = (x − 3)/(x − 2). Bölen (x − 3)²/(x − 2)² olduğundan ifade (x − 3)/(x − 2) · (x − 2)²/(x − 3)² = (x − 2)/(x − 3) olur.",
+      "{x² − 9|x² + x − 6} = {(x − 3)(x + 3)|(x + 3)(x − 2)} = {x − 3|x − 2}. Bölen {(x − 3)²|(x − 2)²} olduğundan ifade {x − 3|x − 2} · {(x − 2)²|(x − 3)²} = {x − 2|x − 3} olur.",
   },
   {
     ders: "MATEMATIK",
@@ -666,7 +595,7 @@ export const LISANS_SORULARI: SeedSoru[] = [
     soruMetni: "f(2x − 1) = 4x + 3 olduğuna göre f(5) + f⁻¹(15) toplamı kaçtır?",
     secenekler: ["20", "22", "24", "25", "30"],
     dogruCevap: 0,
-    aciklama: "2x − 1 = t ⇒ x = (t + 1)/2 ⇒ f(t) = 2(t + 1) + 3 = 2t + 5. f(5) = 15; f(a) = 15 ⇒ 2a + 5 = 15 ⇒ f⁻¹(15) = 5. Toplam 20.",
+    aciklama: "2x − 1 = t ⇒ x = {t + 1|2} ⇒ f(t) = 2(t + 1) + 3 = 2t + 5. f(5) = 15; f(a) = 15 ⇒ 2a + 5 = 15 ⇒ f⁻¹(15) = 5. Toplam 20.",
   },
   {
     ders: "MATEMATIK",
@@ -703,7 +632,7 @@ export const LISANS_SORULARI: SeedSoru[] = [
     secenekler: ["20", "25", "30", "36", "40"],
     dogruCevap: 4,
     aciklama:
-      "360 kitap 360°'ye karşılık geldiğinden her derece 1 kitaptır; bilim kitabı 60 tanedir. x kitap alınınca (60 + x)/(360 + x) = 90/360 = 1/4 ⇒ 240 + 4x = 360 + x ⇒ x = 40.",
+      "360 kitap 360°'ye karşılık geldiğinden her derece 1 kitaptır; bilim kitabı 60 tanedir. x kitap alınınca {60 + x|360 + x} = 90/360 = 1/4 ⇒ 240 + 4x = 360 + x ⇒ x = 40.",
   },
   {
     ders: "MATEMATIK",
@@ -767,7 +696,7 @@ export const LISANS_SORULARI: SeedSoru[] = [
     secenekler: ["36", "39", "42", "45", "52"],
     dogruCevap: 1,
     aciklama:
-      "Dik üçgende hipotenüse ait yükseklik için Öklid bağıntısı: |AH|² = |BH| · |HC| = 4 · 9 = 36 ⇒ |AH| = 6. |BC| = 13 olduğundan Alan(ABC) = 13 · 6 / 2 = 39 cm².",
+      "Dik üçgende hipotenüse ait yükseklik için Öklid bağıntısı: |AH|² = |BH| · |HC| = 4 · 9 = 36 ⇒ |AH| = 6. |BC| = 13 olduğundan Alan(ABC) = {13 · 6|2} = 39 cm².",
   },
   {
     ders: "MATEMATIK",
@@ -788,7 +717,7 @@ export const LISANS_SORULARI: SeedSoru[] = [
     secenekler: ["15", "18", "21", "24", "27"],
     dogruCevap: 4,
     aciklama:
-      "2x − y = 0 doğrusu x eksenini (0, 0)'da, x + y = 9 doğrusu (9, 0)'da keser. İki doğrunun kesişimi: y = 2x ve x + 2x = 9 ⇒ (3, 6). Taban 9, yükseklik 6 ⇒ Alan = 9 · 6 / 2 = 27 birimkare.",
+      "2x − y = 0 doğrusu x eksenini (0, 0)'da, x + y = 9 doğrusu (9, 0)'da keser. İki doğrunun kesişimi: y = 2x ve x + 2x = 9 ⇒ (3, 6). Taban 9, yükseklik 6 ⇒ Alan = {9 · 6|2} = 27 birimkare.",
   },
 
   // ---- TARİH (27) ----

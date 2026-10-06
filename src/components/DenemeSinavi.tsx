@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "
 import { useRouter } from "next/navigation";
 import { Clock, Flag } from "lucide-react";
 import { DERS_LABEL, type ExamSoru } from "@/lib/kpssDenemeSabitler";
+import { KesirliMetin } from "@/components/KesirliMetin";
 import { SoruGovdesi } from "@/components/SoruGovdesi";
 import { SoruHaritasi } from "@/components/SoruHaritasi";
 
@@ -154,7 +155,9 @@ export function DenemeSinavi({
               }`}
             >
               <span className="font-semibold">{String.fromCharCode(65 + i)})</span>
-              <span>{secenek}</span>
+              <span>
+                <KesirliMetin metin={secenek} />
+              </span>
             </button>
           ))}
         </div>

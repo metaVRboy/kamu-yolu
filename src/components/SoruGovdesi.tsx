@@ -1,4 +1,5 @@
 import { soruMetniNumarali, type ExamSoru } from "@/lib/kpssDenemeSabitler";
+import { KesirliMetin } from "@/components/KesirliMetin";
 
 /** Sinav ve sonuc ekranlarinda ortak: grup basligi + numarali soru metni + gorsel. */
 export function SoruGovdesi({ sorular, index }: { sorular: ExamSoru[]; index: number }) {
@@ -13,7 +14,7 @@ export function SoruGovdesi({ sorular, index }: { sorular: ExamSoru[]; index: nu
         </p>
       )}
       <p className="mt-3 whitespace-pre-line text-base font-medium text-slate-800">
-        {soru.grupId ? soruMetniNumarali(soru.soruMetni, index + 1) : soru.soruMetni}
+        <KesirliMetin metin={soru.grupId ? soruMetniNumarali(soru.soruMetni, index + 1) : soru.soruMetni} />
       </p>
       {soru.gorselSvg && (
         <div

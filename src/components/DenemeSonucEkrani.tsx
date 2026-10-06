@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CheckCircle2, XCircle, MinusCircle } from "lucide-react";
 import { DERS_LABEL, type ExamSoru } from "@/lib/kpssDenemeSabitler";
+import { KesirliMetin } from "@/components/KesirliMetin";
 import { SoruGovdesi } from "@/components/SoruGovdesi";
 import { SoruHaritasi } from "@/components/SoruHaritasi";
 
@@ -102,7 +103,9 @@ export function DenemeSonucEkrani({
                 }`}
               >
                 <span className="font-semibold">{String.fromCharCode(65 + i)})</span>
-                <span className="flex-1">{secenek}</span>
+                <span className="flex-1">
+                  <KesirliMetin metin={secenek} />
+                </span>
                 {dogruMu && <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />}
                 {!dogruMu && verilenMi && <XCircle className="h-4 w-4 shrink-0 text-red-600" />}
               </div>
@@ -115,7 +118,9 @@ export function DenemeSonucEkrani({
           )}
         </div>
         {incelenen.aciklama && (
-          <p className="mt-3 rounded-lg bg-slate-50 p-3 text-sm text-slate-600">{incelenen.aciklama}</p>
+          <p className="mt-3 rounded-lg bg-slate-50 p-3 text-sm text-slate-600">
+            <KesirliMetin metin={incelenen.aciklama} />
+          </p>
         )}
       </div>
       <aside className="mt-4 lg:sticky lg:top-20 lg:mt-0 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
