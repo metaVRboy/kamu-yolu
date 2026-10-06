@@ -23,7 +23,7 @@ export default function KullanimKosullariPage() {
         kuruluşu ve fiyatlandırma netleştikçe doldurulmalıdır.
       </p>
 
-      <div className="prose prose-slate mt-6 max-w-none space-y-5 text-sm leading-relaxed text-slate-700">
+      <div className="prose prose-slate mt-6 max-w-none space-y-5 rounded-2xl border border-primary/10 bg-white p-6 shadow-sm sm:p-8 text-sm leading-relaxed text-slate-700">
         <section>
           <h2 className="font-sans text-base font-semibold text-primary">1. Taraflar ve Kapsam</h2>
           <p>

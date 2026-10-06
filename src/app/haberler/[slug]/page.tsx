@@ -160,7 +160,7 @@ export default async function HaberDetayPage({
       </nav>
 
       <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="min-w-0">
+        <div className="min-w-0 rounded-2xl border border-primary/10 bg-white p-5 shadow-sm sm:p-8">
           <div className="flex flex-wrap items-center gap-2 text-xs">
             {haber.kategori && (
               <Badge className="border-transparent bg-primary text-primary-foreground">{haber.kategori}</Badge>

@@ -42,7 +42,7 @@ export function DenemeSonucEkrani({
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
-      <div className="rounded-xl border border-primary/15 bg-slate-50/60 p-5">
+      <div className="rounded-xl border border-primary/15 bg-white p-5">
         <h2 className="text-lg font-semibold text-slate-800">Sınav Sonucun</h2>
         <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
           <div className="rounded-lg bg-white p-3 text-center">

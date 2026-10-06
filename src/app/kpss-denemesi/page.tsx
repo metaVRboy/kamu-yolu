@@ -27,7 +27,7 @@ export default async function KpssDenemesiHubPage() {
           const hazirSoruSayisi = sayiByDuzey.get(duzey) ?? 0;
           const hazirMi = hazirSoruSayisi >= TOPLAM_SORU;
           return (
-            <div key={duzey} className="flex flex-col rounded-2xl border border-primary/15 bg-slate-50/60 p-5">
+            <div key={duzey} className="flex flex-col rounded-2xl border border-primary/15 bg-white p-5">
               <h2 className="text-lg font-semibold text-slate-800">{DUZEY_LABEL[duzey]}</h2>
               <div className="mt-2 space-y-1 text-xs text-muted-foreground">
                 <p className="flex items-center gap-1.5">

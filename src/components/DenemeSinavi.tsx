@@ -104,7 +104,7 @@ export function DenemeSinavi({
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/15 bg-slate-50/60 px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/15 bg-white px-4 py-3">
         <div
           className={`flex items-center gap-1.5 font-mono text-lg font-semibold ${sureAzaldiMi ? "text-destructive" : "text-primary"}`}
         >

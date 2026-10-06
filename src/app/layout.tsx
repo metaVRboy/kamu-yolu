@@ -48,7 +48,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
 
   return (
     <html lang="tr" className={cn("h-full antialiased", inter.variable, "font-sans")}>
-      <body className="flex min-h-full flex-col bg-white text-foreground">
+      <body className="flex min-h-full flex-col text-foreground">
        <AuthModalProvider>
         {/* next/script (afterInteractive/beforeInteractive fark etmeksizin)
             src'yi ham HTML'de duz bir <script src=...> etiketi olarak degil,

@@ -48,7 +48,8 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
+  /* Sayfa zemini acik gri - beyaz kartlar (--card) zeminden ayrissin. */
+  --background: oklch(0.955 0.007 255);
   --foreground: oklch(0.148 0.004 228.8);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.148 0.004 228.8);

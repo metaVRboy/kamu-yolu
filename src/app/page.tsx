@@ -37,7 +37,7 @@ export default async function Home() {
             asagidaki icerik/input ile ayni boyama baglamini paylasmiyor,
             aksi halde Safari'de input'un imleci yanlis konumda cizilebiliyor. */}
         <div className="animate-frame-glow relative rounded-3xl">
-          <div className="relative flex h-full flex-col justify-center overflow-hidden rounded-3xl border border-primary/10 bg-primary/[0.04] p-8 text-center shadow-sm backdrop-blur-xl sm:p-10">
+          <div className="relative flex h-full flex-col justify-center overflow-hidden rounded-3xl border border-primary/10 bg-white p-8 text-center shadow-sm backdrop-blur-xl sm:p-10">
             <div aria-hidden className="pointer-events-none absolute inset-0">
               <div className="absolute -top-20 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
             </div>
