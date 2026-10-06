@@ -1,8 +1,11 @@
+import Link from "next/link";
 import { ClipboardList } from "lucide-react";
 import { getLatestPostings, getHomepageStats, getDepartmentPostingCounts } from "@/lib/matching";
 import { getLatestHaberler } from "@/lib/haberler";
 import { prisma } from "@/lib/prisma";
-import { PostingCard } from "@/components/PostingCard";
+import { IlanVitrinKarti } from "@/components/IlanVitrinKarti";
+import { aramaAdi, kurumaGoreGrupla } from "@/lib/ilanVitrin";
+import { findInstitutionImageCached } from "@/lib/findInstitutionImage";
 import { DepartmentSearch } from "@/components/DepartmentSearch";
 import { HaberlerSection } from "@/components/HaberlerSection";
 import { HeroHaberCarousel } from "@/components/HeroHaberCarousel";
@@ -14,7 +17,8 @@ export const revalidate = 300;
 
 export default async function Home() {
   const [latestPostings, haberler, departmentRows, stats, postingCounts] = await Promise.all([
-    getLatestPostings(6),
+    // Ayni kurumun toplu ilanlari tek kartta birlesecegi icin genis bir pencere cekilir.
+    getLatestPostings(120),
     getLatestHaberler(5),
     prisma.department.findMany({ select: { id: true, slug: true, name: true, level: true }, orderBy: { name: "asc" } }),
     getHomepageStats(),
@@ -27,6 +31,16 @@ export default async function Home() {
     level: d.level,
     ilanSayisi: postingCounts.get(d.id) ?? 0,
   }));
+
+  const ilanGruplari = kurumaGoreGrupla(latestPostings, 6);
+  // Wikipedia aramasi once duzgun harfli adla, bulamazsa kaynaktaki ham adla denenir.
+  const ilanLogolari = await Promise.all(
+    ilanGruplari.map(
+      async (g) =>
+        (await findInstitutionImageCached(aramaAdi(g.ilk.institutionName))) ??
+        (await findInstitutionImageCached(g.ilk.institutionName)),
+    ),
+  );
 
   const haberlerMapped = haberler.map((h) => ({ ...h, yayinTarihi: h.yayinTarihi.toISOString() }));
 
@@ -86,7 +100,7 @@ export default async function Home() {
               <ClipboardList className="h-5 w-5" />
             </span>
             <div>
-              <h2 className="font-sans text-xl font-semibold text-primary">
+              <h2 className="font-sans text-2xl font-semibold text-primary">
                 Yeni Eklenen İlanlar
               </h2>
               <p className="mt-0.5 text-sm text-muted-foreground">
@@ -94,15 +108,14 @@ export default async function Home() {
               </p>
             </div>
           </div>
+          <Link href="/ilanlar" className="shrink-0 text-sm font-medium text-primary hover:underline">
+            Tümü »
+          </Link>
         </div>
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          {latestPostings.length === 0 && (
-            <p className="text-sm text-muted-foreground">
-              Henüz ilan bulunmuyor.
-            </p>
-          )}
-          {latestPostings.map((posting) => (
-            <PostingCard key={posting.id} posting={posting} />
+        <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {ilanGruplari.length === 0 && <p className="text-sm text-muted-foreground">Henüz ilan bulunmuyor.</p>}
+          {ilanGruplari.map((grup, i) => (
+            <IlanVitrinKarti key={grup.ilk.id} grup={grup} logoUrl={ilanLogolari[i]} />
           ))}
         </div>
       </section>

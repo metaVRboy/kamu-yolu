@@ -1,11 +1,19 @@
 import { unstable_cache } from "next/cache";
 
+// Wikimedia, tanimlayici User-Agent olmayan istekleri daha siki kisitliyor.
+const WIKI_ISTEK = { headers: { "User-Agent": "KamuYolu/1.0 (https://www.kamuyolu.com)" } };
+
+/** Wikipedia istegi: 404 = gercekten yok (null); 429/5xx/ag hatasi = gecici (firlatir). */
+async function wikiGetir(url: string): Promise<Response | null> {
+  const res = await fetch(url, { ...WIKI_ISTEK, signal: AbortSignal.timeout(8000) });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Wikipedia ${res.status}`);
+  return res;
+}
+
 async function ozetGorseliniGetir(baslik: string): Promise<string | null> {
-  const res = await fetch(
-    `https://tr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(baslik)}`,
-    { signal: AbortSignal.timeout(8000) },
-  );
-  if (!res.ok) return null;
+  const res = await wikiGetir(`https://tr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(baslik)}`);
+  if (!res) return null;
 
   const data = (await res.json()) as {
     thumbnail?: { source?: string };
@@ -47,11 +55,10 @@ function anlamliKelimeler(metin: string): Set<string> {
 
 /** Tam baslik eslesmesi basarisiz olursa en yakin sayfa basligini bulur. */
 async function enYakinBasligiBul(kurumAdi: string): Promise<string | null> {
-  const res = await fetch(
+  const res = await wikiGetir(
     `https://tr.wikipedia.org/w/api.php?action=query&list=search&srlimit=1&format=json&origin=*&srsearch=${encodeURIComponent(kurumAdi)}`,
-    { signal: AbortSignal.timeout(8000) },
   );
-  if (!res.ok) return null;
+  if (!res) return null;
 
   const data = (await res.json()) as { query?: { search?: { title?: string }[] } };
   const bulunanBaslik = data.query?.search?.[0]?.title;
@@ -67,6 +74,19 @@ async function enYakinBasligiBul(kurumAdi: string): Promise<string | null> {
   return ortusuyorMu ? bulunanBaslik : null;
 }
 
+async function gorselAra(kurumAdi: string): Promise<string | null> {
+  const tamEslesme = await ozetGorseliniGetir(kurumAdi);
+  if (tamEslesme) return tamEslesme;
+
+  // Model bazen kurum adini Wikipedia'daki sayfa basligiyla birebir
+  // ayni yazmayabilir (ör. "T.C. Adalet Bakanligi" vs "Adalet Bakanligi") -
+  // arama ile en yakin sayfayi bulup tekrar dene.
+  const enYakinBaslik = await enYakinBasligiBul(kurumAdi);
+  if (!enYakinBaslik) return null;
+
+  return ozetGorseliniGetir(enYakinBaslik);
+}
+
 /**
  * Bir kurum/kuruluş adiyla Wikipedia'da arama yapip, o sayfanin kendi
  * ozet gorselini (varsa) doner. Wikipedia/Wikimedia gorselleri acik
@@ -76,30 +96,26 @@ async function enYakinBasligiBul(kurumAdi: string): Promise<string | null> {
  */
 export async function findInstitutionImage(kurumAdi: string): Promise<string | null> {
   try {
-    const tamEslesme = await ozetGorseliniGetir(kurumAdi);
-    if (tamEslesme) return tamEslesme;
-
-    // Model bazen kurum adini Wikipedia'daki sayfa basligiyla birebir
-    // ayni yazmayabilir (ör. "T.C. Adalet Bakanligi" vs "Adalet Bakanligi") -
-    // arama ile en yakin sayfayi bulup tekrar dene.
-    const enYakinBaslik = await enYakinBasligiBul(kurumAdi);
-    if (!enYakinBaslik) return null;
-
-    return await ozetGorseliniGetir(enYakinBaslik);
+    return await gorselAra(kurumAdi);
   } catch {
     return null;
   }
 }
 
+const gorselAraOnbellekli = unstable_cache(gorselAra, ["institution-image-v2"], { revalidate: 60 * 60 * 24 * 7 });
+
 /**
  * findInstitutionImage'in onbellekli hali - ilanlar sayfalarda tekrar
- * tekrar (her sayfa render'inda) ayni kurum adiyla gosterilebilir, haberler
- * gibi bir kez bulunup kalici saklanmiyor. Wikipedia'ya her render'da
- * istek atmamak icin 7 gun onbelleklenir (kurum logolari pratikte hic
- * degismez).
+ * tekrar ayni kurum adiyla gosterilebilir; Wikipedia'ya her render'da istek
+ * atmamak icin 7 gun onbelleklenir (kurum logolari pratikte hic degismez).
+ * Gecici hatalar (429, zaman asimi) firlatildigi icin onbellege GIRMEZ: o
+ * render'da gorselsiz gosterilir, sonraki render'da tekrar denenir. Eskiden
+ * hata da null olarak 7 gun onbellekte kalip logoyu bir hafta yok ediyordu.
  */
-export const findInstitutionImageCached = unstable_cache(
-  findInstitutionImage,
-  ["institution-image"],
-  { revalidate: 60 * 60 * 24 * 7 },
-);
+export async function findInstitutionImageCached(kurumAdi: string): Promise<string | null> {
+  try {
+    return await gorselAraOnbellekli(kurumAdi);
+  } catch {
+    return null;
+  }
+}

@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, X } from "lucide-react";
 import { getAllActivePostings, getAvailableFiltersForAll } from "@/lib/matching";
 import { PostingCard } from "@/components/PostingCard";
 import { FilterBar } from "@/components/FilterBar";
+import { duzgunHarf } from "@/lib/ilanVitrin";
 
 export const revalidate = 300;
 
@@ -14,13 +15,13 @@ export const metadata = {
 export default async function TumIlanlarPage({
   searchParams,
 }: {
-  searchParams: Promise<{ kurum?: string; ilanTuru?: string; il?: string; bolumSarti?: string }>;
+  searchParams: Promise<{ kurum?: string; ilanTuru?: string; il?: string; bolumSarti?: string; kurumAdi?: string }>;
 }) {
-  const { kurum, ilanTuru, il, bolumSarti } = await searchParams;
+  const { kurum, ilanTuru, il, bolumSarti, kurumAdi } = await searchParams;
   const departmentRequirement = bolumSarti === "var" || bolumSarti === "yok" ? bolumSarti : undefined;
 
   const [postings, filterOptions] = await Promise.all([
-    getAllActivePostings({ institutionType: kurum, ilanTuru, il, departmentRequirement }),
+    getAllActivePostings({ institutionType: kurum, ilanTuru, il, departmentRequirement, kurumAdi }),
     getAvailableFiltersForAll(),
   ]);
 
@@ -40,6 +41,16 @@ export default async function TumIlanlarPage({
       <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
         Sistemdeki tüm güncel kamu personeli/memur ilanları ({postings.length} ilan).
       </p>
+
+      {kurumAdi && (
+        <Link
+          href="/ilanlar"
+          className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-white px-3 py-1 text-sm font-medium text-primary hover:bg-primary/5"
+        >
+          Kurum: {duzgunHarf(kurumAdi)}
+          <X className="h-3.5 w-3.5" />
+        </Link>
+      )}
 
       <div className="mt-6">
         <FilterBar options={filterOptions} />
