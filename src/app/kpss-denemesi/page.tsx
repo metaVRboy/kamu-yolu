@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { GraduationCap, Clock, ListChecks } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { SayfaBasligi } from "@/components/SayfaBasligi";
 import { DENEME_DUZEYLERI, DUZEY_LABEL, SINAV_SURESI_DK, TOPLAM_SORU } from "@/lib/kpssDenemeSabitler";
 
 export const metadata = { title: "KPSS Deneme Sınavı — Kamu Yolu" };
@@ -12,15 +13,17 @@ export default async function KpssDenemesiHubPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
-      <div className="flex items-center gap-2">
-        <GraduationCap className="h-7 w-7 text-primary" />
-        <h1 className="font-sans text-2xl font-bold tracking-tight text-primary sm:text-3xl">KPSS Deneme Sınavı</h1>
-      </div>
-      <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-        Her gün yenilenen, gerçek KPSS formatında ({TOPLAM_SORU} soru, {SINAV_SURESI_DK} dakika) deneme sınavına
-        gir. O gün giren herkes aynı soruları görür; sınav bitince doğru/yanlış/boş sayılarını ve puanını
-        görebilir, yanlış yaptığın sorulara dönüp doğru cevabı inceleyebilirsin.
-      </p>
+      <SayfaBasligi
+        ikon={GraduationCap}
+        breadcrumb={[{ ad: "Ana Sayfa", href: "/" }, { ad: "KPSS Denemesi" }]}
+        baslik="KPSS Deneme Sınavı"
+        aciklama="Her gün yenilenen, gerçek KPSS formatında deneme sınavına gir. O gün giren herkes aynı soruları görür; sınav bitince doğru/yanlış/boş sayılarını ve puanını görebilir, yanlış yaptığın sorulara dönüp doğru cevabı inceleyebilirsin."
+        cipler={[
+          { etiket: `${TOPLAM_SORU} soru`, ikon: ListChecks },
+          { etiket: `${SINAV_SURESI_DK} dakika`, ikon: Clock },
+          { etiket: "Her gün yenilenir", durum: "vurgu" },
+        ]}
+      />
 
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
         {DENEME_DUZEYLERI.map((duzey) => {

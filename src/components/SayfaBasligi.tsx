@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ChevronRight, type LucideIcon } from "lucide-react";
+import { Building2, ChevronRight, Hourglass, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MobilSabitBaslik } from "@/components/MobilSabitBaslik";
 
@@ -36,6 +36,7 @@ export function SayfaBasligi({
   tema = "varsayilan",
   mobilBaslik,
   filtreHedefi,
+  kompakt = false,
 }: {
   ikon: LucideIcon;
   breadcrumb?: { ad: string; href?: string }[];
@@ -48,11 +49,18 @@ export function SayfaBasligi({
   // Verilirse mobilde baslik kaybolunca sabit ince cubukta gosterilir.
   mobilBaslik?: string;
   filtreHedefi?: string;
+  // Profil/becayis alt sayfalari ve yasal metinler: desensiz, kucuk.
+  kompakt?: boolean;
 }) {
   return (
-    <header className="relative overflow-hidden rounded-3xl border border-primary/10 bg-white p-6 shadow-sm sm:p-8">
+    <header
+      className={cn(
+        "relative overflow-hidden border border-primary/10 bg-white shadow-sm",
+        kompakt ? "rounded-2xl p-5" : "rounded-3xl p-6 sm:p-8",
+      )}
+    >
       {/* Sag tarafta tema renginde soluk desenli alan - icerigin arkasinda kalir. */}
-      <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 hidden w-2/5 sm:block">
+      <div aria-hidden className={cn("pointer-events-none absolute inset-y-0 right-0 hidden w-2/5", !kompakt && "sm:block")}>
         <div
           className={cn(
             "absolute inset-0 bg-gradient-to-l opacity-[0.14] [mask-image:linear-gradient(to_left,black_30%,transparent)]",
@@ -84,15 +92,23 @@ export function SayfaBasligi({
         <div className="flex items-start gap-4">
           <span
             className={cn(
-              "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-lg shadow-primary/25",
+              "flex shrink-0 items-center justify-center bg-gradient-to-br text-white shadow-lg shadow-primary/25",
+              kompakt ? "h-10 w-10 rounded-xl" : "h-12 w-12 rounded-2xl",
               TEMA[tema],
             )}
           >
-            <Ikon className="h-6 w-6" />
+            <Ikon className={kompakt ? "h-5 w-5" : "h-6 w-6"} />
           </span>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="font-sans text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{baslik}</h1>
+              <h1
+                className={cn(
+                  "font-sans font-bold tracking-tight text-slate-900",
+                  kompakt ? "text-xl sm:text-2xl" : "text-2xl sm:text-3xl",
+                )}
+              >
+                {baslik}
+              </h1>
               {rozet}
             </div>
             {aciklama && <p className="mt-1.5 max-w-2xl text-sm text-muted-foreground">{aciklama}</p>}
@@ -140,4 +156,26 @@ export function SayfaBasligi({
       {mobilBaslik && <MobilSabitBaslik baslik={mobilBaslik} filtreHedefi={filtreHedefi} />}
     </header>
   );
+}
+
+/** Ilan listesi sayfalari icin ortak cipler: aktif ilan, kurum sayisi, bu hafta biten (filtre). */
+export function ilanCipleri(
+  ilanlar: { institutionName: string }[],
+  yakinda: { biteceklerSayisi: number; aktif: boolean; href: string },
+): BaslikCipi[] {
+  const kurumSayisi = new Set(ilanlar.map((i) => i.institutionName)).size;
+  return [
+    { etiket: `${ilanlar.length} aktif ilan` },
+    { etiket: `${kurumSayisi} kurum`, ikon: Building2, href: "#filtreler" },
+    ...(yakinda.biteceklerSayisi > 0
+      ? [
+          {
+            etiket: yakinda.aktif ? "Yakında bitenler gösteriliyor ✕" : `${yakinda.biteceklerSayisi} ilan bu hafta bitiyor`,
+            ikon: Hourglass,
+            href: yakinda.href,
+            durum: yakinda.aktif ? ("aktif" as const) : ("vurgu" as const),
+          },
+        ]
+      : []),
+  ];
 }

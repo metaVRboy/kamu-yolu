@@ -12,6 +12,7 @@ import { ResmiIstihdamGrafik } from "@/components/ResmiIstihdamGrafik";
 import { YillikSutunGrafik } from "@/components/YillikSutunGrafik";
 import { KpssBolumSecici } from "@/components/KpssBolumSecici";
 import { BolumSiralamaPaneli } from "@/components/BolumSiralamaPaneli";
+import { SayfaBasligi } from "@/components/SayfaBasligi";
 
 export const metadata = { title: "Kamu Alım Analizi — Kamu Yolu" };
 
@@ -77,13 +78,17 @@ export default async function AnalizPage({
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
-      <div className="flex items-center gap-2">
-        <BarChart3 className="h-6 w-6 text-primary" />
-        <h1 className="text-2xl font-bold tracking-tight">Kamu Alım Analizi</h1>
-      </div>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Türkiye genelinde yıllara göre kamu istihdamı ve KPSS ile bölümüne göre yapılan alımlar.
-      </p>
+      <SayfaBasligi
+        ikon={BarChart3}
+        breadcrumb={[{ ad: "Ana Sayfa", href: "/" }, { ad: "Alım Analizi" }]}
+        baslik="Kamu Alım Analizi"
+        aciklama="Türkiye genelinde yıllara göre kamu istihdamı ve KPSS ile bölümüne göre yapılan alımlar."
+        cipler={[
+          { etiket: "Strateji ve Bütçe Başkanlığı verisi", ikon: Landmark },
+          { etiket: "ÖSYM KPSS tercih kılavuzları", ikon: GraduationCap },
+          { etiket: "Bölüm bazlı yıllık karşılaştırma" },
+        ]}
+      />
 
       <div className="mt-6 rounded-2xl border border-primary/20 bg-white p-4">
         <div className="flex items-center gap-2">

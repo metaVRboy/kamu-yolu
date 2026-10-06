@@ -1,9 +1,9 @@
-import Link from "next/link";
-import { ArrowLeft, X } from "lucide-react";
+import { ClipboardList } from "lucide-react";
 import { getAllActivePostings, getAvailableFiltersForAll } from "@/lib/matching";
 import { IlanVitrinKarti } from "@/components/IlanVitrinKarti";
 import { FilterBar } from "@/components/FilterBar";
-import { duzgunHarf, kurumLogolari, tekIlanKartlari } from "@/lib/ilanVitrin";
+import { duzgunHarf, kurumLogolari, tekIlanKartlari, yakindaFiltresi } from "@/lib/ilanVitrin";
+import { ilanCipleri, SayfaBasligi } from "@/components/SayfaBasligi";
 
 export const revalidate = 300;
 
@@ -15,45 +15,40 @@ export const metadata = {
 export default async function TumIlanlarPage({
   searchParams,
 }: {
-  searchParams: Promise<{ kurum?: string; ilanTuru?: string; il?: string; bolumSarti?: string; kurumAdi?: string }>;
+  searchParams: Promise<{ kurum?: string; ilanTuru?: string; il?: string; bolumSarti?: string; kurumAdi?: string; yakinda?: string }>;
 }) {
-  const { kurum, ilanTuru, il, bolumSarti, kurumAdi } = await searchParams;
+  const { kurum, ilanTuru, il, bolumSarti, kurumAdi, yakinda } = await searchParams;
   const departmentRequirement = bolumSarti === "var" || bolumSarti === "yok" ? bolumSarti : undefined;
 
-  const [postings, filterOptions] = await Promise.all([
+  const [tumIlanlar, filterOptions] = await Promise.all([
     getAllActivePostings({ institutionType: kurum, ilanTuru, il, departmentRequirement, kurumAdi }),
     getAvailableFiltersForAll(),
   ]);
+  const yakindaDurumu = yakindaFiltresi(tumIlanlar, "/ilanlar", { kurum, ilanTuru, il, bolumSarti, kurumAdi, yakinda });
+  const postings = yakindaDurumu.gosterilen;
   const logolar = await kurumLogolari(postings);
+  // Kurum filtresi cipi: tiklayinca sadece kurumAdi kalkar, diger filtreler kalir.
+  const kurumsuz = new URLSearchParams(
+    Object.entries({ kurum, ilanTuru, il, bolumSarti, yakinda }).filter((e): e is [string, string] => !!e[1]),
+  );
+  const kurumsuzHref = `/ilanlar${kurumsuz.size ? `?${kurumsuz}` : ""}`;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-      <Link
-        href="/"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" />
-        Ana sayfaya dön
-      </Link>
+      <SayfaBasligi
+        ikon={ClipboardList}
+        breadcrumb={[{ ad: "Ana Sayfa", href: "/" }, { ad: "Tüm İlanlar" }]}
+        baslik="Tüm İlanlar"
+        aciklama="Sistemdeki tüm güncel kamu personeli ve memur ilanları; her ilan kartında bölüm şartını ve son başvuru tarihini görebilirsin."
+        cipler={[
+          ...(kurumAdi ? [{ etiket: `Kurum: ${duzgunHarf(kurumAdi)} ✕`, href: kurumsuzHref, durum: "aktif" as const }] : []),
+          ...ilanCipleri(tumIlanlar, yakindaDurumu),
+        ]}
+        mobilBaslik="Tüm İlanlar"
+        filtreHedefi="#filtreler"
+      />
 
-      <h1 className="mt-4 font-sans text-2xl font-bold tracking-tight text-primary sm:text-3xl">
-        Tüm İlanlar
-      </h1>
-      <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-        Sistemdeki tüm güncel kamu personeli/memur ilanları ({postings.length} ilan).
-      </p>
-
-      {kurumAdi && (
-        <Link
-          href="/ilanlar"
-          className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-white px-3 py-1 text-sm font-medium text-primary hover:bg-primary/5"
-        >
-          Kurum: {duzgunHarf(kurumAdi)}
-          <X className="h-3.5 w-3.5" />
-        </Link>
-      )}
-
-      <div className="mt-6">
+      <div id="filtreler" className="mt-6 scroll-mt-32">
         <FilterBar options={filterOptions} />
       </div>
 

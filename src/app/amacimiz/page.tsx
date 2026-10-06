@@ -1,4 +1,6 @@
+import { Info } from "lucide-react";
 import { getHomepageStats } from "@/lib/matching";
+import { SayfaBasligi } from "@/components/SayfaBasligi";
 import {
   HowItWorksSection,
   ProblemSection,
@@ -18,13 +20,17 @@ export default async function AmacimizPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
-      <h1 className="text-center font-sans text-2xl font-bold tracking-tight text-primary sm:text-3xl">
-        Hakkımızda
-      </h1>
-      <p className="mx-auto mt-2 max-w-xl text-center text-sm text-muted-foreground">
-        Kamu Yolu&apos;nu neden kurduk, nasıl çalışıyor ve verilerin doğruluğunu nasıl
-        sağlıyoruz.
-      </p>
+      <SayfaBasligi
+        ikon={Info}
+        breadcrumb={[{ ad: "Ana Sayfa", href: "/" }, { ad: "Hakkımızda" }]}
+        baslik="Hakkımızda"
+        aciklama="Kamu Yolu'nu neden kurduk, nasıl çalışıyor ve verilerin doğruluğunu nasıl sağlıyoruz."
+        cipler={[
+          { etiket: `${stats.postingCount} aktif ilan` },
+          { etiket: `${stats.institutionCount} kurum` },
+          { etiket: `${stats.departmentCount} bölüm` },
+        ]}
+      />
 
       <div className="mt-12">
         <ProblemSection />

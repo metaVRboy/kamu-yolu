@@ -1,3 +1,5 @@
+import { Crown } from "lucide-react";
+import { SayfaBasligi } from "@/components/SayfaBasligi";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { getOkunmamisIlgilendiklerimSayisi, getOkunmamisMesajSayisi } from "@/lib/becayis";
@@ -20,10 +22,12 @@ export default async function AbonelikPage() {
       okunmamisMesajSayisi={okunmamisSayisi}
       okunmamisIlgilendiklerimSayisi={okunmamisIlgilendiklerimSayisi}
     >
-      <h1 className="font-sans text-2xl font-bold tracking-tight text-primary">Aboneliğim</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Planını yönet, ihtiyacına göre yükselt.
-      </p>
+      <SayfaBasligi
+        kompakt
+        ikon={Crown}
+        baslik="Aboneliğim"
+        aciklama="Planını yönet, ihtiyacına göre yükselt."
+      />
 
       <div className="mt-6">
         <AbonelikPlanlari mevcutPlan={user.abonelikPlani} />

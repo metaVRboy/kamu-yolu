@@ -1,3 +1,5 @@
+import { ShieldCheck } from "lucide-react";
+import { SayfaBasligi } from "@/components/SayfaBasligi";
 import Link from "next/link";
 
 export const metadata = {
@@ -7,9 +9,11 @@ export const metadata = {
 export default function KvkkPage() {
   return (
     <div className="mx-auto max-w-2xl px-4 py-14 sm:px-6 sm:py-20">
-      <h1 className="font-sans text-2xl font-bold tracking-tight text-primary sm:text-3xl">
-        KVKK Aydınlatma Metni ve Gizlilik Politikası
-      </h1>
+      <SayfaBasligi
+        kompakt
+        ikon={ShieldCheck}
+        baslik="KVKK Aydınlatma Metni ve Gizlilik Politikası"
+      />
 
       <div className="prose prose-slate mt-6 max-w-none space-y-5 rounded-2xl border border-primary/10 bg-white p-6 shadow-sm sm:p-8 text-sm leading-relaxed text-slate-700">
         <section>

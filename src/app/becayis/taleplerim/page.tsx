@@ -1,3 +1,5 @@
+import { Inbox } from "lucide-react";
+import { SayfaBasligi } from "@/components/SayfaBasligi";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { getOkunmamisIlgilendiklerimSayisi, getTaleplerim } from "@/lib/becayis";
@@ -24,12 +26,12 @@ export default async function TaleplerimPage() {
       okunmamisMesajSayisi={okunmamisSayisi}
       okunmamisIlgilendiklerimSayisi={okunmamisIlgilendiklerimSayisi}
     >
-      <h1 className="font-sans text-2xl font-bold tracking-tight text-primary sm:text-3xl">
-        Mevcut Taleplerim
-      </h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Becayiş taleplerin ve sana gelen mesajlar.
-      </p>
+      <SayfaBasligi
+        kompakt
+        ikon={Inbox}
+        baslik="Mevcut Taleplerim"
+        aciklama="Becayiş taleplerin ve sana gelen mesajlar."
+      />
       <div className="mt-6">
         <TaleplerimList
           talepler={talepler.map((t) => ({

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Bell, Building2, GraduationCap, Hourglass } from "lucide-react";
+import { Bell, GraduationCap } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import {
   getAvailableFiltersForDepartment,
@@ -10,8 +10,8 @@ import {
 import { getHaberlerForDepartment } from "@/lib/haberler";
 import { getCurrentUser } from "@/lib/auth";
 import { IlanVitrinKarti } from "@/components/IlanVitrinKarti";
-import { kurumLogolari, tekIlanKartlari, yakindaBitenler } from "@/lib/ilanVitrin";
-import { SayfaBasligi } from "@/components/SayfaBasligi";
+import { kurumLogolari, tekIlanKartlari, yakindaFiltresi } from "@/lib/ilanVitrin";
+import { ilanCipleri, SayfaBasligi } from "@/components/SayfaBasligi";
 import { FarkliBolumAra } from "@/components/FarkliBolumAra";
 import { LEVEL_SLUG_TO_ENUM } from "@/lib/levels";
 import { FilterBar } from "@/components/FilterBar";
@@ -48,15 +48,10 @@ export default async function DepartmentResultsPage({
     prisma.department.findMany({ select: { id: true, slug: true, name: true, level: true }, orderBy: { name: "asc" } }),
     getDepartmentPostingCounts(),
   ]);
-  const bitecekler = yakindaBitenler(tumIlanlar);
-  const postings = yakinda === "1" ? bitecekler : tumIlanlar;
-  const kurumSayisi = new Set(tumIlanlar.map((p) => p.institutionName)).size;
+  const yakindaDurumu = yakindaFiltresi(tumIlanlar, `/bolum/${slug}`, { kurum, ilanTuru, il, bolumSarti, yakinda });
+  const postings = yakindaDurumu.gosterilen;
   const bolumler = bolumSatirlari.map((d) => ({ slug: d.slug, name: d.name, level: d.level, ilanSayisi: bolumIlanSayilari.get(d.id) ?? 0 }));
   const seviyeSlug = Object.entries(LEVEL_SLUG_TO_ENUM).find(([, v]) => v === department.level)?.[0];
-  // yakinda filtresini ac/kapa ederken diger filtreler korunur.
-  const yakindaParam = new URLSearchParams(Object.entries({ kurum, ilanTuru, il, bolumSarti }).filter((e): e is [string, string] => !!e[1]));
-  if (yakinda !== "1") yakindaParam.set("yakinda", "1");
-  const yakindaHref = `/bolum/${slug}${yakindaParam.size ? `?${yakindaParam}` : ""}`;
   const logolar = await kurumLogolari(postings);
   // SMS ile anlik ilan bildirimi Pro ozelligi (bkz. AbonelikPlanlari) - bu
   // yuzden Pro/Pro+ uyelere yukseltme kartini gostermiyoruz.
@@ -83,20 +78,7 @@ export default async function DepartmentResultsPage({
           </Badge>
         }
         aciklama="Sadece bu bölüme özel şart koşan güncel kamu ilanları listelenir."
-        cipler={[
-          { etiket: `${tumIlanlar.length} aktif ilan` },
-          { etiket: `${kurumSayisi} kurum`, ikon: Building2, href: "#filtreler" },
-          ...(bitecekler.length > 0
-            ? [
-                {
-                  etiket: yakinda === "1" ? "Yakında bitenler gösteriliyor ✕" : `${bitecekler.length} ilan bu hafta bitiyor`,
-                  ikon: Hourglass,
-                  href: yakindaHref,
-                  durum: yakinda === "1" ? ("aktif" as const) : ("vurgu" as const),
-                },
-              ]
-            : []),
-        ]}
+        cipler={ilanCipleri(tumIlanlar, yakindaDurumu)}
         aksiyonlar={
           <>
             {yukseltmeKartiGoster && (

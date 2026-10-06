@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowUpRight, MapPin, Repeat } from "lucide-react";
+import { ArrowUpRight, MapPin, Plus, Repeat } from "lucide-react";
+import { SayfaBasligi } from "@/components/SayfaBasligi";
 import { getAktifTalepler } from "@/lib/becayis";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -14,23 +15,27 @@ export const metadata = {
 
 export default async function BecayisPage() {
   const talepler = await getAktifTalepler();
+  const ilSayisi = new Set(talepler.map((t) => t.mevcutIl)).size;
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-14 sm:px-6 sm:py-20">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="flex items-center gap-2 font-sans text-2xl font-bold tracking-tight text-primary sm:text-3xl">
-            <Repeat className="h-6 w-6 text-primary" />
-            Becayiş İlanları
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Kamu personeli arasında il/ilçe değişimi talepleri.
-          </p>
-        </div>
-        <Link href="/becayis/talep-olustur" className={buttonVariants()}>
-          Talep Oluştur
-        </Link>
-      </div>
+    <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
+      <SayfaBasligi
+        ikon={Repeat}
+        breadcrumb={[{ ad: "Ana Sayfa", href: "/" }, { ad: "Becayiş İlanları" }]}
+        baslik="Becayiş İlanları"
+        aciklama="Kamu personeli arasında il/ilçe değişimi talepleri. İletişim bilgileri gizli kalır, talep sahibine site üzerinden mesaj gönderilir."
+        cipler={[
+          { etiket: `${talepler.length} aktif talep` },
+          ...(ilSayisi > 0 ? [{ etiket: `${ilSayisi} farklı ilden`, ikon: MapPin }] : []),
+        ]}
+        aksiyonlar={
+          <Link href="/becayis/talep-olustur" className={cn(buttonVariants(), "rounded-full")}>
+            <Plus className="h-4 w-4" />
+            Talep Oluştur
+          </Link>
+        }
+        mobilBaslik="Becayiş İlanları"
+      />
 
       <div className="mt-8 space-y-3">
         {talepler.length === 0 && (

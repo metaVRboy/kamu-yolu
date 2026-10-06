@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { GraduationCap } from "lucide-react";
 import {
   getAvailableFiltersForLevel,
   getPostingsForLevel,
@@ -8,9 +7,9 @@ import {
 import { LEVEL_SLUG_TO_ENUM } from "@/lib/levels";
 import { LEVEL_LABEL } from "@/lib/labels";
 import { IlanVitrinKarti } from "@/components/IlanVitrinKarti";
-import { kurumLogolari, tekIlanKartlari } from "@/lib/ilanVitrin";
+import { kurumLogolari, tekIlanKartlari, yakindaFiltresi } from "@/lib/ilanVitrin";
+import { ilanCipleri, SayfaBasligi } from "@/components/SayfaBasligi";
 import { FilterBar } from "@/components/FilterBar";
-import { Badge } from "@/components/ui/badge";
 
 export const revalidate = 300;
 
@@ -19,47 +18,43 @@ export default async function LevelResultsPage({
   searchParams,
 }: {
   params: Promise<{ level: string }>;
-  searchParams: Promise<{ kurum?: string; ilanTuru?: string; il?: string; bolumSarti?: string }>;
+  searchParams: Promise<{ kurum?: string; ilanTuru?: string; il?: string; bolumSarti?: string; yakinda?: string }>;
 }) {
   const { level: levelSlug } = await params;
-  const { kurum, ilanTuru, il, bolumSarti } = await searchParams;
+  const { kurum, ilanTuru, il, bolumSarti, yakinda } = await searchParams;
 
   const level = LEVEL_SLUG_TO_ENUM[levelSlug];
   if (!level) notFound();
 
   const departmentRequirement = bolumSarti === "var" || bolumSarti === "yok" ? bolumSarti : undefined;
 
-  const [postings, filterOptions] = await Promise.all([
+  const [tumIlanlar, filterOptions] = await Promise.all([
     getPostingsForLevel(level, { institutionType: kurum, ilanTuru, il, departmentRequirement }),
     getAvailableFiltersForLevel(level),
   ]);
+  const yakindaDurumu = yakindaFiltresi(tumIlanlar, `/seviye/${levelSlug}`, { kurum, ilanTuru, il, bolumSarti, yakinda });
+  const postings = yakindaDurumu.gosterilen;
   const logolar = await kurumLogolari(postings);
+  const duzey = LEVEL_LABEL[level] ?? level;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-      <Link
-        href="/"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" />
-        Ana sayfaya dön
-      </Link>
+      <SayfaBasligi
+        ikon={GraduationCap}
+        tema={level === "LISANS" || level === "ONLISANS" || level === "LISE" ? level : "varsayilan"}
+        breadcrumb={[{ ad: "Ana Sayfa", href: "/" }, { ad: `${duzey} Mezunları` }]}
+        baslik={
+          <>
+            <span className="text-primary">{duzey}</span> mezunları için ilanlar
+          </>
+        }
+        aciklama={`${duzey} mezunlarının başvurabileceği güncel kamu ilanları. Bazı ilanlar belirli bir bölüm mezunu olmayı şart koşar, bazıları koşmaz — her ilan kartında bunu ayrıca görebilirsin.`}
+        cipler={ilanCipleri(tumIlanlar, yakindaDurumu)}
+        mobilBaslik={`${duzey} mezunları ilanları`}
+        filtreHedefi="#filtreler"
+      />
 
-      <div className="mt-4 flex flex-wrap items-center gap-3">
-        <h1 className="font-sans text-2xl font-bold tracking-tight text-primary sm:text-3xl">
-          {LEVEL_LABEL[level] ?? level} Mezunları İçin İlanlar
-        </h1>
-        <Badge variant="outline" className="border-primary/30 text-primary">
-          {LEVEL_LABEL[level] ?? level}
-        </Badge>
-      </div>
-      <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-        {(LEVEL_LABEL[level] ?? level)} mezunlarının başvurabileceği güncel kamu
-        ilanları. Bazı ilanlar belirli bir bölüm mezunu olmayı şart koşar, bazıları
-        koşmaz — her ilan kartında bunu ayrıca görebilirsin.
-      </p>
-
-      <div className="mt-6">
+      <div id="filtreler" className="mt-6 scroll-mt-32">
         <FilterBar options={filterOptions} />
       </div>
 

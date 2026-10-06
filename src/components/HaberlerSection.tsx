@@ -29,14 +29,18 @@ export function HaberlerSection({
   showAllLink = true,
   baslik = "Haberler",
   aciklama = "Kamu personel alımları, toplu alım duyuruları ve gündemdeki gelişmeler.",
+  basliksiz = false,
 }: {
   haberler: HaberItem[];
   showAllLink?: boolean;
   baslik?: string;
   aciklama?: string;
+  // Sayfanin kendi SayfaBasligi varsa bolum basligi tekrar edilmez.
+  basliksiz?: boolean;
 }) {
   return (
     <section>
+      {!basliksiz && (
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md shadow-primary/25">
@@ -53,6 +57,7 @@ export function HaberlerSection({
           </Link>
         )}
       </div>
+      )}
 
       <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {haberler.length === 0 && (

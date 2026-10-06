@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Briefcase, Inbox, Lock, MessageCircle, Repeat } from "lucide-react";
+import { Briefcase, Inbox, Lock, MessageCircle, Repeat, UserRound } from "lucide-react";
+import { SayfaBasligi } from "@/components/SayfaBasligi";
 import { getCurrentUser } from "@/lib/auth";
 import { getOkunmamisIlgilendiklerimSayisi, getOkunmamisMesajSayisi, getTaleplerim } from "@/lib/becayis";
 import { getPostingsForDepartment, getPostingsForLevel } from "@/lib/matching";
@@ -54,13 +55,13 @@ export default async function ProfilimPage() {
       okunmamisMesajSayisi={okunmamisSayisi}
       okunmamisIlgilendiklerimSayisi={okunmamisIlgilendiklerimSayisi}
     >
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-sans text-2xl font-bold tracking-tight text-primary">Profilim</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{user.adSoyad} — {user.email}</p>
-        </div>
-        <LogoutButton />
-      </div>
+      <SayfaBasligi
+        kompakt
+        ikon={UserRound}
+        baslik="Profilim"
+        aciklama={`${user.adSoyad} — ${user.email}`}
+        aksiyonlar={<LogoutButton />}
+      />
 
       <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
         <Card className="gap-3 border-primary/20 bg-white p-5 shadow-sm">

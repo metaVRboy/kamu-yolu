@@ -127,3 +127,21 @@ export function yakindaBitenler<T extends Pick<Posting, "applicationEnd">>(ilanl
     return kalan >= -GUN_MS && kalan <= gun * GUN_MS;
   });
 }
+
+/**
+ * Basliktaki "bu hafta bitiyor" filtresi: gosterilecek ilanlar ve filtreyi
+ * ac/kapa eden link (sayfadaki diger filtre parametreleri korunur).
+ */
+export function yakindaFiltresi<T extends Pick<Posting, "applicationEnd">>(
+  ilanlar: T[],
+  yol: string,
+  parametreler: Record<string, string | undefined>,
+) {
+  const bitecekler = yakindaBitenler(ilanlar);
+  const aktif = parametreler.yakinda === "1";
+  const q = new URLSearchParams(
+    Object.entries(parametreler).filter((e): e is [string, string] => !!e[1] && e[0] !== "yakinda"),
+  );
+  if (!aktif) q.set("yakinda", "1");
+  return { gosterilen: aktif ? bitecekler : ilanlar, biteceklerSayisi: bitecekler.length, aktif, href: `${yol}${q.size ? `?${q}` : ""}` };
+}

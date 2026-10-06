@@ -1,3 +1,5 @@
+import { Cookie } from "lucide-react";
+import { SayfaBasligi } from "@/components/SayfaBasligi";
 export const metadata = {
   title: "Çerez Politikası — Kamu Yolu",
 };
@@ -5,9 +7,11 @@ export const metadata = {
 export default function CerezPolitikasiPage() {
   return (
     <div className="mx-auto max-w-2xl px-4 py-14 sm:px-6 sm:py-20">
-      <h1 className="font-sans text-2xl font-bold tracking-tight text-primary sm:text-3xl">
-        Çerez Politikası
-      </h1>
+      <SayfaBasligi
+        kompakt
+        ikon={Cookie}
+        baslik="Çerez Politikası"
+      />
 
       <div className="prose prose-slate mt-6 max-w-none space-y-5 rounded-2xl border border-primary/10 bg-white p-6 shadow-sm sm:p-8 text-sm leading-relaxed text-slate-700">
         <section>

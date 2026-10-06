@@ -1,3 +1,5 @@
+import { Heart } from "lucide-react";
+import { SayfaBasligi } from "@/components/SayfaBasligi";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { getIlgilendiklerim, getOkunmamisMesajSayisi } from "@/lib/becayis";
@@ -21,12 +23,12 @@ export default async function IlgilendiklerimPage() {
       okunmamisMesajSayisi={okunmamisSayisi}
       okunmamisIlgilendiklerimSayisi={okunmamisIlgilendiklerimSayisi}
     >
-      <h1 className="font-sans text-2xl font-bold tracking-tight text-primary sm:text-3xl">
-        İlgilendiğim İlanlar
-      </h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Mesaj gönderdiğin becayiş ilanları ve o ilanlarla ilgili konuşmaların.
-      </p>
+      <SayfaBasligi
+        kompakt
+        ikon={Heart}
+        baslik="İlgilendiğim İlanlar"
+        aciklama="Mesaj gönderdiğin becayiş ilanları ve o ilanlarla ilgili konuşmaların."
+      />
       <div className="mt-6">
         <IlgilendiklerimList
           talepler={talepler.map((t) => ({

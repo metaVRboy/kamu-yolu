@@ -45,3 +45,8 @@ export function haberSuresiGectiMi(haber: YayinBilgisi, simdi = Date.now()): boo
   // Tarih icermeyen duyurular (sonuc, takvim haberi vb.) 30 gun sonra kalkar.
   return simdi - haber.yayinTarihi.getTime() > TARIHSIZ_YAYIN_GUNU * GUN_MS;
 }
+
+/** Son `gun` gun icinde yayimlanan haber sayisi (baslik cipi icin). */
+export function sonGunlerdeYayinlanan(haberler: { yayinTarihi: Date }[], gun = 7, simdi = Date.now()): number {
+  return haberler.filter((h) => simdi - h.yayinTarihi.getTime() <= gun * GUN_MS).length;
+}

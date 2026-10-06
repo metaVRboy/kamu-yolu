@@ -1,3 +1,5 @@
+import { Settings } from "lucide-react";
+import { SayfaBasligi } from "@/components/SayfaBasligi";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -24,10 +26,12 @@ export default async function ProfilAyarlarPage() {
       okunmamisMesajSayisi={okunmamisSayisi}
       okunmamisIlgilendiklerimSayisi={okunmamisIlgilendiklerimSayisi}
     >
-      <h1 className="font-sans text-2xl font-bold tracking-tight text-primary">Ayarlar</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Hesap ve profil bilgilerini buradan yönetebilirsin.
-      </p>
+      <SayfaBasligi
+        kompakt
+        ikon={Settings}
+        baslik="Ayarlar"
+        aciklama="Hesap ve profil bilgilerini buradan yönetebilirsin."
+      />
 
       <Card className="mt-6 border-primary/20 bg-white p-6 shadow-sm">
         <h2 className="mb-4 font-sans font-semibold text-primary">Bilgilerim</h2>
