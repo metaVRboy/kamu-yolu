@@ -1,4 +1,4 @@
-import { getAllHaberler } from "@/lib/haberler";
+import { getYayindakiHaberler } from "@/lib/haberler";
 import { HaberlerSection } from "@/components/HaberlerSection";
 
 export const revalidate = 300;
@@ -9,7 +9,7 @@ export const metadata = {
 };
 
 export default async function HaberlerPage() {
-  const haberler = await getAllHaberler();
+  const haberler = await getYayindakiHaberler();
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">

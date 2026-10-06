@@ -12,6 +12,7 @@ import {
   Users,
 } from "lucide-react";
 import { getHaberBySlug, getLatestHaberler } from "@/lib/haberler";
+import { haberSuresiGectiMi } from "@/lib/haberYayin";
 import { getLatestPostings } from "@/lib/matching";
 import { findInstitutionImageCached } from "@/lib/findInstitutionImage";
 import { HaberGorsel } from "@/components/HaberGorsel";
@@ -70,6 +71,7 @@ export default async function HaberDetayPage({
   const { slug } = await params;
   const haber = await getHaberBySlug(slug);
   if (!haber) notFound();
+  const suresiGecti = haberSuresiGectiMi(haber);
 
   const [digerHaberlerHam, guncelIlanlarHam] = await Promise.all([
     getLatestHaberler(6),
@@ -161,6 +163,15 @@ export default async function HaberDetayPage({
 
       <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="min-w-0 rounded-2xl border border-primary/10 bg-white p-5 shadow-sm sm:p-8">
+          {suresiGecti && (
+            <p className="mb-5 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+              Bu ilanın başvuru süresi sona erdi. Güncel ilanlar için{" "}
+              <Link href="/ilanlar" className="underline">
+                tüm ilanlara
+              </Link>{" "}
+              göz atabilirsin.
+            </p>
+          )}
           <div className="flex flex-wrap items-center gap-2 text-xs">
             {haber.kategori && (
               <Badge className="border-transparent bg-primary text-primary-foreground">{haber.kategori}</Badge>
