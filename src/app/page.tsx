@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { ClipboardList } from "lucide-react";
 import { getLatestPostings, getHomepageStats, getDepartmentPostingCounts } from "@/lib/matching";
-import { getLatestHaberler } from "@/lib/haberler";
+import { getYayindakiHaberler } from "@/lib/haberler";
+import { BolumBasligi } from "@/components/BolumBasligi";
 import { prisma } from "@/lib/prisma";
 import { IlanVitrinKarti } from "@/components/IlanVitrinKarti";
 import { kurumaGoreGrupla, kurumLogolari } from "@/lib/ilanVitrin";
@@ -18,7 +18,7 @@ export default async function Home() {
   const [latestPostings, haberler, departmentRows, stats, postingCounts] = await Promise.all([
     // Ayni kurumun toplu ilanlari tek kartta birlesecegi icin genis bir pencere cekilir.
     getLatestPostings(120),
-    getLatestHaberler(5),
+    getYayindakiHaberler(),
     prisma.department.findMany({ select: { id: true, slug: true, name: true, level: true }, orderBy: { name: "asc" } }),
     getHomepageStats(),
     getDepartmentPostingCounts(),
@@ -34,7 +34,7 @@ export default async function Home() {
   const ilanGruplari = kurumaGoreGrupla(latestPostings, 6);
   const ilanLogolari = await kurumLogolari(ilanGruplari.map((g) => g.ilk));
 
-  const haberlerMapped = haberler.map((h) => ({ ...h, yayinTarihi: h.yayinTarihi.toISOString() }));
+  const haberlerMapped = haberler.slice(0, 5).map((h) => ({ ...h, yayinTarihi: h.yayinTarihi.toISOString() }));
 
   return (
     <div className="relative mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
@@ -82,28 +82,19 @@ export default async function Home() {
       </section>
 
       <div className="mt-16">
-        <HaberlerSection haberler={haberlerMapped} />
+        <HaberlerSection haberler={haberlerMapped} etiket="Güncel" toplamSayi={haberler.length} />
       </div>
 
       <section className="mt-16">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md shadow-primary/25">
-              <ClipboardList className="h-5 w-5" />
-            </span>
-            <div>
-              <h2 className="font-sans text-2xl font-semibold text-primary">
-                Yeni Eklenen İlanlar
-              </h2>
-              <p className="mt-0.5 text-sm text-muted-foreground">
-                Sisteme en son eklenen kamu ilanları.
-              </p>
-            </div>
-          </div>
-          <Link href="/ilanlar" className="shrink-0 text-sm font-medium text-primary hover:underline">
-            Tümü »
-          </Link>
-        </div>
+        <BolumBasligi
+          ikon={ClipboardList}
+          etiket="Yeni eklenenler"
+          baslik="Yeni Eklenen İlanlar"
+          aciklama="Sisteme en son eklenen kamu ilanları; aynı kurumun toplu ilanları tek kartta."
+          tumuHref="/ilanlar"
+          tumuEtiket="Tüm ilanlar"
+          sayac={stats.postingCount}
+        />
         <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {ilanGruplari.length === 0 && <p className="text-sm text-muted-foreground">Henüz ilan bulunmuyor.</p>}
           {ilanGruplari.map((grup) => (

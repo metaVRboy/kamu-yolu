@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { HaberGorsel } from "@/components/HaberGorsel";
+import { BolumBasligi } from "@/components/BolumBasligi";
 
 export type HaberItem = {
   id: string;
@@ -30,6 +31,8 @@ export function HaberlerSection({
   baslik = "Haberler",
   aciklama = "Kamu personel alımları, toplu alım duyuruları ve gündemdeki gelişmeler.",
   basliksiz = false,
+  etiket,
+  toplamSayi,
 }: {
   haberler: HaberItem[];
   showAllLink?: boolean;
@@ -37,26 +40,22 @@ export function HaberlerSection({
   aciklama?: string;
   // Sayfanin kendi SayfaBasligi varsa bolum basligi tekrar edilmez.
   basliksiz?: boolean;
+  etiket?: string;
+  // "Tum haberler" butonundaki sayac (yayindaki toplam haber).
+  toplamSayi?: number;
 }) {
   return (
     <section>
       {!basliksiz && (
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md shadow-primary/25">
-            <Newspaper className="h-5 w-5" />
-          </span>
-          <div>
-            <h2 className="font-sans text-2xl font-semibold text-primary">{baslik}</h2>
-            <p className="mt-0.5 text-sm text-muted-foreground">{aciklama}</p>
-          </div>
-        </div>
-        {showAllLink && (
-          <Link href="/haberler" className="shrink-0 text-sm font-medium text-primary hover:underline">
-            Tümü »
-          </Link>
-        )}
-      </div>
+        <BolumBasligi
+          ikon={Newspaper}
+          etiket={etiket}
+          baslik={baslik}
+          aciklama={aciklama}
+          tumuHref={showAllLink ? "/haberler" : undefined}
+          tumuEtiket="Tüm haberler"
+          sayac={toplamSayi}
+        />
       )}
 
       <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
