@@ -160,6 +160,43 @@ model User {
   bildirimler      Bildirim[]
   sifreSifirlamaTokenlari PasswordResetToken[]
   denemeKatilimlari DenemeKatilim[]
+  oturumlar        Oturum[]
+  profilFotografi  ProfilFotografi?
+  epostaDegisikligi EpostaDegisiklikKodu?
+}
+
+// Cihaz bazli oturum: JWT icindeki oturumId buraya bakar. Ayarlar > Guvenlik
+// sayfasinda listelenir ve tek tek kapatilabilir.
+model Oturum {
+  id         String    @id @default(cuid())
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  // "Chrome · Windows" gibi; tarayicinin user-agent bilgisinden turetilir. IP saklanmaz.
+  cihaz      String
+  olusturma  DateTime  @default(now())
+  sonGorulme DateTime  @default(now())
+  kapatildi  DateTime?
+
+  @@index([userId])
+}
+
+// Her istekte sorgulanan User satirini sisirmemek icin ayri tablo.
+model ProfilFotografi {
+  userId      String   @id
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  veri        Bytes
+  tur         String
+  guncellenme DateTime @updatedAt
+}
+
+// E-posta degisikligi: kod YENI adrese gider, dogrulaninca email guncellenir.
+model EpostaDegisiklikKodu {
+  userId    String   @id
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  yeniEmail String
+  kod       String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 }
 
 model PasswordResetToken {
@@ -217,8 +254,9 @@ model BecayisMesaj {
   id             String       @id @default(cuid())
   talep          BecayisTalep @relation(fields: [talepId], references: [id], onDelete: Cascade)
   talepId        String
-  gonderen       User         @relation("MesajGonderen", fields: [gonderenId], references: [id], onDelete: Cascade)
-  gonderenId     String
+  // Gonderen hesabini silerse mesaj karsi tarafin sohbeti bozulmasin diye kalir; gonderen bosalir ("Silinmis kullanici").
+  gonderen       User?        @relation("MesajGonderen", fields: [gonderenId], references: [id], onDelete: SetNull)
+  gonderenId     String?
   konusmaKarsiId String
   mesaj          String
   okundu         Boolean      @default(false)

@@ -1,43 +1,37 @@
-import { Settings } from "lucide-react";
-import { SayfaBasligi } from "@/components/SayfaBasligi";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getOkunmamisIlgilendiklerimSayisi, getOkunmamisMesajSayisi } from "@/lib/becayis";
+import { profilFotografiUrl } from "@/lib/profil";
 import { ProfilForm } from "@/components/ProfilForm";
-import { ProfilLayout } from "@/components/ProfilLayout";
-import { SifreDegistirForm } from "@/components/SifreDegistirForm";
-import { Card } from "@/components/ui/card";
+import { AyarKarti, AyarlarSayfasi, tarihMetni } from "@/components/AyarlarSayfasi";
+import { EpostaDegistirForm, ProfilFotografi } from "@/components/HesapAyarlari";
 
 export const metadata = { title: "Ayarlar — Kamu Yolu" };
+
+const PLAN_ADI = { UCRETSIZ: "Ücretsiz", PRO: "Pro", PRO_PLUS: "Pro+" } as const;
 
 export default async function ProfilAyarlarPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/giris");
 
-  const [departments, okunmamisSayisi, okunmamisIlgilendiklerimSayisi] = await Promise.all([
+  const [departments, fotografUrl] = await Promise.all([
     prisma.department.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
-    getOkunmamisMesajSayisi(user.id),
-    getOkunmamisIlgilendiklerimSayisi(user.id),
+    profilFotografiUrl(user.id),
   ]);
+  const girisYontemleri = [user.passwordHash && "E-posta ve şifre", user.googleId && "Google"].filter(Boolean).join(", ");
 
   return (
-    <ProfilLayout
-      okunmamisMesajSayisi={okunmamisSayisi}
-      okunmamisIlgilendiklerimSayisi={okunmamisIlgilendiklerimSayisi}
-    >
-      <SayfaBasligi
-        kompakt
-        ikon={Settings}
-        baslik="Ayarlar"
-        aciklama="Hesap ve profil bilgilerini buradan yönetebilirsin."
-      />
+    <AyarlarSayfasi userId={user.id}>
+      <AyarKarti baslik="Profil fotoğrafı" aciklama="Fotoğrafın sitenin üst menüsünde adının yanında görünür.">
+        <ProfilFotografi adSoyad={user.adSoyad} ilkUrl={fotografUrl} />
+      </AyarKarti>
 
-      <Card className="mt-6 border-primary/20 bg-white p-6 shadow-sm">
-        <h2 className="mb-4 font-sans font-semibold text-primary">Bilgilerim</h2>
+      <AyarKarti baslik="Bilgilerim">
         <ProfilForm
           departments={departments}
           initial={{
+            adSoyad: user.adSoyad,
             telefon: user.telefon,
             meslek: user.meslek,
             kurumTuru: user.kurumTuru,
@@ -46,12 +40,33 @@ export default async function ProfilAyarlarPage() {
             educationLevel: user.educationLevel,
           }}
         />
-      </Card>
+      </AyarKarti>
 
-      <Card className="mt-6 border-primary/20 bg-white p-6 shadow-sm">
-        <h2 className="mb-4 font-sans font-semibold text-primary">Şifre Değiştir</h2>
-        <SifreDegistirForm />
-      </Card>
-    </ProfilLayout>
+      <AyarKarti baslik="E-posta adresi" aciklama="Giriş yapmak ve hesap bildirimlerini almak için kullanılır. Değiştirirken yeni adrese doğrulama kodu gönderilir.">
+        <EpostaDegistirForm email={user.email} sifreVar={!!user.passwordHash} />
+      </AyarKarti>
+
+      <AyarKarti baslik="Üyelik bilgileri">
+        <dl className="grid gap-3 text-sm sm:grid-cols-3">
+          <div>
+            <dt className="text-muted-foreground">Üyelik tarihi</dt>
+            <dd className="font-semibold text-slate-800">{tarihMetni(user.createdAt)}</dd>
+          </div>
+          <div>
+            <dt className="text-muted-foreground">Giriş yöntemi</dt>
+            <dd className="font-semibold text-slate-800">{girisYontemleri}</dd>
+          </div>
+          <div>
+            <dt className="text-muted-foreground">Plan</dt>
+            <dd className="font-semibold text-slate-800">
+              {PLAN_ADI[user.abonelikPlani]}{" "}
+              <Link href="/profilim/abonelik" className="text-xs font-medium text-primary hover:underline">
+                Planları gör
+              </Link>
+            </dd>
+          </div>
+        </dl>
+      </AyarKarti>
+    </AyarlarSayfasi>
   );
 }

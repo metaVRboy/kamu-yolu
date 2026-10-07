@@ -33,6 +33,7 @@ export function ProfilForm({
 }: {
   departments: DepartmentOption[];
   initial: {
+    adSoyad: string;
     telefon: string | null;
     meslek: string | null;
     kurumTuru: string | null;
@@ -42,6 +43,7 @@ export function ProfilForm({
   };
 }) {
   const router = useRouter();
+  const [adSoyad, setAdSoyad] = useState(initial.adSoyad);
   const [telefon, setTelefon] = useState(initial.telefon ?? "");
   const [kurumTuru, setKurumTuru] = useState(initial.kurumTuru ?? "");
   const ilkCozum = meslekSeciminiCoz(initial.kurumTuru ?? "", initial.meslek ?? "");
@@ -52,6 +54,7 @@ export function ProfilForm({
   const [departmentId, setDepartmentId] = useState(initial.departmentId ?? "");
   const [educationLevel, setEducationLevel] = useState(initial.educationLevel ?? "");
   const [saved, setSaved] = useState(false);
+  const [hata, setHata] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const meslekler = kurumTuru ? meslekSecenekleri(kurumTuru) : [];
@@ -91,11 +94,13 @@ export function ProfilForm({
   async function handleSave() {
     setLoading(true);
     setSaved(false);
+    setHata(null);
     try {
-      await fetch("/api/profil", {
+      const res = await fetch("/api/profil", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          adSoyad,
           telefon: telefon || null,
           meslek: nihaiMeslek || null,
           kurumTuru: kurumTuru || null,
@@ -104,6 +109,10 @@ export function ProfilForm({
           educationLevel: educationLevel || null,
         }),
       });
+      if (!res.ok) {
+        setHata((await res.json().catch(() => null))?.error ?? "Kaydedilemedi.");
+        return;
+      }
       setSaved(true);
       router.refresh();
     } finally {
@@ -113,6 +122,10 @@ export function ProfilForm({
 
   return (
     <div className="space-y-4">
+      <div>
+        <Label className="mb-1.5">Ad Soyad</Label>
+        <Input value={adSoyad} onChange={(e) => setAdSoyad(e.target.value)} maxLength={100} autoComplete="name" className="border-primary/20 bg-white" />
+      </div>
       <div>
         <Label className="mb-1.5">Telefon</Label>
         <Input value={telefon} onChange={(e) => setTelefon(e.target.value)} className="border-primary/20 bg-white" />
@@ -221,6 +234,7 @@ export function ProfilForm({
           {loading ? "Kaydediliyor..." : "Kaydet"}
         </Button>
         {saved && <span className="text-sm text-emerald-600">Kaydedildi.</span>}
+        {hata && <span className="text-sm text-destructive">{hata}</span>}
       </div>
     </div>
   );

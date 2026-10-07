@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 
 type Mesaj = {
   id: string;
-  gonderenId: string;
+  gonderenId: string | null;
   mesaj: string;
   createdAt: string;
   okundu: boolean;

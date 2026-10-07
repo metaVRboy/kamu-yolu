@@ -15,3 +15,6 @@ export function passwordRequirementIssues(password: string): string[] {
   if (!/[0-9]/.test(password)) issues.push("En az bir rakam");
   return issues;
 }
+
+// Sifresiz (yalniz Google) hesaplarda hesap silme onayi icin yazilacak metin.
+export const SILME_ONAY_METNI = "HESABIMI SİL";

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { deleteMesajlar, getTalepDetay, sendMesaj } from "@/lib/becayis";
 
 const bodySchema = z.object({
@@ -38,6 +39,10 @@ export async function POST(req: NextRequest) {
   }
 
   const konusmaKarsiId = isSahibi ? parsed.data.konusmaKarsiId! : user.id;
+  // Karsi taraf hesabini silmisse mesaj (ve bildirimi) gidecek kimse yok.
+  if (isSahibi && !(await prisma.user.findUnique({ where: { id: konusmaKarsiId }, select: { id: true } }))) {
+    return NextResponse.json({ error: "Bu kullanıcı hesabını silmiş, mesaj gönderilemez." }, { status: 410 });
+  }
 
   const created = await sendMesaj({
     talepId,

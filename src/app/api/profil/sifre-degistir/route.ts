@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { destroySession, getCurrentUser } from "@/lib/auth";
-import { hashPassword, verifyPassword } from "@/lib/auth";
+import { createSession, getCurrentUser, hashPassword, sifreyiTeyitEt } from "@/lib/auth";
 import { passwordSchema } from "@/lib/authValidation";
-import { clearFailures, getLockoutState, lockoutMessage, recordFailure } from "@/lib/authAbuse";
+import { guvenlikEpostasi } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 
 const bodySchema = z
   .object({
-    mevcutSifre: z.string().min(1, "Mevcut şifreni gir."),
+    // Yalniz Google ile acilmis (sifresiz) hesaplarda bos gelir: "sifre belirle".
+    mevcutSifre: z.string().optional(),
     yeniSifre: passwordSchema,
     yeniSifreTekrar: z.string().min(1),
   })
@@ -29,35 +29,23 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const abuseIdentifier = `user:${user.id}`;
-  const lockout = await getLockoutState(abuseIdentifier);
-  if (lockout.locked && lockout.lockedUntil) {
-    return NextResponse.json({ error: lockoutMessage(lockout.lockedUntil) }, { status: 429 });
+  if (user.passwordHash && !parsed.data.mevcutSifre) {
+    return NextResponse.json({ error: "Mevcut şifreni gir." }, { status: 400 });
   }
-
-  if (!user.passwordHash) {
-    return NextResponse.json(
-      { error: "Bu hesapta şifre yok (Google ile giriş yapıyorsun) - şifre değiştirilemez." },
-      { status: 400 },
-    );
+  const sifreHatasi = await sifreyiTeyitEt(user, parsed.data.mevcutSifre);
+  if (sifreHatasi) {
+    return NextResponse.json({ error: sifreHatasi === "Şifre yanlış." ? "Mevcut şifre yanlış." : sifreHatasi }, { status: 400 });
   }
-
-  const dogruMu = await verifyPassword(parsed.data.mevcutSifre, user.passwordHash);
-  if (!dogruMu) {
-    await recordFailure(abuseIdentifier);
-    return NextResponse.json({ error: "Mevcut şifre yanlış." }, { status: 400 });
-  }
-  await clearFailures(abuseIdentifier);
 
   const passwordHash = await hashPassword(parsed.data.yeniSifre);
-  // tokenVersion artirilir ve mevcut cerez silinir: sifre degisince bu
-  // tarayicidaki ve baska her cihazdaki eski oturum aninda gecersiz olur,
-  // kullanici yeni sifresiyle tekrar giris yapmak zorunda kalir.
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { passwordHash, tokenVersion: { increment: 1 } },
-  });
-  await destroySession();
+  // tokenVersion artar ve tum oturum kayitlari kapanir: diger cihazlardaki
+  // oturumlar aninda gecersiz olur. Bu cihaz icin yeni oturum acilir.
+  const [guncel] = await prisma.$transaction([
+    prisma.user.update({ where: { id: user.id }, data: { passwordHash, tokenVersion: { increment: 1 } } }),
+    prisma.oturum.updateMany({ where: { userId: user.id, kapatildi: null }, data: { kapatildi: new Date() } }),
+  ]);
+  await createSession(guncel.id, guncel.tokenVersion);
 
+  await guvenlikEpostasi(user.email, user.adSoyad, user.passwordHash ? "şifren değiştirildi" : "hesabına şifre tanımlandı");
   return NextResponse.json({ ok: true });
 }

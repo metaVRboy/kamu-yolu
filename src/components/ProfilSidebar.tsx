@@ -65,7 +65,7 @@ export function ProfilSidebar({
         href="/profilim/ayarlar"
         className={cn(
           "flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-colors",
-          pathname === "/profilim/ayarlar" ? "bg-primary/10 text-primary" : "text-slate-800 hover:bg-primary/5 hover:text-primary",
+          pathname.startsWith("/profilim/ayarlar") ? "bg-primary/10 text-primary" : "text-slate-800 hover:bg-primary/5 hover:text-primary",
         )}
       >
         <Settings className="h-4 w-4" />

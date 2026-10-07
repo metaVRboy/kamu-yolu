@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getLastSuccessfulScrapeAt } from "@/lib/matching";
 import { cn } from "@/lib/utils";
 import { getCurrentUser } from "@/lib/auth";
+import { profilFotografiUrl } from "@/lib/profil";
 import { SITE_URL } from "@/lib/site";
 import { SiteMenu } from "@/components/SiteMenu";
 import { HeaderNav } from "@/components/HeaderNav";
@@ -45,6 +46,7 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const [lastScrapeAt, user] = await Promise.all([getLastSuccessfulScrapeAt(), getCurrentUser()]);
+  const fotografUrl = user ? await profilFotografiUrl(user.id) : null;
 
   return (
     <html lang="tr" className={cn("h-full antialiased", inter.variable, "font-sans")}>
@@ -84,7 +86,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             <div className="flex items-center gap-2">
               <NotificationBell isLoggedIn={!!user} />
               {user ? (
-                <ProfileMenu adSoyad={user.adSoyad} abonelikPlani={user.abonelikPlani} />
+                <ProfileMenu adSoyad={user.adSoyad} abonelikPlani={user.abonelikPlani} fotografUrl={fotografUrl} />
               ) : (
                 <HeaderAuthButton />
               )}

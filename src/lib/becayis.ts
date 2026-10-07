@@ -66,7 +66,8 @@ export async function getTaleplerim(userId: string) {
     const threads = Array.from(threadMap.entries()).map(([karsiId, mesajlar]) => ({
       karsiId,
       karsiAdSoyad:
-        mesajlar.find((m) => m.gonderenId === karsiId)?.gonderen.adSoyad ?? "Kullanıcı",
+        // Karsi taraf ilk mesaji hep kendisi atar; bulunamiyorsa hesabini silmistir.
+        mesajlar.find((m) => m.gonderenId === karsiId)?.gonderen?.adSoyad ?? "Silinmiş kullanıcı",
       mesajlar,
       okunmamisSayisi: mesajlar.filter((m) => !m.okundu && m.gonderenId !== userId).length,
     }));

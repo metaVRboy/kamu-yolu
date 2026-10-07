@@ -44,6 +44,7 @@ export async function POST(req: NextRequest) {
       data: { passwordHash, tokenVersion: { increment: 1 } },
     }),
     prisma.passwordResetToken.update({ where: { id: resetToken.id }, data: { usedAt: new Date() } }),
+    prisma.oturum.updateMany({ where: { userId: resetToken.userId, kapatildi: null }, data: { kapatildi: new Date() } }),
   ]);
 
   await createSession(updatedUser.id, updatedUser.tokenVersion);

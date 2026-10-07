@@ -9,9 +9,11 @@ import { cn } from "@/lib/utils";
 export function ProfileMenu({
   adSoyad,
   abonelikPlani,
+  fotografUrl,
 }: {
   adSoyad: string;
   abonelikPlani: "UCRETSIZ" | "PRO" | "PRO_PLUS";
+  fotografUrl: string | null;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -44,7 +46,12 @@ export function ProfileMenu({
         onClick={() => setOpen((v) => !v)}
         className="flex h-9 items-center gap-1.5 rounded-lg border border-border bg-white px-2.5 text-sm font-medium text-slate-600 transition-colors hover:border-primary/30 hover:text-primary"
       >
-        <UserRound className="h-4 w-4" />
+        {fotografUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={fotografUrl} alt="" className="h-6 w-6 rounded-full object-cover" />
+        ) : (
+          <UserRound className="h-4 w-4" />
+        )}
         <span className="hidden sm:inline">{adSoyad}</span>
         {proRozeti && (
           <span className="rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
