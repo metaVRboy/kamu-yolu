@@ -86,7 +86,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             <div className="flex items-center gap-2">
               <NotificationBell isLoggedIn={!!user} />
               {user ? (
-                <ProfileMenu adSoyad={user.adSoyad} abonelikPlani={user.abonelikPlani} fotografUrl={fotografUrl} />
+                <ProfileMenu adSoyad={user.adSoyad} abonelikPlani={user.abonelikPlani} fotografUrl={fotografUrl} isAdmin={user.isAdmin} />
               ) : (
                 <HeaderAuthButton />
               )}

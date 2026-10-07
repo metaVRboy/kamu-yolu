@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 const SEKMELER = [
   { href: "/profilim/ayarlar", label: "Hesap" },
   { href: "/profilim/ayarlar/guvenlik", label: "Güvenlik" },
+  { href: "/profilim/ayarlar/bildirimler", label: "Bildirimler" },
   { href: "/profilim/ayarlar/gizlilik", label: "Gizlilik ve KVKK" },
 ];
 
@@ -404,5 +405,174 @@ export function HesapSilForm({ sifreVar }: { sifreVar: boolean }) {
         onayEtiketi="Hesabımı sil"
       />
     </form>
+  );
+}
+
+/** Pro: telefon numarasini SMS koduyla dogrular. Test modunda (saglayici yok) kod admine ekranda gosterilir. */
+export function TelefonDogrulama({ dogrulanmisTelefon }: { dogrulanmisTelefon: string | null }) {
+  const router = useRouter();
+  const [adim, setAdim] = useState<"bos" | "numara" | "kod">(dogrulanmisTelefon ? "bos" : "numara");
+  const [telefon, setTelefon] = useState("");
+  const [kod, setKod] = useState("");
+  const [testKodu, setTestKodu] = useState<string | null>(null);
+  const [hata, setHata] = useState<string | null>(null);
+  const [yukleniyor, setYukleniyor] = useState(false);
+
+  async function istek(url: string, govde: object) {
+    setHata(null);
+    setYukleniyor(true);
+    try {
+      const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(govde) });
+      if (!res.ok) {
+        setHata(await hataMetni(res));
+        return null;
+      }
+      return await res.json();
+    } finally {
+      setYukleniyor(false);
+    }
+  }
+
+  async function kodGonder(e: React.FormEvent) {
+    e.preventDefault();
+    const sonuc = await istek("/api/profil/telefon", { telefon });
+    if (!sonuc) return;
+    setTestKodu(sonuc.testKodu ?? null);
+    setAdim("kod");
+  }
+
+  async function dogrula(e: React.FormEvent) {
+    e.preventDefault();
+    if (!(await istek("/api/profil/telefon/dogrula", { kod }))) return;
+    toast.success("Telefon numaran doğrulandı.");
+    setAdim("bos");
+    setKod("");
+    setTestKodu(null);
+    router.refresh();
+  }
+
+  if (adim === "bos" && dogrulanmisTelefon) {
+    return (
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-slate-800">
+          <span className="font-semibold">{dogrulanmisTelefon}</span>{" "}
+          <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">Doğrulandı</span>
+        </p>
+        <Button type="button" variant="outline" onClick={() => setAdim("numara")}>
+          Numarayı değiştir
+        </Button>
+      </div>
+    );
+  }
+
+  return adim === "kod" ? (
+    <form onSubmit={dogrula} className="space-y-4">
+      <p className="text-sm text-muted-foreground">Numarana 6 haneli bir kod gönderdik. Kod 10 dakika geçerli.</p>
+      {testKodu && (
+        <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+          <strong>Test modu:</strong> SMS sağlayıcısı henüz bağlı değil, gerçek SMS gönderilmedi. Kod: <strong className="tracking-widest">{testKodu}</strong>
+        </p>
+      )}
+      <div>
+        <Label className="mb-1.5">Doğrulama kodu</Label>
+        <Input
+          required
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          maxLength={6}
+          value={kod}
+          onChange={(e) => setKod(e.target.value.replace(/\D/g, ""))}
+          className="max-w-40 border-primary/20 bg-white text-center text-lg tracking-[0.4em]"
+        />
+      </div>
+      {hata && <p className="text-sm text-destructive">{hata}</p>}
+      <div className="flex gap-2">
+        <Button type="submit" disabled={yukleniyor || kod.length !== 6}>{yukleniyor ? "Doğrulanıyor..." : "Doğrula"}</Button>
+        <Button type="button" variant="ghost" onClick={() => setAdim("numara")}>Geri</Button>
+      </div>
+    </form>
+  ) : (
+    <form onSubmit={kodGonder} className="space-y-4">
+      <div>
+        <Label className="mb-1.5">Cep telefonu</Label>
+        <Input
+          required
+          type="tel"
+          inputMode="tel"
+          autoComplete="tel"
+          placeholder="0532 123 45 67"
+          value={telefon}
+          onChange={(e) => setTelefon(e.target.value)}
+          className="max-w-xs border-primary/20 bg-white"
+        />
+      </div>
+      {hata && <p className="text-sm text-destructive">{hata}</p>}
+      <div className="flex gap-2">
+        <Button type="submit" disabled={yukleniyor}>{yukleniyor ? "Gönderiliyor..." : "Doğrulama kodu gönder"}</Button>
+        {dogrulanmisTelefon && (
+          <Button type="button" variant="ghost" onClick={() => setAdim("bos")}>Vazgeç</Button>
+        )}
+      </div>
+    </form>
+  );
+}
+
+const SMS_SECENEKLERI = [
+  { alan: "smsIlanBildirimi", baslik: "Bölümüne uygun yeni ilanlar", aciklama: "Taramalardan sonra yeni ilanlar tek SMS'te toplanır; günde en fazla 3 SMS." },
+  { alan: "smsBecayisBildirimi", baslik: "Becayiş mesajları", aciklama: "Becayiş ilanlarında sana yeni bir mesaj geldiğinde (30 dakikada en fazla 1 SMS)." },
+] as const;
+
+type SmsAlani = (typeof SMS_SECENEKLERI)[number]["alan"];
+
+/** Pro: hangi bildirimler SMS ile gelsin. Telefon dogrulanmadan acilamaz. */
+export function SmsTercihleri({ ilk, telefonDogrulandi }: { ilk: Record<SmsAlani, boolean>; telefonDogrulandi: boolean }) {
+  const [tercih, setTercih] = useState(ilk);
+  const [kaydediliyor, setKaydediliyor] = useState<SmsAlani | null>(null);
+
+  async function degistir(alan: SmsAlani, deger: boolean) {
+    // Iyimser guncelleme: kutu hemen degisir, sunucu reddederse geri alinir.
+    setTercih((t) => ({ ...t, [alan]: deger }));
+    setKaydediliyor(alan);
+    try {
+      const res = await fetch("/api/profil/sms-tercihleri", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ [alan]: deger }),
+      });
+      if (!res.ok) {
+        setTercih((t) => ({ ...t, [alan]: !deger }));
+        toast.error("Tercih kaydedilemedi.", await hataMetni(res));
+      }
+    } finally {
+      setKaydediliyor(null);
+    }
+  }
+
+  return (
+    <div className="space-y-3">
+      {SMS_SECENEKLERI.map((s) => (
+        <label
+          key={s.alan}
+          className={cn("flex items-start gap-3 rounded-xl border border-primary/15 p-4", !telefonDogrulandi && "opacity-60")}
+        >
+          <input
+            type="checkbox"
+            checked={tercih[s.alan]}
+            disabled={!telefonDogrulandi || kaydediliyor === s.alan}
+            onChange={(e) => degistir(s.alan, e.target.checked)}
+            className="mt-0.5 h-4 w-4 rounded border-primary/30 accent-primary"
+          />
+          <span>
+            <span className="block text-sm font-semibold text-slate-800">{s.baslik}</span>
+            <span className="block text-xs text-muted-foreground">{s.aciklama}</span>
+          </span>
+        </label>
+      ))}
+      <p className="text-xs text-muted-foreground">
+        {telefonDogrulandi
+          ? "İşaretlediğin bildirimlerin doğrulanmış numarana SMS ile gönderilmesine izin vermiş olursun; istediğin an kapatabilirsin. SMS'ler 09:00-21:00 arasında gönderilir."
+          : "SMS bildirimlerini açmak için önce yukarıdan telefon numaranı doğrula."}
+      </p>
+    </div>
   );
 }

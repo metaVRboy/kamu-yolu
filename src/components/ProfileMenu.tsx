@@ -3,17 +3,26 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { UserRound, Settings, CreditCard, Repeat, LogOut } from "lucide-react";
+import { UserRound, Settings, CreditCard, Repeat, LogOut, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const ADMIN_LINKLERI = [
+  { href: "/admin/uyeler", label: "Üyeler ve planlar" },
+  { href: "/admin/sms", label: "SMS kayıtları" },
+  { href: "/admin/duyurular", label: "Duyurular" },
+  { href: "/admin/haberler", label: "Haberler" },
+];
 
 export function ProfileMenu({
   adSoyad,
   abonelikPlani,
   fotografUrl,
+  isAdmin,
 }: {
   adSoyad: string;
   abonelikPlani: "UCRETSIZ" | "PRO" | "PRO_PLUS";
   fotografUrl: string | null;
+  isAdmin: boolean;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -86,6 +95,22 @@ export function ProfileMenu({
             <Repeat className="h-4 w-4" />
             Becayiş Sayfam
           </Link>
+          {isAdmin && (
+            <div className="my-1 border-y border-primary/10 py-1">
+              <p className="px-4 pt-1 pb-0.5 text-[11px] font-bold tracking-wider text-muted-foreground uppercase">Yönetim</p>
+              {ADMIN_LINKLERI.map((l) => (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2.5 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-primary/10 hover:text-slate-900"
+                >
+                  <Shield className="h-4 w-4" />
+                  {l.label}
+                </Link>
+              ))}
+            </div>
+          )}
           <button
             type="button"
             onClick={handleLogout}

@@ -163,6 +163,51 @@ model User {
   oturumlar        Oturum[]
   profilFotografi  ProfilFotografi?
   epostaDegisikligi EpostaDegisiklikKodu?
+
+  // Admin panelden suresiz/sureli verilen planin bitisi; gecince plan
+  // UCRETSIZ sayilir (getCurrentUser + bildirim sorgulari).
+  abonelikBitis       DateTime?
+  // SMS ile dogrulanmis telefon (yalniz Pro); `telefon` degisirse sifirlanir.
+  telefonDogrulandi   DateTime?
+  // SMS bildirim tercihleri (Pro) - varsayilan kapali, acik onayla acilir.
+  smsIlanBildirimi    Boolean  @default(false)
+  smsBecayisBildirimi Boolean  @default(false)
+  // Ilk kez SMS iznini verdigi an (onay kaydi).
+  smsIzinTarihi       DateTime?
+  telefonDogrulama    TelefonDogrulamaKodu?
+  smsGonderimleri     SmsGonderim[]
+}
+
+model TelefonDogrulamaKodu {
+  userId    String   @id
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  telefon   String
+  kod       String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+// Gonderilen (ya da saglayici yokken test modunda yazilan) her SMS.
+model SmsGonderim {
+  id          String   @id @default(cuid())
+  // Hesap silinince kayit da silinir (telefon kisisel veri).
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String?
+  telefon     String
+  metin       String
+  // DOGRULAMA | ILAN | BECAYIS
+  tur         String
+  // TEST (saglayici tanimsiz) | GONDERILDI | HATA
+  durum       String
+  saglayiciId String?
+  hata        String?
+  // ILAN SMS'inin kapsadigi en son bildirimin createdAt'i. Sonraki tarama bundan
+  // yenileri sayar - SMS'in kendi zamani kullanilmaz (farkli saatler kayabilir).
+  kapsamSonu  DateTime?
+  olusturma   DateTime @default(now())
+
+  @@index([userId, tur, olusturma])
+  @@index([olusturma])
 }
 
 // Cihaz bazli oturum: JWT icindeki oturumId buraya bakar. Ayarlar > Guvenlik

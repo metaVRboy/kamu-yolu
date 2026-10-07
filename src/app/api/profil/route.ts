@@ -40,9 +40,12 @@ export async function PATCH(req: NextRequest) {
     data.meslek = null;
   }
 
+  // Dogrulanmis numara elle degistirilirse SMS'ler yeni numaraya gitmesin: dogrulama sifirlanir.
+  const telefonDegisti = data.telefon !== undefined && (data.telefon || null) !== user.telefon;
+
   const updated = await prisma.user.update({
     where: { id: user.id },
-    data,
+    data: { ...data, ...(telefonDegisti ? { telefonDogrulandi: null } : {}) },
   });
 
   return NextResponse.json({

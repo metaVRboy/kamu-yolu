@@ -1,4 +1,6 @@
+import { after } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { proAktifMi, sessizSaatMi, smsGonder, sonSmsSayisi } from "@/lib/sms";
 import { createBildirim } from "@/lib/notifications";
 
 export async function createTalep(
@@ -158,6 +160,8 @@ export async function sendMesaj(params: {
     icerik: params.mesaj.slice(0, 120),
     link,
   });
+  // Yanit bekletilmesin diye SMS yanit gonderildikten sonra denenir.
+  after(() => becayisSmsGonder(aliciId));
 
   return created;
 }
@@ -178,4 +182,20 @@ export async function deleteMesajlar(talepId: string, konusmaKarsiId?: string) {
 
 export async function deleteTalep(talepId: string, userId: string) {
   await prisma.becayisTalep.deleteMany({ where: { id: talepId, userId } });
+}
+
+const BECAYIS_SMS_ARALIGI_MS = 30 * 60 * 1000;
+
+/**
+ * Pro + telefonu dogrulanmis + becayis SMS'ini acmis aliciya kisa bildirim.
+ * Gece (21-09) ve son 30 dk icinde zaten SMS gittiyse atlanir - site ici bildirim yine durur.
+ */
+async function becayisSmsGonder(aliciId: string) {
+  const alici = await prisma.user.findUnique({
+    where: { id: aliciId },
+    select: { abonelikPlani: true, abonelikBitis: true, telefon: true, telefonDogrulandi: true, smsBecayisBildirimi: true },
+  });
+  if (!alici?.telefon || !alici.telefonDogrulandi || !alici.smsBecayisBildirimi || !proAktifMi(alici) || sessizSaatMi()) return;
+  if (await sonSmsSayisi(aliciId, "BECAYIS", BECAYIS_SMS_ARALIGI_MS)) return;
+  await smsGonder({ userId: aliciId, telefon: alici.telefon, tur: "BECAYIS", metin: "Kamu Yolu: Yeni bir becayiş mesajın var. Siteye girip yanıtlayabilirsin." });
 }

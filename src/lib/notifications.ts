@@ -1,5 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { aktifProKosulu } from "@/lib/sms";
 
 export async function createBildirim(params: {
   userId: string;
@@ -71,7 +72,7 @@ export async function notifyUsersForMatchedPosting(params: {
   const users = await prisma.user.findMany({
     where: {
       departmentId: { in: params.departments.map((d) => d.departmentId) },
-      abonelikPlani: { not: "UCRETSIZ" },
+      ...aktifProKosulu(),
     },
     select: { id: true, departmentId: true },
   });

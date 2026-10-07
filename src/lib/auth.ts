@@ -133,14 +133,19 @@ export async function getCurrentUser() {
     if (Date.now() - oturum.sonGorulme.getTime() > SON_GORULME_ARALIGI_MS) {
       after(() => prisma.oturum.update({ where: { id: oturum.id }, data: { sonGorulme: new Date() } }));
     }
-    return oturum.user;
+    return planiGuncelle(oturum.user);
   }
 
   const user = await prisma.user.findUnique({ where: { id: session.userId } });
   // tokenVersion uyusmuyorsa (sifre degistirilmis, oturum baska bir yerden
   // dusurulmus) bu JWT artik gecersiz sayilir - suresi dolmamis olsa bile.
   if (!user || user.tokenVersion !== session.tokenVersion) return null;
-  return user;
+  return planiGuncelle(user);
+}
+
+/** Admin panelden sureli verilen planin suresi dolduysa kullanici her yerde UCRETSIZ gorulur. */
+function planiGuncelle<T extends { abonelikPlani: string; abonelikBitis: Date | null }>(user: T): T {
+  return user.abonelikBitis && user.abonelikBitis.getTime() <= Date.now() ? { ...user, abonelikPlani: "UCRETSIZ" } : user;
 }
 
 export async function requireUser() {
