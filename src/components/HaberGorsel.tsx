@@ -14,6 +14,7 @@ export function HaberGorsel({
   logoMu = false,
   className = "aspect-[16/9] w-full rounded-xl",
   markaGizli = false,
+  hemenYukle = false,
 }: {
   src: string | null;
   alt: string;
@@ -24,6 +25,8 @@ export function HaberGorsel({
   // Kenar cubugu gibi cok kucuk onizlemelerde marka damgasi gorsele
   // sigmiyor/orantisiz kaliyor - bu durumlarda damga tamamen gizlenir.
   markaGizli?: boolean;
+  // Carousel gibi ekran disinda bekleyip kayarak gelen gorseller: gecis aninda bos kare gorunmesin.
+  hemenYukle?: boolean;
 }) {
   const [hataVar, setHataVar] = useState(false);
 
@@ -44,7 +47,7 @@ export function HaberGorsel({
           src={src}
           alt={alt}
           onError={() => setHataVar(true)}
-          loading="lazy"
+          loading={hemenYukle ? "eager" : "lazy"}
           referrerPolicy="no-referrer"
           className="max-h-full max-w-full object-contain"
         />
@@ -57,7 +60,7 @@ export function HaberGorsel({
         src={src}
         alt={alt}
         onError={() => setHataVar(true)}
-        loading="lazy"
+        loading={hemenYukle ? "eager" : "lazy"}
         referrerPolicy="no-referrer"
         className="h-full w-full object-cover"
       />
