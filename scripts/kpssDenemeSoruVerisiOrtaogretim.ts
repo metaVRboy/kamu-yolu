@@ -54,6 +54,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   // ---- TÜRKÇE (30) ----
   {
     ders: "TURKCE",
+    konu: "Sözcükte Anlam",
     soruMetni: "Aşağıdaki cümlelerin hangisinde “tutmak” sözcüğü “kiralamak” anlamında kullanılmıştır?",
     secenekler: [
       "Yağmur başlayınca şemsiyesini sıkıca tuttu.",
@@ -68,6 +69,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Sözcükte Anlam",
     soruMetni:
       "Yaşlı balıkçı, denizin ne zaman kabaracağını bulutların rengine bakarak ----; yıllarca denizde geçen ömrü ona bu sezgiyi kazandırmıştı.\n\nBu cümlede boş bırakılan yere aşağıdakilerden hangisi getirilmelidir?",
     secenekler: ["kestirirdi", "unuturdu", "gizlerdi", "değiştirirdi", "ertelerdi"],
@@ -77,6 +79,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Paragraf",
     soruMetni:
       "I. Bu yüzden ilk kez bisiklete binen çocuklara genellikle yardımcı tekerlek takılır.\nII. Bisiklet sürmek, bedenin sürekli küçük dengeleme hareketleri yapmasını gerektirir.\nIII. Yardımcı tekerlekler bu süreçte çocuğun düşmesini önler ama dengeyi onun yerine kurar.\nIV. Bu hareketleri öğrenmek ise başlangıçta oldukça zordur.\nV. Bu nedenle uzmanlar, yardımcı tekerleklerin olabildiğince kısa süre kullanılmasını öneriyor.\n\nBu cümlelerle anlamlı bir paragraf oluşturulduğunda sonuncu cümle hangisi olur?",
     secenekler: ["I", "II", "III", "IV", "V"],
@@ -86,19 +89,15 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
-    soruMetni: "“Ayağını yorganına göre uzat.” atasözüyle anlatılmak istenen aşağıdakilerden hangisidir?",
-    secenekler: [
-      "Başkalarının işine karışmamak",
-      "Zor işlerden kaçınmak",
-      "Her işi zamanında yapmak",
-      "Harcamalarını gelirine göre ayarlamak",
-      "Sağlığına dikkat etmek",
-    ],
+    konu: "Paragraf",
+    soruMetni: "Bir kenti tanımanın en iyi yolu, onu haritadan değil, sokaklarında yürüyerek öğrenmektir. Haritalar size yolların nereye çıktığını gösterir ama bir fırından yayılan ekmek kokusunu, bir avluda oynayan çocukların sesini ya da bir çeşmenin başında sohbet eden yaşlıları göstermez. Kent, kâğıt üzerindeki çizgilerden çok, içinde yaşayan insanların gündelik hayatıyla anlam kazanır.\n\nBu parçada anlatılmak istenen aşağıdakilerden hangisidir?",
+    secenekler: ["Haritalar, bir kentte yol bulmayı kolaylaştırır.", "Kentlerdeki eski yapılar korunmalıdır.", "Kent yaşamı, kırsal yaşamdan daha hareketlidir.", "Bir kent, ancak içinde yaşanan gündelik hayat yakından gözlemlenerek tanınabilir.", "Haritalar, kentlerin tarihini öğrenmek için yeterli değildir."],
     dogruCevap: 3,
-    aciklama: "Atasözü, kişinin harcamalarını ve isteklerini olanaklarına, gelirine göre düzenlemesi gerektiğini anlatır.",
+    aciklama: "Parça, kentin haritadaki çizgilerle değil sokaklarında yaşanan gündelik hayatla tanınabileceğini vurgular. A'daki bilgi parçada geçer ama ana düşünce değildir; B, C ve E'ye değinilmemiştir.",
   },
   {
     ders: "TURKCE",
+    konu: "Cümlede Anlam",
     soruMetni: "“Bu yıl da festivale katılamadım.” cümlesinden aşağıdakilerden hangisi kesin olarak çıkarılabilir?",
     secenekler: [
       "Festival her yıl aynı kentte yapılır.",
@@ -113,6 +112,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Anlatım Bozuklukları",
     soruMetni: "Aşağıdaki cümlelerin hangisinde anlatım bozukluğu vardır?",
     secenekler: [
       "Toplantıya katılan herkes görüşünü açıkça dile getirdi.",
@@ -127,6 +127,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Ses Bilgisi",
     soruMetni:
       "Ağacın dalında bir kuş ötüyor,\nGönlüm bu sesle yeniden doğuyor.\nAkşamın rengi suya düşerken\nSokakta yolumu bekleyen gözler yaşarken\n\nBu dizelerde aşağıdaki ses olaylarından hangisi yoktur?",
     secenekler: ["Ünsüz yumuşaması", "Ünlü düşmesi", "Ünlü daralması", "Kaynaştırma", "Ünsüz benzeşmesi"],
@@ -136,6 +137,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Dil Bilgisi",
     soruMetni: "Aşağıdaki cümlelerin hangisinde ögelerin dizilişi “özne - dolaylı tümleç - nesne - yüklem” biçimindedir?",
     secenekler: [
       "Dün akşam misafirler eve geldi.",
@@ -150,6 +152,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Dil Bilgisi",
     soruMetni: "Aşağıdaki cümlelerin hangisinde birleşik yapılı bir sözcük kullanılmıştır?",
     secenekler: [
       "Bahçedeki ağaçlar meyve vermeye başladı.",
@@ -163,6 +166,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Dil Bilgisi",
     soruMetni: "Aşağıdaki cümlelerin hangisinde belirtili ad tamlaması özne görevinde kullanılmıştır?",
     secenekler: [
       "Okulun bahçesi çiçeklerle doldu.",
@@ -177,6 +181,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Yazım Kuralları",
     soruMetni: "Aşağıdaki sözcüklerden hangisinin yazımı yanlıştır?",
     secenekler: ["birkaç", "pek çok", "hiçbir", "yalnız", "herkez"],
     dogruCevap: 4,
@@ -184,6 +189,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Noktalama İşaretleri",
     soruMetni:
       "Çırak, ustasının yıllar önce söylediği sözleri hâlâ hatırlıyordu ( I ) Usta ona üç şey öğütlemişti ( II ) sabır ( III ) dikkat ve dürüstlük ( IV ) Bu öğütler ( V ) çırağın bütün hayatına yön vermişti.\n\nBu parçada numaralanmış yerlerden hangisine iki nokta (:) getirilmelidir?",
     secenekler: ["I", "II", "III", "IV", "V"],
@@ -193,6 +199,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Paragraf",
     soruMetni:
       "Bir fidanı dikip ertesi gün meyve beklemek ne kadar boşunaysa, bir beceriyi birkaç günde kazanmayı ummak da o kadar boşunadır. Müzik aleti çalmayı, yabancı bir dil konuşmayı ya da resim yapmayı öğrenen herkes, ilk haftalarda ilerlemediği duygusuna kapılır. Oysa bu dönemde atılan küçük adımlar zamanla birikerek büyük bir değişime dönüşür. Vazgeçenler genellikle yeteneksiz olanlar değil, sonucu erken görmek isteyenlerdir.\n\nBu parçada vurgulanmak istenen düşünce aşağıdakilerden hangisidir?",
     secenekler: [
@@ -208,6 +215,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Paragraf",
     soruMetni:
       "(I) Kutup ayıları, kalın yağ tabakaları ve yoğun kürkleri sayesinde dondurucu soğuklarda yaşayabilir. (II) Avlarının büyük bölümünü deniz buzu üzerinde, nefes almak için su yüzüne çıkan foklardan sağlarlar. (III) Ne var ki deniz buzunun her yıl daha erken erimesi, avlanabildikleri süreyi kısaltıyor. (IV) Penguenler ise kutup ayılarından farklı olarak Güney Yarım Küre'de yaşar. (V) Bu durum, pek çok kutup ayısının yaz aylarında aç kalmasına yol açıyor.\n\nBu parçada numaralanmış cümlelerden hangisi düşüncenin akışını bozmaktadır?",
     secenekler: ["I", "II", "III", "IV", "V"],
@@ -217,6 +225,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Paragraf",
     soruMetni:
       "(I) Kâğıt, bugün kullandığımız biçimiyle ilk kez Çin'de üretilmiştir. (II) Ağaç kabuğu, kenevir ve eski kumaş parçalarının suda ezilip ince bir tabaka hâline getirilmesiyle elde edilen bu malzeme, yazıyı çok daha ucuz ve yaygın kılmıştır. (III) Kâğıt yapım tekniği, VIII. yüzyılda Semerkant üzerinden İslam dünyasına geçmiştir. (IV) Kanımca kâğıt, insanlık tarihinin en önemli buluşlarından biridir. (V) Bugün dijital ekranların yaygınlaşmasına karşın kâğıt, gündelik yaşamdaki yerini korumaktadır.\n\nBu parçadaki numaralanmış cümlelerle ilgili aşağıdakilerden hangisi yanlıştır?",
     secenekler: [
@@ -231,6 +240,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Paragraf",
     soruMetni:
       "Zeytinyağı, Akdeniz mutfağının vazgeçilmez ögesidir. Hasat edilen zeytinler bekletilmeden sıkılırsa yağın kalitesi artar; uzun süre bekleyen zeytinlerden elde edilen yağın asitliği yükselir. Yağ, ışık ve havayla temas ettikçe bozulduğu için koyu renkli şişelerde ve serin yerde saklanmalıdır. Uzmanlar, ağızda hafif acımsı ve yakıcı bir tat bırakmasını iyi bir zeytinyağının işareti olarak görür.\n\nBu parçada zeytinyağıyla ilgili aşağıdakilerden hangisine değinilmemiştir?",
     secenekler: [
@@ -245,6 +255,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Paragraf",
     soruMetni:
       "Eskiden köylerde ekmek, haftada bir ya da iki kez yakılan taş fırınlarda topluca pişirilirdi. Komşular sırayla hamurlarını getirir, fırının başında hem ekmeklerinin pişmesini bekler hem de sohbet ederdi. Böylece fırın, yalnızca ekmeğin değil, dostlukların da piştiği bir yere dönüşürdü.\n\nBu parçanın konusu aşağıdakilerden hangisidir?",
     secenekler: [
@@ -259,6 +270,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Paragraf",
     soruMetni:
       "Haritalar, dünyayı olduğu gibi değil, onu çizenin seçtiği yöntemle gösterir. Küre biçimindeki dünyayı düz bir kâğıda aktarmak, bazı bölgelerin olduğundan büyük, bazılarının da olduğundan küçük görünmesine yol açar. Örneğin yaygın olarak kullanılan bazı haritalarda Grönland, kendisinden kat kat büyük olan Afrika kadar geniş görünür. Bu nedenle ----\n\nBu parça, düşüncenin akışına göre aşağıdakilerden hangisiyle tamamlanmalıdır?",
     secenekler: [
@@ -273,6 +285,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Paragraf",
     soruMetni:
       "(I) Türkiye, dünyada en fazla kiraz üreten ülkedir. (II) Kirazın büyük bölümü Konya, Afyonkarahisar, Manisa, İzmir ve Isparta gibi illerde yetiştirilir. (III) Üretilen kirazın önemli bir kısmı da başta Rusya ve Avrupa ülkeleri olmak üzere pek çok ülkeye ihraç edilir. (IV) Kiraz, sağlık açısından da oldukça değerli bir meyvedir. (V) İçerdiği antioksidanlar ve vitaminler, bağışıklık sisteminin güçlenmesine katkı sağlar.\n\nBu parça iki paragrafa ayrılmak istense ikinci paragraf hangi cümleyle başlar?",
     secenekler: ["I", "II", "III", "IV", "V"],
@@ -281,6 +294,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Paragraf",
     soruMetni:
       "Kapı çaldığında Ayşe Hanım mutfakta çorbayı karıştırıyordu. Elini önlüğüne silip kapıya koştu. Karşısında yıllardır görmediği kardeşini bulunca bir an ne diyeceğini bilemedi; sonra ona sarılıp ağlamaya başladı.\n\nBu parçada ağırlıklı olarak kullanılan anlatım biçimi aşağıdakilerden hangisidir?",
     secenekler: ["Öyküleme", "Betimleme", "Tartışma", "Açıklama", "Karşılaştırma"],
@@ -289,6 +303,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Paragraf",
     soruMetni:
       "Bazı anne babalar, çocuklarının boş zamanını kurslar, etütler ve özel derslerle doldurarak onlara iyilik yaptığını düşünüyor. Oysa oyun oynamaya, sıkılmaya, hayal kurmaya vakit bulamayan çocuk, kendi ilgi alanlarını keşfetme fırsatını da yitiriyor. Her saati önceden planlanmış bir çocukluk, başarılı ama mutsuz yetişkinler yetiştirme tehlikesi taşıyor.\n\nBu parçada yazarın eleştirdiği durum aşağıdakilerden hangisidir?",
     secenekler: [
@@ -303,6 +318,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Cümlede Anlam",
     soruMetni: "Aşağıdaki cümlelerin hangisinde öznel bir yargı vardır?",
     secenekler: [
       "Ankara, 13 Ekim 1923'te başkent ilan edilmiştir.",
@@ -316,19 +332,16 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
-    soruMetni: "Aşağıdaki cümlelerin hangisinde karşıt anlamlı sözcükler bir arada kullanılmıştır?",
-    secenekler: [
-      "Yaşlı adam, genç komşusuna bahçe işlerinde yardım etti.",
-      "Sessiz sakin bir mahallede oturuyorlar.",
-      "Eski dostlarıyla uzun uzun konuştu.",
-      "Akşam yemeğini erkenden yedik.",
-      "Kitabı okuyup arkadaşına verdi.",
-    ],
+    konu: "Sözel Mantık",
+    grupId: "ort-turkce-nobet",
+    soruMetni: `${NOBET}\n\nBuna göre bu nöbet çizelgesi kaç farklı biçimde oluşturulabilir?`,
+    secenekler: ["2", "3", "4", "5", "6"],
     dogruCevap: 0,
-    aciklama: "A'da “yaşlı” ve “genç” sözcükleri karşıt anlamlıdır. B'deki “sessiz sakin” yakın anlamlı sözcüklerle kurulmuş bir ikilemedir.",
+    aciklama: "Ceren çarşamba nöbet tuttuğundan Elif salı ve perşembe tutamaz; Elif pazartesi ya da cuma tutar. Deniz de pazartesi ya da cuma tuttuğundan bu iki gün Deniz ile Elif'e kalır. Salı ve perşembe Ahmet ile Berk'indir; Ahmet Berk'ten önce olduğundan Ahmet salı, Berk perşembe tutar. Yalnızca Deniz ile Elif yer değiştirebilir ⇒ 2 farklı çizelge.",
   },
   {
     ders: "TURKCE",
+    konu: "Paragraf",
     soruMetni:
       "Göç eden kuşların bir bölümü, uzun yolculuklarında hiç durmadan binlerce kilometre uçabilir. Örneğin kıyı çamurçulluğu adlı kuşun Alaska'dan Yeni Zelanda'ya, on bin kilometreyi aşan yolu günlerce hiç konmadan uçtuğu belirlenmiştir. Bu kuşlar yolculuktan önce bol bol beslenerek vücut ağırlıklarını neredeyse ikiye katlar; yol boyunca da depoladıkları yağı enerji olarak kullanır.\n\nBu parçaya göre aşağıdakilerden hangisi söylenemez?",
     secenekler: [
@@ -343,6 +356,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Paragraf",
     soruMetni:
       "Yeni bir şehre taşındığımızda ilk günlerde her sokak bize aynı görünür; kaybolmamak için telefondaki haritaya sıkı sıkıya bağlanırız. Oysa birkaç hafta sonra fırının köşesini, tabelası eğik dükkânı, önünden geçerken selam verdiğimiz kapıcıyı tanımaya başlarız. İşte o zaman şehir, haritadaki çizgilerden çıkıp bizim için anlamı olan bir yere dönüşür.\n\nBu parçada anlatılmak istenen aşağıdakilerden hangisidir?",
     secenekler: [
@@ -357,6 +371,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Paragraf",
     grupId: "ort-turkce-sinan",
     soruMetni: `${SINAN}\n\nBu parçaya göre Mimar Sinan'ın ustalık eseri olarak nitelendirdiği yapı aşağıdakilerden hangisidir?`,
     secenekler: ["Şehzade Camii", "Süleymaniye Camii", "Selimiye Camii", "Sultanahmet Camii", "Mihrimah Sultan Camii"],
@@ -365,6 +380,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Paragraf",
     grupId: "ort-turkce-sinan",
     soruMetni: `${SINAN}\n\nBu parçada aşağıdakilerden hangisine değinilmemiştir?`,
     secenekler: [
@@ -379,6 +395,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Sözel Mantık",
     grupId: "ort-turkce-nobet",
     soruMetni: `${NOBET}\n\nBuna göre aşağıdakilerden hangisi kesinlikle doğrudur?`,
     secenekler: [
@@ -394,6 +411,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Sözel Mantık",
     grupId: "ort-turkce-nobet",
     soruMetni: `${NOBET}\n\nDeniz cuma günü nöbet tutarsa pazartesi günü kim nöbet tutar?`,
     secenekler: ["Ahmet", "Berk", "Ceren", "Deniz", "Elif"],
@@ -402,6 +420,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Sözel Mantık",
     grupId: "ort-turkce-nobet",
     soruMetni: `${NOBET}\n\nBuna göre Elif'in nöbet tutabileceği günler aşağıdakilerin hangisinde birlikte verilmiştir?`,
     secenekler: ["Yalnız pazartesi", "Yalnız cuma", "Pazartesi ve cuma", "Salı ve perşembe", "Pazartesi, salı ve cuma"],
@@ -412,6 +431,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   // ---- MATEMATİK (30) ----
   {
     ders: "MATEMATIK",
+    konu: "Rasyonel Sayılar",
     soruMetni: "{1/2 + 1/3|1/2 − 1/3}\n\nişleminin sonucu kaçtır?",
     secenekler: ["3", "5", "6", "7", "9"],
     dogruCevap: 1,
@@ -419,6 +439,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Rasyonel Sayılar",
     soruMetni: "{0,6 · 0,5|0,03}\n\nişleminin sonucu kaçtır?",
     secenekler: ["0,1", "1", "5", "10", "100"],
     dogruCevap: 3,
@@ -426,6 +447,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Köklü Sayılar",
     soruMetni: "√48 − √27 + √12\n\nişleminin sonucu kaçtır?",
     secenekler: ["3√3", "2√3", "4√3", "5√3", "9√3"],
     dogruCevap: 0,
@@ -433,6 +455,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Üslü Sayılar",
     soruMetni: "4ˣ = 8ˣ⁻¹ olduğuna göre x kaçtır?",
     secenekler: ["1", "2", "3", "4", "6"],
     dogruCevap: 2,
@@ -440,6 +463,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Matematiksel İlişkilerden Yararlanma",
     soruMetni: "−2 < x ≤ 4 eşitsizliğini sağlayan x tam sayılarının toplamı kaçtır?",
     secenekler: ["5", "6", "7", "8", "9"],
     dogruCevap: 4,
@@ -447,6 +471,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Matematiksel İlişkilerden Yararlanma",
     soruMetni: "|2x − 1| = 5 denkleminin çözüm kümesi aşağıdakilerden hangisidir?",
     secenekler: ["{−3, 2}", "{−2, 3}", "{2, 3}", "{−2}", "{3}"],
     dogruCevap: 1,
@@ -454,13 +479,15 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
-    soruMetni: "x ≠ 0 ve x ≠ −2 olmak üzere\n\n{x² − 4|x² + 2x}\n\nifadesinin en sade biçimi aşağıdakilerden hangisidir?",
-    secenekler: ["{x − 2|x}", "{x + 2|x}", "{x − 2|x + 2}", "x − 2", "{2|x}"],
+    konu: "Sayısal Mantık",
+    soruMetni: "Bir duvar saati her saat başında akrebin gösterdiği sayı kadar, her buçukta ise bir kez çalmaktadır.\n\nBuna göre bu saat, 10.15 ile 13.45 arasında toplam kaç kez çalar?",
+    secenekler: ["28", "29", "30", "31", "32"],
     dogruCevap: 0,
-    aciklama: "x² − 4 = (x − 2)(x + 2) ve x² + 2x = x(x + 2) olduğundan ifade {x − 2|x} olur.",
+    aciklama: "Saat başları: 11.00'de 11, 12.00'de 12, 13.00'te akrep 1'i gösterdiğinden 1 kez ⇒ 24. Buçuklar: 10.30, 11.30, 12.30, 13.30 ⇒ 4. Toplam 24 + 4 = 28.",
   },
   {
     ders: "MATEMATIK",
+    konu: "Matematiksel İlişkilerden Yararlanma",
     soruMetni: "n bir doğal sayı olmak üzere\n\n{(n + 1)!|(n − 1)!} = 56\n\nolduğuna göre n kaçtır?",
     secenekler: ["4", "5", "6", "7", "8"],
     dogruCevap: 3,
@@ -468,6 +495,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Matematiksel İlişkilerden Yararlanma",
     soruMetni:
       "30 kişilik bir sınıfta futbol oynayan 18, basketbol oynayan 14 öğrenci vardır. Bu sporlardan hiçbirini oynamayan 5 öğrenci bulunmaktadır.\n\nBuna göre her iki sporu da oynayan kaç öğrenci vardır?",
     secenekler: ["5", "6", "7", "8", "9"],
@@ -476,6 +504,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Temel Kavramlar",
     soruMetni: "7²³ sayısının birler basamağındaki rakam kaçtır?",
     secenekler: ["1", "3", "5", "7", "9"],
     dogruCevap: 1,
@@ -483,6 +512,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Problemler",
     soruMetni:
       "Boyu 20 cm olan bir mum 4 saatte, boyu 15 cm olan başka bir mum ise 5 saatte tamamen eriyor. Mumlar sabit hızla eriyor ve aynı anda yakılıyor.\n\nBuna göre kaç saat sonra mumların boyları eşit olur?",
     secenekler: ["1", "1,5", "2", "2,5", "3"],
@@ -491,21 +521,25 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
-    soruMetni:
-      "Bir öğrenci kitap okumaya ilk gün 10 sayfa okuyarak başlıyor ve sonraki her gün bir önceki günden 5 sayfa fazla okuyor.\n\nBuna göre öğrenci ilk 8 günde toplam kaç sayfa okumuştur?",
-    secenekler: ["220", "240", "260", "280", "300"],
+    konu: "Tablo ve Grafik",
+    soruMetni: "Bir fidanlıkta 2020-2024 yılları arasında her yıl dikilen fidan sayıları aşağıdaki grafikte bin adet cinsinden verilmiştir.\n\nBuna göre bu beş yılda yılda ortalama kaç bin fidan dikilmiştir?",
+    gorselSvg: '<svg viewBox="0 0 400 230" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif" fill="#1e293b"><text x="44" y="20" font-size="12" font-weight="700">Dikilen fidan sayısı (bin adet)</text><line x1="44" y1="204" x2="384" y2="204" stroke="#cbd5e1" stroke-width="0.7"/><text x="38" y="208" font-size="10" text-anchor="end" fill="#475569">0</text><line x1="44" y1="185.11111111111111" x2="384" y2="185.11111111111111" stroke="#cbd5e1" stroke-width="0.7"/><text x="38" y="189.11111111111111" font-size="10" text-anchor="end" fill="#475569">3</text><line x1="44" y1="166.22222222222223" x2="384" y2="166.22222222222223" stroke="#cbd5e1" stroke-width="0.7"/><text x="38" y="170.22222222222223" font-size="10" text-anchor="end" fill="#475569">6</text><line x1="44" y1="147.33333333333334" x2="384" y2="147.33333333333334" stroke="#cbd5e1" stroke-width="0.7"/><text x="38" y="151.33333333333334" font-size="10" text-anchor="end" fill="#475569">9</text><line x1="44" y1="128.44444444444446" x2="384" y2="128.44444444444446" stroke="#cbd5e1" stroke-width="0.7"/><text x="38" y="132.44444444444446" font-size="10" text-anchor="end" fill="#475569">12</text><line x1="44" y1="109.55555555555556" x2="384" y2="109.55555555555556" stroke="#cbd5e1" stroke-width="0.7"/><text x="38" y="113.55555555555556" font-size="10" text-anchor="end" fill="#475569">15</text><line x1="44" y1="90.66666666666667" x2="384" y2="90.66666666666667" stroke="#cbd5e1" stroke-width="0.7"/><text x="38" y="94.66666666666667" font-size="10" text-anchor="end" fill="#475569">18</text><line x1="44" y1="71.77777777777777" x2="384" y2="71.77777777777777" stroke="#cbd5e1" stroke-width="0.7"/><text x="38" y="75.77777777777777" font-size="10" text-anchor="end" fill="#475569">21</text><line x1="44" y1="52.888888888888886" x2="384" y2="52.888888888888886" stroke="#cbd5e1" stroke-width="0.7"/><text x="38" y="56.888888888888886" font-size="10" text-anchor="end" fill="#475569">24</text><line x1="44" y1="34" x2="384" y2="34" stroke="#cbd5e1" stroke-width="0.7"/><text x="38" y="38" font-size="10" text-anchor="end" fill="#475569">27</text><rect x="62" y="128.44444444444446" width="32" height="75.55555555555554" fill="#2563eb"/><rect x="130" y="109.55555555555556" width="32" height="94.44444444444444" fill="#2563eb"/><rect x="198" y="147.33333333333334" width="32" height="56.66666666666666" fill="#2563eb"/><rect x="266" y="90.66666666666667" width="32" height="113.33333333333333" fill="#2563eb"/><rect x="334" y="52.888888888888886" width="32" height="151.11111111111111" fill="#2563eb"/><line x1="44" y1="204" x2="384" y2="204" stroke="#1e293b" stroke-width="1.2"/><text x="78" y="220" font-size="11" text-anchor="middle" fill="#475569">2020</text><text x="146" y="220" font-size="11" text-anchor="middle" fill="#475569">2021</text><text x="214" y="220" font-size="11" text-anchor="middle" fill="#475569">2022</text><text x="282" y="220" font-size="11" text-anchor="middle" fill="#475569">2023</text><text x="350" y="220" font-size="11" text-anchor="middle" fill="#475569">2024</text></svg>',
+    secenekler: ["15,6", "16", "16,4", "17", "17,2"],
     dogruCevap: 0,
-    aciklama: "Okunan sayfalar 10, 15, 20, …, 45 biçiminde bir aritmetik dizidir. Toplam {8 · (10 + 45)|2} = 220.",
+    aciklama: "Grafikten değerler 12, 15, 9, 18 ve 24 bin okunur. Toplam 78 bin ⇒ ortalama 78 / 5 = 15,6 bin fidan.",
   },
   {
     ders: "MATEMATIK",
-    soruMetni: "Beş sayının aritmetik ortalaması 12'dir. Bu sayılardan biri çıkarıldığında kalan dört sayının aritmetik ortalaması 10 oluyor.\n\nBuna göre çıkarılan sayı kaçtır?",
-    secenekler: ["8", "12", "15", "18", "20"],
+    konu: "Tablo ve Grafik",
+    soruMetni: "Bir lisenin sınıf düzeylerine göre kız ve erkek öğrenci sayıları aşağıdaki tabloda verilmiştir.\n\nBuna göre kız öğrenci sayısının erkek öğrenci sayısından fazla olduğu sınıf düzeylerindeki toplam öğrenci sayısı, okuldaki tüm öğrencilerin yüzde kaçıdır?",
+    gorselSvg: '<svg viewBox="0 0 360 170" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif" fill="#1e293b"><rect x="20" y="10" width="120" height="30" fill="#dbeafe" stroke="#1e293b" stroke-width="1"/><text x="80" y="30" font-size="13" text-anchor="middle" font-weight="700">Sınıf</text><rect x="140" y="10" width="100" height="30" fill="#dbeafe" stroke="#1e293b" stroke-width="1"/><text x="190" y="30" font-size="13" text-anchor="middle" font-weight="700">Kız</text><rect x="240" y="10" width="100" height="30" fill="#dbeafe" stroke="#1e293b" stroke-width="1"/><text x="290" y="30" font-size="13" text-anchor="middle" font-weight="700">Erkek</text><rect x="20" y="40" width="120" height="30" fill="#fff" stroke="#1e293b" stroke-width="1"/><text x="80" y="60" font-size="13" text-anchor="middle">9</text><rect x="140" y="40" width="100" height="30" fill="#fff" stroke="#1e293b" stroke-width="1"/><text x="190" y="60" font-size="13" text-anchor="middle">70</text><rect x="240" y="40" width="100" height="30" fill="#fff" stroke="#1e293b" stroke-width="1"/><text x="290" y="60" font-size="13" text-anchor="middle">60</text><rect x="20" y="70" width="120" height="30" fill="#fff" stroke="#1e293b" stroke-width="1"/><text x="80" y="90" font-size="13" text-anchor="middle">10</text><rect x="140" y="70" width="100" height="30" fill="#fff" stroke="#1e293b" stroke-width="1"/><text x="190" y="90" font-size="13" text-anchor="middle">50</text><rect x="240" y="70" width="100" height="30" fill="#fff" stroke="#1e293b" stroke-width="1"/><text x="290" y="90" font-size="13" text-anchor="middle">55</text><rect x="20" y="100" width="120" height="30" fill="#fff" stroke="#1e293b" stroke-width="1"/><text x="80" y="120" font-size="13" text-anchor="middle">11</text><rect x="140" y="100" width="100" height="30" fill="#fff" stroke="#1e293b" stroke-width="1"/><text x="190" y="120" font-size="13" text-anchor="middle">45</text><rect x="240" y="100" width="100" height="30" fill="#fff" stroke="#1e293b" stroke-width="1"/><text x="290" y="120" font-size="13" text-anchor="middle">45</text><rect x="20" y="130" width="120" height="30" fill="#fff" stroke="#1e293b" stroke-width="1"/><text x="80" y="150" font-size="13" text-anchor="middle">12</text><rect x="140" y="130" width="100" height="30" fill="#fff" stroke="#1e293b" stroke-width="1"/><text x="190" y="150" font-size="13" text-anchor="middle">35</text><rect x="240" y="130" width="100" height="30" fill="#fff" stroke="#1e293b" stroke-width="1"/><text x="290" y="150" font-size="13" text-anchor="middle">40</text></svg>',
+    secenekler: ["25", "27,5", "30", "31,25", "32,5"],
     dogruCevap: 4,
-    aciklama: "Beş sayının toplamı 5 · 12 = 60, kalan dördünün toplamı 4 · 10 = 40'tır. Çıkarılan sayı 60 − 40 = 20.",
+    aciklama: "Okuldaki toplam öğrenci: kız 200 + erkek 200 = 400. Kız sayısının erkekten fazla olduğu tek düzey 9. sınıftır (70 > 60); 11. sınıfta sayılar eşittir. 9. sınıf 130 öğrencidir ⇒ 130 / 400 = %32,5.",
   },
   {
     ders: "MATEMATIK",
+    konu: "Problemler",
     soruMetni: "Ali'nin parası Veli'nin parasının 3 katıdır. Ali, Veli'ye 40 TL verirse paraları eşit oluyor.\n\nBuna göre Ali'nin başlangıçta kaç TL'si vardır?",
     secenekler: ["40", "60", "80", "100", "120"],
     dogruCevap: 4,
@@ -513,6 +547,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Problemler",
     soruMetni:
       "Bir manav, sabah domatesinin 1/3'ünü, öğleden sonra ise kalan domatesin 1/4'ünü satıyor. Akşam manavda 30 kg domates kalıyor.\n\nBuna göre manavın başlangıçta kaç kg domatesi vardır?",
     secenekler: ["40", "50", "60", "72", "90"],
@@ -521,6 +556,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Problemler",
     soruMetni:
       "Bir annenin bugünkü yaşı, iki çocuğunun yaşları toplamının 3 katıdır. 6 yıl sonra annenin yaşı, çocuklarının o zamanki yaşları toplamının 2 katı olacaktır.\n\nBuna göre annenin bugünkü yaşı kaçtır?",
     secenekler: ["54", "48", "45", "42", "36"],
@@ -529,6 +565,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Tablo ve Grafik",
     soruMetni: "Bir aracın hızının zamana göre değişimi aşağıdaki grafikte verilmiştir.\n\nBuna göre araç 5 saatte toplam kaç km yol almıştır?",
     gorselSvg: HIZ_GRAFIGI,
     secenekler: ["240", "260", "280", "300", "320"],
@@ -537,6 +574,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Problemler",
     soruMetni:
       "Bir kırtasiyeci tanesini 40 TL'den aldığı 50 kalemin 30'unu %25 kârla, kalanını ise %10 zararla satıyor.\n\nBuna göre kırtasiyecinin bu satıştaki kâr ya da zararı aşağıdakilerden hangisidir?",
     secenekler: ["180 TL kâr", "220 TL kâr", "250 TL kâr", "220 TL zarar", "180 TL zarar"],
@@ -545,6 +583,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Matematiksel İlişkilerden Yararlanma",
     soruMetni:
       "5 kişilik bir ailede yalnızca anne ile babanın ehliyeti vardır. Aile, 5 koltuklu otomobillerine sürücü koltuğunda ehliyeti olan biri oturacak biçimde yerleşecektir.\n\nBuna göre aile otomobile kaç farklı biçimde oturabilir?",
     secenekler: ["12", "24", "36", "42", "48"],
@@ -553,6 +592,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Temel Kavramlar",
     soruMetni: "Bir duraktan A otobüsü 12 dakikada bir, B otobüsü 18 dakikada bir kalkmaktadır. İki otobüs saat 08.00'de bu duraktan birlikte kalkmıştır.\n\nBuna göre iki otobüs bu duraktan ilk kez saat kaçta yeniden birlikte kalkar?",
     secenekler: ["08.18", "08.30", "08.36", "08.54", "09.12"],
     dogruCevap: 2,
@@ -560,6 +600,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Matematiksel İlişkilerden Yararlanma",
     soruMetni: "Bir torbada 3 kırmızı, 5 beyaz ve 2 mavi bilye vardır.\n\nTorbadan rastgele çekilen bir bilyenin mavi olmama olasılığı kaçtır?",
     secenekler: ["4/5", "3/5", "1/2", "3/10", "1/5"],
     dogruCevap: 0,
@@ -567,6 +608,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Sayısal Mantık",
     soruMetni: "Gerçek sayılar kümesinde ∗ işlemi a ∗ b = a · b − a + b biçiminde tanımlanıyor.\n\nBuna göre (2 ∗ 3) ∗ 1 işleminin sonucu kaçtır?",
     secenekler: ["−2", "−1", "0", "1", "2"],
     dogruCevap: 3,
@@ -574,6 +616,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Sayısal Mantık",
     grupId: "ort-mat-kibrit",
     soruMetni: `${KIBRIT}\n\nBuna göre bu örüntünün 10. şeklinde kaç kibrit çöpü kullanılır?`,
     gorselSvg: KIBRIT_GORSELI,
@@ -583,6 +626,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Sayısal Mantık",
     grupId: "ort-mat-kibrit",
     soruMetni: `${KIBRIT}\n\nElinde 64 kibrit çöpü olan biri bu örüntüye uygun olarak en fazla kaçıncı şekli oluşturabilir?`,
     gorselSvg: KIBRIT_GORSELI,
@@ -592,6 +636,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Problemler",
     grupId: "ort-mat-zeytin",
     soruMetni: `${ZEYTIN}\n\nÜretici zeytinin 900 kg'ını yağ yapımına ayırırsa kaç litre zeytinyağı elde eder?`,
     secenekler: ["120", "150", "180", "200", "225"],
@@ -600,6 +645,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Problemler",
     grupId: "ort-mat-zeytin",
     soruMetni: `${ZEYTIN}\n\nZeytinin tamamını sofralık olarak satmak, tamamından yağ elde edip satmaya göre kaç TL daha fazla gelir sağlar?`,
     secenekler: ["60.000", "40.000", "30.000", "20.000", "10.000"],
@@ -608,6 +654,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Problemler",
     grupId: "ort-mat-zeytin",
     soruMetni: `${ZEYTIN}\n\nÜretici zeytinin bir bölümünü sofralık olarak satıp kalanından yağ elde ederek toplam 162.000 TL gelir elde ettiğine göre sofralık olarak satılan zeytin kaç kg'dır?`,
     secenekler: ["750", "850", "900", "1050", "1200"],
@@ -618,6 +665,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   // -- Geometri (3, gorselli) --
   {
     ders: "MATEMATIK",
+    konu: "Temel Geometri",
     geometri: true,
     soruMetni: "Şekilde d₁ ∥ d₂'dir.\n\nBuna göre x kaç derecedir?",
     gorselSvg:
@@ -628,6 +676,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Temel Geometri",
     geometri: true,
     soruMetni:
       "Şekildeki taralı bölge, ABCD dikdörtgeni ile [AB] çaplı yarım daireden oluşmaktadır. |AB| = 8 cm ve |BC| = 5 cm'dir.\n\nBuna göre taralı bölgenin alanı kaç cm²'dir? (π = 3 alınız.)",
@@ -639,6 +688,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Temel Geometri",
     geometri: true,
     soruMetni:
       "Taban yarıçapı 3 cm ve yüksekliği 10 cm olan dik dairesel silindir biçimindeki bir bardak, yüksekliğinin 2/3'üne kadar suyla doludur.\n\nBuna göre bardaktaki suyun hacmi kaç cm³'tür? (π = 3 alınız.)",
@@ -652,6 +702,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   // ---- TARİH (27) ----
   {
     ders: "TARIH",
+    konu: "İlk Türk Devletleri",
     soruMetni:
       "İslamiyet öncesi Türk devletlerinde kurultay kararları ve toplumun gelenek, görenek ve ahlak kurallarından oluşan; hükümdar dâhil herkesin uymak zorunda olduğu yazısız hukuk kurallarına ne ad verilir?",
     secenekler: ["Kut", "Yasa", "Töre", "Ülüş", "Yarlığ"],
@@ -661,27 +712,23 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
-    soruMetni: "Aşağıdakilerden hangisi Avrupa Hunlarının batıya ilerlemesiyle başlayan Kavimler Göçü'nün (375) sonuçlarından biri değildir?",
-    secenekler: [
-      "Orta Asya'da Uygur Devleti'nin kurulması",
-      "Avrupa'nın etnik yapısının değişmesi",
-      "Batı Roma İmparatorluğu'nun yıkılmasına zemin hazırlanması",
-      "Avrupa'da feodalitenin ortaya çıkması",
-      "Roma İmparatorluğu'nun ikiye ayrılması sürecinin hızlanması",
-    ],
+    konu: "Osmanlı Devleti",
+    soruMetni: "Osmanlı Devleti'nde Lale Devri'nde (1718-1730) gerçekleştirilen yeniliklerden biri aşağıdakilerden hangisidir?",
+    secenekler: ["İlk Türk matbaasının kurulması", "Nizam-ı Cedid ordusunun kurulması", "Tanzimat Fermanı'nın ilan edilmesi", "Mekteb-i Harbiye'nin açılması", "Kanun-ı Esasi'nin ilan edilmesi"],
     dogruCevap: 0,
-    aciklama:
-      "Uygur Devleti 744'te Orta Asya'da Göktürklerin yerine kurulmuştur ve Kavimler Göçü ile ilgisi yoktur. Diğer seçenekler Kavimler Göçü'nün bilinen sonuçlarıdır.",
+    aciklama: "İlk Türk matbaası, Lale Devri'nde İbrahim Müteferrika ve Said Mehmet Çelebi tarafından kurulmuştur (1727). Nizam-ı Cedid III. Selim, Mekteb-i Harbiye II. Mahmud, Tanzimat Fermanı Abdülmecid, Kanun-ı Esasi II. Abdülhamid dönemine aittir.",
   },
   {
     ders: "TARIH",
-    soruMetni: "“Türk” adını devletin resmî adı olarak kullanan ilk Türk devleti aşağıdakilerden hangisidir?",
-    secenekler: ["Asya Hun Devleti", "Avrupa Hun Devleti", "Uygur Devleti", "Hazar Devleti", "I. Göktürk (Kök Türk) Devleti"],
+    konu: "Atatürk İlke ve İnkılapları",
+    soruMetni: "Aşağıdakilerden hangisi toplumsal hayatın düzenlenmesine yönelik inkılaplardan biri değildir?",
+    secenekler: ["Şapka Kanunu'nun kabulü", "Soyadı Kanunu'nun kabulü", "Tekke ve zaviyelerin kapatılması", "Takvim, saat ve ölçülerde yapılan değişiklikler", "Saltanatın kaldırılması"],
     dogruCevap: 4,
-    aciklama: "552'de Bumin Kağan tarafından kurulan Göktürk Devleti, “Türk” adını devlet adı olarak kullanan ilk Türk devletidir.",
+    aciklama: "Saltanatın kaldırılması (1 Kasım 1922), siyasi alanda yapılan bir inkılaptır. Diğer seçeneklerdeki düzenlemeler toplumsal hayatın çağdaşlaştırılmasına yöneliktir.",
   },
   {
     ders: "TARIH",
+    konu: "Türk-İslam Devletleri",
     soruMetni: "Satuk Buğra Han döneminde İslamiyet'i kabul ederek bu dini resmî din hâline getiren ilk Türk devleti aşağıdakilerden hangisidir?",
     secenekler: ["Gazneliler", "Karahanlılar", "Büyük Selçuklular", "Tolunoğulları", "İhşidiler"],
     dogruCevap: 1,
@@ -689,6 +736,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
+    konu: "Türk-İslam Devletleri",
     soruMetni:
       "Alp Arslan ve Melikşah dönemlerinde Büyük Selçuklu Devleti'nin veziri olan; Nizamiye medreselerini kuran ve devlet yönetimine ilişkin görüşlerini Siyasetname adlı eserinde toplayan devlet adamı aşağıdakilerden hangisidir?",
     secenekler: ["Kaşgarlı Mahmut", "Yusuf Has Hacip", "Ahmet Yesevi", "Nizamülmülk", "Edip Ahmet Yükneki"],
@@ -697,22 +745,23 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
-    soruMetni:
-      "1176'da Türkiye Selçuklu Devleti ile Bizans arasında yapılan; Bizans'ın Türkleri Anadolu'dan çıkarma umudunu yitirdiği ve Anadolu'nun Türk yurdu olduğunun kesinleştiği savaş aşağıdakilerden hangisidir?",
-    secenekler: ["Malazgirt Meydan Muharebesi", "Miryokefalon Savaşı", "Kösedağ Savaşı", "Dandanakan Savaşı", "Yassıçemen Savaşı"],
+    konu: "Atatürk İlke ve İnkılapları",
+    soruMetni: "Devletin, özel girişimin yetersiz kaldığı alanlarda ekonomik hayatı düzenlemesini ve gerektiğinde doğrudan yatırımcı olmasını öngören Atatürk ilkesi aşağıdakilerden hangisidir?",
+    secenekler: ["Cumhuriyetçilik", "Devletçilik", "Laiklik", "Milliyetçilik", "İnkılapçılık"],
     dogruCevap: 1,
-    aciklama: "Miryokefalon Savaşı (1176) ile Bizans savunmaya çekilmiş, Anadolu'nun Türk yurdu olduğu kesinleşmiştir. Malazgirt (1071) ise Anadolu'nun kapılarını Türklere açmıştır.",
+    aciklama: "Devletçilik ilkesi, özel teşebbüsün yetersiz kaldığı alanlarda devletin ekonomiye müdahalesini ve yatırım yapmasını öngörür. I. Beş Yıllık Sanayi Planı (1934) bu ilkenin uygulamasıdır.",
   },
   {
     ders: "TARIH",
-    soruMetni:
-      "Türkiye Selçukluları döneminde Ahi Evran'ın öncülüğünde kurulan; esnaf ve zanaatkârların hem mesleki hem de ahlaki eğitimini sağlayan, üretimin kalitesini ve fiyatını denetleyen teşkilat aşağıdakilerden hangisidir?",
-    secenekler: ["Lonca", "Gedik", "Bacıyan-ı Rum", "Ahilik", "Kazaskerlik"],
+    konu: "Atatürk İlke ve İnkılapları",
+    soruMetni: "Türk Tarih Kurumu (1931) ve Türk Dil Kurumunun (1932) kurulması, en çok aşağıdaki Atatürk ilkelerinden hangisiyle ilişkilidir?",
+    secenekler: ["Devletçilik", "Halkçılık", "Laiklik", "Milliyetçilik", "Cumhuriyetçilik"],
     dogruCevap: 3,
-    aciklama: "Ahilik, Ahi Evran'ın öncülüğünde kurulmuştur. Bacıyan-ı Rum kadınların, lonca ise Osmanlı'nın ilerleyen dönemlerindeki esnaf örgütlenmesidir.",
+    aciklama: "Türk tarihini ve Türk dilini bilimsel yöntemlerle araştırıp millî bilinci güçlendirmeyi amaçlayan bu kurumlar, milliyetçilik ilkesiyle doğrudan ilişkilidir.",
   },
   {
     ders: "TARIH",
+    konu: "Osmanlı Devleti",
     soruMetni:
       "Döneminde İznik'te ilk Osmanlı medresesi açılan, “yaya ve müsellem” adıyla ilk düzenli ordu kurulan ve ilk Osmanlı parası bastırılan hükümdar aşağıdakilerden hangisidir?",
     secenekler: ["Orhan Bey", "Osman Bey", "I. Murat", "Yıldırım Bayezid", "Çelebi Mehmet"],
@@ -721,6 +770,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
+    konu: "Osmanlı Devleti",
     soruMetni: "Aşağıdakilerden hangisi Ankara Savaşı'nın (1402) sonuçlarından biri değildir?",
     secenekler: [
       "Osmanlı Devleti'nde Fetret Devri'nin başlaması",
@@ -734,6 +784,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
+    konu: "Osmanlı Devleti",
     soruMetni:
       "1571'de Osmanlı donanmasının Haçlı donanmasına yenildiği; ancak Osmanlı Devleti'nin bir yıl içinde yeni bir donanma kurarak gücünü göstermesiyle sonuçlanan deniz savaşı aşağıdakilerden hangisidir?",
     secenekler: ["Preveze Deniz Savaşı", "Cerbe Deniz Savaşı", "İnebahtı Deniz Savaşı", "Çeşme Baskını", "Navarin Baskını"],
@@ -742,6 +793,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
+    konu: "Osmanlı Devleti",
     soruMetni:
       "II. Mahmut ile ayanlar arasında 1808'de imzalanan; padişahın yetkilerinin ilk kez sınırlandırıldığı ve ayanların varlığının devletçe resmen tanındığı belge aşağıdakilerden hangisidir?",
     secenekler: ["Tanzimat Fermanı", "Islahat Fermanı", "Kanun-i Esasi", "Mecelle", "Sened-i İttifak"],
@@ -750,6 +802,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
+    konu: "Osmanlı Devleti",
     soruMetni:
       "Kırım'ın bağımsız olduğu, Rusya'nın Osmanlı topraklarındaki Ortodoksların koruyuculuğunu üstlendiği ve Osmanlı Devleti'nin ilk kez savaş tazminatı ödediği antlaşma aşağıdakilerden hangisidir?",
     secenekler: ["Karlofça Antlaşması", "Pasarofça Antlaşması", "Küçük Kaynarca Antlaşması", "Yaş Antlaşması", "Bükreş Antlaşması"],
@@ -758,6 +811,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
+    konu: "Osmanlı Devleti",
     soruMetni: "Osmanlı Devleti'nin 1856'da Islahat Fermanı'nı ilan etmesindeki temel amaç aşağıdakilerden hangisidir?",
     secenekler: [
       "Kapitülasyonları tamamen kaldırmak",
@@ -771,6 +825,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
+    konu: "Osmanlı Devleti",
     soruMetni: "II. Meşrutiyet döneminde etkili olan fikir akımlarından Türkçülüğün önde gelen temsilcisi aşağıdakilerden hangisidir?",
     secenekler: ["Namık Kemal", "Prens Sabahattin", "Abdullah Cevdet", "Ziya Gökalp", "Mehmet Akif Ersoy"],
     dogruCevap: 3,
@@ -778,6 +833,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
+    konu: "Osmanlı Devleti",
     soruMetni:
       "I. Dünya Savaşı'nda Osmanlı Devleti'nin, İngiltere'nin Hindistan ile bağlantısını kesmek ve Mısır'ı geri almak amacıyla açtığı cephe aşağıdakilerden hangisidir?",
     secenekler: ["Kanal Cephesi", "Kafkas Cephesi", "Çanakkale Cephesi", "Galiçya Cephesi", "Irak Cephesi"],
@@ -786,6 +842,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
+    konu: "Kurtuluş Savaşı",
     soruMetni: "Aşağıdakilerden hangisi Mondros Ateşkes Antlaşması'ndan sonra kurulan millî (yararlı) cemiyetlerden biri değildir?",
     secenekler: [
       "Wilson Prensipleri Cemiyeti",
@@ -799,6 +856,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
+    konu: "Kurtuluş Savaşı",
     soruMetni:
       "Mustafa Kemal'in Samsun'a çıktıktan kısa süre sonra yayımladığı; işgallerin mitinglerle protesto edilmesini ve halkın millî bilincinin uyandırılmasını isteyen belge aşağıdakilerden hangisidir?",
     secenekler: ["Amasya Genelgesi", "Amasya Görüşmeleri", "Misak-ı Millî", "Havza Genelgesi", "Sivas Kongresi kararları"],
@@ -807,6 +865,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
+    konu: "Kurtuluş Savaşı",
     soruMetni:
       "23 Nisan 1920'de açılan Türkiye Büyük Millet Meclisi ile ilgili;\nI. Olağanüstü yetkilere sahip bir meclistir.\nII. Güçler birliği ilkesini benimsemiştir.\nIII. Padişahın onayıyla toplanmıştır.\nifadelerinden hangileri doğrudur?",
     secenekler: ["Yalnız I", "Yalnız II", "I ve II", "II ve III", "I, II ve III"],
@@ -815,21 +874,23 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
-    soruMetni: "Doğu Cephesi'nde kazanılan başarının ardından imzalanan ve TBMM'nin imzaladığı ilk uluslararası antlaşma aşağıdakilerden hangisidir?",
-    secenekler: ["Moskova Antlaşması", "Kars Antlaşması", "Ankara Antlaşması", "Mudanya Ateşkes Antlaşması", "Gümrü Antlaşması"],
+    konu: "Çağdaş Türk ve Dünya Tarihi",
+    soruMetni: "Türkiye'nin 18 Şubat 1952'de üye olduğu askerî ittifak aşağıdakilerden hangisidir?",
+    secenekler: ["Varşova Paktı", "Bağdat Paktı", "Balkan Paktı", "Sadabat Paktı", "NATO"],
     dogruCevap: 4,
-    aciklama: "Ermenistan ile imzalanan Gümrü Antlaşması (3 Aralık 1920), TBMM'nin ilk askerî ve siyasi başarısıdır.",
+    aciklama: "Türkiye, Yunanistan ile birlikte 18 Şubat 1952'de NATO'ya üye olmuştur. Varşova Paktı Doğu Bloku'nun ittifakıdır; Bağdat Paktı 1955'te, Balkan Paktı 1953'te kurulmuş, Sadabat Paktı ise 1937'de imzalanmıştır.",
   },
   {
     ders: "TARIH",
-    soruMetni:
-      "Sakarya Meydan Muharebesi öncesinde Başkomutan Mustafa Kemal'in, ordunun ihtiyaçlarını halktan karşılamak amacıyla yayımladığı emirler aşağıdakilerden hangisidir?",
-    secenekler: ["Teşkilat-ı Esasiye", "Tekalif-i Milliye Emirleri", "Hıyanet-i Vataniye Kanunu", "Firariler Hakkında Kanun", "Takrir-i Sükûn Kanunu"],
+    konu: "Çağdaş Türk ve Dünya Tarihi",
+    soruMetni: "1962 Küba Füze Krizi'nin çözümü kapsamında ABD'nin Türkiye'den çektiği füzeler aşağıdakilerden hangisidir?",
+    secenekler: ["Patriot", "Jüpiter", "Tomahawk", "Scud", "Stinger"],
     dogruCevap: 1,
-    aciklama: "Tekalif-i Milliye Emirleri (Ağustos 1921) ile ordunun giyecek, yiyecek, silah ve taşıt ihtiyaçları halkın katkısıyla karşılanmıştır.",
+    aciklama: "Krizin çözümünde SSCB füzelerini Küba'dan çekmiş; ABD de Türkiye'deki Jüpiter füzelerini 1963'te sökmüştür. Türkiye'ye danışılmadan alınan bu karar, Türk dış politikasında ABD'ye güvenin sorgulanmasına yol açmıştır.",
   },
   {
     ders: "TARIH",
+    konu: "Atatürk İlke ve İnkılapları",
     soruMetni:
       "Lozan Konferansı'nda çözülemeyip İngiltere ile ikili görüşmelere bırakılan; 1926 Ankara Antlaşması ile Irak'a bırakılan toprak aşağıdakilerden hangisidir?",
     secenekler: ["Hatay", "Batı Trakya", "Musul", "Oniki Ada", "Kıbrıs"],
@@ -838,6 +899,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
+    konu: "Atatürk İlke ve İnkılapları",
     soruMetni: "29 Ekim 1923'te cumhuriyetin ilan edilmesiyle doğrudan çözüme kavuşturulan sorun aşağıdakilerden hangisidir?",
     secenekler: ["Halifelik sorunu", "Musul sorunu", "Boğazlar sorunu", "Dış borçlar sorunu", "Devlet başkanlığı ve rejimin adı sorunu"],
     dogruCevap: 4,
@@ -845,6 +907,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
+    konu: "Atatürk İlke ve İnkılapları",
     soruMetni: "Harf İnkılabı'nın (1928) ardından okuma yazma bilmeyen yetişkinlere yeni Türk harflerini öğretmek amacıyla açılan kurumlar aşağıdakilerden hangisidir?",
     secenekler: ["Millet Mektepleri", "Köy Enstitüleri", "Halkevleri", "Darülfünun", "Mekteb-i Mülkiye"],
     dogruCevap: 0,
@@ -852,6 +915,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
+    konu: "Atatürk İlke ve İnkılapları",
     soruMetni:
       "Türk kadınının siyasi haklarını kazanma sürecindeki;\nI. milletvekili seçme ve seçilme hakkı,\nII. belediye seçimlerinde seçme ve seçilme hakkı,\nIII. muhtarlık seçimlerinde seçme ve seçilme hakkı\ngelişmelerinin kronolojik sıralaması aşağıdakilerden hangisidir?",
     secenekler: ["I, II, III", "II, III, I", "III, II, I", "II, I, III", "III, I, II"],
@@ -860,6 +924,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
+    konu: "Atatürk İlke ve İnkılapları",
     soruMetni:
       "Lozan görüşmelerinin kesintiye uğradığı Şubat 1923'te toplanan; Misak-ı İktisadi'nin kabul edildiği ve millî ekonominin esaslarının belirlendiği kongre aşağıdakilerden hangisidir?",
     secenekler: ["Sivas Kongresi", "Erzurum Kongresi", "Balıkesir Kongresi", "İzmir İktisat Kongresi", "Maarif Kongresi"],
@@ -868,6 +933,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
+    konu: "Atatürk İlke ve İnkılapları",
     soruMetni: "Türkiye'nin 1932'de davet üzerine üye olduğu, I. Dünya Savaşı'ndan sonra dünya barışını korumak amacıyla kurulan uluslararası örgüt aşağıdakilerden hangisidir?",
     secenekler: ["Milletler Cemiyeti", "Birleşmiş Milletler", "NATO", "Avrupa Konseyi", "Balkan Antantı"],
     dogruCevap: 0,
@@ -875,6 +941,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
+    konu: "Çağdaş Türk ve Dünya Tarihi",
     soruMetni: "Türkiye'nin 1974'te Kıbrıs Barış Harekâtı'nı gerçekleştirmesinin hukuki dayanağı aşağıdakilerden hangisidir?",
     secenekler: [
       "Lozan Barış Antlaşması",
@@ -890,13 +957,15 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   // ---- COĞRAFYA (18) ----
   {
     ders: "COGRAFYA",
-    soruMetni: "1/500.000 ölçekli bir haritada iki kent arasındaki uzaklık 4 cm olarak ölçülmüştür.\n\nBuna göre bu iki kent arasındaki gerçek uzaklık kaç km'dir?",
-    secenekler: ["2", "20", "40", "200", "2000"],
-    dogruCevap: 1,
-    aciklama: "Gerçek uzaklık = 4 · 500.000 = 2.000.000 cm. 1 km = 100.000 cm olduğundan 2.000.000/100.000 = 20 km.",
+    konu: "Fiziki Özellikler",
+    soruMetni: "Aşağıdaki yer şekillerinden hangisi rüzgâr aşındırmasıyla oluşur?",
+    secenekler: ["Kanyon", "Dolin", "Lapya", "Moren", "Mantarkaya"],
+    dogruCevap: 4,
+    aciklama: "Mantarkaya, rüzgârın taşıdığı kum tanelerinin kayaları alt kısımdan daha fazla aşındırmasıyla oluşur. Kanyon akarsu, dolin ve lapya karstik çözünme, moren ise buzul biriktirmesiyle oluşan şekillerdir.",
   },
   {
     ders: "COGRAFYA",
+    konu: "Coğrafi Konum",
     soruMetni: "Yerel öğle vaktinde ölçüldüğünde, yıl boyunca cisimlerin gölge boyunun Türkiye'de en kısa olduğu il aşağıdakilerden hangisidir?",
     secenekler: ["Sinop", "Edirne", "Iğdır", "Hatay", "Artvin"],
     dogruCevap: 3,
@@ -904,6 +973,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "COGRAFYA",
+    konu: "Ekonomik Özellikler",
     soruMetni:
       "Haritada numaralandırılarak gösterilen enerji santralleri ile kullandıkları enerji kaynakları eşleştirilmiştir.\n\nBu eşleştirmelerden hangisi yanlıştır?",
     gorselSvg: turkiyeHaritasi({
@@ -922,6 +992,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "COGRAFYA",
+    konu: "İklim ve Bitki Örtüsü",
     soruMetni: "Haritada taralı olarak gösterilen alanda yaygın olan doğal bitki örtüsü aşağıdakilerden hangisidir?",
     gorselSvg: turkiyeHaritasi({ taraliIller: ["Konya", "Aksaray", "Ankara", "Kırşehir"] }),
     secenekler: ["Bozkır", "Maki", "Gür (nemli) orman", "Alpin çayır", "Garig"],
@@ -930,6 +1001,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "COGRAFYA",
+    konu: "İklim ve Bitki Örtüsü",
     soruMetni:
       "Grafiklerde bir meteoroloji istasyonuna ait uzun yıllar aylık ortalama sıcaklık ve aylık ortalama yağış değerleri verilmiştir.\n\nBu istasyonda görülen iklim tipi aşağıdakilerden hangisidir?",
     // MGM, Rize uzun yillar (1927-2025) aylik ortalamalari.
@@ -944,6 +1016,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "COGRAFYA",
+    konu: "Fiziki Özellikler",
     soruMetni: "Aşağıdaki yer şekillerinden hangisi akarsuların aşındırmasıyla oluşmuştur?",
     secenekler: ["Kumul", "Moren", "Falez", "Lapya", "Kanyon vadi"],
     dogruCevap: 4,
@@ -951,6 +1024,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "COGRAFYA",
+    konu: "Fiziki Özellikler",
     soruMetni: "Merkez üsleri Kahramanmaraş'ın Pazarcık ve Elbistan ilçeleri olan 6 Şubat 2023 depremleri hangi fay hattı üzerinde meydana gelmiştir?",
     secenekler: ["Kuzey Anadolu Fay Hattı", "Batı Anadolu fay sistemi", "Doğu Anadolu Fay Hattı", "Ölü Deniz Fayı", "Tuz Gölü Fayı"],
     dogruCevap: 2,
@@ -958,6 +1032,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "COGRAFYA",
+    konu: "Beşeri Özellikler",
     soruMetni: "Türkiye'de 2007'den bu yana nüfus bilgileri, herkesin evde beklediği sayım günleri yerine hangi sistemle belirlenmektedir?",
     secenekler: [
       "Adrese Dayalı Nüfus Kayıt Sistemi",
@@ -971,6 +1046,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "COGRAFYA",
+    konu: "Beşeri Özellikler",
     soruMetni: "Türkiye'de doğum oranlarının düşmesiyle nüfus giderek yaşlanmaktadır.\n\nAşağıdakilerden hangisi bu sürecin sonuçlarından biri değildir?",
     secenekler: [
       "Sağlık harcamalarının artması",
@@ -984,6 +1060,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "COGRAFYA",
+    konu: "Beşeri Özellikler",
     soruMetni: "Toroslarda yaşayan Yörüklerin, hayvanlarını otlatmak için yaz ve kış farklı yerlere taşıdıkları çadırlardan oluşan geçici yerleşmelere ne ad verilir?",
     secenekler: ["Mezra", "Kom", "Oba", "Divan", "Dam"],
     dogruCevap: 2,
@@ -991,6 +1068,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "COGRAFYA",
+    konu: "Ekonomik Özellikler",
     soruMetni: "Zeytin, Türkiye'de kıyı bölgelerinde yaygın olarak yetiştirilirken İç Anadolu'da tarımı yapılmaz.\n\nBunun temel nedeni aşağıdakilerden hangisidir?",
     secenekler: [
       "Yaz yağışlarının fazla olması",
@@ -1004,6 +1082,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "COGRAFYA",
+    konu: "Ekonomik Özellikler",
     soruMetni: "Dut yaprağıyla beslenen ipek böceğinin yetiştiriciliği ve ipek dokumacılığı Türkiye'de en çok hangi ilde yapılmaktadır?",
     secenekler: ["Erzurum", "Rize", "Konya", "Van", "Bursa"],
     dogruCevap: 4,
@@ -1011,6 +1090,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "COGRAFYA",
+    konu: "Ekonomik Özellikler",
     soruMetni: "Sivas'ın Divriği ilçesi, Türkiye'nin hangi madeninin en önemli çıkarım alanlarından biridir?",
     secenekler: ["Demir", "Bakır", "Krom", "Bor", "Linyit"],
     dogruCevap: 0,
@@ -1018,6 +1098,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "COGRAFYA",
+    konu: "Ekonomik Özellikler",
     soruMetni: "Türkiye'de rüzgâr enerjisi santralleri en çok Ege ve Marmara bölgelerinin kıyı kesimlerinde kurulmuştur.\n\nBunun temel nedeni aşağıdakilerden hangisidir?",
     secenekler: [
       "Güneşlenme süresinin uzun olması",
@@ -1031,6 +1112,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "COGRAFYA",
+    konu: "Ekonomik Özellikler",
     soruMetni: "İstanbul Boğazı'nın altından geçerek Asya ile Avrupa yakalarını demir yoluyla birbirine bağlayan proje aşağıdakilerden hangisidir?",
     secenekler: ["Avrasya Tüneli", "Yavuz Sultan Selim Köprüsü", "Marmaray", "Osmangazi Köprüsü", "1915 Çanakkale Köprüsü"],
     dogruCevap: 2,
@@ -1038,6 +1120,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "COGRAFYA",
+    konu: "Ekonomik Özellikler",
     soruMetni: "UNESCO Dünya Mirası Listesi'nde yer alan bazı alanlar ile bulundukları iller eşleştirilmiştir.\n\nBu eşleştirmelerden hangisi yanlıştır?",
     secenekler: ["Pamukkale - Denizli", "Göreme Millî Parkı - Nevşehir", "Nemrut Dağı - Adıyaman", "Safranbolu - Karabük", "Çatalhöyük - Kayseri"],
     dogruCevap: 4,
@@ -1045,6 +1128,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "COGRAFYA",
+    konu: "Ekonomik Özellikler",
     soruMetni: "Türkiye'de ayçiçeği üretiminin en fazla yapıldığı yöre aşağıdakilerden hangisidir?",
     secenekler: ["Trakya (Ergene Havzası)", "Çukurova", "Harran Ovası", "Iğdır Ovası", "Muş Ovası"],
     dogruCevap: 0,
@@ -1052,6 +1136,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "COGRAFYA",
+    konu: "Fiziki Özellikler",
     soruMetni: "Çukur bir alanda kurulmuş kentlerde kış aylarında hava kirliliğinin artmasının doğal nedeni aşağıdakilerden hangisidir?",
     secenekler: [
       "Yağışların fazla olması",
@@ -1067,6 +1152,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   // ---- VATANDAŞLIK (9) ----
   {
     ders: "VATANDASLIK",
+    konu: "Temel Hukuk Kavramları",
     soruMetni: "Hukuka aykırı bir idari işlemin, idare mahkemesi kararıyla hüküm ve sonuçlarıyla birlikte ortadan kaldırılmasına ne ad verilir?",
     secenekler: ["Ceza", "Tazminat", "İptal", "Cebri icra", "Disiplin cezası"],
     dogruCevap: 2,
@@ -1074,6 +1160,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "VATANDASLIK",
+    konu: "Temel Hukuk Kavramları",
     soruMetni: "Aşağıdakilerden hangisi özel hukukun dallarından biridir?",
     secenekler: ["Anayasa hukuku", "İdare hukuku", "Ceza hukuku", "Vergi hukuku", "Ticaret hukuku"],
     dogruCevap: 4,
@@ -1081,6 +1168,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "VATANDASLIK",
+    konu: "Temel Hukuk Kavramları",
     soruMetni: "Türk Medeni Kanunu'na göre bir küçük, kendi isteği ve velisinin rızasıyla en erken kaç yaşını doldurduğunda mahkeme kararıyla ergin kılınabilir?",
     secenekler: ["15", "16", "17", "18", "21"],
     dogruCevap: 0,
@@ -1088,19 +1176,15 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "VATANDASLIK",
-    soruMetni: "Aşağıdakilerden hangisi 1982 Anayasası'nın değiştirilemeyecek ve değiştirilmesi teklif edilemeyecek hükümleri arasında yer almaz?",
-    secenekler: [
-      "Devletin şeklinin Cumhuriyet olması",
-      "Devletin dilinin Türkçe olması",
-      "Başkentin Ankara olması",
-      "TBMM'nin 600 milletvekilinden oluşması",
-      "Bayrağın beyaz ay yıldızlı al bayrak olması",
-    ],
+    konu: "Yasama-Yürütme-Yargı",
+    soruMetni: "1982 Anayasası'na göre Türkiye Büyük Millet Meclisi ve Cumhurbaşkanlığı seçimleri kaç yılda bir yapılır?",
+    secenekler: ["2", "3", "4", "5", "6"],
     dogruCevap: 3,
-    aciklama: "Anayasa'nın ilk üç maddesi (devletin şekli, Cumhuriyetin nitelikleri, ülke ve millet bütünlüğü, dil, bayrak, millî marş, başkent) değiştirilemez. Milletvekili sayısı 75. maddede düzenlenir ve 2017'de 550'den 600'e çıkarılmıştır.",
+    aciklama: "2017 Anayasa değişikliğiyle TBMM ve Cumhurbaşkanlığı seçimlerinin beş yılda bir aynı gün yapılması kabul edilmiştir.",
   },
   {
     ders: "VATANDASLIK",
+    konu: "Yasama-Yürütme-Yargı",
     soruMetni: "Aşağıdakilerden hangisi 1982 Anayasası'nda sayılan seçim ilkelerinden biri değildir?",
     secenekler: ["Serbest seçim", "Açık oy", "Eşit oy", "Tek dereceli seçim", "Genel oy"],
     dogruCevap: 1,
@@ -1108,6 +1192,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "VATANDASLIK",
+    konu: "Yasama-Yürütme-Yargı",
     soruMetni: "2017 değişikliği sonrasında 1982 Anayasası'na göre bakanlar kim tarafından atanır?",
     secenekler: ["TBMM", "Anayasa Mahkemesi", "Danıştay", "TBMM Başkanı", "Cumhurbaşkanı"],
     dogruCevap: 4,
@@ -1115,6 +1200,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "VATANDASLIK",
+    konu: "Yasama-Yürütme-Yargı",
     soruMetni: "1982 Anayasası'na göre Hâkimler ve Savcılar Kurulunun başkanı aşağıdakilerden hangisidir?",
     secenekler: ["Adalet Bakanı", "Yargıtay Birinci Başkanı", "Danıştay Başkanı", "Cumhurbaşkanı", "Anayasa Mahkemesi Başkanı"],
     dogruCevap: 0,
@@ -1122,6 +1208,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "VATANDASLIK",
+    konu: "İdare Hukuku",
     soruMetni: "İl düzeyinde devletin ve Cumhurbaşkanının temsilcisi olan, merkezî yönetimin il idaresindeki en yetkili amiri aşağıdakilerden hangisidir?",
     secenekler: ["Belediye başkanı", "Kaymakam", "Vali", "Muhtar", "İl genel meclisi başkanı"],
     dogruCevap: 2,
@@ -1129,6 +1216,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "VATANDASLIK",
+    konu: "İdare Hukuku",
     soruMetni: "İdarenin işleyişiyle ilgili şikâyetleri inceleyen ve Türkiye Büyük Millet Meclisi Başkanlığına bağlı olarak kurulan kurum aşağıdakilerden hangisidir?",
     secenekler: ["Sayıştay", "Danıştay", "Devlet Denetleme Kurulu", "Kamu Denetçiliği Kurumu", "Hâkimler ve Savcılar Kurulu"],
     dogruCevap: 3,
@@ -1138,6 +1226,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   // ---- GÜNCEL BİLGİLER (6) ----
   {
     ders: "GUNCEL",
+    konu: "Güncel Bilgiler",
     soruMetni: "2025 Nobel Fizik Ödülü, John Clarke, Michel H. Devoret ve John M. Martinis'e aşağıdaki çalışmalardan hangisi nedeniyle verilmiştir?",
     secenekler: [
       "Yapay sinir ağlarıyla makine öğrenmesinin temellerinin atılması",
@@ -1151,6 +1240,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "GUNCEL",
+    konu: "Güncel Bilgiler",
     soruMetni: "2025 Nobel Fizyoloji veya Tıp Ödülü, Mary E. Brunkow, Fred Ramsdell ve Shimon Sakaguchi'ye hangi alandaki keşifleri nedeniyle verilmiştir?",
     secenekler: [
       "MikroRNA'nın keşfi",
@@ -1164,6 +1254,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "GUNCEL",
+    konu: "Güncel Bilgiler",
     soruMetni: "Mart 2026'da düzenlenen 98. Akademi (Oscar) Ödülleri'nde “En İyi Film” ödülünü kazanan yapım aşağıdakilerden hangisidir?",
     secenekler: ["Savaş Üstüne Savaş (One Battle After Another)", "Anora", "Oppenheimer", "Her Şey Her Yerde Aynı Anda", "CODA"],
     dogruCevap: 0,
@@ -1171,6 +1262,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "GUNCEL",
+    konu: "Güncel Bilgiler",
     soruMetni: "Birleşmiş Milletler İklim Değişikliği Çerçeve Sözleşmesi'nin 30. Taraflar Konferansı (COP30) 2025'te nerede düzenlenmiştir?",
     secenekler: ["Bakü - Azerbaycan", "Dubai - Birleşik Arap Emirlikleri", "Şarm El-Şeyh - Mısır", "Glasgow - Birleşik Krallık", "Belém - Brezilya"],
     dogruCevap: 4,
@@ -1178,6 +1270,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "GUNCEL",
+    konu: "Güncel Bilgiler",
     soruMetni: "6-22 Şubat 2026 tarihlerinde düzenlenen Kış Olimpiyat Oyunları'na ev sahipliği yapan kent ve ülke aşağıdakilerden hangisidir?",
     secenekler: ["Pekin - Çin", "Pyeongchang - Güney Kore", "Milano-Cortina - İtalya", "Soçi - Rusya", "Vancouver - Kanada"],
     dogruCevap: 2,
@@ -1185,6 +1278,7 @@ export const ORTAOGRETIM_SORULARI: SeedSoru[] = [
   },
   {
     ders: "GUNCEL",
+    konu: "Güncel Bilgiler",
     soruMetni: "28-31 Ağustos 2025 tarihlerinde İstanbul Tersanesi'nde düzenlenen TEKNOFEST etkinliğinin adı aşağıdakilerden hangisidir?",
     secenekler: ["TEKNOFEST Gök Vatan", "TEKNOFEST Mavi Vatan", "TEKNOFEST Yeşil Vatan", "TEKNOFEST Kızılelma", "TEKNOFEST Çelik Kubbe"],
     dogruCevap: 1,

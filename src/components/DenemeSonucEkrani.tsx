@@ -56,6 +56,7 @@ const KONU_STIL: Record<KonuDurumu, { baslik: string; ikon: typeof CheckCircle2;
 const DURUM_ADI: Record<KonuDurumu, string> = { kirmizi: "kırmızı", sari: "sarı", yesil: "yeşil" };
 
 const fmt = (n: number) => n.toLocaleString("tr-TR", { maximumFractionDigits: 2 });
+const GORUNEN_KONU = 6;
 
 function Fark({ deger, birim = "net" }: { deger: number; birim?: string }) {
   if (Math.abs(deger) < 0.005) return <span className="text-xs font-semibold text-slate-500">değişmedi</span>;
@@ -130,6 +131,7 @@ export function DenemeSonucEkrani({
 }) {
   const [incelenenIndex, setIncelenenIndex] = useState(Math.max(0, sorular.findIndex((s) => durum(s) === "yanlis")));
   const [secilenKonu, setSecilenKonu] = useState<KonuSonucu | null>(null);
+  const [acikSutunlar, setAcikSutunlar] = useState<KonuDurumu[]>([]);
   const incelemeAlani = useRef<HTMLDivElement>(null);
   const tema = DUZEY_TEMA[duzey];
   const net = dogruSayisi - yanlisSayisi / 4;
@@ -250,13 +252,15 @@ export function DenemeSonucEkrani({
             <div className="mt-4 grid gap-4 lg:grid-cols-3">
               {(["kirmizi", "sari", "yesil"] as const).map((d) => {
                 const stil = KONU_STIL[d];
-                const liste = konular.filter((k) => k.durum === d);
+                const tumu = konular.filter((k) => k.durum === d);
+                // ~60 konu var; uzun sutun sayfayi bogmasin diye ilk birkaci gorunur.
+                const liste = acikSutunlar.includes(d) ? tumu : tumu.slice(0, GORUNEN_KONU);
                 return (
                   <div key={d}>
                     <p className="mb-2 flex items-center gap-1.5 text-sm font-bold text-slate-800">
                       <stil.ikon className={cn("h-4 w-4", stil.ikonRenk)} />
                       {stil.baslik}
-                      <span className={cn("rounded-full px-2 py-0.5 text-xs", stil.rozet)}>{liste.length}</span>
+                      <span className={cn("rounded-full px-2 py-0.5 text-xs", stil.rozet)}>{tumu.length}</span>
                     </p>
                     <ul className="space-y-2">
                       {liste.map((k) => {
@@ -286,6 +290,17 @@ export function DenemeSonucEkrani({
                         );
                       })}
                       {liste.length === 0 && <li className="text-xs text-muted-foreground">Bu grupta konu yok.</li>}
+                      {tumu.length > GORUNEN_KONU && (
+                        <li>
+                          <button
+                            type="button"
+                            onClick={() => setAcikSutunlar((a) => (a.includes(d) ? a.filter((x) => x !== d) : [...a, d]))}
+                            className="text-sm font-semibold text-primary hover:underline"
+                          >
+                            {acikSutunlar.includes(d) ? "Daha az göster" : `${tumu.length - GORUNEN_KONU} konu daha göster`}
+                          </button>
+                        </li>
+                      )}
                     </ul>
                   </div>
                 );

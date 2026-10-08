@@ -50,6 +50,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   // ---- TÜRKÇE (30) ----
   {
     ders: "TURKCE",
+    konu: "Sözcükte Anlam",
     soruMetni: "Aşağıdaki cümlelerin hangisinde “ağır” sözcüğü “ciddi, tehlikeli” anlamında kullanılmıştır?",
     secenekler: [
       "Bu valizi tek başına taşıyamayacak kadar ağır bulmuştu.",
@@ -64,6 +65,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Sözcükte Anlam",
     soruMetni:
       "Bilim tarihinde nice buluş, araştırmacı aslında başka bir şeyin peşindeyken ---- ortaya çıkmıştır. Alexander Fleming'in, unuttuğu bakteri kaplarında üreyen küfün bakterileri öldürdüğünü fark ederek penisilini keşfetmesi de böyle bir ---- sonucudur.\n\nBu parçada boş bırakılan yerlere aşağıdakilerden hangisi sırasıyla getirilmelidir?",
     secenekler: [
@@ -79,6 +81,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Cümlede Anlam",
     soruMetni: "Aşağıdaki cümlelerin hangisinde gerçekleşmesi bir koşula bağlanmış bir yargı vardır?",
     secenekler: [
       "Hava kararmadan kampa dönmek istiyorduk.",
@@ -93,20 +96,15 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
-    soruMetni: "Aşağıdaki cümlelerin hangisinde “bir kimseyi kaçacak yer bırakmayacak biçimde güç durumda bırakmak” anlamında bir deyim kullanılmıştır?",
-    secenekler: [
-      "Sınav sonucunu öğrenince ağzı kulaklarına vardı.",
-      "Yeni işinde kısa sürede taşı gediğine koymayı öğrendi.",
-      "Toplantıda yöneltilen sorular, yöneticiyi köşeye sıkıştırdı.",
-      "Hesapları defalarca kontrol etti ama işin içinden çıkamadı.",
-      "Bu haberi duyunca gözleri faltaşı gibi açıldı.",
-    ],
+    konu: "Sözcükte Yapı",
+    soruMetni: "Aşağıdaki sözcüklerden hangisi yapı bakımından ötekilerden farklıdır?",
+    secenekler: ["gözlük", "yolcu", "kitaplar", "balıkçı", "sevgi"],
     dogruCevap: 2,
-    aciklama:
-      "“Köşeye sıkıştırmak” birini kaçamayacağı, karşılık veremeyeceği bir duruma düşürmek demektir. “Ağzı kulaklarına varmak” çok sevinmek, “taşı gediğine koymak” yerinde söz söylemek, “işin içinden çıkamamak” bir sorunu çözememek, “gözleri faltaşı gibi açılmak” çok şaşırmak anlamındadır.",
+    aciklama: "“göz-lük”, “yol-cu”, “balık-çı” ve “sev-gi” sözcükleri yapım eki almış türemiş sözcüklerdir. “kitap-lar” ise yalnızca çekim eki (çoğul eki) almıştır; yapı bakımından basittir.",
   },
   {
     ders: "TURKCE",
+    konu: "Ses Bilgisi",
     soruMetni: "Aşağıdaki cümlelerin hangisinde ünsüz yumuşaması yoktur?",
     secenekler: [
       "Kitabı masanın üstüne bırakıp çıktı.",
@@ -121,6 +119,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Yazım Kuralları",
     soruMetni: "Aşağıdaki cümlelerin hangisinde yazım yanlışı yapılmıştır?",
     secenekler: [
       "Sen de bizimle gelecek misin?",
@@ -135,6 +134,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Noktalama İşaretleri",
     soruMetni: "Aşağıdaki cümlelerin hangisinde kesme işaretinin (') kullanımı yanlıştır?",
     secenekler: [
       "Türkiye'nin en uzun akarsuyu Kızılırmak'tır.",
@@ -149,6 +149,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Sözcük Türleri",
     soruMetni: "Aşağıdaki cümlelerin hangisinde “geç” sözcüğü zarf olarak kullanılmıştır?",
     secenekler: [
       "Geç saatlere kadar ders çalıştı.",
@@ -163,6 +164,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Cümlenin Ögeleri",
     soruMetni:
       "“Yüzyıllık çınarın gölgesinde oturan yaşlılar, akşam ezanına kadar eski günleri konuştu.”\n\nBu cümlenin ögeleri sırasıyla aşağıdakilerin hangisinde verilmiştir?",
     secenekler: [
@@ -178,6 +180,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Anlatım Bozuklukları",
     soruMetni: "Aşağıdaki cümlelerin hangisinde gereksiz sözcük kullanımından kaynaklanan bir anlatım bozukluğu vardır?",
     secenekler: [
       "Toplantıya katılanların hepsi önerimizi destekledi.",
@@ -191,6 +194,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Paragrafta Anlam",
     soruMetni:
       "Çocuklara kitap okumayı sevdirmenin yolu, okumayı onlara bir ödev gibi dayatmaktan geçmez. Ne zaman, ne kadar ve hangi kitabı okuyacağına kendisi karar veren çocuk, okumayı bir zorunluluk değil keşif olarak görür. Evde anne babasını elinde kitapla gören, kütüphaneye götürülen, okuduğu kitap üzerine sohbet edilen çocuk için kitap da oyuncakları gibi hayatın doğal bir parçası hâline gelir. Zorla okutulan sayfalar ise çoğu zaman çocuğu kitaptan uzaklaştırır.\n\nBu parçada asıl anlatılmak istenen aşağıdakilerden hangisidir?",
     secenekler: [
@@ -206,6 +210,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Paragrafta Anlam",
     soruMetni:
       "Bal arıları bir çiçek kaynağı bulduklarında kovana dönüp özel bir dans yapar. Bu dansta arının izlediği yolun güneşle yaptığı açı kaynağın yönünü, dansın süresi ise kaynağın kovana uzaklığını bildirir. Kovandaki diğer arılar, dans eden arının vücuduna sinen çiçek kokusundan da yararlanarak kaynağı kolayca bulur. Bilim insanları bu iletişim biçimini çözebilmek için onlarca yıl gözlem yapmıştır.\n\nBu parçada aşağıdakilerin hangisine değinilmemiştir?",
     secenekler: [
@@ -220,6 +225,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Paragrafta Anlam",
     soruMetni:
       "(I) Kahve, Osmanlı İstanbul'una XVI. yüzyılın ortalarında Yemen üzerinden gelmiştir. (II) Kısa sürede yaygınlaşan bu içecek, kahvehane adı verilen yeni bir toplumsal mekânın doğmasına yol açmıştır. (III) Kahvehaneler; insanların bir araya gelip sohbet ettiği, haber alışverişinde bulunduğu, meddahların hikâyelerinin dinlendiği yerlere dönüşmüştür. (IV) Kahve bitkisi, yetişebilmek için yıl boyunca ılık ve nemli bir iklime ihtiyaç duyar. (V) Bu yönüyle kahvehaneler, dönemin kültür hayatında âdeta birer okul işlevi görmüştür.\n\nBu parçada numaralanmış cümlelerden hangisi düşüncenin akışını bozmaktadır?",
     secenekler: ["I", "II", "III", "IV", "V"],
@@ -229,6 +235,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Paragrafta Anlam",
     soruMetni:
       "(I) Eskiden kentlerde saatler yalnızca varlıklı ailelerin evlerinde bulunurdu. (II) Halk, günün vaktini camilerden okunan ezanlarla ya da meydanlardaki saat kulelerinin çanlarıyla öğrenirdi. (III) Bu yüzden saat kuleleri, kentin ortak zamanını belirleyen önemli yapılar sayılırdı. (IV) Bugün ise neredeyse herkesin cebinde, zamanı saniyesi saniyesine gösteren bir telefon bulunuyor. (V) Bu kolaylık, zamanı öğrenmeyi bireysel bir eyleme dönüştürdüğü gibi saat kulelerini de birer süs ögesine çevirdi.\n\nBu parça iki paragrafa ayrılmak istense ikinci paragraf hangi cümleyle başlar?",
     secenekler: ["I", "II", "III", "IV", "V"],
@@ -238,6 +245,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Paragrafta Anlam",
     soruMetni:
       "Bir dili öğrenmek yalnızca kelime ve kural ezberlemek değildir. O dili konuşan toplumun mizahını, deyimlerini, gündelik alışkanlıklarını tanımadan yapılan çeviriler çoğu zaman kulağa yapay gelir. Bir deyimin sözlükteki karşılığını bilen biri, onun hangi durumda, kime karşı ve hangi tonda kullanıldığını bilmiyorsa ----\n\nBu parça, düşüncenin akışına göre aşağıdakilerden hangisiyle tamamlanmalıdır?",
     secenekler: [
@@ -253,6 +261,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Paragrafta Anlam",
     soruMetni:
       "I. Bu nedenle uzmanlar, egzersize başlamadan önce mutlaka ısınma hareketleri yapılmasını öneriyor.\nII. Isınmadan yapılan ani ve zorlayıcı hareketler, kaslarda ve eklemlerde sakatlanmalara yol açabiliyor.\nIII. Çünkü ısınma hareketleri, vücut sıcaklığını ve kaslara giden kan miktarını artırarak bedeni efora hazırlıyor.\nIV. Düzenli spor yapmak sağlığı korumanın en etkili yollarından biridir; ancak yanlış yapıldığında yarardan çok zarar getirebilir.\n\nBu cümlelerle anlamlı bir paragraf oluşturulduğunda sıralama aşağıdakilerden hangisi olur?",
     secenekler: ["IV - II - I - III", "II - IV - III - I", "IV - III - II - I", "III - I - IV - II", "II - I - IV - III"],
@@ -262,6 +271,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Paragrafta Anlatım Biçimleri",
     soruMetni:
       "Köyün girişindeki yaşlı çınarın gövdesi, beş kişinin el ele verse ancak sarabileceği kadar kalındı. Yosun tutmuş dallarından sarkan yapraklar, öğle güneşinde meydanın taş zeminine titrek gölgeler düşürüyordu. Ağacın dibindeki çeşmeden akan suyun şırıltısı, kahvehaneden yükselen tavla şakırtılarına karışıyordu.\n\nBu parçada ağırlıklı olarak kullanılan anlatım biçimi aşağıdakilerden hangisidir?",
     secenekler: ["Tartışma", "Açıklama", "Betimleme", "Öyküleme", "Karşılaştırma"],
@@ -271,6 +281,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Paragrafta Anlam",
     soruMetni:
       "Bir şehrin gerçek yüzünü görmek isteyen gezgin, turistik rehberlerde yıldızla işaretlenmiş yerlerin dışına çıkmayı göze almalıdır. Müzeler, saraylar ve meydanlar elbette görülmeye değerdir; ancak bir kentin ruhu çoğu zaman mahalle aralarındaki fırında, sabah kahvaltısının yapıldığı küçük lokantada, çarşıdaki pazarlık seslerinde saklıdır. Programını dakikası dakikasına planlayan gezgin ise bu beklenmedik karşılaşmaların tadını kaçırır.\n\nBu parçadan aşağıdakilerin hangisi çıkarılabilir?",
     secenekler: [
@@ -286,6 +297,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Paragrafta Anlam",
     soruMetni:
       "(I) Fethiye'ye bağlı Kayaköy, 1923'teki nüfus mübadelesinin ardından boşalan bir yerleşimdir. (II) Yamaca kurulu yüzlerce taş evin yıkık duvarları, bugün de köyün eski büyüklüğünü gözler önüne serer. (III) Rum nüfusun ayrılmasından sonra köy bir daha eski canlılığına kavuşamamıştır. (IV) Bence gün batımında bu ıssız sokaklarda dolaşmak, insanın yaşayabileceği en hüzünlü deneyimlerden biridir. (V) Bölge bugün yerli ve yabancı turistlerin ziyaret ettiği yerler arasındadır.\n\nBu parçadaki numaralanmış cümlelerden hangisi kişisel bir yargı içermektedir?",
     secenekler: ["I", "II", "III", "IV", "V"],
@@ -295,6 +307,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Paragrafta Anlam",
     grupId: "onl-turkce-uyku",
     soruMetni: `${UYKU}\n\nBu parçada uykuyla ilgili aşağıdakilerden hangisine değinilmemiştir?`,
     secenekler: [
@@ -310,6 +323,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Paragrafta Anlam",
     grupId: "onl-turkce-uyku",
     soruMetni: `${UYKU}\n\nBu parçaya göre sınavdan önceki gece uykusuz kalarak çalışmanın sakıncası aşağıdakilerden hangisidir?`,
     secenekler: [
@@ -325,6 +339,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Paragrafta Anlam",
     grupId: "onl-turkce-plastik",
     soruMetni: `${PLASTIK}\n\nBu parçada plastiğin hangi özelliğinin hem bir üstünlük hem de bir sorun kaynağı olduğu vurgulanmaktadır?`,
     secenekler: ["Ucuzluğunun", "Dayanıklılığının", "Hafifliğinin", "Kolay şekil almasının", "Geri dönüştürülebilmesinin"],
@@ -334,6 +349,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Paragrafta Anlam",
     grupId: "onl-turkce-plastik",
     soruMetni: `${PLASTIK}\n\nBu parçadan aşağıdakilerden hangisi çıkarılamaz?`,
     secenekler: [
@@ -349,6 +365,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Paragrafta Anlam",
     grupId: "onl-turkce-evliya",
     soruMetni: `${EVLIYA}\n\nBu parçaya göre araştırmacıların Seyahatname'deki bilgileri başka belgelerle karşılaştırmasının nedeni aşağıdakilerden hangisidir?`,
     secenekler: [
@@ -364,6 +381,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Paragrafta Anlam",
     grupId: "onl-turkce-evliya",
     soruMetni: `${EVLIYA}\n\nBu parçada Seyahatname ile ilgili aşağıdakilerden hangisine değinilmemiştir?`,
     secenekler: [
@@ -379,6 +397,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Paragrafta Anlam",
     grupId: "onl-turkce-evliya",
     soruMetni: `${EVLIYA}\n\nBu parçada yazarın, Seyahatname'deki abartılara yönelik tutumu aşağıdakilerden hangisidir?`,
     secenekler: [
@@ -394,6 +413,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Sözel Mantık",
     grupId: "onl-turkce-mantik-apartman",
     soruMetni: `${APARTMAN}\n\nBuna göre aşağıdakilerden hangisi kesinlikle yanlıştır?`,
     secenekler: [
@@ -409,6 +429,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Sözel Mantık",
     grupId: "onl-turkce-mantik-apartman",
     soruMetni: `${APARTMAN}\n\nEce 5. katta oturuyorsa aşağıdakilerden hangisi kesinlikle doğrudur?`,
     secenekler: [
@@ -424,6 +445,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Sözel Mantık",
     grupId: "onl-turkce-mantik-apartman",
     soruMetni: `${APARTMAN}\n\nAli, Duygu'dan daha alt bir katta oturuyorsa 4. katta kim oturur?`,
     secenekler: ["Ali", "Duygu", "Cem", "Banu", "Ece"],
@@ -433,6 +455,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TURKCE",
+    konu: "Sözel Mantık",
     grupId: "onl-turkce-mantik-apartman",
     soruMetni: `${APARTMAN}\n\nCem 4. katta oturuyorsa 2. katta kim oturur?`,
     secenekler: ["Ali", "Banu", "Cem", "Duygu", "Ece"],
@@ -444,6 +467,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   // ---- MATEMATİK (30) ----
   {
     ders: "MATEMATIK",
+    konu: "Rasyonel ve Ondalık Sayılar",
     soruMetni: "(0,9/0,03 − 0,4/0,08) · (3/5 − 2/5)\n\nişleminin sonucu kaçtır?",
     secenekler: ["3", "4", "5", "6", "7"],
     dogruCevap: 2,
@@ -451,6 +475,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Rasyonel ve Ondalık Sayılar",
     soruMetni: "{2/3 + 1/6|1 − 1/6} + {3/4|3/8}\n\nişleminin sonucu kaçtır?",
     secenekler: ["3", "7/2", "4", "9/2", "5"],
     dogruCevap: 0,
@@ -458,6 +483,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Üslü Sayılar",
     soruMetni: "3ˣ⁺¹ + 3ˣ = 108 olduğuna göre 2ˣ⁺¹ kaçtır?",
     secenekler: ["4", "8", "12", "16", "32"],
     dogruCevap: 3,
@@ -465,13 +491,15 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
-    soruMetni: "{√50 + √18 − √32|√8}\n\nişleminin sonucu kaçtır?",
-    secenekler: ["√2", "2", "2√2", "3", "4"],
+    konu: "Faktöriyel",
+    soruMetni: "{8! − 7!|6!} işleminin sonucu kaçtır?",
+    secenekler: ["42", "49", "56", "63", "72"],
     dogruCevap: 1,
-    aciklama: "√50 = 5√2, √18 = 3√2, √32 = 4√2 ve √8 = 2√2'dir. Pay 5√2 + 3√2 − 4√2 = 4√2; sonuç 4√2/2√2 = 2.",
+    aciklama: "8! = 8 · 7! olduğundan 8! − 7! = 7! · (8 − 1) = 7 · 7!. 7! = 7 · 6! ⇒ pay = 49 · 6!. Sonuç 49'dur.",
   },
   {
     ders: "MATEMATIK",
+    konu: "Faktöriyel",
     soruMetni: "n bir doğal sayı olmak üzere {(n + 2)!|n!} = 42 olduğuna göre n kaçtır?",
     secenekler: ["1", "2", "3", "4", "5"],
     dogruCevap: 4,
@@ -479,6 +507,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Sayılar ve EBOB-EKOK",
     soruMetni:
       "A ve B birbirinden farklı rakamlar olmak üzere 5AB ve AB5 üç basamaklı sayılardır.\n\n5AB − AB5 = 252 olduğuna göre A + B toplamı kaçtır?",
     secenekler: ["7", "8", "9", "10", "11"],
@@ -488,13 +517,15 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
-    soruMetni: "x ≠ 0 ve x ≠ −3 olmak üzere\n\n{xy + 3y − 2x − 6|x² + 3x}\n\nifadesinin en sade biçimi aşağıdakilerden hangisidir?",
-    secenekler: ["{y − 2|x}", "{y + 2|x}", "{y − 2|x + 3}", "{x + 3|x}", "y − 2"],
+    konu: "Denklem Çözme",
+    soruMetni: "{x + 1|3} − {x − 2|4} = 2 olduğuna göre x kaçtır?",
+    secenekler: ["14", "16", "18", "20", "22"],
     dogruCevap: 0,
-    aciklama: "Pay gruplanarak çarpanlarına ayrılır: y(x + 3) − 2(x + 3) = (x + 3)(y − 2). Payda x(x + 3)'tür. Sadeleştirince {y − 2|x} bulunur.",
+    aciklama: "Eşitliğin iki yanı 12 ile çarpılır: 4(x + 1) − 3(x − 2) = 24 ⇒ 4x + 4 − 3x + 6 = 24 ⇒ x + 10 = 24 ⇒ x = 14.",
   },
   {
     ders: "MATEMATIK",
+    konu: "Temel Kavramlar",
     soruMetni:
       "a çift, b tek doğal sayı ve b · c çarpımı çift sayıdır.\n\nBuna göre;\nI. a + c\nII. b + c\nIII. a · b + b + c\nifadelerinden hangileri her zaman tek sayıdır?",
     secenekler: ["Yalnız I", "Yalnız II", "I ve II", "I ve III", "II ve III"],
@@ -504,6 +535,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Mutlak Değer",
     soruMetni: "|x − 2| ≤ 3 eşitsizliğini sağlayan x tam sayılarının toplamı kaçtır?",
     secenekler: ["12", "14", "15", "18", "21"],
     dogruCevap: 1,
@@ -511,6 +543,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Sayılar ve EBOB-EKOK",
     soruMetni:
       "Uzunlukları 48 cm, 72 cm ve 120 cm olan üç ip, hiç artmayacak biçimde eşit uzunlukta ve mümkün olan en uzun parçalara kesilecektir.\n\nBuna göre toplam kaç parça ip elde edilir?",
     secenekler: ["6", "8", "9", "10", "12"],
@@ -519,6 +552,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Oran-Orantı",
     soruMetni:
       "Bir sınıfta kız öğrenci sayısının erkek öğrenci sayısına oranı 3/5'tir. Sınıfa 4 kız öğrenci daha katıldığında kız ve erkek öğrenci sayıları eşit oluyor.\n\nBuna göre sınıfın başlangıçtaki mevcudu kaçtır?",
     secenekler: ["16", "18", "20", "24", "32"],
@@ -527,6 +561,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Sayı Problemleri",
     soruMetni:
       "Ali'nin elma sayısı, Ayşe'nin elma sayısının 3 katının 4 eksiğidir. Ayşe, Ali'ye 6 elma verirse Ali'nin elma sayısı Ayşe'nin elma sayısının 8 katı oluyor.\n\nBuna göre Ali'nin başlangıçta kaç elması vardır?",
     secenekler: ["20", "23", "26", "29", "32"],
@@ -535,6 +570,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Yaş Problemleri",
     soruMetni:
       "Bir babanın bugünkü yaşı oğlunun yaşının 4 katıdır. 6 yıl sonra babanın yaşı, oğlunun o zamanki yaşının 2 katından 12 fazla olacaktır.\n\nBuna göre baba ile oğlunun bugünkü yaşları toplamı kaçtır?",
     secenekler: ["30", "35", "40", "42", "45"],
@@ -543,6 +579,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "İşçi ve Havuz Problemleri",
     soruMetni:
       "Bir işi Ahmet tek başına 6 günde, Burak tek başına 12 günde, Can ise tek başına 12 günde bitirebilmektedir. Ahmet ile Burak birlikte 2 gün çalıştıktan sonra işin kalanını Can tek başına bitiriyor.\n\nBuna göre Can kaç gün çalışmıştır?",
     secenekler: ["4", "6", "8", "9", "10"],
@@ -551,6 +588,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Hareket Problemleri",
     soruMetni:
       "A kentinden B kentine saatte 60 km sabit hızla giden bir araç, saatte 75 km sabit hızla gitseydi B kentine 1 saat erken varacaktı.\n\nBuna göre A ile B kentleri arası kaç km'dir?",
     secenekler: ["150", "200", "240", "300", "360"],
@@ -559,21 +597,23 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
-    soruMetni:
-      "Maliyeti 400 TL olan bir ürünün etiket fiyatı, maliyetinin %25 fazlası olarak belirlenmiştir. Bu ürün kampanya döneminde etiket fiyatı üzerinden %20 indirimle satılmıştır.\n\nBuna göre bu satış için aşağıdakilerden hangisi doğrudur?",
-    secenekler: ["20 TL kâr edilmiştir.", "40 TL kâr edilmiştir.", "Ne kâr ne zarar edilmiştir.", "20 TL zarar edilmiştir.", "40 TL zarar edilmiştir."],
+    konu: "Kesir Problemleri",
+    soruMetni: "Bir öğrenci harçlığının 1/3'ünü kitaba, kalan paranın 1/4'ünü yemeğe harcıyor. Geriye 150 TL kaldığına göre öğrencinin harçlığı kaç TL'dir?",
+    secenekler: ["240", "270", "300", "360", "450"],
     dogruCevap: 2,
-    aciklama: "Etiket fiyatı 400 · 1,25 = 500 TL, indirimli satış fiyatı 500 · 0,80 = 400 TL'dir. Satış fiyatı maliyete eşit olduğundan ne kâr ne zarar edilmiştir.",
+    aciklama: "Harçlık x olsun. Kitaptan sonra 2x/3 kalır; bunun 1/4'ü olan x/6 yemeğe gider. Kalan: 2x/3 − x/6 = x/2 = 150 ⇒ x = 300 TL.",
   },
   {
     ders: "MATEMATIK",
-    soruMetni: "Tuz oranı %20 olan 30 gram tuzlu su ile tuz oranı %40 olan 20 gram tuzlu su karıştırılıyor.\n\nElde edilen karışımın tuz oranı yüzde kaçtır?",
-    secenekler: ["28", "30", "32", "34", "36"],
+    konu: "Kümeler",
+    soruMetni: "A ve B kümeleri için s(A) = 12, s(B) = 9 ve s(A ∩ B) = 4'tür.\n\nBuna göre s(A ∪ B) − s(A − B) farkı kaçtır?",
+    secenekler: ["9", "10", "11", "12", "13"],
     dogruCevap: 0,
-    aciklama: "Tuz miktarı 30 · 0,20 + 20 · 0,40 = 6 + 8 = 14 gram, karışım 50 gramdır. Tuz oranı 14/50 = %28.",
+    aciklama: "s(A ∪ B) = 12 + 9 − 4 = 17; s(A − B) = 12 − 4 = 8. Fark 17 − 8 = 9'dur (bu fark aslında s(B)'ye eşittir).",
   },
   {
     ders: "MATEMATIK",
+    konu: "Kümeler",
     soruMetni:
       "Bir sınıfta İngilizce bilen 18, Almanca bilen 12 öğrenci vardır. Her iki dili de bilen 5 öğrenci, bu dillerden hiçbirini bilmeyen ise 7 öğrenci bulunmaktadır.\n\nBuna göre sınıf mevcudu kaçtır?",
     secenekler: ["25", "27", "28", "30", "32"],
@@ -582,6 +622,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Fonksiyonlar",
     soruMetni: "f(x) = 2x + 1 ve g(x) = 3x − 2 fonksiyonları veriliyor.\n\nBuna göre (g ∘ f)(2) değeri kaçtır?",
     secenekler: ["11", "13", "15", "17", "19"],
     dogruCevap: 1,
@@ -589,6 +630,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Sayılar ve EBOB-EKOK",
     soruMetni: "Rakamlarının çarpımı, rakamlarının toplamının 2 katına eşit olan iki basamaklı doğal sayıların toplamı kaçtır?",
     secenekler: ["99", "107", "136", "143", "170"],
     dogruCevap: 3,
@@ -597,14 +639,15 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
-    soruMetni:
-      "Birbirinden farklı 4 roman ve birbirinden farklı 4 hikâye kitabı bir rafa yan yana dizilecektir. Rafta ilk kitap roman olacak ve romanlar ile hikâye kitapları sırayla (roman, hikâye, roman, …) yer alacaktır.\n\nBuna göre bu dizilim kaç farklı biçimde yapılabilir?",
-    secenekler: ["576", "1152", "2880", "20160", "40320"],
+    konu: "Sayısal Mantık",
+    soruMetni: "Belirli bir kurala göre oluşturulan\n\n3, 4, 7, 11, 18, 29, …\n\nsayı dizisinin 8. terimi kaçtır?",
+    secenekler: ["76", "78", "81", "85", "94"],
     dogruCevap: 0,
-    aciklama: "Romanlar 1, 3, 5 ve 7. sıralara 4! = 24, hikâye kitapları 2, 4, 6 ve 8. sıralara 4! = 24 farklı biçimde dizilir. Toplam 24 · 24 = 576.",
+    aciklama: "Üçüncü terimden itibaren her terim kendinden önceki iki terimin toplamıdır (3 + 4 = 7, 4 + 7 = 11, …). 7. terim 18 + 29 = 47, 8. terim 29 + 47 = 76'dır.",
   },
   {
     ders: "MATEMATIK",
+    konu: "Olasılık",
     soruMetni: "Hileli olmayan iki zar birlikte atılıyor.\n\nZarların üst yüzüne gelen sayıların toplamının 8 olma olasılığı kaçtır?",
     secenekler: ["1/9", "1/12", "5/36", "1/6", "7/36"],
     dogruCevap: 2,
@@ -612,6 +655,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Sayısal Mantık",
     grupId: "onl-mat-delta",
     soruMetni: `${DELTA_ISLEMI}\n\nBuna göre (5 Δ 2) + (2 Δ 5) işleminin sonucu kaçtır?`,
     secenekler: ["12", "14", "15", "16", "18"],
@@ -620,6 +664,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Sayısal Mantık",
     grupId: "onl-mat-delta",
     soruMetni: `${DELTA_ISLEMI}\n\nBuna göre x Δ 3 = 10 eşitliğini sağlayan x değerlerinin toplamı kaçtır?`,
     secenekler: ["−7", "−2", "2", "5", "12"],
@@ -629,6 +674,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Grafik Problemleri",
     grupId: "onl-mat-defter",
     soruMetni: `${DEFTER}\n\nKırtasiye cumartesi günü de satış yaptığında altı günlük ortalama satış 16 defter olduğuna göre cumartesi günü kaç defter satılmıştır?`,
     gorselSvg: DEFTER_GRAFIGI,
@@ -638,6 +684,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Grafik Problemleri",
     grupId: "onl-mat-defter",
     soruMetni: `${DEFTER}\n\nDefterin satış fiyatı pazartesi, salı ve çarşamba günleri 25 TL; perşembe ve cuma günleri 30 TL olduğuna göre bu beş günde defter satışından elde edilen toplam gelir kaç TL'dir?`,
     gorselSvg: DEFTER_GRAFIGI,
@@ -648,6 +695,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   // -- Geometri (4, gorselli) --
   {
     ders: "MATEMATIK",
+    konu: "Geometri",
     geometri: true,
     soruMetni:
       "Şekildeki ABC üçgeninde D noktası [AC] üzerindedir. m(BAC) = 40°, m(ABD) = 35° ve m(ACB) = 50°'dir.\n\nBuna göre m(DBC) kaç derecedir?",
@@ -660,6 +708,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Geometri",
     geometri: true,
     soruMetni: "Şekilde ABCD bir kare, ABE ise karenin içinde kalan bir eşkenar üçgendir.\n\nBuna göre m(EDC) kaç derecedir?",
     gorselSvg:
@@ -671,6 +720,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Geometri",
     geometri: true,
     soruMetni:
       "Şekildeki ABC dik üçgeninde [AB] ⊥ [BC], |AC| = 10 cm ve |AB| = 6 cm'dir. D noktası [BC]'nin orta noktasıdır.\n\nBuna göre ABD üçgeninin alanı kaç cm²'dir?",
@@ -682,6 +732,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "MATEMATIK",
+    konu: "Geometri",
     geometri: true,
     soruMetni:
       "Taban ayrıtları 8 cm ve 6 cm olan dikdörtgenler prizması biçimindeki bir kapta 4 cm yüksekliğinde su vardır. Bu suyun tamamı, taban ayrıtları 4 cm olan kare dik prizma biçimindeki boş bir kaba boşaltılıyor.\n\nBuna göre ikinci kaptaki suyun yüksekliği kaç cm olur?",
@@ -695,22 +746,23 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   // ---- TARİH (27) ----
   {
     ders: "TARIH",
-    soruMetni:
-      "Mete Han döneminde ordu; onlu, yüzlü, binli ve on binli birlikler hâlinde teşkilatlandırılmıştır. Türk tarihinde ilk kez uygulanan bu düzen, sonraki Türk devletlerince de sürdürülmüş ve günümüzde pek çok ülkenin ordu teşkilatına örnek olmuştur.\n\nOrdunun ilk kez onlu sisteme göre teşkilatlandırıldığı bu Türk devleti aşağıdakilerden hangisidir?",
-    secenekler: ["I. Göktürk Devleti", "Asya Hun Devleti", "Uygur Devleti", "Avar Devleti", "Hazar Devleti"],
+    konu: "İlk Türk-İslam Kültür ve Medeniyeti",
+    soruMetni: "Karahanlılar döneminde Kaşgarlı Mahmud tarafından, Araplara Türkçeyi öğretmek ve Türkçenin Arapça kadar zengin bir dil olduğunu göstermek amacıyla yazılan eser aşağıdakilerden hangisidir?",
+    secenekler: ["Atabetü'l-Hakayık", "Divanü Lügati't-Türk", "Kutadgu Bilig", "Siyasetname", "Divan-ı Hikmet"],
     dogruCevap: 1,
-    aciklama: "Onlu sistem, Asya Hun hükümdarı Mete Han tarafından MÖ 209'dan sonra uygulamaya konmuştur; bu nedenle Mete Han Türk ordusunun kurucusu kabul edilir.",
+    aciklama: "Divanü Lügati't-Türk (1072-1074), Kaşgarlı Mahmud'un Araplara Türkçeyi öğretmek amacıyla yazdığı ilk Türkçe sözlüktür. Kutadgu Bilig Yusuf Has Hacib'in, Atabetü'l-Hakayık Edip Ahmet Yükneki'nin, Divan-ı Hikmet Ahmet Yesevi'nin, Siyasetname ise Büyük Selçuklu veziri Nizamülmülk'ün eseridir.",
   },
   {
     ders: "TARIH",
-    soruMetni:
-      "Orhun Yazıtları (Göktürk Kitabeleri) ile ilgili;\nI. “Türk” adının geçtiği ilk Türkçe yazılı belgelerdir.\nII. Kül Tigin, Bilge Kağan ve Tonyukuk adına dikilmiştir.\nIII. Uygur alfabesiyle yazılmıştır.\nifadelerinden hangileri doğrudur?",
-    secenekler: ["Yalnız I", "Yalnız II", "Yalnız III", "I ve II", "II ve III"],
+    konu: "Osmanlı Kültür ve Medeniyeti",
+    soruMetni: "Osmanlı Devleti'nde Divan-ı Hümayun'da dış işlerinden sorumlu olan; görevi XIX. yüzyılda Hariciye Nazırlığına dönüştürülen görevli aşağıdakilerden hangisidir?",
+    secenekler: ["Defterdar", "Nişancı", "Kazasker", "Reisülküttap", "Kaptan-ı Derya"],
     dogruCevap: 3,
-    aciklama: "Orhun Yazıtları Türk adının geçtiği ilk Türkçe metinlerdir ve Kül Tigin, Bilge Kağan ile Tonyukuk adına dikilmiştir. Yazıtlar Uygur alfabesiyle değil, Göktürk (Köktürk) alfabesiyle yazılmıştır.",
+    aciklama: "Reisülküttap, Divan-ı Hümayun kâtiplerinin başıdır ve dış yazışmalarla antlaşmaların hazırlanmasından sorumludur; II. Mahmud döneminde görevi Hariciye Nazırlığına dönüştürülmüştür. Defterdar mali işlere, nişancı padişah tuğrasına ve tapu kayıtlarına, kazasker adalet ve eğitim işlerine bakardı.",
   },
   {
     ders: "TARIH",
+    konu: "İslamiyet Öncesi Türk Kültür ve Medeniyeti",
     soruMetni:
       "İslamiyet öncesi Türk devletlerinde hükümdarın başkanlığında; hatun, hanedan üyeleri, boy beyleri ve ileri gelen devlet adamlarının katılımıyla toplanan, savaş, barış ve tahta geçiş gibi önemli devlet işlerinin görüşüldüğü meclis aşağıdakilerden hangisidir?",
     secenekler: ["Kurultay (Toy)", "Divan-ı Hümayun", "Ahilik", "Lonca", "Encümen-i Daniş"],
@@ -720,6 +772,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
+    konu: "İlk Türk-İslam Devletleri",
     soruMetni:
       "751'de Abbasiler ile Çin arasında yapılan Talas Savaşı'nda Karlukların Abbasilerin yanında yer alması, savaşın sonucunu belirlemiştir.\n\nAşağıdakilerden hangisi Talas Savaşı'nın sonuçlarından biri değildir?",
     secenekler: [
@@ -735,14 +788,15 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
-    soruMetni:
-      "Hindistan'a on yedi sefer düzenleyerek bu bölgede İslamiyet'in yayılmasına katkı sağlayan; Abbasi halifesinden “sultan” unvanını kullanma izni aldığı kabul edilen ilk Müslüman Türk hükümdarı aşağıdakilerden hangisidir?",
-    secenekler: ["Alp Arslan", "Tuğrul Bey", "Gazneli Mahmut", "Satuk Buğra Han", "Melikşah"],
+    konu: "İnkılap Tarihi",
+    soruMetni: "Aşağıdakilerden hangisi hukuk alanında yapılan inkılaplardan biridir?",
+    secenekler: ["Şapka Kanunu'nun kabulü", "Tevhid-i Tedrisat Kanunu'nun kabulü", "Türk Medeni Kanunu'nun kabulü", "Harf İnkılabı", "Ölçüler Kanunu'nun kabulü"],
     dogruCevap: 2,
-    aciklama: "Gazneli Mahmut, Hindistan seferleriyle tanınır ve “sultan” unvanını kullanan ilk Türk-İslam hükümdarı olarak kabul edilir.",
+    aciklama: "Türk Medeni Kanunu (1926), aile ve kişiler hukukunu laik esaslara göre düzenleyen hukuk inkılabıdır. Şapka Kanunu ve Ölçüler Kanunu toplumsal hayata, Tevhid-i Tedrisat ve Harf İnkılabı ise eğitim ve kültür alanına yöneliktir.",
   },
   {
     ders: "TARIH",
+    konu: "İlk Türk-İslam Kültür ve Medeniyeti",
     soruMetni:
       "Karahanlılar döneminde Yusuf Has Hacip tarafından yazılıp Tabgaç Buğra Han'a sunulan; “mutluluk veren bilgi” anlamına gelen ve ideal devlet yönetimine ilişkin öğütler içeren eser aşağıdakilerden hangisidir?",
     secenekler: ["Atabetü'l-Hakayık", "Divan-ı Hikmet", "Kutadgu Bilig", "Siyasetname", "Divan-ı Lügati't-Türk"],
@@ -752,20 +806,15 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
-    soruMetni: "Aşağıdakilerden hangisi Haçlı Seferleri'nin Avrupa'ya etkilerinden biri değildir?",
-    secenekler: [
-      "Kilisenin otoritesinin güçlenmesi",
-      "Doğu-Batı ticaretinin canlanması",
-      "Feodal beylerin güç kaybetmesi",
-      "İslam dünyasındaki bazı bilgi ve buluşların Avrupa'ya geçmesi",
-      "Venedik ve Ceneviz gibi liman kentlerinin zenginleşmesi",
-    ],
+    konu: "İnkılap Tarihi",
+    soruMetni: "3 Mart 1924'te halifeliğin kaldırılmasıyla aynı gün kabul edilen ve bütün eğitim-öğretim kurumlarını Maarif Vekâletine (Millî Eğitim Bakanlığı) bağlayan düzenleme aşağıdakilerden hangisidir?",
+    secenekler: ["Tevhid-i Tedrisat Kanunu", "Tekke ve zaviyelerin kapatılması", "Şapka Kanunu", "Soyadı Kanunu", "Harf İnkılabı"],
     dogruCevap: 0,
-    aciklama:
-      "Seferlerin dinî amaçlarına ulaşamaması kiliseye duyulan güveni sarsmış, kilisenin otoritesi zayıflamıştır. Diğer seçenekler Haçlı Seferleri'nin Avrupa'ya etkileridir.",
+    aciklama: "Tevhid-i Tedrisat (Öğretim Birliği) Kanunu, halifeliğin ve Şer'iye ve Evkaf Vekâletinin kaldırılmasıyla aynı gün (3 Mart 1924) kabul edilmiştir. Tekke ve zaviyelerin kapatılması ile Şapka Kanunu 1925'te, Harf İnkılabı 1928'de, Soyadı Kanunu 1934'te gerçekleşmiştir.",
   },
   {
     ders: "TARIH",
+    konu: "Osmanlı Kuruluş ve Yükselme",
     soruMetni: "Aşağıdakilerden hangisi İstanbul'un fethinin (1453) sonuçlarından biri değildir?",
     secenekler: [
       "Bizans İmparatorluğu'nun yıkılması",
@@ -779,14 +828,15 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
-    soruMetni:
-      "Mercidabık (1516) ve Ridaniye (1517) savaşlarında Memlük Devleti'ni yenerek Suriye, Filistin ve Mısır'ı Osmanlı topraklarına katan; halifeliğin Osmanlı Devleti'ne geçmesini sağlayan padişah aşağıdakilerden hangisidir?",
-    secenekler: ["II. Bayezid", "Yavuz Sultan Selim", "Kanuni Sultan Süleyman", "Fatih Sultan Mehmet", "I. Murat"],
+    konu: "İnkılap Tarihi",
+    soruMetni: "Cumhuriyetin ilk yıllarında köylünün vergi yükünü hafifletmek ve tarımsal üretimi artırmak amacıyla 1925'te kaldırılan vergi aşağıdakilerden hangisidir?",
+    secenekler: ["Cizye", "Aşar", "Avarız", "İspençe", "Haraç"],
     dogruCevap: 1,
-    aciklama: "Mısır Seferi'ni gerçekleştiren ve halifeliği Osmanlı'ya getiren padişah Yavuz Sultan Selim'dir.",
+    aciklama: "Ürünün belirli bir oranında alınan aşar (öşür) vergisi 1925'te kaldırılmıştır. Bu karar, nüfusun büyük bölümünü oluşturan köylüyü rahatlatmayı ve tarımı canlandırmayı amaçlar.",
   },
   {
     ders: "TARIH",
+    konu: "Osmanlı Kültür ve Medeniyeti",
     soruMetni:
       "Osmanlı Devleti'nde Hristiyan ailelerin erkek çocuklarının belirli aralıklarla toplanarak Türk-İslam kültürüyle yetiştirildiği; bu çocukların yeteneklerine göre Kapıkulu ocaklarında ya da saray hizmetinde görevlendirildiği sistem aşağıdakilerden hangisidir?",
     secenekler: ["Pençik", "İltizam", "Tımar", "Devşirme", "Müsadere"],
@@ -796,6 +846,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
+    konu: "Osmanlı Kültür ve Medeniyeti",
     soruMetni:
       "Osmanlı Devleti'nde uygulanan tımar sisteminin;\nI. hazineden para harcanmadan büyük bir atlı asker gücünün beslenmesi,\nII. tarımsal üretimin denetim altında tutulması ve sürekliliğinin sağlanması,\nIII. taşrada güvenlik ve asayişin korunması,\nIV. merkezî hazineye peşin ve yüksek nakit gelir sağlanması\nyararlarından hangileri devlete sağladığı katkılar arasında gösterilebilir?",
     secenekler: ["I ve II", "I ve IV", "II ve IV", "I, II ve III", "II, III ve IV"],
@@ -805,6 +856,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
+    konu: "Osmanlı Gerileme (XVIII. yy)",
     soruMetni:
       "Osmanlı Devleti, Belgrat Antlaşması'nda (1739) arabuluculuk yapan Fransa'ya 1740'ta tanıdığı kapitülasyonları sürekli hâle getirmiştir. Böylece bu ayrıcalıkların her padişah değişiminde yenilenmesi gereği ortadan kalkmıştır.\n\nBu gelişmenin uzun vadeli sonucu aşağıdakilerden hangisidir?",
     secenekler: [
@@ -820,6 +872,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
+    konu: "Osmanlı Duraklama (XVII. yy)",
     soruMetni:
       "II. Viyana Kuşatması'nın (1683) başarısızlıkla sonuçlanmasından sonra Kutsal İttifak devletleriyle yapılan uzun savaşların ardından imzalanan; Osmanlı Devleti'nin ilk kez büyük çapta toprak kaybettiği antlaşma aşağıdakilerden hangisidir?",
     secenekler: ["Zitvatorok", "Pasarofça", "Karlofça", "Küçük Kaynarca", "İstanbul"],
@@ -829,6 +882,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
+    konu: "Osmanlı Kültür ve Medeniyeti",
     soruMetni:
       "III. Selim döneminde Avrupa tarzında eğitilerek Yeniçeri Ocağı'na alternatif olarak kurulan; Kabakçı Mustafa İsyanı sonucunda kaldırılan ordu aşağıdakilerden hangisidir?",
     secenekler: ["Nizam-ı Cedid", "Asakir-i Mansure-i Muhammediye", "Sekban-ı Cedid", "Kuva-yı Seyyare", "Kapıkulu Süvarileri"],
@@ -838,6 +892,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
+    konu: "Osmanlı Dağılma (XIX. yy)",
     soruMetni: "Aşağıdakilerden hangisi Tanzimat Fermanı (1839) ile getirilen düzenlemelerden biri değildir?",
     secenekler: [
       "Herkesin can, mal ve namus güvenliğinin devlet güvencesine alınması",
@@ -851,14 +906,15 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
-    soruMetni:
-      "Kırım Savaşı'nın ardından 1856'da imzalanan; Osmanlı Devleti'nin Avrupa devleti sayılarak toprak bütünlüğünün Avrupa devletlerinin güvencesi altına alındığı ve Karadeniz'in tarafsız hâle getirildiği antlaşma aşağıdakilerden hangisidir?",
-    secenekler: ["Edirne Antlaşması", "Berlin Antlaşması", "Londra Antlaşması", "Hünkâr İskelesi Antlaşması", "Paris Antlaşması"],
+    konu: "Çağdaş Türk ve Dünya Tarihi",
+    soruMetni: "Türkiye, Kuzey Atlantik Antlaşması Örgütüne (NATO) hangi yıl üye olmuştur?",
+    secenekler: ["1945", "1947", "1949", "1950", "1952"],
     dogruCevap: 4,
-    aciklama: "Paris Antlaşması (1856) ile Osmanlı Devleti Avrupa hukukundan yararlanan bir Avrupa devleti sayılmış, Karadeniz tarafsız hâle getirilmiştir.",
+    aciklama: "NATO 1949'da kurulmuş, Türkiye ve Yunanistan 18 Şubat 1952'de örgüte üye olmuştur. Türkiye'nin Kore Savaşı'na (1950) asker göndermesi bu üyeliğin önünü açmıştır.",
   },
   {
     ders: "TARIH",
+    konu: "XX. Yüzyılda Osmanlı",
     soruMetni: "Aşağıdakilerden hangisi Balkan Savaşları'nın (1912-1913) sonuçlarından biri değildir?",
     secenekler: [
       "Osmanlı Devleti'nin Rumeli topraklarının büyük bölümünü kaybetmesi",
@@ -872,6 +928,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
+    konu: "Millî Mücadele",
     soruMetni:
       "Kuvayımilliye birlikleri ile ilgili;\nI. Düzenli ordu kurulana kadar düşman ilerleyişini yavaşlatmıştır.\nII. Yerel ve bölgesel nitelikte örgütlenmiştir.\nIII. Merkezî bir komuta altında, tek elden yönetilmiştir.\nifadelerinden hangileri doğrudur?",
     secenekler: ["Yalnız I", "I ve II", "I ve III", "II ve III", "I, II ve III"],
@@ -881,6 +938,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
+    konu: "Millî Mücadele",
     soruMetni:
       "Manda ve himayenin kesin olarak reddedildiği; bütün yerel cemiyetlerin “Anadolu ve Rumeli Müdafaa-i Hukuk Cemiyeti” adıyla tek çatı altında birleştirildiği ve İrade-i Milliye gazetesinin çıkarılmasına karar verilen kongre aşağıdakilerden hangisidir?",
     secenekler: ["Erzurum Kongresi", "Balıkesir Kongresi", "Alaşehir Kongresi", "Sivas Kongresi", "Pozantı Kongresi"],
@@ -890,6 +948,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
+    konu: "Millî Mücadele",
     soruMetni:
       "Son Osmanlı Mebusan Meclisi'nde kabul edilen; Mondros Ateşkesi imzalandığı sırada Türk askerinin savunduğu sınırlar içindeki toprakların bölünmez bir bütün olduğunu ilan eden ve kapitülasyonları reddeden kararlar aşağıdakilerden hangisidir?",
     secenekler: ["Misak-ı Millî", "Amasya Genelgesi", "Amasya Görüşmeleri", "Havza Genelgesi", "Teşkilat-ı Esasiye Kanunu"],
@@ -899,6 +958,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
+    konu: "Millî Mücadele",
     soruMetni: "Aşağıdaki gelişmelerden hangisi I. İnönü Muharebesi'nin (Ocak 1921) kazanılmasından sonra gerçekleşmemiştir?",
     secenekler: [
       "Sevr Antlaşması'nın imzalanması",
@@ -913,15 +973,15 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
-    soruMetni:
-      "Büyük Taarruz'un ardından imzalanan; Doğu Trakya'nın savaş yapılmadan kurtarılmasını sağlayan ve İtilaf Devletleri'nin TBMM'yi fiilen Türkiye'nin tek temsilcisi olarak kabul ettiğini gösteren antlaşma aşağıdakilerden hangisidir?",
-    secenekler: ["Mondros Ateşkes Antlaşması", "Gümrü Antlaşması", "Kars Antlaşması", "Ankara Antlaşması", "Mudanya Ateşkes Antlaşması"],
+    konu: "Çağdaş Türk ve Dünya Tarihi",
+    soruMetni: "1947'de ilan edilen; Sovyet yayılmacılığına karşı Türkiye ve Yunanistan'a ABD tarafından askerî ve ekonomik yardım yapılmasını öngören doktrin aşağıdakilerden hangisidir?",
+    secenekler: ["Marshall Planı", "Eisenhower Doktrini", "Monroe Doktrini", "Nixon Doktrini", "Truman Doktrini"],
     dogruCevap: 4,
-    aciklama:
-      "Mudanya Ateşkes Antlaşması (11 Ekim 1922) ile Doğu Trakya savaşsız olarak TBMM'ye bırakılmış, İstanbul ve Boğazların yönetiminin de TBMM'ye geçmesi kabul edilmiştir.",
+    aciklama: "Truman Doktrini (1947), Sovyetler Birliği'nin baskısı altındaki Türkiye ve Yunanistan'a askerî ve ekonomik yardımı öngörür. Marshall Planı (1948) Avrupa'nın ekonomik kalkınmasına, Eisenhower Doktrini (1957) Orta Doğu'ya yöneliktir.",
   },
   {
     ders: "TARIH",
+    konu: "İnkılap Tarihi",
     soruMetni:
       "İtilaf Devletleri'nin Lozan Barış Konferansı'na hem İstanbul hükümetini hem de TBMM hükümetini davet etmesi, ikili bir görüntü oluşmasına neden olmuştur. TBMM bu durumu ortadan kaldırmak için 1 Kasım 1922'de önemli bir karar almıştır.\n\nBu karar aşağıdakilerden hangisidir?",
     secenekler: [
@@ -936,6 +996,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
+    konu: "İnkılap Tarihi",
     soruMetni: "Aşağıdaki inkılap - Atatürk ilkesi eşleştirmelerinden hangisi yanlıştır?",
     secenekler: [
       "Saltanatın kaldırılması - Cumhuriyetçilik",
@@ -950,6 +1011,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
+    konu: "Atatürk Dönemi İç ve Dış Politika",
     soruMetni:
       "1925'te Doğu Anadolu'da başlayan; bastırılması amacıyla Takrir-i Sükûn Kanunu'nun çıkarılmasına ve Terakkiperver Cumhuriyet Fırkası'nın kapatılmasına yol açan ayaklanma aşağıdakilerden hangisidir?",
     secenekler: ["Menemen Olayı", "Şeyh Sait İsyanı", "Ağrı İsyanı", "Çerkez Ethem İsyanı", "Kubilay Olayı"],
@@ -958,24 +1020,25 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "TARIH",
-    soruMetni:
-      "1936'da imzalanan; Lozan'da kurulan uluslararası Boğazlar Komisyonu'nu kaldırarak Boğazların yönetimini ve savunmasını tamamen Türkiye'ye bırakan sözleşme aşağıdakilerden hangisidir?",
-    secenekler: ["Lozan Barış Antlaşması", "Montrö Boğazlar Sözleşmesi", "Sadabat Paktı", "Balkan Antantı", "Ankara Antlaşması"],
+    konu: "Çağdaş Türk ve Dünya Tarihi",
+    soruMetni: "Türkiye'nin 1950'de Birleşmiş Milletler kararı doğrultusunda asker göndererek katıldığı savaş aşağıdakilerden hangisidir?",
+    secenekler: ["Vietnam Savaşı", "Kore Savaşı", "Körfez Savaşı", "Arap-İsrail Savaşı", "Afganistan Savaşı"],
     dogruCevap: 1,
-    aciklama: "Montrö Boğazlar Sözleşmesi (1936) ile Boğazlar Komisyonu kaldırılmış, Türkiye Boğazlara asker yerleştirme hakkını elde etmiştir.",
+    aciklama: "Türkiye, BM kararıyla Kore Savaşı'na (1950-1953) tugay düzeyinde asker göndermiştir. Bu katılım, Türkiye'nin 1952'de NATO'ya üye olmasında etkili olmuştur.",
   },
   {
     ders: "TARIH",
-    soruMetni:
-      "1937'de Türkiye, İran, Irak ve Afganistan arasında imzalanan; Orta Doğu'da barışın korunmasını ve taraflar arasında saldırmazlığı amaçlayan pakt aşağıdakilerden hangisidir?",
-    secenekler: ["Balkan Antantı", "Bağdat Paktı", "NATO", "Sadabat Paktı", "CENTO"],
+    konu: "Çağdaş Türk ve Dünya Tarihi",
+    soruMetni: "1955'te Türkiye, Irak, İngiltere, İran ve Pakistan arasında kurulan; 1959'da Irak'ın ayrılmasıyla CENTO adını alan savunma örgütü aşağıdakilerden hangisidir?",
+    secenekler: ["Sadabat Paktı", "Balkan Paktı", "Varşova Paktı", "Bağdat Paktı", "Balkan Antantı"],
     dogruCevap: 3,
-    aciklama: "Sadabat Paktı, Atatürk döneminde Tahran'daki Sadabat Sarayı'nda imzalanmıştır. Balkan Antantı (1934) Balkan devletleriyle; Bağdat Paktı (1955) ve onun devamı CENTO ise Atatürk sonrası dönemde kurulmuştur.",
+    aciklama: "Bağdat Paktı 1955'te kurulmuş, Irak'ın 1959'da ayrılmasıyla Merkezî Antlaşma Teşkilatı (CENTO) adını almıştır. Sadabat Paktı (1937) ve Balkan Antantı (1934) Atatürk dönemine, Balkan Paktı (1953) Türkiye-Yunanistan-Yugoslavya ittifakına aittir.",
   },
 
   // ---- COĞRAFYA (18) ----
   {
     ders: "COGRAFYA",
+    konu: "Coğrafi Konum",
     soruMetni: "Aşağıdakilerden hangisi Türkiye'nin özel (göreceli) konumunun bir sonucu değildir?",
     secenekler: [
       "Boğazlar sayesinde Karadeniz ile Akdeniz arasında geçiş noktası olması",
@@ -990,6 +1053,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "COGRAFYA",
+    konu: "Fiziki Özellikler",
     soruMetni:
       "Konya'nın Karapınar ilçesi, rüzgâr erozyonunun en etkili olduğu yerlerden biridir; burada kum tepeleri (kumullar) oluşmuş ve uzun yıllar ağaçlandırma ile rüzgâr perdesi çalışmaları yapılmıştır.\n\nKarapınar'da rüzgâr erozyonunun etkili olmasında aşağıdakilerden hangisinin payı yoktur?",
     secenekler: [
@@ -1005,6 +1069,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "COGRAFYA",
+    konu: "Fiziki Özellikler",
     soruMetni:
       "Haritada numaralandırılarak gösterilen göllerden hangisi doğal yollarla oluşmamış, bir akarsuyun önüne yapılan barajın gerisinde biriken sularla oluşmuştur?",
     gorselSvg: turkiyeHaritasi({
@@ -1023,6 +1088,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "COGRAFYA",
+    konu: "Tarım",
     soruMetni:
       "Haritada taralı olarak gösterilen illerde yetiştirilen ve Türkiye üretiminin büyük bölümünün karşılandığı; yetişme dönemi boyunca bol ve düzenli yağış, asitli topraklar isteyen tarım ürünü aşağıdakilerden hangisidir?",
     gorselSvg: turkiyeHaritasi({ taraliIller: ["Rize", "Artvin"] }),
@@ -1033,6 +1099,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "COGRAFYA",
+    konu: "İklim ve Bitki Örtüsü",
     soruMetni:
       "Grafiklerde bir meteoroloji istasyonuna ait uzun yıllar aylık ortalama sıcaklık ve aylık ortalama yağış değerleri verilmiştir.\n\nBu istasyonun bulunduğu yöreyle ilgili aşağıdakilerden hangisi söylenemez?",
     // MGM, Erzurum uzun yillar (1929-2025) aylik ortalamalari.
@@ -1053,6 +1120,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "COGRAFYA",
+    konu: "Fiziki Özellikler",
     soruMetni: "Çukurova, Bafra ve Çarşamba ovalarının oluşumunda etkili olan temel süreç aşağıdakilerden hangisidir?",
     secenekler: [
       "Rüzgârların taşıdığı kumların birikmesi",
@@ -1067,6 +1135,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "COGRAFYA",
+    konu: "Nüfus ve Yerleşme",
     soruMetni: "Doğu Anadolu Bölgesi'nin genelinde nüfusun seyrek olmasında aşağıdakilerden hangisinin etkisi yoktur?",
     secenekler: [
       "Ortalama yükseltinin fazla olması",
@@ -1081,6 +1150,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "COGRAFYA",
+    konu: "Nüfus ve Yerleşme",
     soruMetni:
       "Her yıl ilkbahar ve yaz aylarında Güneydoğu Anadolu'dan pek çok aile; Çukurova, Ege ve İç Anadolu'daki tarım alanlarına çalışmak için gider, hasat bitince de yaşadıkları yerlere geri döner.\n\nBu durum aşağıdaki göç türlerinden hangisine örnektir?",
     secenekler: ["Mevsimlik (geçici) göç", "Beyin göçü", "Zorunlu göç (mübadele)", "Dış göç", "Kırdan kente kalıcı göç"],
@@ -1089,21 +1159,15 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "COGRAFYA",
-    soruMetni:
-      "Türkiye, dünya fındık üretiminde ilk sırada yer alır ve fındık tarımı büyük ölçüde Karadeniz kıyı kuşağında yapılır.\n\nFındık tarımının bu kuşakta yoğunlaşmasının temel nedeni aşağıdakilerden hangisidir?",
-    secenekler: [
-      "Sulama olanaklarının fazla olması",
-      "Makineli tarıma uygun geniş düzlüklerin bulunması",
-      "Tüketim pazarlarına yakın olunması",
-      "Yaz aylarının sıcak ve kurak geçmesi",
-      "Bitkinin her mevsim yağış alan ılıman ve nemli bir iklim istemesi",
-    ],
+    konu: "İklim ve Bitki Örtüsü",
+    soruMetni: "Türkiye'de Akdeniz kıyı kuşağında, yazların sıcak ve kurak geçmesine uyum sağlamış; kısa boylu, sert yapraklı ve her mevsim yeşil kalan çalılardan oluşan doğal bitki örtüsü aşağıdakilerden hangisidir?",
+    secenekler: ["Bozkır", "Geniş yapraklı orman", "Alpin çayır", "Tundra", "Maki"],
     dogruCevap: 4,
-    aciklama:
-      "Fındık, kışları ılık ve her mevsimi yağışlı nemli iklim ister; bu koşullar Karadeniz kıyı kuşağında bulunur. Bölgede eğimli araziler nedeniyle makineli tarım zordur ve yazlar kurak değildir.",
+    aciklama: "Maki, Akdeniz ikliminin yaz kuraklığına uyum sağlamış, kızılçam ormanlarının tahrip edildiği alanlarda yayılan, her dem yeşil sert yapraklı çalılardır (kocayemiş, mersin, defne vb.).",
   },
   {
     ders: "COGRAFYA",
+    konu: "Hayvancılık",
     soruMetni:
       "Uzun ve parlak tüyleri (tiftik) dokumacılıkta değerli bir ham madde olan Ankara keçisinin yetiştiriciliği, en çok hangi bölgemizde yaygındır?",
     secenekler: ["Karadeniz", "Akdeniz", "İç Anadolu", "Ege", "Marmara"],
@@ -1113,6 +1177,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "COGRAFYA",
+    konu: "Madenler ve Enerji Kaynakları",
     soruMetni:
       "Dünya bor rezervlerinin büyük bölümü Türkiye'de bulunur.\n\nAşağıdaki illerden hangisinde bor minerali çıkarılmaz?",
     secenekler: ["Zonguldak", "Eskişehir", "Balıkesir", "Kütahya", "Bursa"],
@@ -1122,6 +1187,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "COGRAFYA",
+    konu: "Sanayi",
     soruMetni:
       "Türkiye'de şeker fabrikaları, genellikle şeker pancarı tarımının yapıldığı alanların yakınına kurulmuştur.\n\nBunun temel nedeni aşağıdakilerden hangisidir?",
     secenekler: [
@@ -1137,6 +1203,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "COGRAFYA",
+    konu: "Fiziki Özellikler",
     soruMetni: "Doğu Karadeniz Bölümü'nde heyelanların sık yaşanmasında aşağıdakilerden hangisinin etkisi yoktur?",
     secenekler: [
       "Yamaç eğiminin fazla olması",
@@ -1151,15 +1218,15 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "COGRAFYA",
-    soruMetni:
-      "Güneydoğu Anadolu Projesi (GAP) kapsamında Fırat ve Dicle üzerinde barajlar ve sulama kanalları yapılmıştır.\n\nBu projenin sonuçları arasında;\nI. sulu tarım alanlarının genişlemesi,\nII. hidroelektrik üretiminin artması,\nIII. pamuk gibi sanayi bitkilerinin üretiminin artması,\nIV. bölgeden dışarıya göçün tamamen sona ermesi\ndurumlarından hangileri gösterilebilir?",
-    secenekler: ["Yalnız I", "I ve II", "II ve IV", "I, II ve III", "I, II, III ve IV"],
+    konu: "Ticaret",
+    soruMetni: "Aşağıdaki gümrük kapılarından hangisi Türkiye ile Gürcistan arasındadır?",
+    secenekler: ["Kapıkule", "Habur", "Gürbulak", "Sarp", "Cilvegözü"],
     dogruCevap: 3,
-    aciklama:
-      "GAP ile Harran Ovası gibi alanlarda sulu tarım yaygınlaşmış, Atatürk Barajı gibi santrallerle elektrik üretimi ve pamuk üretimi artmıştır. Bölgeden dışarıya göç azalmış olsa da tamamen sona ermemiştir.",
+    aciklama: "Sarp Gümrük Kapısı Artvin'de, Gürcistan sınırındadır. Kapıkule (Edirne) Bulgaristan, Habur (Şırnak) Irak, Gürbulak (Ağrı) İran, Cilvegözü (Hatay) ise Suriye sınırındaki kapılardır.",
   },
   {
     ders: "COGRAFYA",
+    konu: "Turizm",
     soruMetni: "Rize'deki Ayder ve Pokut ile Trabzon'daki Uzungöl, daha çok aşağıdaki turizm türlerinden hangisiyle öne çıkar?",
     secenekler: ["Kıyı (deniz) turizmi", "Yayla turizmi", "İnanç turizmi", "Termal turizm", "Kış (kayak) turizmi"],
     dogruCevap: 1,
@@ -1168,13 +1235,15 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "COGRAFYA",
-    soruMetni: "Aşağıdaki akarsulardan hangisi Karadeniz'e dökülmez?",
-    secenekler: ["Sakarya", "Kızılırmak", "Yeşilırmak", "Çoruh", "Seyhan"],
+    konu: "Coğrafi Konum",
+    soruMetni: "Türkiye 26° ve 45° doğu meridyenleri arasında yer alır.\n\nBuna göre Türkiye'nin en doğusu ile en batısı arasındaki yerel saat farkı kaç dakikadır?",
+    secenekler: ["19", "38", "57", "64", "76"],
     dogruCevap: 4,
-    aciklama: "Seyhan Nehri Akdeniz'e dökülür. Sakarya, Kızılırmak ve Yeşilırmak Türkiye'den, Çoruh ise Gürcistan'ın Batum kenti yakınlarından Karadeniz'e ulaşır.",
+    aciklama: "İki meridyen arasındaki yerel saat farkı 4 dakikadır. 45° − 26° = 19 meridyen farkı ⇒ 19 · 4 = 76 dakika.",
   },
   {
     ders: "COGRAFYA",
+    konu: "Ulaşım",
     soruMetni: "Karadeniz kıyıları ile iç kesimler arasında ulaşımın zor olmasının temel nedeni aşağıdakilerden hangisidir?",
     secenekler: [
       "Dağların kıyıya paralel uzanması",
@@ -1189,6 +1258,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "COGRAFYA",
+    konu: "Madenler ve Enerji Kaynakları",
     soruMetni: "Karabük ve Karadeniz Ereğli demir-çelik fabrikalarının kuruluş yerinin seçiminde etkili olan temel faktör aşağıdakilerden hangisidir?",
     secenekler: [
       "Demir madenlerine yakınlık",
@@ -1205,6 +1275,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   // ---- VATANDAŞLIK (9) ----
   {
     ders: "VATANDASLIK",
+    konu: "Temel Hukuk Kavramları",
     soruMetni: "Aşağıdakilerden hangisi Türk hukukunda yazılı asli (bağlayıcı) hukuk kaynakları arasında yer almaz?",
     secenekler: ["Anayasa", "Kanun", "Cumhurbaşkanlığı kararnamesi", "Bilimsel görüşler (doktrin)", "Yönetmelik"],
     dogruCevap: 3,
@@ -1213,6 +1284,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "VATANDASLIK",
+    konu: "Temel Hukuk Kavramları",
     soruMetni:
       "Türk Medeni Kanunu'na göre fiil ehliyetine sahip olmak için;\nI. ayırt etme gücüne sahip olmak,\nII. ergin olmak,\nIII. kısıtlı olmamak,\nIV. Türk vatandaşı olmak\nkoşullarından hangileri gereklidir?",
     secenekler: ["I ve II", "I, II ve III", "I, II ve IV", "II, III ve IV", "I, II, III ve IV"],
@@ -1222,14 +1294,15 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "VATANDASLIK",
-    soruMetni: "Aşağıdaki kurumlardan hangisi Türk anayasa tarihinde ilk kez 1961 Anayasası ile kurulmamıştır?",
-    secenekler: ["Anayasa Mahkemesi", "Cumhuriyet Senatosu", "Millî Güvenlik Kurulu", "Yüksek Hâkimler Kurulu", "Danıştay"],
+    konu: "Temel Hukuk Kavramları",
+    soruMetni: "Aşağıdakilerden hangisi kamu hukukunun dallarından biri değildir?",
+    secenekler: ["Anayasa hukuku", "İdare hukuku", "Ceza hukuku", "Vergi hukuku", "Ticaret hukuku"],
     dogruCevap: 4,
-    aciklama:
-      "Danıştay'ın kökeni 1868'de kurulan Şura-yı Devlet'e dayanır. Anayasa Mahkemesi, Cumhuriyet Senatosu, Millî Güvenlik Kurulu ve Yüksek Hâkimler Kurulu ise 1961 Anayasası ile kurulmuştur.",
+    aciklama: "Ticaret hukuku, kişiler arasındaki ilişkileri eşitlik esasına göre düzenleyen özel hukukun dalıdır. Anayasa, idare, ceza ve vergi hukuku ise devletin taraf olduğu ilişkileri düzenleyen kamu hukuku dallarıdır.",
   },
   {
     ders: "VATANDASLIK",
+    konu: "Yasama",
     soruMetni: "2017 değişikliği sonrasında 1982 Anayasası'na göre Türkiye Büyük Millet Meclisi ile ilgili aşağıdakilerden hangisi yanlıştır?",
     secenekler: [
       "Milletvekili seçilebilmek için 25 yaşını doldurmuş olmak gerekir.",
@@ -1243,6 +1316,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "VATANDASLIK",
+    konu: "Yürütme",
     soruMetni: "2017 değişikliği sonrasında 1982 Anayasası'na göre Cumhurbaşkanlığı seçimi ile ilgili aşağıdakilerden hangisi yanlıştır?",
     secenekler: [
       "Aday olabilmek için kırk yaşını doldurmuş olmak gerekir.",
@@ -1257,6 +1331,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "VATANDASLIK",
+    konu: "Yargı",
     soruMetni: "Aşağıdakilerden hangisi 1982 Anayasası'nın “Yüksek Mahkemeler” bölümünde düzenlenen yargı organlarından biri değildir?",
     secenekler: ["Anayasa Mahkemesi", "Yargıtay", "Danıştay", "Uyuşmazlık Mahkemesi", "Sayıştay"],
     dogruCevap: 4,
@@ -1265,6 +1340,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "VATANDASLIK",
+    konu: "İdare Hukuku",
     soruMetni: "Aşağıdakilerden hangisi merkezî yönetimin taşra teşkilatında yer alır?",
     secenekler: ["Kaymakamlık", "Belediye", "İl özel idaresi", "Köy", "Türkiye Radyo-Televizyon Kurumu"],
     dogruCevap: 0,
@@ -1273,14 +1349,15 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "VATANDASLIK",
-    soruMetni: "Aşağıdaki haklardan hangisi 1982 Anayasası'nda “Sosyal ve Ekonomik Haklar ve Ödevler” başlığı altında düzenlenmiştir?",
-    secenekler: ["Konut dokunulmazlığı", "Haberleşme hürriyeti", "Seçme ve seçilme hakkı", "Sendika kurma hakkı", "Din ve vicdan hürriyeti"],
+    konu: "Yürütme",
+    soruMetni: "1982 Anayasası'na göre aşağıdakilerden hangisi Cumhurbaşkanının görev ve yetkilerinden biri değildir?",
+    secenekler: ["Kanunları yayımlamak", "Bakanları atamak ve görevlerine son vermek", "Milletlerarası antlaşmaları onaylamak ve yayımlamak", "Kanun teklif etmek", "Üst kademe kamu yöneticilerini atamak"],
     dogruCevap: 3,
-    aciklama:
-      "Sendika kurma hakkı sosyal ve ekonomik haklar arasındadır. Konut dokunulmazlığı, haberleşme hürriyeti ile din ve vicdan hürriyeti kişinin hakları; seçme ve seçilme hakkı ise siyasi haklardır.",
+    aciklama: "Anayasa'nın 88. maddesine göre kanun teklif etmeye yalnızca milletvekilleri yetkilidir. Kanunları yayımlamak, bakanları ve üst kademe kamu yöneticilerini atamak, milletlerarası antlaşmaları onaylayıp yayımlamak Cumhurbaşkanının yetkileridir.",
   },
   {
     ders: "VATANDASLIK",
+    konu: "İdare Hukuku",
     soruMetni:
       "5393 sayılı Belediye Kanunu'na göre;\nI. belediye meclisi,\nII. belediye encümeni,\nIII. belediye başkanı,\nIV. il genel meclisi\nkurullarından ve makamlarından hangileri belediyenin organlarıdır?",
     secenekler: ["Yalnız I", "I ve II", "II ve III", "I, II ve III", "I, II, III ve IV"],
@@ -1291,6 +1368,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   // ---- GÜNCEL BİLGİLER (6) ----
   {
     ders: "GUNCEL",
+    konu: "Güncel Bilgiler",
     soruMetni:
       "2025 Nobel Kimya Ödülü, Susumu Kitagawa, Richard Robson ve Omar M. Yaghi'ye aşağıdaki alanlardan hangisindeki çalışmaları nedeniyle verilmiştir?",
     secenekler: [
@@ -1306,6 +1384,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "GUNCEL",
+    konu: "Güncel Bilgiler",
     soruMetni:
       "Eylül 2025'te Tayland'da düzenlenen FIVB Kadınlar Voleybol Dünya Şampiyonası'nda finale yükselen A Millî Kadın Voleybol Takımı'mızı 3-2 yenerek şampiyon olan ülke aşağıdakilerden hangisidir?",
     secenekler: ["Brezilya", "Japonya", "ABD", "Sırbistan", "İtalya"],
@@ -1314,6 +1393,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "GUNCEL",
+    konu: "Güncel Bilgiler",
     soruMetni: "Aralık 2025'te UNESCO İnsanlığın Somut Olmayan Kültürel Mirası Temsilî Listesi'ne Türkiye adına kaydedilen unsur aşağıdakilerden hangisidir?",
     secenekler: ["Antep işi nakışı", "Ebru sanatı", "Hüsn-i hat", "Türk kahvesi kültürü ve geleneği", "Geleneksel Türk okçuluğu"],
     dogruCevap: 0,
@@ -1322,6 +1402,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "GUNCEL",
+    konu: "Güncel Bilgiler",
     soruMetni: "TEKNOFEST kapsamında 1-4 Mayıs 2025 tarihlerinde Eski Ercan Havalimanı'nda düzenlenen festivale ev sahipliği yapan ülke aşağıdakilerden hangisidir?",
     secenekler: ["Azerbaycan", "Kazakistan", "Özbekistan", "Kuzey Kıbrıs Türk Cumhuriyeti", "Gürcistan"],
     dogruCevap: 3,
@@ -1329,6 +1410,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "GUNCEL",
+    konu: "Güncel Bilgiler",
     soruMetni: "Haziran-Temmuz 2026'da düzenlenen ve tarihte ilk kez 48 takımın katıldığı FIFA Dünya Kupası'na ev sahipliği yapan ülkeler aşağıdakilerin hangisinde birlikte verilmiştir?",
     secenekler: ["Fas, İspanya ve Portekiz", "ABD, Kanada ve Meksika", "Brezilya ve Arjantin", "Suudi Arabistan", "Almanya ve Fransa"],
     dogruCevap: 1,
@@ -1336,6 +1418,7 @@ export const ONLISANS_SORULARI: SeedSoru[] = [
   },
   {
     ders: "GUNCEL",
+    konu: "Güncel Bilgiler",
     soruMetni: "Slovakya'nın Trenčín kentiyle birlikte 2026 yılı Avrupa Kültür Başkenti seçilen Oulu kenti hangi ülkededir?",
     secenekler: ["İsveç", "Norveç", "Finlandiya", "Estonya", "Danimarka"],
     dogruCevap: 2,

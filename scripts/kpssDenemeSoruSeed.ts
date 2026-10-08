@@ -12,6 +12,7 @@ import type { EducationLevel } from "../src/generated/prisma/client";
 import { LISANS_SORULARI, type SeedSoru } from "./kpssDenemeSoruVerisi";
 import { ONLISANS_SORULARI } from "./kpssDenemeSoruVerisiOnlisans";
 import { ORTAOGRETIM_SORULARI } from "./kpssDenemeSoruVerisiOrtaogretim";
+import { KONU_DAGILIMI } from "./kpssDenemeKonular";
 
 const HAVUZLAR: [EducationLevel, SeedSoru[]][] = [
   ["LISANS", LISANS_SORULARI],
@@ -19,11 +20,33 @@ const HAVUZLAR: [EducationLevel, SeedSoru[]][] = [
   ["LISE", ORTAOGRETIM_SORULARI],
 ];
 
-async function havuzuYaz(duzey: EducationLevel, sorular: SeedSoru[]) {
+/** Havuz konu dagilimina birebir uymali; sorular ders ici konu sirasina dizilir (stabil). */
+function konuSirasinaDiz(duzey: keyof typeof KONU_DAGILIMI, sorular: SeedSoru[]) {
+  const dagilim = KONU_DAGILIMI[duzey];
+  const hatalar: string[] = [];
+  for (const [ders, konular] of Object.entries(dagilim)) {
+    for (const [konu, adet] of konular) {
+      const sayi = sorular.filter((s) => s.ders === ders && s.konu === konu).length;
+      if (sayi !== adet) hatalar.push(`${ders} / ${konu}: ${sayi} (hedef ${adet})`);
+    }
+  }
+  for (const s of sorular) {
+    if (!dagilim[s.ders].some(([k]) => k === s.konu)) hatalar.push(`Dagilimda olmayan konu: ${s.ders} / ${s.konu}`);
+  }
+  for (const grupId of new Set(sorular.map((s) => s.grupId).filter(Boolean))) {
+    if (new Set(sorular.filter((s) => s.grupId === grupId).map((s) => s.konu)).size > 1) hatalar.push(`Grup konulari farkli: ${grupId}`);
+  }
+  if (hatalar.length) throw new Error(`${duzey} konu dagilimi tutmuyor:\n${hatalar.join("\n")}`);
+  const sira = (s: SeedSoru) => dagilim[s.ders].findIndex(([k]) => k === s.konu);
+  return [...sorular].sort((a, b) => sira(a) - sira(b));
+}
+
+async function havuzuYaz(duzey: EducationLevel, hamSorular: SeedSoru[]) {
+  const sorular = konuSirasinaDiz(duzey as keyof typeof KONU_DAGILIMI, hamSorular);
   let eklenen = 0;
   let guncellenen = 0;
-  // Her ders icin ayri sayac - dizideki yazim sirasi, gercek sinavdaki konu
-  // sirasini (ör. geometri en sonda) birebir yansitir.
+  // Her ders icin ayri sayac - konu sirasi gercek sinavdaki sirayi (ör.
+  // geometri en sonda) yansitir.
   const dersSirasi: Record<string, number> = {};
   for (const soru of sorular) {
     const sira = dersSirasi[soru.ders] ?? 0;
