@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { sayfaYuklemesiniBaslat } from "@/components/SayfaYuklemeCizgisi";
 import { UserRound, Settings, CreditCard, Repeat, LogOut, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -41,6 +42,7 @@ export function ProfileMenu({
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
+    sayfaYuklemesiniBaslat("/");
     router.push("/");
     router.refresh();
   }

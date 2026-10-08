@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { sayfaYuklemesiniBaslat } from "@/components/SayfaYuklemeCizgisi";
 import { Search } from "lucide-react";
 import { LEVEL_LABEL } from "@/lib/labels";
 import { Input } from "@/components/ui/input";
@@ -68,6 +69,7 @@ export function DepartmentSearch({
     const target = exact ?? filtered[0];
     if (!target) return;
     setIsOpen(false);
+    sayfaYuklemesiniBaslat(`/bolum/${target.slug}`);
     router.push(`/bolum/${target.slug}`);
   }
 

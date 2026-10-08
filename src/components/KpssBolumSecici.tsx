@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { sayfaYuklemesiniBaslat } from "@/components/SayfaYuklemeCizgisi";
 import { Search, X } from "lucide-react";
 import { LEVEL_LABEL } from "@/lib/labels";
 import { Input } from "@/components/ui/input";
@@ -56,6 +57,7 @@ export function KpssBolumSecici({ bolumler, seciliAd }: { bolumler: KpssBolum[];
     const params = new URLSearchParams(searchParams.toString());
     params.set("bolum", bolum.id);
     // Sayfa basina ziplamasin; karne arama kutusunun hemen altinda acilir.
+    sayfaYuklemesiniBaslat(`${pathname}?${params.toString()}`);
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   }
 
@@ -65,6 +67,7 @@ export function KpssBolumSecici({ bolumler, seciliAd }: { bolumler: KpssBolum[];
     const params = new URLSearchParams(searchParams.toString());
     params.delete("bolum");
     const q = params.toString();
+    sayfaYuklemesiniBaslat(q ? `${pathname}?${q}` : pathname);
     router.push(q ? `${pathname}?${q}` : pathname, { scroll: false });
   }
 

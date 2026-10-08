@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { sayfaYuklemesiniBaslat } from "@/components/SayfaYuklemeCizgisi";
 import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -9,6 +10,7 @@ export function LogoutButton() {
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
+    sayfaYuklemesiniBaslat("/");
     router.push("/");
     router.refresh();
   }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { sayfaYuklemesiniBaslat } from "@/components/SayfaYuklemeCizgisi";
 import { MessageCircle, Send, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -23,6 +24,7 @@ export function MessageWidget({
 
   function handleTriggerClick() {
     if (!isLoggedIn) {
+      sayfaYuklemesiniBaslat(`/giris?sonra=/becayis/${talepId}`);
       router.push(`/giris?sonra=/becayis/${talepId}`);
       return;
     }

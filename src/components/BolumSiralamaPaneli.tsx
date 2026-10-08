@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { sayfaYuklemesiniBaslat } from "@/components/SayfaYuklemeCizgisi";
 import { ArrowUpDown, SlidersHorizontal, X } from "lucide-react";
 import type { BolumSiralamaSatiri } from "@/lib/kpssIstatistik";
 import { DUZEY_TEMA } from "@/lib/kpssDenemeSabitler";
@@ -67,6 +68,7 @@ export function BolumSiralamaPaneli({
   function parametreleriYaz(degistir: (params: URLSearchParams) => void) {
     const params = new URLSearchParams(searchParams.toString());
     degistir(params);
+    sayfaYuklemesiniBaslat(`${pathname}?${params.toString()}`);
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   }
 

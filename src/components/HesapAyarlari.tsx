@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { sayfaYuklemesiniBaslat } from "@/components/SayfaYuklemeCizgisi";
 import { Camera, LogOut, Monitor, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -360,6 +361,7 @@ export function HesapSilForm({ sifreVar }: { sifreVar: boolean }) {
         return;
       }
       toast.success("Hesabın silindi.", "Kamu Yolu'nu kullandığın için teşekkür ederiz.");
+      sayfaYuklemesiniBaslat("/");
       router.push("/");
       router.refresh();
     } finally {

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { sayfaYuklemesiniBaslat } from "@/components/SayfaYuklemeCizgisi";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -97,6 +98,7 @@ export function BecayisTalepForm() {
         setError(data.error ?? "Bir şeyler ters gitti.");
         return;
       }
+      sayfaYuklemesiniBaslat("/becayis/taleplerim");
       router.push("/becayis/taleplerim");
       router.refresh();
     } finally {

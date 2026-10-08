@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { sayfaYuklemesiniBaslat } from "@/components/SayfaYuklemeCizgisi";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -91,6 +92,7 @@ export function AuthForm({
         return;
       }
       onBasarili?.();
+      sayfaYuklemesiniBaslat("/profilim");
       router.push("/profilim");
       router.refresh();
     } catch {
@@ -162,6 +164,7 @@ export function AuthForm({
       }
       toast.success("Hesabın oluşturuldu.");
       onBasarili?.();
+      sayfaYuklemesiniBaslat("/profilim");
       router.push("/profilim");
       router.refresh();
     } catch {

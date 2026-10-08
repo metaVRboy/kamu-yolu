@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { sayfaYuklemesiniBaslat } from "@/components/SayfaYuklemeCizgisi";
 import { Check, X } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -60,6 +61,7 @@ export function SifreSifirlaForm({ token }: { token: string }) {
         setError(data.error ?? "Bir şeyler ters gitti.");
         return;
       }
+      sayfaYuklemesiniBaslat("/profilim");
       router.push("/profilim");
       router.refresh();
     } finally {

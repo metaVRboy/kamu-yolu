@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { sayfaYuklemesiniBaslat } from "@/components/SayfaYuklemeCizgisi";
 import { X } from "lucide-react";
 import { INSTITUTION_TYPE_LABEL } from "@/lib/labels";
 import {
@@ -40,6 +41,7 @@ export function FilterBar({ options }: { options: FilterOptions }) {
       params.delete(key);
     }
     const query = params.toString();
+    sayfaYuklemesiniBaslat(query ? `${pathname}?${query}` : pathname);
     router.push(query ? `${pathname}?${query}` : pathname);
   }
 
@@ -141,7 +143,10 @@ export function FilterBar({ options }: { options: FilterOptions }) {
           type="button"
           variant="ghost"
           size="sm"
-          onClick={() => router.push(pathname)}
+          onClick={() => {
+            sayfaYuklemesiniBaslat(pathname);
+            router.push(pathname);
+          }}
           className="text-muted-foreground"
         >
           <X className="h-3.5 w-3.5" />

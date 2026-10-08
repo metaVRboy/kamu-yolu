@@ -18,6 +18,7 @@ import { Toaster } from "@/components/ui/toast";
 import { CerezBildirimi } from "@/components/CerezBildirimi";
 import { ReklamEngelleyiciKontrol } from "@/components/ReklamEngelleyiciKontrol";
 import { YukseltmeProvider } from "@/components/YukseltmePenceresi";
+import { SayfaYuklemeCizgisi } from "@/components/SayfaYuklemeCizgisi";
 import { AuthModalProvider } from "@/components/AuthModal";
 import { HeaderAuthButton } from "@/components/HeaderAuthButton";
 import { GezinmeKaydi } from "@/components/GeriDonLinki";
@@ -101,6 +102,10 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               )}
             </div>
           </div>
+          {/* Gezinme baslayinca header'in alt kenarinda dolan ince cizgi (useSearchParams -> Suspense). */}
+          <Suspense fallback={null}>
+            <SayfaYuklemeCizgisi />
+          </Suspense>
         </header>
 
         <div className="mx-auto flex w-full max-w-[1600px] flex-1 items-start justify-center gap-4 px-2">
