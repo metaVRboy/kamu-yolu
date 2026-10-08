@@ -34,7 +34,8 @@ import {
 } from "lucide-react";
 import { DENEME_DUZEYLERI } from "@/lib/kpssDenemeSabitler";
 import { getHomepageStats } from "@/lib/matching";
-import { PLAN_ADI, PLAN_FIYATI, tl } from "@/lib/planlar";
+import { PLAN_ADI, tl } from "@/lib/planlar";
+import { getFiyatlar } from "@/lib/fiyatlar";
 import { SayfaBasligi } from "@/components/SayfaBasligi";
 import { BolumBasligi } from "@/components/BolumBasligi";
 import { YukseltButonu } from "@/components/YukseltmePenceresi";
@@ -122,7 +123,7 @@ const ILKELER: { ikon: LucideIcon; baslik: string; metin: string }[] = [
 ];
 
 export default async function AmacimizPage() {
-  const stats = await getHomepageStats();
+  const [stats, { tablo: fiyatlar }] = await Promise.all([getHomepageStats(), getFiyatlar()]);
 
   const canliSayilar: { deger: number; etiket: string; ikon: LucideIcon; yaklasik?: boolean }[] = [
     { deger: stats.postingCount, etiket: "aktif kamu ilanı", ikon: Radar },
@@ -293,7 +294,7 @@ export default async function AmacimizPage() {
             { ad: PLAN_ADI.UCRETSIZ, fiyat: "Ücretsiz", maddeler: ["Tüm ilanlar, filtreler ve haberler", "Haftada toplam 1 KPSS denemesi", "Becayiş ilanlarını görüntüleme"], vurgu: false },
             {
               ad: PLAN_ADI.PRO,
-              fiyat: `${tl(PLAN_FIYATI.PRO.aylik)} / ay`,
+              fiyat: `${tl(fiyatlar.PRO.aylik.odenecek)} / ay`,
               maddeler: [
                 "Haftada toplam 3 deneme, ders karnesi ve soru çözümleri",
                 "Kişisel bildirimler ve SMS ile anlık ilan bildirimi",
@@ -304,7 +305,7 @@ export default async function AmacimizPage() {
             },
             {
               ad: PLAN_ADI.PRO_PLUS,
-              fiyat: `${tl(PLAN_FIYATI.PRO_PLUS.aylik)} / ay`,
+              fiyat: `${tl(fiyatlar.PRO_PLUS.aylik.odenecek)} / ay`,
               maddeler: ["Sınırsız deneme, konu bazlı değerlendirme ve gelişim takibi", "Reklamsız deneyim", "Öncelikli destek"],
               vurgu: true,
             },

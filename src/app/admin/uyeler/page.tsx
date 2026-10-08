@@ -32,8 +32,8 @@ export default async function AdminUyelerPage({ searchParams }: { searchParams: 
   const toplamTalep = talepDagilimi.reduce((t, d) => t + d._count._all, 0);
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6 sm:py-20">
-      <h1 className="font-sans text-2xl font-bold tracking-tight text-primary sm:text-3xl">Üye Yönetimi</h1>
+    <div className="max-w-4xl">
+      <h1 className="font-sans text-2xl font-bold tracking-tight text-slate-900">Üye Yönetimi</h1>
 
       <section className="mt-6 rounded-2xl border border-primary/15 bg-white p-4">
         <h2 className="text-sm font-bold text-slate-900">Yükseltme talepleri (açılınca haber ver) · {toplamTalep}</h2>

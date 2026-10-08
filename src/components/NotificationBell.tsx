@@ -14,7 +14,7 @@ const ORNEK_BILDIRIMLER = [
   { baslik: "Bölümüne uygun yeni ilan", icerik: "Son başvuru tarihi yaklaşan bir ilan seni bekliyor." },
 ];
 
-type Duyuru = { id: string; baslik: string; icerik: string; createdAt: string };
+type Duyuru = { id: string; baslik: string; icerik: string; link: string | null; createdAt: string };
 type Bildirim = { id: string; baslik: string; icerik: string | null; link: string | null; createdAt: string; okundu: boolean };
 
 // Her acik sekme bu araligin sonunda /api/bildirimler'i sorguluyor - bu
@@ -165,12 +165,24 @@ export function NotificationBell({ isLoggedIn }: { isLoggedIn: boolean }) {
               (genel.length === 0 ? (
                 <p className="p-3 text-sm text-muted-foreground">Henüz duyuru yok.</p>
               ) : (
-                genel.map((d) => (
-                  <div key={d.id} className="rounded-xl p-3 hover:bg-primary/5">
-                    <p className="text-sm font-medium text-slate-900">{d.baslik}</p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">{d.icerik}</p>
-                  </div>
-                ))
+                genel.map((d) => {
+                  const icerik = (
+                    <>
+                      <p className="text-sm font-medium text-slate-900">{d.baslik}</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">{d.icerik}</p>
+                    </>
+                  );
+                  return d.link ? (
+                    <Link key={d.id} href={d.link} onClick={() => setOpen(false)} className="block rounded-xl p-3 hover:bg-primary/5">
+                      {icerik}
+                      <span className="mt-1 block text-xs font-semibold text-primary">Göz at →</span>
+                    </Link>
+                  ) : (
+                    <div key={d.id} className="rounded-xl p-3 hover:bg-primary/5">
+                      {icerik}
+                    </div>
+                  );
+                })
               ))}
 
             {tab === "ozel" &&

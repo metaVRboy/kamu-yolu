@@ -5,8 +5,17 @@ export type Plan = "UCRETSIZ" | UcretliPlan;
 
 export const PLAN_ADI: Record<Plan, string> = { UCRETSIZ: "Standart", PRO: "Pro", PRO_PLUS: "Pro+" };
 
-/** TL, KDV dahil. */
-export const PLAN_FIYATI: Record<UcretliPlan, { aylik: number; yillik: number }> = {
+export const UCRETLI_PLANLAR: UcretliPlan[] = ["PRO", "PRO_PLUS"];
+export type Donem = "aylik" | "yillik";
+
+/** Bir plan+donem fiyati (TL, KDV dahil): liste fiyati, kampanyali odenecek tutar ve kampanya etiketi. */
+export type DonemFiyati = { liste: number; odenecek: number; etiket: string | null };
+export type FiyatTablosu = Record<UcretliPlan, Record<Donem, DonemFiyati>>;
+/** Sitede gosterilen aktif kampanya; kalanMs sunucuda hesaplanir (cihaz saatine guvenilmez). */
+export type KampanyaOzeti = { ad: string; kalanMs: number } | null;
+
+/** Fiyatlar admin panelden (PlanFiyat tablosu) yonetilir; tablo bossa bunlar kullanilir. */
+export const VARSAYILAN_FIYAT: Record<UcretliPlan, Record<Donem, number>> = {
   PRO: { aylik: 59, yillik: 529 },
   PRO_PLUS: { aylik: 79, yillik: 699 },
 };
@@ -15,13 +24,27 @@ export const PLAN_FIYATI: Record<UcretliPlan, { aylik: number; yillik: number }>
 export const tl = (n: number) =>
   `${n.toLocaleString("tr-TR", Number.isInteger(n) ? {} : { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TL`;
 
-/** Yillik odemede 12 aylik fiyata gore tasarruf yuzdesi (tam sayi). */
-export const yillikTasarruf = (p: UcretliPlan) => Math.round((1 - PLAN_FIYATI[p].yillik / (PLAN_FIYATI[p].aylik * 12)) * 100);
+/** Yillik odemede 12 aylik odemeye gore tasarruf yuzdesi (tam sayi, en az 0). */
+export const yillikTasarruf = (f: Record<Donem, DonemFiyati>) =>
+  Math.max(0, Math.round((1 - f.yillik.odenecek / (f.aylik.odenecek * 12)) * 100));
 
 /** Yillikta her planda en az kac aylik ucret kazanilir ("3 ay bedava"). */
-export const yillikBedavaAy = Math.floor(
-  Math.min(...(Object.keys(PLAN_FIYATI) as UcretliPlan[]).map((p) => 12 - PLAN_FIYATI[p].yillik / PLAN_FIYATI[p].aylik)),
-);
+export const yillikBedavaAy = (t: FiyatTablosu) =>
+  Math.max(0, Math.floor(Math.min(...UCRETLI_PLANLAR.map((p) => 12 - t[p].yillik.odenecek / t[p].aylik.odenecek))));
+
+type Indirim = { yuzde: number | null; tutar: number | null };
+
+/** Liste fiyatina indirim uygular (tam TL'ye yuvarlanir, 0'in altina inmez). */
+export function indirimliFiyat(liste: number, k: Indirim) {
+  if (k.yuzde) return Math.max(0, Math.round((liste * (100 - k.yuzde)) / 100));
+  if (k.tutar) return Math.max(0, liste - k.tutar);
+  return liste;
+}
+
+export const indirimEtiketi = (k: Indirim) => (k.yuzde ? `%${k.yuzde} indirim` : `${k.tutar} TL indirim`);
+
+export const kalanSureMetni = (ms: number) =>
+  ms >= 86_400_000 ? `${Math.ceil(ms / 86_400_000)} gün kaldı` : ms >= 3_600_000 ? `${Math.ceil(ms / 3_600_000)} saat kaldı` : "son saatler";
 
 /** Yukseltme butonunun bulundugu yer: pencere basligi ve karsilastirmada vurgulanan satir buna gore. */
 export type YukseltmeKaynagi =

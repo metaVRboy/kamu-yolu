@@ -13,8 +13,8 @@ export default async function AdminHaberlerPage() {
   const haberler = await getAllHaberler();
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-14 sm:px-6 sm:py-20">
-      <h1 className="font-sans text-2xl font-bold tracking-tight text-primary sm:text-3xl">
+    <div className="max-w-3xl">
+      <h1 className="font-sans text-2xl font-bold tracking-tight text-slate-900">
         Haber Yönetimi
       </h1>
       <p className="mt-1 text-sm text-muted-foreground">

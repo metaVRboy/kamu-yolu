@@ -1,5 +1,7 @@
 import { FileSignature } from "lucide-react";
 import { SayfaBasligi } from "@/components/SayfaBasligi";
+import { getFiyatlar } from "@/lib/fiyatlar";
+import { tl } from "@/lib/planlar";
 export const metadata = {
   title: "Mesafeli Satış Sözleşmesi — Kamu Yolu",
 };
@@ -12,7 +14,9 @@ function YerTutucu({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function MesafeliSatisSozlesmesiPage() {
+export default async function MesafeliSatisSozlesmesiPage() {
+  // Sozlesmede liste fiyati yazar (kampanya indirimi odeme adiminda ayrica gosterilir).
+  const { tablo } = await getFiyatlar();
   return (
     <div className="mx-auto max-w-2xl px-4 py-14 sm:px-6 sm:py-20">
       <SayfaBasligi
@@ -73,7 +77,7 @@ export default function MesafeliSatisSozlesmesiPage() {
                   SMS ile anlık ilan bildirimi, kişisel bildirimler, becayiş talebi oluşturma ve
                   site içi mesajlaşma, haftada toplam 3 KPSS deneme sınavı, ders karnesi ve soru çözümleri
                 </td>
-                <td className="border border-border p-2">59 TL / ay</td>
+                <td className="border border-border p-2">{tl(tablo.PRO.aylik.liste)} / ay · {tl(tablo.PRO.yillik.liste)} / yıl</td>
               </tr>
               <tr>
                 <td className="border border-border p-2">Pro+</td>
@@ -81,7 +85,7 @@ export default function MesafeliSatisSozlesmesiPage() {
                   Pro&apos;daki tüm özellikler, sınırsız KPSS deneme sınavı, konu bazlı değerlendirme ve gelişim
                   takibi, reklamsız kullanım, öncelikli destek
                 </td>
-                <td className="border border-border p-2">79 TL / ay</td>
+                <td className="border border-border p-2">{tl(tablo.PRO_PLUS.aylik.liste)} / ay · {tl(tablo.PRO_PLUS.yillik.liste)} / yıl</td>
               </tr>
             </tbody>
           </table>

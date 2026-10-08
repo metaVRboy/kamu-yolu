@@ -1,22 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { Check } from "lucide-react";
+import { Check, Flame } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { YukseltButonu } from "@/components/YukseltmePenceresi";
-import { PLAN_ADI, PLAN_FIYATI, tl, type Plan as PlanKey } from "@/lib/planlar";
+import { PLAN_ADI, kalanSureMetni, tl, type FiyatTablosu, type KampanyaOzeti, type Plan as PlanKey } from "@/lib/planlar";
 
-// Fiyatlar: rakip/pazar arastirmasina dayali oneri (becayis.net, kariyer.net,
-// ihale takip siteleri kiyaslamasi) - odeme altyapisi henuz baglanmadigi
-// icin "Yukseltme" butonlari hala pasif, ama fiyatlar artik gercek oneri
-// degerleri (placeholder "Yakinda" degil).
+// Fiyatlar admin panelden yonetilir (PlanFiyat + Kampanya); sayfa getFiyatlar() ile prop verir.
 const PLANLAR: {
   key: PlanKey;
   ad: string;
-  aylikFiyat: string;
-  yillikFiyat: string;
   aciklama: string;
   populer?: boolean;
   ozellikler: string[];
@@ -24,8 +19,6 @@ const PLANLAR: {
   {
     key: "UCRETSIZ",
     ad: "Standart",
-    aylikFiyat: "Ücretsiz",
-    yillikFiyat: "Ücretsiz",
     aciklama: "Temel kullanım için.",
     ozellikler: [
       "Tüm ilanları görüntüleme",
@@ -37,8 +30,6 @@ const PLANLAR: {
   {
     key: "PRO",
     ad: "Pro",
-    aylikFiyat: tl(PLAN_FIYATI.PRO.aylik),
-    yillikFiyat: tl(PLAN_FIYATI.PRO.yillik),
     aciklama: "Aktif iş arayanlar için.",
     populer: true,
     ozellikler: [
@@ -54,8 +45,6 @@ const PLANLAR: {
   {
     key: "PRO_PLUS",
     ad: "Pro+",
-    aylikFiyat: tl(PLAN_FIYATI.PRO_PLUS.aylik),
-    yillikFiyat: tl(PLAN_FIYATI.PRO_PLUS.yillik),
     aciklama: "En kapsamlı deneyim.",
     ozellikler: [
       "Pro'daki her şey",
@@ -69,11 +58,18 @@ const PLANLAR: {
 const PLAN_ETIKET = PLAN_ADI;
 const SIRA: Record<PlanKey, number> = { UCRETSIZ: 0, PRO: 1, PRO_PLUS: 2 };
 
-export function AbonelikPlanlari({ mevcutPlan }: { mevcutPlan: PlanKey }) {
+export function AbonelikPlanlari({ mevcutPlan, fiyat }: { mevcutPlan: PlanKey; fiyat: { tablo: FiyatTablosu; kampanya: KampanyaOzeti } }) {
   const [donem, setDonem] = useState<"aylik" | "yillik">("aylik");
 
   return (
     <div>
+      {fiyat.kampanya && (
+        <p className="mb-6 flex flex-wrap items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-rose-500 to-orange-500 px-4 py-3 text-center text-sm font-bold text-white shadow-md shadow-rose-500/20">
+          <Flame className="h-4 w-4" />
+          {fiyat.kampanya.ad}
+          <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs">{kalanSureMetni(fiyat.kampanya.kalanMs)}</span>
+        </p>
+      )}
       <div className="flex justify-center">
         <div className="inline-flex rounded-full border border-primary/20 bg-white p-1">
           <button
@@ -121,14 +117,20 @@ export function AbonelikPlanlari({ mevcutPlan }: { mevcutPlan: PlanKey }) {
                 </div>
 
                 <div>
-                  <span className="text-2xl font-bold text-slate-900">
-                    {donem === "aylik" ? plan.aylikFiyat : plan.yillikFiyat}
-                  </span>
-                  {plan.key !== "UCRETSIZ" && (
-                    <span className="text-sm text-muted-foreground">
-                      {" "}
-                      / {donem === "aylik" ? "ay" : "yıl"}
-                    </span>
+                  {plan.key === "UCRETSIZ" ? (
+                    <span className="text-2xl font-bold text-slate-900">Ücretsiz</span>
+                  ) : (
+                    (() => {
+                      const d = fiyat.tablo[plan.key][donem];
+                      return (
+                        <>
+                          {d.etiket && <span className="mb-1 block w-fit rounded-full bg-rose-100 px-2 py-0.5 text-[11px] font-bold text-rose-700">{d.etiket}</span>}
+                          {d.odenecek < d.liste && <s className="mr-1.5 text-base font-semibold text-slate-400">{tl(d.liste)}</s>}
+                          <span className="text-2xl font-bold text-slate-900">{tl(d.odenecek)}</span>
+                          <span className="text-sm text-muted-foreground"> / {donem === "aylik" ? "ay" : "yıl"}</span>
+                        </>
+                      );
+                    })()
                   )}
                 </div>
 

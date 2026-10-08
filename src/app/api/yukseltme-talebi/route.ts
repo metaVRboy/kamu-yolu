@@ -3,17 +3,19 @@ import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { buHaftakiDenemeSayisi } from "@/lib/kpssDeneme";
+import { getFiyatlar } from "@/lib/fiyatlar";
 import { YUKSELTME_KAYNAKLARI, type YukseltmeKaynagi } from "@/lib/planlar";
 
 /** Yukseltme penceresi verisi: gercek site sayilari + kullanicinin mevcut plani ve onceki talebi. */
 export async function GET() {
   const user = await getCurrentUser();
-  const [aktifIlan, haftalikDeneme, talep] = await Promise.all([
+  const [aktifIlan, haftalikDeneme, talep, fiyat] = await Promise.all([
     prisma.posting.count({ where: { isActive: true } }),
     buHaftakiDenemeSayisi(),
     user ? prisma.yukseltmeTalebi.findUnique({ where: { userId: user.id }, select: { plan: true, yillik: true } }) : null,
+    getFiyatlar(),
   ]);
-  return NextResponse.json({ girisli: !!user, plan: user?.abonelikPlani ?? null, talep, aktifIlan, haftalikDeneme });
+  return NextResponse.json({ girisli: !!user, plan: user?.abonelikPlani ?? null, talep, aktifIlan, haftalikDeneme, fiyat });
 }
 
 const bodySchema = z.object({

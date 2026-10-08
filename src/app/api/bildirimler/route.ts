@@ -1,26 +1,30 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import {
-  deleteTumBildirimler,
-  getBanaOzelBildirimler,
-  getGenelDuyurular,
-  getOkunmamisBildirimSayisi,
-} from "@/lib/notifications";
+import { deleteTumBildirimler, getBanaOzelBildirimler, getOkunmamisBildirimSayisi, kullaniciDuyurulari } from "@/lib/notifications";
 import { proAktifMi } from "@/lib/sms";
 
 export async function GET() {
   const user = await getCurrentUser();
-  // Kisisel bildirimler Pro; genel duyurular herkese. Ucretsizde eski kisisel
-  // bildirimler de gonderilmez (panelde bulanik ornek gosterilir).
+  // Kisisel bildirimler Pro; genel duyurular (hedefine uyanlar) herkese. Ucretsizde eski
+  // kisisel bildirimler de gonderilmez (panelde bulanik ornek gosterilir).
   const pro = !!user && proAktifMi(user);
 
-  const [genel, banaOzel, okunmamisSayisi] = await Promise.all([
-    getGenelDuyurular(),
+  const [duyurular, banaOzel, bildirimOkunmamis] = await Promise.all([
+    kullaniciDuyurulari(user),
     pro ? getBanaOzelBildirimler(user.id) : Promise.resolve([]),
     pro ? getOkunmamisBildirimSayisi(user.id) : Promise.resolve(0),
   ]);
+  // Zili en son actigindan sonra yayinlanan duyurular okunmamis sayilir (kirmizi nokta).
+  const sonGorulme = user ? (user.duyuruGorulme ?? user.createdAt).getTime() : Infinity;
+  const duyuruOkunmamis = duyurular.filter((d) => d.yayinZamani.getTime() > sonGorulme).length;
 
-  return NextResponse.json({ genel, banaOzel, okunmamisSayisi, plan: user?.abonelikPlani ?? null, banaOzelKilitli: !!user && !pro });
+  return NextResponse.json({
+    genel: duyurular.slice(0, 30).map((d) => ({ id: d.id, baslik: d.baslik, icerik: d.icerik, link: d.link, createdAt: d.yayinZamani })),
+    banaOzel,
+    okunmamisSayisi: bildirimOkunmamis + duyuruOkunmamis,
+    plan: user?.abonelikPlani ?? null,
+    banaOzelKilitli: !!user && !pro,
+  });
 }
 
 export async function DELETE() {

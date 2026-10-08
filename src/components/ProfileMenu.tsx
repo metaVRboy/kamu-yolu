@@ -7,12 +7,8 @@ import { sayfaYuklemesiniBaslat } from "@/components/SayfaYuklemeCizgisi";
 import { UserRound, Settings, CreditCard, Repeat, LogOut, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const ADMIN_LINKLERI = [
-  { href: "/admin/uyeler", label: "Üyeler ve planlar" },
-  { href: "/admin/sms", label: "SMS kayıtları" },
-  { href: "/admin/duyurular", label: "Duyurular" },
-  { href: "/admin/haberler", label: "Haberler" },
-];
+// Admin sayfalarinin tamami admin panelinin yan menusunde.
+const ADMIN_LINKLERI = [{ href: "/admin", label: "Admin paneli" }];
 
 export function ProfileMenu({
   adSoyad,

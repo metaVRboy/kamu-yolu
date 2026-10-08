@@ -1,5 +1,7 @@
 import { FileText } from "lucide-react";
 import { SayfaBasligi } from "@/components/SayfaBasligi";
+import { getFiyatlar } from "@/lib/fiyatlar";
+import { tl } from "@/lib/planlar";
 export const metadata = {
   title: "Ön Bilgilendirme Formu — Kamu Yolu",
 };
@@ -12,7 +14,8 @@ function YerTutucu({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function OnBilgilendirmeFormuPage() {
+export default async function OnBilgilendirmeFormuPage() {
+  const { tablo } = await getFiyatlar();
   return (
     <div className="mx-auto max-w-2xl px-4 py-14 sm:px-6 sm:py-20">
       <SayfaBasligi
@@ -62,8 +65,8 @@ export default function OnBilgilendirmeFormuPage() {
           <h2 className="font-sans text-base font-semibold text-primary">3. Toplam Fiyat (Vergiler Dahil)</h2>
           <p>
             Seçtiğiniz plan ve dönem (aylık/yıllık) için ödeyeceğiniz toplam tutar, ödeme
-            adımında KDV dahil olarak açıkça gösterilir. Güncel fiyatlar: Pro 59 TL/ay (529
-            TL/yıl), Pro+ 79 TL/ay (699 TL/yıl).
+            adımında KDV dahil olarak açıkça gösterilir. Güncel fiyatlar: Pro {tl(tablo.PRO.aylik.liste)}/ay ({tl(tablo.PRO.yillik.liste)}/yıl), Pro+{" "}
+            {tl(tablo.PRO_PLUS.aylik.liste)}/ay ({tl(tablo.PRO_PLUS.yillik.liste)}/yıl).
           </p>
         </section>
 

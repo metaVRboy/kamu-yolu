@@ -3,16 +3,18 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { BellRing, Check, CheckCircle2, Crown, Loader2, Minus, ShieldCheck, Sparkles, X } from "lucide-react";
+import { BellRing, Check, CheckCircle2, Crown, Flame, Loader2, Minus, ShieldCheck, Sparkles, X } from "lucide-react";
 import { useAuthModal } from "@/components/AuthModal";
 import {
   KAYNAK_METNI,
   KARSILASTIRMA,
   PLAN_ADI,
-  PLAN_FIYATI,
+  kalanSureMetni,
   tl,
   yillikBedavaAy,
   yillikTasarruf,
+  type FiyatTablosu,
+  type KampanyaOzeti,
   type Plan,
   type UcretliPlan,
   type YukseltmeKaynagi,
@@ -75,6 +77,7 @@ type Ozet = {
   talep: { plan: UcretliPlan; yillik: boolean } | null;
   aktifIlan: number;
   haftalikDeneme: number;
+  fiyat: { tablo: FiyatTablosu; kampanya: KampanyaOzeti };
 };
 
 export function YukseltmeProvider({ children }: { children: ReactNode }) {
@@ -237,6 +240,15 @@ function Pencere({ baslangicPlani, kaynak, kapat }: { baslangicPlani?: UcretliPl
             </div>
           ) : (
             <>
+              {ozet?.fiyat.kampanya && (
+                <p className="mb-2 flex items-center justify-between gap-2 rounded-2xl bg-gradient-to-r from-rose-500 to-orange-500 px-3.5 py-2.5 text-sm font-bold text-white shadow-md shadow-rose-500/20">
+                  <span className="flex items-center gap-2">
+                    <Flame className="h-4 w-4 shrink-0" />
+                    {ozet.fiyat.kampanya.ad}
+                  </span>
+                  <span className="shrink-0 rounded-full bg-white/20 px-2 py-0.5 text-xs">{kalanSureMetni(ozet.fiyat.kampanya.kalanMs)}</span>
+                </p>
+              )}
               <p className="flex items-center gap-2 rounded-2xl bg-amber-50 px-3.5 py-2.5 text-xs font-medium text-amber-800">
                 <Sparkles className="h-4 w-4 shrink-0" />
                 Ödeme altyapımız çok yakında açılıyor. Şimdi yerini ayır, açıldığında ilk sen haberdar ol.
@@ -253,9 +265,9 @@ function Pencere({ baslangicPlani, kaynak, kapat }: { baslangicPlani?: UcretliPl
                       className={cn("relative rounded-full px-5 py-1.5 transition-all", yillik === y ? "bg-white text-slate-900 shadow" : "text-slate-500")}
                     >
                       {y ? "Yıllık" : "Aylık"}
-                      {y && (
+                      {y && ozet && yillikBedavaAy(ozet.fiyat.tablo) > 0 && (
                         <span className="absolute -top-2.5 -right-3 rounded-full bg-emerald-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
-                          {yillikBedavaAy} ay bedava
+                          {yillikBedavaAy(ozet.fiyat.tablo)} ay bedava
                         </span>
                       )}
                     </button>
@@ -266,7 +278,8 @@ function Pencere({ baslangicPlani, kaynak, kapat }: { baslangicPlani?: UcretliPl
               {/* Plan kartlari */}
               <div className="mt-5 grid grid-cols-2 gap-3">
                 {(["PRO", "PRO_PLUS"] as const).map((p) => {
-                  const f = PLAN_FIYATI[p];
+                  const f = ozet?.fiyat.tablo[p];
+                  const d = f && (yillik ? f.yillik : f.aylik);
                   const sahip = mevcut === p || (mevcut === "PRO_PLUS" && p === "PRO");
                   const secili = secilen === p && !sahip;
                   const kart = (
@@ -291,15 +304,25 @@ function Pencere({ baslangicPlani, kaynak, kapat }: { baslangicPlani?: UcretliPl
                           {secili && <Check className="h-3 w-3" />}
                         </span>
                       </span>
-                      <span className="mt-2 font-sans text-2xl font-bold text-slate-900 tabular-nums">
-                        {tl(yillik ? f.yillik : f.aylik)}
-                        <span className="text-xs font-medium text-muted-foreground"> / {yillik ? "yıl" : "ay"}</span>
-                      </span>
-                      <span className={cn("mt-1 text-xs font-semibold", TEMA[p].metin)}>
-                        {yillik
-                          ? `Aylık ${tl(f.yillik / 12)}'ye denk · %${yillikTasarruf(p)} tasarruf`
-                          : `Günde ${tl(f.aylik / 30)}, bir çaydan ucuz`}
-                      </span>
+                      {f && d ? (
+                        <>
+                          {d.etiket && (
+                            <span className="mt-2 self-start rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-700">{d.etiket}</span>
+                          )}
+                          <span className="mt-1.5 font-sans text-2xl font-bold text-slate-900 tabular-nums">
+                            {d.odenecek < d.liste && <s className="mr-1.5 text-base font-semibold text-slate-400">{tl(d.liste)}</s>}
+                            {tl(d.odenecek)}
+                            <span className="text-xs font-medium text-muted-foreground"> / {yillik ? "yıl" : "ay"}</span>
+                          </span>
+                          <span className={cn("mt-1 text-xs font-semibold", TEMA[p].metin)}>
+                            {yillik
+                              ? `Aylık ${tl(Math.round((f.yillik.odenecek / 12) * 100) / 100)}'ye denk · %${yillikTasarruf(f)} tasarruf`
+                              : `Günde ${tl(Math.round((f.aylik.odenecek / 30) * 100) / 100)}, bir çaydan ucuz`}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="mt-2 h-12 w-28 animate-pulse rounded-lg bg-slate-100" />
+                      )}
                       {sahip && <span className="mt-2 text-xs font-semibold text-slate-500">Mevcut planın</span>}
                     </button>
                   );

@@ -7,6 +7,7 @@ import { ProfilLayout } from "@/components/ProfilLayout";
 import { AbonelikPlanlari } from "@/components/AbonelikPlanlari";
 import { cn } from "@/lib/utils";
 import { kalanGunSayisi } from "@/lib/ilanVitrin";
+import { getFiyatlar } from "@/lib/fiyatlar";
 
 export const metadata = { title: "Aboneliğim — Kamu Yolu" };
 
@@ -20,9 +21,10 @@ export default async function AbonelikPage() {
   const ucretli = user.abonelikPlani !== "UCRETSIZ"; // getCurrentUser suresi dolani UCRETSIZ dondurur
   const kalanGun = kalanGunSayisi(user.abonelikBitis);
 
-  const [okunmamisSayisi, okunmamisIlgilendiklerimSayisi] = await Promise.all([
+  const [okunmamisSayisi, okunmamisIlgilendiklerimSayisi, fiyat] = await Promise.all([
     getOkunmamisMesajSayisi(user.id),
     getOkunmamisIlgilendiklerimSayisi(user.id),
+    getFiyatlar(),
   ]);
 
   return (
@@ -85,7 +87,7 @@ export default async function AbonelikPage() {
       </section>
 
       <div className="mt-8">
-        <AbonelikPlanlari mevcutPlan={user.abonelikPlani} />
+        <AbonelikPlanlari mevcutPlan={user.abonelikPlani} fiyat={fiyat} />
       </div>
     </ProfilLayout>
   );

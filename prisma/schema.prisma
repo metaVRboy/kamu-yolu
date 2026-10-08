@@ -170,6 +170,8 @@ model User {
   // Odeme altyapisi gelince donem sonunda otomatik yenileme. Iptal = false yapmak:
   // abonelikBitis'e dokunulmaz, kullanici odenen donem sonuna kadar plani kullanir.
   otomatikYenileme    Boolean  @default(true)
+  // Zilin Genel sekmesini en son actigi an (uygulama saati); sonrasindaki duyurular okunmamis.
+  duyuruGorulme       DateTime?
   // SMS ile dogrulanmis telefon (yalniz Pro); `telefon` degisirse sifirlanir.
   telefonDogrulandi   DateTime?
   // SMS bildirim tercihleri (Pro) - varsayilan kapali, acik onayla acilir.
@@ -330,11 +332,49 @@ model BecayisMesaj {
 
 // Site yoneticisinin (admin panelden) yayimladigi, tum kullanicilarin
 // gordugu genel duyurular.
+// Admin panelden yayinlanan bildirimler (zilin "Genel" sekmesi - her planda gorunur).
+// hedefTur: HERKES | PLAN | DUZEY | BOLUM; hedefDeger: plan/duzey/departmentId.
+// yayinZamani ileri bir tarihse o ana kadar gorunmez (zamanlama); geriCekildi doluysa gizlenir.
 model Duyuru {
-  id        String   @id @default(cuid())
-  baslik    String
-  icerik    String
-  createdAt DateTime @default(now())
+  id          String    @id @default(cuid())
+  baslik      String
+  icerik      String
+  link        String?
+  hedefTur    String    @default("HERKES")
+  hedefDeger  String?
+  aliciSayisi Int?
+  yayinZamani DateTime  @default(now())
+  geriCekildi DateTime?
+  olusturanId String?
+  createdAt   DateTime  @default(now())
+
+  @@index([yayinZamani])
+}
+
+// Uyelik fiyatlari (TL, KDV dahil) - admin panelden degistirilir.
+model PlanFiyat {
+  plan       AbonelikPlani @id
+  aylik      Int
+  yillik     Int
+  guncelleme DateTime      @updatedAt
+}
+
+// Indirim kampanyasi: kuponKodu bossa tarih araliginda sitede otomatik uygulanir;
+// doluysa yalniz kodla (odeme altyapisi gelince) gecerlidir.
+model Kampanya {
+  id          String          @id @default(cuid())
+  ad          String
+  yuzde       Int?
+  tutar       Int?
+  planlar     AbonelikPlani[]
+  aylik       Boolean         @default(true)
+  yillik      Boolean         @default(true)
+  baslangic   DateTime
+  bitis       DateTime
+  kuponKodu   String?         @unique
+  aktif       Boolean         @default(true)
+  olusturanId String?
+  olusturma   DateTime        @default(now())
 }
 
 // Kamu personel alimlariyla ilgili haberler (toplu alim duyurulari,
