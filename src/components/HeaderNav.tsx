@@ -15,14 +15,6 @@ export const MENU: MenuOgesi[] = [
   { href: "/amacimiz", label: "Hakkımızda" },
   { href: "/haberler", label: "Haberler" },
   {
-    label: "KPSS",
-    items: [
-      { href: "/kpss-puan-hesaplama", label: "KPSS Puan Hesaplama" },
-      { href: "/kpss-denemesi", label: "KPSS Denemesi" },
-    ],
-  },
-  { href: "/analiz", label: "Alım Analizi" },
-  {
     label: "İlanlar",
     items: [
       {
@@ -47,6 +39,14 @@ export const MENU: MenuOgesi[] = [
       },
     ],
   },
+  {
+    label: "KPSS",
+    items: [
+      { href: "/kpss-puan-hesaplama", label: "KPSS Puan Hesaplama" },
+      { href: "/kpss-denemesi", label: "KPSS Denemesi" },
+    ],
+  },
+  { href: "/analiz", label: "Alım Analizi" },
 ];
 
 /** Oge ya da altindaki herhangi bir sayfa aciksa aktif sayilir. */
