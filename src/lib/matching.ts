@@ -394,3 +394,23 @@ export async function linkDepartmentToExistingPostings(
 
   return linked;
 }
+
+/**
+ * Ilan sayfasinin "Benzer ilanlar" bolumu: ayni bolume ya da ayni kuruma ait
+ * diger aktif ilanlar, en yeniler once.
+ */
+export async function getBenzerIlanlar(ilan: { id: string; institutionName: string; departments: { departmentId: string }[] }, adet = 3) {
+  const bolumIdleri = ilan.departments.map((d) => d.departmentId);
+  return prisma.posting.findMany({
+    where: {
+      isActive: true,
+      id: { not: ilan.id },
+      OR: [
+        ...(bolumIdleri.length ? [{ departments: { some: { departmentId: { in: bolumIdleri } } } }] : []),
+        { institutionName: ilan.institutionName },
+      ],
+    },
+    orderBy: { publishedAt: "desc" },
+    take: adet,
+  });
+}

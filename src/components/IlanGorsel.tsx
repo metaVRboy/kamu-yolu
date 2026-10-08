@@ -15,13 +15,24 @@ const TEMA: Record<string, { zemin: string; ikon: LucideIcon }> = {
 };
 
 /** Ilan karti kapak gorseli: kurum turu temali zemin + gercek kurum logosu (Wikipedia). */
-export function IlanGorsel({ logoUrl, kurumTuru, kurumAdi }: { logoUrl: string | null; kurumTuru: string; kurumAdi: string }) {
+// className: kart disinda (ör. ilan sayfasi ust bandi) farkli oran/yukseklik icin.
+export function IlanGorsel({
+  logoUrl,
+  kurumTuru,
+  kurumAdi,
+  className = "aspect-[16/9]",
+}: {
+  logoUrl: string | null;
+  kurumTuru: string;
+  kurumAdi: string;
+  className?: string;
+}) {
   const [logoHatasi, setLogoHatasi] = useState(false);
   const { zemin, ikon: Ikon } = TEMA[kurumTuru] ?? TEMA.DIGER;
   const logoVar = logoUrl && !logoHatasi;
 
   return (
-    <div className={`relative aspect-[16/9] w-full overflow-hidden bg-gradient-to-br ${zemin}`}>
+    <div className={`relative w-full overflow-hidden bg-gradient-to-br ${zemin} ${className}`}>
       {/* Hafif nokta deseni + buyuk soluk tur ikonu: duz renk zemini derinlestirir. */}
       <div
         aria-hidden

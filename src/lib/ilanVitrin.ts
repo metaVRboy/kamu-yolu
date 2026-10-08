@@ -88,7 +88,7 @@ export function tekIlanKartlari(ilanlar: Posting[], simdi = Date.now()): IlanVit
 function zamanBilgisi(ilan: Posting, simdi: number) {
   return {
     yeni: !!ilan.publishedAt && simdi - ilan.publishedAt.getTime() < 2 * GUN_MS,
-    kalanGun: ilan.applicationEnd ? Math.ceil((ilan.applicationEnd.getTime() - simdi) / GUN_MS) : null,
+    kalanGun: kalanGunSayisi(ilan.applicationEnd, simdi),
   };
 }
 
@@ -144,4 +144,35 @@ export function yakindaFiltresi<T extends Pick<Posting, "applicationEnd">>(
   );
   if (!aktif) q.set("yakinda", "1");
   return { gosterilen: aktif ? bitecekler : ilanlar, biteceklerSayisi: bitecekler.length, aktif, href: `${yol}${q.size ? `?${q}` : ""}` };
+}
+
+/**
+ * Ilan sayfasindaki basvuru cizelgesi: baslangic-bitis arasinda bugunun yeri (0-100).
+ * Tarihlerden biri yoksa null; bitis gectiyse 100.
+ */
+export function basvuruIlerlemesi(baslangic: Date | null, bitis: Date | null, simdi = Date.now()): number | null {
+  if (!baslangic || !bitis || bitis <= baslangic) return null;
+  const oran = (simdi - baslangic.getTime()) / (bitis.getTime() + GUN_MS - baslangic.getTime());
+  return Math.round(Math.min(1, Math.max(0, oran)) * 100);
+}
+
+/** Son basvuruya kalan gun (bitis gunu dahil); tarih yoksa null. */
+export function kalanGunSayisi(bitis: Date | null, simdi = Date.now()): number | null {
+  return bitis ? Math.ceil((bitis.getTime() - simdi) / GUN_MS) : null;
+}
+
+/**
+ * "Aranan nitelikler" ham metnini maddelere ayirir: "-", "•", "*", "1)", "1." ya da "1- " ile
+ * baslayan satirlar madde olur. Bolum basligini tekrarlayan "ARANAN NİTELİKLER" satiri atilir.
+ */
+export function nitelikMaddeleri(metin: string): { madde: boolean; metin: string }[] {
+  return metin
+    .split(/\r?\n/)
+    .map((s) => s.trim())
+    .filter((s) => s && !/^aranan nitelikler:?$/.test(s.toLocaleLowerCase("tr-TR")))
+    .map((s) => {
+      // "1- " bosluk ister: "2024-2025 yili..." gibi satirlar madde sanilmasin.
+      const m = s.match(/^(?:[-•*–]|\d+[.)]|\d+-\s)\s*(.+)$/);
+      return m ? { madde: true, metin: m[1] } : { madde: false, metin: s };
+    });
 }

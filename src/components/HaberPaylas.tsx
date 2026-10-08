@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 const pillClass =
   "rounded-full border border-primary/20 bg-white px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/10";
 
-export function HaberPaylas({ baslik, url }: { baslik: string; url: string }) {
+export function HaberPaylas({ baslik, url, etiket = "Haberi paylaş:" }: { baslik: string; url: string; etiket?: string }) {
   const [kopyalandi, setKopyalandi] = useState(false);
   const metin = encodeURIComponent(baslik);
   const link = encodeURIComponent(url);
@@ -25,7 +25,7 @@ export function HaberPaylas({ baslik, url }: { baslik: string; url: string }) {
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <span className="text-sm font-medium text-muted-foreground">Haberi paylaş:</span>
+      <span className="text-sm font-medium text-muted-foreground">{etiket}</span>
       <a
         href={`https://wa.me/?text=${metin}%20${link}`}
         target="_blank"
