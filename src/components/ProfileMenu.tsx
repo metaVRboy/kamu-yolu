@@ -74,6 +74,14 @@ export function ProfileMenu({
       {open && (
         <div className="absolute top-full right-0 z-50 mt-2 w-56 overflow-hidden rounded-2xl border border-primary/20 bg-white py-1.5 shadow-2xl shadow-primary/20">
           <Link
+            href="/profilim"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-primary/10 hover:text-slate-900"
+          >
+            <UserRound className="h-4 w-4" />
+            Profilim
+          </Link>
+          <Link
             href="/profilim/ayarlar"
             onClick={() => setOpen(false)}
             className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-primary/10 hover:text-slate-900"
