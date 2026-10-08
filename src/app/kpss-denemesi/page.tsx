@@ -29,7 +29,7 @@ const fmt = (n: number) => n.toLocaleString("tr-TR", { maximumFractionDigits: 2 
 const ADIMLAR = [
   { ikon: MousePointerClick, baslik: "Düzeyini seç", metin: "Ortaöğretim, Önlisans ya da Lisans; her düzeyin kendi günlük denemesi var." },
   { ikon: Timer, baslik: `${SINAV_SURESI_DK} dakikada ${TOPLAM_SORU} soru`, metin: "Gerçek KPSS formatı ve süresi. Soruları işaretleyip sonra dönebilirsin." },
-  { ikon: ChartColumnBig, baslik: "Raporunu al", metin: "Pro'da ders karnen ve konu bazlı uyarılar, Pro+'da önceki denemene göre gelişimin hazır." },
+  { ikon: ChartColumnBig, baslik: "Raporunu al", metin: "Pro'da ders karnen ve soru çözümlerin, Pro+'da konu bazlı değerlendirme ve önceki denemene göre gelişimin hazır." },
 ];
 
 export default async function KpssDenemesiHubPage() {
@@ -48,7 +48,7 @@ export default async function KpssDenemesiHubPage() {
         ikon={GraduationCap}
         breadcrumb={[{ ad: "Ana Sayfa", href: "/" }, { ad: "KPSS Denemesi" }]}
         baslik="KPSS Deneme Sınavı"
-        aciklama="Her gün yenilenen, gerçek KPSS formatında deneme. O gün giren herkes aynı soruları görür; Pro'da sınav sonunda ders karnen ve konu bazlı çalışma tavsiyelerin hazırlanır."
+        aciklama="Her gün yenilenen, gerçek KPSS formatında deneme. O gün giren herkes aynı soruları görür; Pro'da ders karnen, Pro+'da konu bazlı çalışma tavsiyelerin hazırlanır."
         cipler={[
           { etiket: `${TOPLAM_SORU} soru`, ikon: ListChecks },
           { etiket: `${SINAV_SURESI_DK} dakika`, ikon: Clock },
@@ -59,15 +59,15 @@ export default async function KpssDenemesiHubPage() {
       <div className="mt-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-primary/10 bg-white px-5 py-3 text-sm shadow-sm">
         <p className="text-slate-700">
           {!user ? (
-            "Ücretsiz planda haftada toplam 1, Pro'da toplam 3 deneme; Pro+'da sınırsız. Sınav sonu rapor Pro ile açılır."
+            "Ücretsiz planda haftada toplam 1, Pro'da toplam 3 deneme; Pro+'da sınırsız. Ders karnesi Pro, konu değerlendirmesi Pro+ ile açılır."
           ) : hak?.limit === null ? (
             <>
-              <strong className="text-slate-900">Pro+</strong> · Sınırsız deneme, rapor ve konu gelişim takibi açık.
+              <strong className="text-slate-900">Pro+</strong> · Sınırsız deneme, konu bazlı değerlendirme ve gelişim takibi açık.
             </>
           ) : (
             <>
               Bu hafta toplam <strong className="text-slate-900 tabular-nums">{hak?.kullanilan}/{hak?.limit}</strong> deneme hakkını kullandın (tüm düzeyler dahil)
-              {user.abonelikPlani === "UCRETSIZ" ? " · Sınav sonu rapor Pro'da" : " · Konu gelişim takibi Pro+'da"}. Hak pazartesi yenilenir.
+              {user.abonelikPlani === "UCRETSIZ" ? " · Ders karnesi Pro'da" : " · Konu değerlendirmesi ve gelişim takibi Pro+'da"}. Hak pazartesi yenilenir.
             </>
           )}
         </p>

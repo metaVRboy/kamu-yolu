@@ -78,7 +78,7 @@ const GRUPLAR: { ad: string; aciklama: string; renk: { rozet: string; ikon: stri
     renk: { rozet: "bg-violet-100 text-violet-700", ikon: "bg-violet-600 text-white", kenar: "hover:border-violet-300", zemin: "from-violet-50" },
     ozellikler: [
       { ikon: GraduationCap, baslik: "Günlük KPSS denemesi", metin: "Ortaöğretim, önlisans ve lisans için 120 soruluk, ÖSYM konu dağılımına uygun deneme.", href: "/kpss-denemesi" },
-      { ikon: FileSearch, baslik: "Konu analizi raporu", metin: "Sınav sonunda ders karnen ve kırmızı, sarı, yeşil konu uyarılarıyla çalışma planın hazır.", href: "/kpss-denemesi", pro: "Pro" },
+      { ikon: FileSearch, baslik: "Konu bazlı değerlendirme", metin: "Kırmızı, sarı, yeşil konu uyarıları ve önceki denemene göre gelişimin; ders karnesi Pro'da.", href: "/kpss-denemesi", pro: "Pro+" },
       { ikon: Calculator, baslik: "KPSS puan hesaplama", metin: "Doğru ve yanlış sayılarını gir, puanını hızlıca hesapla.", href: "/kpss-puan-hesaplama" },
       { ikon: BarChart3, baslik: "Alım analizi", metin: "Yıllara göre kamu istihdamı ve bölümüne KPSS ile kaç kadro açıldığını resmi verilerle gör.", href: "/analiz" },
     ],
@@ -295,7 +295,7 @@ export default async function AmacimizPage() {
               ad: PLAN_ADI.PRO,
               fiyat: `${tl(PLAN_FIYATI.PRO.aylik)} / ay`,
               maddeler: [
-                "Haftada toplam 3 deneme ve sınav sonu rapor",
+                "Haftada toplam 3 deneme, ders karnesi ve soru çözümleri",
                 "Kişisel bildirimler ve SMS ile anlık ilan bildirimi",
                 "Becayiş talebi oluşturma ve mesajlaşma",
                 "Bana özel ilanlar",
@@ -305,7 +305,7 @@ export default async function AmacimizPage() {
             {
               ad: PLAN_ADI.PRO_PLUS,
               fiyat: `${tl(PLAN_FIYATI.PRO_PLUS.aylik)} / ay`,
-              maddeler: ["Sınırsız deneme ve konu gelişim takibi", "Reklamsız deneyim", "Öncelikli destek"],
+              maddeler: ["Sınırsız deneme, konu bazlı değerlendirme ve gelişim takibi", "Reklamsız deneyim", "Öncelikli destek"],
               vurgu: true,
             },
           ].map((p) => (

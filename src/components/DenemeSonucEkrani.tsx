@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowDownRight, ArrowUpRight, CheckCircle2, TrendingUp, CircleAlert, ListChecks, MinusCircle, OctagonAlert, Target, X, XCircle } from "lucide-react";
 import { DERS_LABEL, DUZEY_LABEL, DUZEY_TEMA, type DenemeDuzeyi, type ExamSoru } from "@/lib/kpssDenemeSabitler";
 import { dersKarnesi, konuAnalizi, type KonuDurumu, type KonuSonucu } from "@/lib/kpssDenemeAnaliz";
+import type { DenemeDers } from "@/generated/prisma/client";
 import { KesirliMetin } from "@/components/KesirliMetin";
 import { SoruGovdesi } from "@/components/SoruGovdesi";
 import { SoruHaritasi } from "@/components/SoruHaritasi";
@@ -137,6 +138,32 @@ const ORNEK_GELISIM: Gelisim = {
   ],
 };
 
+// Kilitli konu degerlendirmesi onizlemesi: ornek sayimlar gercek analiz fonksiyonundan gecer
+// ki gorunum rapordakiyle ayni olsun. [ders, konu, dogru, yanlis, bos]
+const ORNEK_KONULAR = (() => {
+  const ornek: [DenemeDers, string, number, number, number][] = [
+    ["TURKCE", "Sözel Mantık", 1, 3, 0],
+    ["MATEMATIK", "Sayısal Mantık", 1, 2, 1],
+    ["TURKCE", "Paragraf", 10, 3, 1],
+    ["TARIH", "Osmanlı Siyasi Tarihi", 3, 1, 2],
+    ["COGRAFYA", "İklim ve Bitki Örtüsü", 2, 0, 1],
+    ["MATEMATIK", "Problemler", 4, 0, 0],
+    ["VATANDASLIK", "Yürütme", 2, 0, 0],
+    ["TARIH", "İnkılap Tarihi", 3, 0, 0],
+  ];
+  const sorular: { id: string; ders: DenemeDers; konu: string; dogruCevap: number }[] = [];
+  const cevaplar: Record<string, number> = {};
+  for (const [ders, konu, dogru, yanlis, bos] of ornek) {
+    for (let i = 0; i < dogru + yanlis + bos; i++) {
+      const id = `ornek-${sorular.length}`;
+      sorular.push({ id, ders, konu, dogruCevap: 0 });
+      if (i < dogru) cevaplar[id] = 0;
+      else if (i < dogru + yanlis) cevaplar[id] = 1;
+    }
+  }
+  return konuAnalizi(sorular, cevaplar);
+})();
+
 /** Konu gelisim takibi: gecen denemeye gore net/puan farki ve durumu degisen konular. */
 function GelisimBolumu({ gelisim }: { gelisim: Gelisim | null }) {
   return (
@@ -214,7 +241,11 @@ export function DenemeSonucEkrani({
   const verilenCevap = cevaplar[incelenen.id];
   const karne = dersKarnesi(sorular, cevaplar);
   const konular = konuAnalizi(sorular, cevaplar);
-  const oncelikliler = konular.filter((k) => k.durum !== "yesil").slice(0, 3);
+  // Konu bazli degerlendirme + gelisim Pro+; digerlerinde ornek veriyle bulanik gosterilir
+  // (sunucu Pro+ disinda sorularin konu bilgisini zaten gondermez).
+  const konuKilitli = plan !== "PRO_PLUS";
+  const gosterilenKonular = konuKilitli ? ORNEK_KONULAR : konular;
+  const oncelikliler = gosterilenKonular.filter((k) => k.durum !== "yesil").slice(0, 3);
   const gelisim: Gelisim | null = onceki && {
     tarihMetni: onceki.tarihMetni,
     netFark: net - onceki.net,
@@ -225,7 +256,7 @@ export function DenemeSonucEkrani({
       return eski && eski !== k.durum ? [{ ders: k.ders, konu: k.konu, eski, yeni: k.durum }] : [];
     }),
   };
-  // Ucretsiz planda rapor gercek duzeniyle ama ornek veriyle, bulanik gosterilir.
+  // Ucretsiz: raporun tamami tek kilit altinda (gercek duzen, ornek veri).
   const raporuSar = (icerik: ReactNode) =>
     plan === "UCRETSIZ" ? (
       <KilitliOzellik
@@ -233,12 +264,33 @@ export function DenemeSonucEkrani({
         gerekenPlan="PRO"
         kaynak="rapor"
         uzun
-        baslik="Sınav sonu raporun Pro'da"
+        baslik="Sınav sonu raporun"
         ozellikler={[
-          "Ders karnesi: her derste doğru, yanlış, boş ve net",
-          "Konu bazlı çalışma tavsiyeleri: kırmızı, sarı, yeşil uyarılar",
-          "Soruların doğru cevapları ve açıklamaları",
-          "Pro'da haftada toplam 3, Pro+'da sınırsız deneme",
+          "Pro: ders karnesi (her derste doğru, yanlış, boş ve net)",
+          "Pro: soruların doğru cevapları ve açıklamaları",
+          "Pro+: konu bazlı değerlendirme (kırmızı, sarı, yeşil uyarılar)",
+          "Pro+: önceki denemene göre gelişimin",
+        ]}
+      >
+        {icerik}
+      </KilitliOzellik>
+    ) : (
+      icerik
+    );
+  // Pro: ders karnesi ve cozumler acik, konu degerlendirmesi + gelisim Pro+ kilidinde.
+  const konuSar = (icerik: ReactNode) =>
+    plan === "PRO" ? (
+      <KilitliOzellik
+        mevcutPlan={plan}
+        gerekenPlan="PRO_PLUS"
+        kaynak="gelisim"
+        uzun
+        baslik="Konu bazlı değerlendirme Pro+'da"
+        ozellikler={[
+          "Hangi konuyu gözden geçirmen gerektiği: kırmızı, sarı, yeşil uyarılar",
+          "Önce çalışman gereken 3 konu",
+          "Önceki denemene göre net, puan ve konu gelişimin",
+          "Sınırsız deneme",
         ]}
       >
         {icerik}
@@ -293,20 +345,6 @@ export function DenemeSonucEkrani({
         </p>
       </section>
 
-      {plan === "PRO_PLUS" ? (
-        <GelisimBolumu gelisim={gelisim} />
-      ) : (
-        <KilitliOzellik
-          mevcutPlan={plan}
-          gerekenPlan="PRO_PLUS"
-          kaynak="gelisim"
-          baslik="Konu gelişim takibi Pro+'da"
-          ozellikler={["Geçen denemene göre net ve puan farkın", "Hangi konuda ilerlediğin, hangisinde gerilediğin", "Her gün sınırsız deneme"]}
-        >
-          <GelisimBolumu gelisim={ORNEK_GELISIM} />
-        </KilitliOzellik>
-      )}
-
       {raporuSar(
       <div className="space-y-6">
       {/* Ders karnesi */}
@@ -336,8 +374,10 @@ export function DenemeSonucEkrani({
         </ul>
       </section>
 
+      {konuSar(
+      <div className="space-y-6">
       {/* Konu analizi - konusu etiketli soru varsa */}
-      {konular.length > 0 && (
+      {gosterilenKonular.length > 0 && (
         <>
           {oncelikliler.length > 0 && (
             <section className="rounded-3xl border border-primary/10 bg-white p-6 shadow-sm">
@@ -369,7 +409,7 @@ export function DenemeSonucEkrani({
             <div className="mt-4 grid gap-4 lg:grid-cols-3">
               {(["kirmizi", "sari", "yesil"] as const).map((d) => {
                 const stil = KONU_STIL[d];
-                const liste = konular.filter((k) => k.durum === d);
+                const liste = gosterilenKonular.filter((k) => k.durum === d);
                 return (
                   <div key={d}>
                     <p className="mb-2 flex items-center gap-1.5 text-sm font-bold text-slate-800">
@@ -413,6 +453,9 @@ export function DenemeSonucEkrani({
             </div>
           </section>
         </>
+      )}
+      <GelisimBolumu gelisim={konuKilitli ? ORNEK_GELISIM : gelisim} />
+      </div>,
       )}
 
       {/* Soru inceleme */}

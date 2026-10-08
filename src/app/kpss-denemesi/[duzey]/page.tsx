@@ -143,8 +143,10 @@ function BaslangicKarti({ duzey, plan, eylem }: { duzey: DenemeDuzeyi; plan: Pla
           <p className="flex items-center gap-1.5 text-xs text-slate-600">
             <Target className={cn("h-3.5 w-3.5", tema.metin)} />
             {plan === "UCRETSIZ"
-              ? "Sınav sonunda puanını görürsün; ders karnesi ve konu tavsiyeleri Pro'da."
-              : "Sınav sonunda ders karnen ve konu bazlı çalışma tavsiyelerin hazırlanır."}
+              ? "Sınav sonunda puanını görürsün; ders karnesi Pro'da, konu tavsiyeleri Pro+'da."
+              : plan === "PRO"
+                ? "Sınav sonunda ders karnen ve soru çözümlerin hazırlanır; konu tavsiyeleri Pro+'da."
+                : "Sınav sonunda ders karnen ve konu bazlı çalışma tavsiyelerin hazırlanır."}
           </p>
         </div>
       </section>
@@ -224,8 +226,8 @@ export default async function KpssDenemesiDuzeyPage({ params }: { params: Promis
                 baslik={`Bu haftaki toplam ${hak.limit} deneme hakkını kullandın`}
                 ozellikler={[
                   "Hakkın pazartesi yenilenir",
-                  ...(plan === "UCRETSIZ" ? ["Pro: haftada toplam 3 deneme ve sınav sonu rapor"] : []),
-                  "Pro+: sınırsız deneme, rapor ve konu gelişim takibi",
+                  ...(plan === "UCRETSIZ" ? ["Pro: haftada toplam 3 deneme ve ders karnesi"] : []),
+                  "Pro+: sınırsız deneme, konu bazlı değerlendirme ve gelişim takibi",
                 ]}
               >
                 <div className="flex min-h-64 items-center justify-center">
@@ -253,8 +255,13 @@ export default async function KpssDenemesiDuzeyPage({ params }: { params: Promis
   if (katilim.bitisZamani) {
     // Ucretsiz: rapor bulanik onizleme. Gercek dogru cevap/aciklama/kullanici cevaplari
     // tarayiciya GITMEZ (devtools'tan okunurdu); yerine sabit desenli ornek veri gider.
+    // Konu bazli degerlendirme Pro+: digerlerine konu bilgisi gonderilmez (devtools'tan hesaplanamasin).
     const ucretsiz = plan === "UCRETSIZ";
-    const raporSorulari = ucretsiz ? sorular.map((s, i) => ({ ...s, dogruCevap: i % 5, aciklama: null })) : sorular;
+    const raporSorulari = sorular.map((s, i) => ({
+      ...s,
+      konu: plan === "PRO_PLUS" ? s.konu : null,
+      ...(ucretsiz && { dogruCevap: i % 5, aciklama: null }),
+    }));
     const raporCevaplari = ucretsiz
       ? Object.fromEntries(sorular.flatMap((s, i) => (i % 6 === 5 ? [] : [[s.id, i % 4 === 3 ? (i + 1) % 5 : i % 5]])))
       : (katilim.cevaplar as Record<string, number>);

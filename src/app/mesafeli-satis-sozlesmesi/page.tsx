@@ -71,14 +71,14 @@ export default function MesafeliSatisSozlesmesiPage() {
                 <td className="border border-border p-2">Pro</td>
                 <td className="border border-border p-2">
                   SMS ile anlık ilan bildirimi, kişisel bildirimler, becayiş talebi oluşturma ve
-                  site içi mesajlaşma, haftada toplam 3 KPSS deneme sınavı ve sınav sonu rapor
+                  site içi mesajlaşma, haftada toplam 3 KPSS deneme sınavı, ders karnesi ve soru çözümleri
                 </td>
                 <td className="border border-border p-2">59 TL / ay</td>
               </tr>
               <tr>
                 <td className="border border-border p-2">Pro+</td>
                 <td className="border border-border p-2">
-                  Pro&apos;daki tüm özellikler, sınırsız KPSS deneme sınavı, rapor ve konu gelişim
+                  Pro&apos;daki tüm özellikler, sınırsız KPSS deneme sınavı, konu bazlı değerlendirme ve gelişim
                   takibi, reklamsız kullanım, öncelikli destek
                 </td>
                 <td className="border border-border p-2">79 TL / ay</td>

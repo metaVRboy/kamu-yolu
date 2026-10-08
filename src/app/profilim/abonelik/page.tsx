@@ -47,7 +47,7 @@ export default async function AbonelikPage() {
             </p>
             <p className="mt-1 text-sm text-slate-600">
               {!ucretli
-                ? "Ücretsiz plandasın. Pro ile SMS bildirimleri, becayiş mesajlaşması ve KPSS deneme raporları açılır."
+                ? "Ücretsiz plandasın. Pro ile SMS bildirimleri, becayiş mesajlaşması ve KPSS ders karnesi açılır."
                 : user.abonelikBitis
                   ? `${TARIH.format(user.abonelikBitis)} tarihine kadar geçerli (${kalanGun} gün kaldı).`
                   : "Süresiz (yönetici tarafından tanımlandı)."}

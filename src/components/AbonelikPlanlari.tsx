@@ -48,7 +48,7 @@ const PLANLAR: {
       "SMS ile anlık ilan bildirimi",
       "Becayiş talebi oluşturma",
       "Becayiş için site içi mesajlaşma",
-      "Haftada toplam 3 KPSS denemesi ve sınav sonu rapor",
+      "Haftada toplam 3 KPSS denemesi, ders karnesi ve soru çözümleri",
     ],
   },
   {
@@ -59,7 +59,7 @@ const PLANLAR: {
     aciklama: "En kapsamlı deneyim.",
     ozellikler: [
       "Pro'daki her şey",
-      "Sınırsız KPSS denemesi, rapor ve konu gelişim takibi",
+      "Sınırsız KPSS denemesi, konu bazlı değerlendirme ve gelişim takibi",
       "Reklamsız deneyim",
       "Öncelikli destek",
     ],
