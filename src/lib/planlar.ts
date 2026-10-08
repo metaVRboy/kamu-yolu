@@ -24,7 +24,17 @@ export const yillikBedavaAy = Math.floor(
 );
 
 /** Yukseltme butonunun bulundugu yer: pencere basligi ve karsilastirmada vurgulanan satir buna gore. */
-export type YukseltmeKaynagi = "genel" | "rapor" | "gelisim" | "deneme-hakki" | "sms" | "becayis-mesaj" | "ozel-ilanlar" | "reklamsiz";
+export type YukseltmeKaynagi =
+  | "genel"
+  | "rapor"
+  | "gelisim"
+  | "deneme-hakki"
+  | "sms"
+  | "bildirim"
+  | "becayis-mesaj"
+  | "becayis-talep"
+  | "ozel-ilanlar"
+  | "reklamsiz";
 
 export const KAYNAK_METNI: Record<YukseltmeKaynagi, { baslik: string; alt: string }> = {
   genel: { baslik: "Kamu Yolu'nun tamamını aç", alt: "Bölümüne uygun ilanları ilk sen öğren, KPSS'ye her gün hazırlan." },
@@ -32,7 +42,9 @@ export const KAYNAK_METNI: Record<YukseltmeKaynagi, { baslik: string; alt: strin
   gelisim: { baslik: "Gelişimini adım adım izle", alt: "Her denemede hangi konuda ilerlediğini, hangisinde gerilediğini gör." },
   "deneme-hakki": { baslik: "Bu hafta durma, çözmeye devam et", alt: "Haftalık hakkın doldu; yükselt, KPSS hazırlığın yarıda kalmasın." },
   sms: { baslik: "Yeni ilanı herkesten önce öğren", alt: "Bölümüne uygun ilan çıktığı an telefonuna SMS gelsin." },
+  bildirim: { baslik: "Önemli hiçbir şeyi kaçırma", alt: "Bölümüne uygun yeni ilan çıkınca ya da becayiş mesajı gelince anında haberin olsun." },
   "becayis-mesaj": { baslik: "Becayiş eşini bul, hemen yaz", alt: "Talep sahipleriyle site içinden doğrudan mesajlaş." },
+  "becayis-talep": { baslik: "Becayiş talebini yayımla", alt: "Talebin herkese açık listelensin, yer değiştirmek isteyenler sana ulaşsın." },
   "ozel-ilanlar": { baslik: "Sana özel ilanları gör", alt: "Bölümüne ve öğrenim düzeyine uygun ilanlar tek listede." },
   reklamsiz: { baslik: "Reklamsız, odaklı bir deneyim", alt: "Hiç reklam görmeden ilanlara ve denemelere odaklan." },
 };
@@ -43,7 +55,9 @@ export const KARSILASTIRMA: { ozellik: string; kaynak?: YukseltmeKaynagi; degerl
   { ozellik: "Haftalık KPSS denemesi", kaynak: "deneme-hakki", degerler: { UCRETSIZ: "1", PRO: "3", PRO_PLUS: "Sınırsız" } },
   { ozellik: "Sınav sonu rapor ve çözümler", kaynak: "rapor", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
   { ozellik: "Konu gelişim takibi", kaynak: "gelisim", degerler: { UCRETSIZ: false, PRO: false, PRO_PLUS: true } },
+  { ozellik: "Kişisel bildirimler", kaynak: "bildirim", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
   { ozellik: "SMS ile anlık ilan bildirimi", kaynak: "sms", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
+  { ozellik: "Becayiş talebi oluşturma", kaynak: "becayis-talep", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
   { ozellik: "Becayiş mesajlaşması", kaynak: "becayis-mesaj", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
   { ozellik: "Bana özel ilanlar", kaynak: "ozel-ilanlar", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
   { ozellik: "Reklamsız deneyim", kaynak: "reklamsiz", degerler: { UCRETSIZ: false, PRO: false, PRO_PLUS: true } },

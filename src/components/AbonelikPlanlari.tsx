@@ -43,9 +43,10 @@ const PLANLAR: {
     populer: true,
     ozellikler: [
       "Standart'taki her şey",
-      "Bölümüne uygun yeni ilan çıktığında öncelikli bildirim",
+      "Kişisel bildirimler: yeni ilan ve becayiş mesajı",
       "Bana özel ilanlar",
       "SMS ile anlık ilan bildirimi",
+      "Becayiş talebi oluşturma",
       "Becayiş için site içi mesajlaşma",
       "Haftada toplam 3 KPSS denemesi ve sınav sonu rapor",
     ],

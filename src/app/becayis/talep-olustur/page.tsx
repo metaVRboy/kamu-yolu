@@ -5,6 +5,8 @@ import { getCurrentUser } from "@/lib/auth";
 import { getOkunmamisIlgilendiklerimSayisi, getOkunmamisMesajSayisi } from "@/lib/becayis";
 import { BecayisTalepForm } from "@/components/BecayisTalepForm";
 import { ProfilLayout } from "@/components/ProfilLayout";
+import { KilitliOzellik } from "@/components/KilitliOzellik";
+import { proAktifMi } from "@/lib/sms";
 
 export const metadata = { title: "Becayiş Talebi Oluştur — Kamu Yolu" };
 
@@ -29,7 +31,25 @@ export default async function BecayisTalepOlusturPage() {
         aciklama="Talebin herkese açık olarak listelenir; iletişim bilgilerin gizli kalır, ilgilenenler sana site üzerinden mesaj gönderir."
       />
       <div className="mt-6">
-        <BecayisTalepForm />
+        {proAktifMi(user) ? (
+          <BecayisTalepForm />
+        ) : (
+          // Form ekranda kalir ama bulanik/tiklanamaz; API de Pro kontrolu yapar.
+          <KilitliOzellik
+            mevcutPlan={user.abonelikPlani}
+            gerekenPlan="PRO"
+            kaynak="becayis-talep"
+            uzun
+            baslik="Becayiş talebi oluşturmak Pro'da"
+            ozellikler={[
+              "Talebin herkese açık listelenir, iletişim bilgilerin gizli kalır",
+              "İlgilenenlerle site içinden mesajlaş",
+              "Yeni mesaj gelince bildirim ve SMS al",
+            ]}
+          >
+            <BecayisTalepForm />
+          </KilitliOzellik>
+        )}
       </div>
     </ProfilLayout>
   );

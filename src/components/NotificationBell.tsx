@@ -4,6 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Bell, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { KilitliOzellik } from "@/components/KilitliOzellik";
+import type { Plan } from "@/lib/planlar";
+
+// Kilitli onizleme icin ornek (gercek kullanici verisi degil).
+const ORNEK_BILDIRIMLER = [
+  { baslik: "Bölümüne uygun yeni ilan", icerik: "Bölümünün başvurabildiği yeni bir kamu ilanı yayımlandı." },
+  { baslik: "Yeni becayiş mesajınız var", icerik: "Talebinle ilgilenen biri sana mesaj gönderdi." },
+  { baslik: "Bölümüne uygun yeni ilan", icerik: "Son başvuru tarihi yaklaşan bir ilan seni bekliyor." },
+];
 
 type Duyuru = { id: string; baslik: string; icerik: string; createdAt: string };
 type Bildirim = { id: string; baslik: string; icerik: string | null; link: string | null; createdAt: string; okundu: boolean };
@@ -23,6 +32,8 @@ export function NotificationBell({ isLoggedIn }: { isLoggedIn: boolean }) {
   const [genel, setGenel] = useState<Duyuru[]>([]);
   const [banaOzel, setBanaOzel] = useState<Bildirim[]>([]);
   const [okunmamisSayisi, setOkunmamisSayisi] = useState(0);
+  // Kisisel bildirimler Pro: ucretsizde sekme bulanik ornekle gosterilir.
+  const [kilit, setKilit] = useState<{ kilitli: boolean; plan: Plan | null }>({ kilitli: false, plan: null });
   const [panelPos, setPanelPos] = useState<{ top: number; left: number } | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -46,6 +57,7 @@ export function NotificationBell({ isLoggedIn }: { isLoggedIn: boolean }) {
       setGenel(data.genel);
       setBanaOzel(data.banaOzel);
       setOkunmamisSayisi(data.okunmamisSayisi);
+      setKilit({ kilitli: !!data.banaOzelKilitli, plan: data.plan ?? null });
     } catch {
       // Sessizce yok say - 30sn sonraki periyodik denemede tekrar dener.
     }
@@ -170,6 +182,23 @@ export function NotificationBell({ isLoggedIn }: { isLoggedIn: boolean }) {
                   </Link>
                   .
                 </p>
+              ) : kilit.kilitli ? (
+                <KilitliOzellik
+                  kompakt
+                  mevcutPlan={kilit.plan ?? "UCRETSIZ"}
+                  gerekenPlan="PRO"
+                  kaynak="bildirim"
+                  baslik="Kişisel bildirimler Pro'da"
+                >
+                  <div className="min-h-64 space-y-1">
+                    {ORNEK_BILDIRIMLER.map((b) => (
+                      <div key={b.baslik} className="rounded-xl bg-primary/5 p-3">
+                        <p className="text-sm font-medium text-slate-900">{b.baslik}</p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">{b.icerik}</p>
+                      </div>
+                    ))}
+                  </div>
+                </KilitliOzellik>
               ) : banaOzel.length === 0 ? (
                 <p className="p-3 text-sm text-muted-foreground">Henüz bildirimin yok.</p>
               ) : (

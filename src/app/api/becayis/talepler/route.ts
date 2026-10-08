@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
 import { createTalep, deleteTalep } from "@/lib/becayis";
+import { proAktifMi } from "@/lib/sms";
 import { TURKIYE_ILLERI } from "@/lib/iller";
 import { ilceSecenekleri } from "@/lib/ilceler";
 import { KURUM_TURLERI } from "@/lib/kurumMeslek";
@@ -30,6 +31,11 @@ export async function POST(req: NextRequest) {
   const user = await getCurrentUser();
   if (!user) {
     return NextResponse.json({ error: "Giriş yapmalısınız." }, { status: 401 });
+  }
+
+  // Talep olusturmak Pro ozelligi (mevcut ucretsiz talepler yayinda kalir, yenisi acilamaz).
+  if (!proAktifMi(user)) {
+    return NextResponse.json({ error: "Becayiş talebi oluşturmak Pro üyelik gerektirir." }, { status: 403 });
   }
 
   const parsed = bodySchema.safeParse(await req.json().catch(() => null));

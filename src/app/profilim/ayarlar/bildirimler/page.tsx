@@ -23,7 +23,8 @@ export default async function BildirimAyarlariPage() {
           ozellikler={[
             "Bölümüne uygun yeni ilan çıkınca anında SMS",
             "Becayiş talebine mesaj gelince SMS",
-            "Site içi bildirimler her planda açık",
+            "Kişisel site içi bildirimler de Pro ile açılır",
+            "Genel duyurular her planda açık",
           ]}
         >
           <div className="space-y-6">

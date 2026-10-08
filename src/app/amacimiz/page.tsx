@@ -32,7 +32,7 @@ import {
   UserCheck,
   type LucideIcon,
 } from "lucide-react";
-import { prisma } from "@/lib/prisma";
+import { DENEME_DUZEYLERI } from "@/lib/kpssDenemeSabitler";
 import { getHomepageStats } from "@/lib/matching";
 import { PLAN_ADI, PLAN_FIYATI, tl } from "@/lib/planlar";
 import { SayfaBasligi } from "@/components/SayfaBasligi";
@@ -66,7 +66,7 @@ const GRUPLAR: { ad: string; aciklama: string; renk: { rozet: string; ikon: stri
     aciklama: "Sana uygun ilanı saniyeler içinde bul.",
     renk: { rozet: "bg-blue-100 text-blue-700", ikon: "bg-blue-600 text-white", kenar: "hover:border-blue-300", zemin: "from-blue-50" },
     ozellikler: [
-      { ikon: Target, baslik: "Bölüme göre eşleştirme", metin: "Bölümün açıkça istenen ve bölüm şartı aranmayan ilanlar ayrı ayrı işaretlenir.", href: "/" },
+      { ikon: Target, baslik: "Bölüme göre eşleştirme", metin: "Yalnızca senin bölümünün başvurabildiği ya da öğrenim düzeyi seninkine denk ve bölüm şartı aranmayan ilanlar ayrı ayrı listelenir.", href: "/" },
       { ikon: BadgeCheck, baslik: "Uygunluk kontrolü", metin: "Giriş yaptıysan ilan sayfası “Bölümün bu ilan için uygun” bilgisini doğrudan gösterir.", href: "/ilanlar" },
       { ikon: ListFilter, baslik: "Filtreler", metin: "Kurum türü, il, ilan türü ve bölüm şartına göre daralt; süresi geçen ilanlar listelenmez.", href: "/ilanlar" },
       { ikon: CalendarPlus, baslik: "Takvime ekle", metin: "Son başvuru tarihini tek tıkla takvimine ekle, bir gün önce hatırlatma al.", href: "/ilanlar" },
@@ -89,7 +89,7 @@ const GRUPLAR: { ad: string; aciklama: string; renk: { rozet: string; ikon: stri
     renk: { rozet: "bg-emerald-100 text-emerald-700", ikon: "bg-emerald-600 text-white", kenar: "hover:border-emerald-300", zemin: "from-emerald-50" },
     ozellikler: [
       { ikon: Newspaper, baslik: "Kamu haberleri", metin: "Alım duyuruları ve kamu personelini ilgilendiren haberler, kaynağıyla doğrulanarak yayımlanır.", href: "/haberler" },
-      { ikon: Bell, baslik: "Bildirimler", metin: "Bölümüne uygun yeni ilan çıkınca ya da becayiş talebine mesaj gelince haberin olur.", href: "/profilim/ayarlar/bildirimler" },
+      { ikon: Bell, baslik: "Bildirimler", metin: "Bölümüne uygun yeni ilan çıkınca ya da becayiş talebine mesaj gelince haberin olur.", href: "/profilim/ayarlar/bildirimler", pro: "Pro" },
       { ikon: Smartphone, baslik: "SMS ile anlık bildirim", metin: "Yeni ilanı telefonuna gelen SMS ile herkesten önce öğren.", href: "/profilim/ayarlar/bildirimler", pro: "Pro" },
       { ikon: UserCheck, baslik: "Bana özel ilanlar", metin: "Profilindeki bölüm ve öğrenim düzeyine uygun ilanlar tek listede.", href: "/profilim", pro: "Pro" },
     ],
@@ -100,7 +100,7 @@ const GRUPLAR: { ad: string; aciklama: string; renk: { rozet: string; ikon: stri
     renk: { rozet: "bg-amber-100 text-amber-800", ikon: "bg-amber-500 text-white", kenar: "hover:border-amber-300", zemin: "from-amber-50" },
     ozellikler: [
       { ikon: Repeat, baslik: "Becayiş ilanları", metin: "Meslek ve ile göre yer değiştirme taleplerini incele.", href: "/becayis" },
-      { ikon: Sparkles, baslik: "Talep oluştur", metin: "Kendi talebini birkaç adımda yayımla, ilgilenenleri gör.", href: "/becayis/talep-olustur" },
+      { ikon: Sparkles, baslik: "Talep oluştur", metin: "Kendi talebini birkaç adımda yayımla, ilgilenenleri gör.", href: "/becayis/talep-olustur", pro: "Pro" },
       { ikon: Heart, baslik: "İlgilendiklerim", metin: "Yazıştığın talepler ve konuşmaların tek yerde, okunmamış mesajlarla birlikte.", href: "/becayis/ilgilendiklerim" },
       { ikon: MessageCircle, baslik: "Site içi mesajlaşma", metin: "Talep sahibiyle telefon numarası paylaşmadan doğrudan yazış.", href: "/becayis", pro: "Pro" },
     ],
@@ -122,13 +122,14 @@ const ILKELER: { ikon: LucideIcon; baslik: string; metin: string }[] = [
 ];
 
 export default async function AmacimizPage() {
-  const [stats, soruHavuzu] = await Promise.all([getHomepageStats(), prisma.denemeSoru.count()]);
+  const stats = await getHomepageStats();
 
-  const canliSayilar = [
+  const canliSayilar: { deger: number; etiket: string; ikon: LucideIcon; yaklasik?: boolean }[] = [
     { deger: stats.postingCount, etiket: "aktif kamu ilanı", ikon: Radar },
     { deger: stats.institutionCount, etiket: "farklı kurum", ikon: Building2 },
     { deger: stats.departmentCount, etiket: "tanımlı bölüm", ikon: BookOpenCheck },
-    { deger: soruHavuzu, etiket: "KPSS deneme sorusu", ikon: GraduationCap },
+    // Her duzeyin her gun bir denemesi var: yilda duzey sayisi x 365.
+    { deger: DENEME_DUZEYLERI.length * 365, etiket: "yılda KPSS denemesi", ikon: GraduationCap, yaklasik: true },
   ];
 
   return (
@@ -164,7 +165,7 @@ export default async function AmacimizPage() {
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4">
-          {canliSayilar.map(({ deger, etiket, ikon: Ikon }, i) => (
+          {canliSayilar.map(({ deger, etiket, ikon: Ikon, yaklasik }, i) => (
             <div
               key={etiket}
               className={cn(
@@ -173,7 +174,10 @@ export default async function AmacimizPage() {
               )}
             >
               <Ikon className={cn("h-6 w-6", i === 0 ? "text-white/80" : "text-primary")} />
-              <p className={cn("mt-4 font-sans text-4xl font-bold tracking-tight tabular-nums", i !== 0 && "text-slate-900")}>{sayi(deger)}</p>
+              <p className={cn("mt-4 font-sans text-4xl font-bold tracking-tight tabular-nums", i !== 0 && "text-slate-900")}>
+                {yaklasik && "~"}
+                {sayi(deger)}
+              </p>
               <p className={cn("mt-1 text-sm font-medium", i === 0 ? "text-white/85" : "text-muted-foreground")}>{etiket}</p>
             </div>
           ))}
@@ -290,7 +294,12 @@ export default async function AmacimizPage() {
             {
               ad: PLAN_ADI.PRO,
               fiyat: `${tl(PLAN_FIYATI.PRO.aylik)} / ay`,
-              maddeler: ["Haftada toplam 3 deneme ve sınav sonu rapor", "SMS ile anlık ilan bildirimi", "Becayiş mesajlaşması ve bana özel ilanlar"],
+              maddeler: [
+                "Haftada toplam 3 deneme ve sınav sonu rapor",
+                "Kişisel bildirimler ve SMS ile anlık ilan bildirimi",
+                "Becayiş talebi oluşturma ve mesajlaşma",
+                "Bana özel ilanlar",
+              ],
               vurgu: false,
             },
             {

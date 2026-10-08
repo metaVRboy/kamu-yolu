@@ -153,13 +153,17 @@ export async function sendMesaj(params: {
   // konusma "Mevcut Taleplerim"de, ilgilenen taraf icin "İlgilendiğim
   // İlanlar"da yer alir - aksi halde alici kendi konusmasini bulamaz.
   const link = aliciId === talep.userId ? "/becayis/taleplerim" : "/becayis/ilgilendiklerim";
-  await createBildirim({
-    userId: aliciId,
-    tur: "BECAYIS_MESAJ",
-    baslik: "Yeni becayiş mesajınız var",
-    icerik: params.mesaj.slice(0, 120),
-    link,
-  });
+  // Kisisel bildirimler Pro ozelligi; ucretsiz alici mesaji Taleplerim'de gorur.
+  const alici = await prisma.user.findUnique({ where: { id: aliciId }, select: { abonelikPlani: true, abonelikBitis: true } });
+  if (alici && proAktifMi(alici)) {
+    await createBildirim({
+      userId: aliciId,
+      tur: "BECAYIS_MESAJ",
+      baslik: "Yeni becayiş mesajınız var",
+      icerik: params.mesaj.slice(0, 120),
+      link,
+    });
+  }
   // Yanit bekletilmesin diye SMS yanit gonderildikten sonra denenir.
   after(() => becayisSmsGonder(aliciId));
 
