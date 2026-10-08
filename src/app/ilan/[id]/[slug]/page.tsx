@@ -1,7 +1,8 @@
 import { notFound, permanentRedirect } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ArrowLeft, ArrowUpRight, Building2, CalendarClock, MapPin } from "lucide-react";
+import { ArrowUpRight, Building2, CalendarClock, MapPin } from "lucide-react";
+import { GeriDonLinki } from "@/components/GeriDonLinki";
 import { getPostingById } from "@/lib/matching";
 import { slugify } from "@/lib/slug";
 import { INSTITUTION_TYPE_LABEL, LEVEL_LABEL } from "@/lib/labels";
@@ -88,13 +89,12 @@ export default async function IlanDetayPage({
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-      <Link
-        href="/ilanlar"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" />
-        Tüm ilanlara dön
-      </Link>
+      {/* Tek bolumlu ilanda dogrudan gelen kullanicinin donecegi yer o bolumun sayfasi. */}
+      <GeriDonLinki
+        yedekHref={bolumler.length === 1 ? `/bolum/${bolumler[0].slug}` : "/ilanlar"}
+        yedekEtiket={bolumler.length === 1 ? `${bolumler[0].name} ilanlarına dön` : "Tüm ilanlara dön"}
+        bolumler={bolumler.map((b) => ({ slug: b.slug, name: b.name }))}
+      />
 
       <Card className="mt-4 gap-4 border-primary/20 bg-white p-6 shadow-sm">
         <div className="flex flex-wrap items-center gap-1.5 text-xs">

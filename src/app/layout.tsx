@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import Image from "next/image";
@@ -18,6 +19,7 @@ import { CerezBildirimi } from "@/components/CerezBildirimi";
 import { ReklamEngelleyiciKontrol } from "@/components/ReklamEngelleyiciKontrol";
 import { AuthModalProvider } from "@/components/AuthModal";
 import { HeaderAuthButton } from "@/components/HeaderAuthButton";
+import { GezinmeKaydi } from "@/components/GeriDonLinki";
 import "./globals.css";
 
 // Site genelinde tek font: Inter. Baslik/govde ayrimi icin ayri bir serif
@@ -97,6 +99,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <div className="mx-auto flex w-full max-w-[1600px] flex-1 items-start justify-center gap-4 px-2">
           <AdSlot side="left" slotId="7192164037" />
           <main className="min-w-0 flex-1">
+            <Suspense fallback={null}>
+              <GezinmeKaydi />
+            </Suspense>
             <PageTransition>{children}</PageTransition>
           </main>
           <AdSlot side="right" slotId="3758342177" />

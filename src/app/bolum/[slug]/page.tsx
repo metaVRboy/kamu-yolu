@@ -12,11 +12,10 @@ import { getCurrentUser } from "@/lib/auth";
 import { IlanVitrinKarti } from "@/components/IlanVitrinKarti";
 import { kurumLogolari, tekIlanKartlari, yakindaFiltresi } from "@/lib/ilanVitrin";
 import { ilanCipleri, SayfaBasligi } from "@/components/SayfaBasligi";
-import { FarkliBolumAra } from "@/components/FarkliBolumAra";
+import { BolumSecici } from "@/components/BolumSecici";
 import { LEVEL_SLUG_TO_ENUM } from "@/lib/levels";
 import { FilterBar } from "@/components/FilterBar";
 import { HaberlerSection } from "@/components/HaberlerSection";
-import { Badge } from "@/components/ui/badge";
 import { LEVEL_LABEL } from "@/lib/labels";
 
 export const revalidate = 300;
@@ -64,29 +63,26 @@ export default async function DepartmentResultsPage({
         breadcrumb={[
           { ad: "Ana Sayfa", href: "/" },
           { ad: `${LEVEL_LABEL[department.level] ?? department.level} Mezunları`, href: seviyeSlug ? `/seviye/${seviyeSlug}` : undefined },
-          { ad: department.name },
+          { ad: department.name, ozel: <BolumSecici aktifAd={department.name} departments={bolumler} /> },
         ]}
         baslik={`${department.name} mezunları için ilanlar`}
-        rozet={
-          <Badge variant="outline" className="border-primary/30 text-primary">
-            {LEVEL_LABEL[department.level] ?? department.level}
-          </Badge>
-        }
         aciklama="Sadece bu bölüme özel şart koşan güncel kamu ilanları listelenir."
         cipler={ilanCipleri(tumIlanlar, yakindaDurumu)}
         aksiyonlar={
-          <>
-            {yukseltmeKartiGoster && (
-              <Link
-                href={user ? "/profilim/abonelik" : "/kayit-ol"}
-                className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
-              >
-                <Bell className="h-4 w-4" />
+          yukseltmeKartiGoster && (
+            // Fareli cihazda yalniz zil; uzerine gelince ikon sola kayar, yazi acilir.
+            // Dokunmatikte (hover yok) yazi bastan gorunur - yoksa ne ise yaradigi anlasilmaz.
+            <Link
+              href={user ? "/profilim/abonelik" : "/kayit-ol"}
+              aria-label="Yeni ilan çıkınca haber ver"
+              className="group/zil inline-flex h-9 items-center rounded-full bg-primary px-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
+            >
+              <Bell className="h-4 w-4 shrink-0 transition-transform group-hover/zil:-rotate-12" />
+              <span className="max-w-56 overflow-hidden pl-1.5 whitespace-nowrap transition-all duration-300 ease-out [@media(hover:hover)]:max-w-0 [@media(hover:hover)]:pl-0 [@media(hover:hover)]:opacity-0 group-hover/zil:max-w-56 group-hover/zil:pl-1.5 group-hover/zil:opacity-100 group-focus-visible/zil:max-w-56 group-focus-visible/zil:pl-1.5 group-focus-visible/zil:opacity-100">
                 Yeni ilan çıkınca haber ver
-              </Link>
-            )}
-            <FarkliBolumAra departments={bolumler} />
-          </>
+              </span>
+            </Link>
+          )
         }
         mobilBaslik={`${department.name} ilanları`}
         filtreHedefi="#filtreler"

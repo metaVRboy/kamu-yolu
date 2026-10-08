@@ -30,7 +30,8 @@ export function SayfaBasligi({
   kompakt = false,
 }: {
   ikon: LucideIcon;
-  breadcrumb?: { ad: string; href?: string }[];
+  // ozel: son oge yerine verilen dugum (ör. bolum sayfasinda acilir bolum secici).
+  breadcrumb?: { ad: string; href?: string; ozel?: ReactNode }[];
   baslik: ReactNode;
   rozet?: ReactNode;
   aciklama?: ReactNode;
@@ -45,12 +46,13 @@ export function SayfaBasligi({
   return (
     <header
       className={cn(
-        "relative overflow-hidden border border-primary/10 bg-white shadow-sm",
+        // overflow-hidden yalniz dekor katmaninda: basliktaki acilir paneller (bolum secici) kirpilmasin.
+        "relative border border-primary/10 bg-white shadow-sm",
         kompakt ? "rounded-2xl p-5" : "rounded-3xl p-6 sm:p-8",
       )}
     >
       {/* Sag tarafta site mavisinde soluk desenli alan - icerigin arkasinda kalir. */}
-      <div aria-hidden className={cn("pointer-events-none absolute inset-y-0 right-0 hidden w-2/5", !kompakt && "sm:block")}>
+      <div aria-hidden className={cn("pointer-events-none absolute inset-y-0 right-0 hidden w-2/5 overflow-hidden rounded-r-[inherit]", !kompakt && "sm:block")}>
         <div className="absolute inset-0 bg-gradient-to-l from-blue-600 to-indigo-600 opacity-[0.14] [mask-image:linear-gradient(to_left,black_30%,transparent)]" />
         <div className="absolute inset-0 opacity-40 [background-image:radial-gradient(circle,rgb(99_102_241/0.35)_1px,transparent_1.5px)] [background-size:18px_18px] [mask-image:linear-gradient(to_left,black,transparent)]" />
         <Ikon className="absolute -right-8 -bottom-10 h-56 w-56 text-primary/[0.07]" strokeWidth={1.25} />
@@ -62,13 +64,13 @@ export function SayfaBasligi({
             {breadcrumb.map((b, i) => (
               <span key={b.ad} className="flex items-center gap-1">
                 {i > 0 && <ChevronRight className="h-3 w-3" />}
-                {b.href ? (
+                {b.ozel ?? (b.href ? (
                   <Link href={b.href} className="hover:text-primary hover:underline">
                     {b.ad}
                   </Link>
                 ) : (
                   <span className="font-medium text-slate-600">{b.ad}</span>
-                )}
+                ))}
               </span>
             ))}
           </nav>
@@ -93,8 +95,9 @@ export function SayfaBasligi({
           </div>
         </div>
 
-        {cipler.length > 0 && (
-          <div className="mt-5 flex flex-wrap gap-2">
+        {/* Cipler solda, aksiyonlar ayni satirin en saginda: ayri satir acip basligi uzatmaz. */}
+        {(cipler.length > 0 || aksiyonlar) && (
+          <div className="mt-5 flex flex-wrap items-center gap-2">
             {cipler.map(({ etiket, ikon: CipIkon, href, durum }) => {
               const sinif = cn(
                 "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
@@ -126,10 +129,9 @@ export function SayfaBasligi({
                 </span>
               );
             })}
+            {aksiyonlar && <div className="ml-auto flex flex-wrap items-center gap-2">{aksiyonlar}</div>}
           </div>
         )}
-
-        {aksiyonlar && <div className="mt-5 flex flex-wrap items-center gap-2">{aksiyonlar}</div>}
       </div>
       {mobilBaslik && <MobilSabitBaslik baslik={mobilBaslik} filtreHedefi={filtreHedefi} />}
     </header>
