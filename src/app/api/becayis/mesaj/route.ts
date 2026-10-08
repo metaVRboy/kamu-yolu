@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { deleteMesajlar, getTalepDetay, sendMesaj } from "@/lib/becayis";
+import { proAktifMi } from "@/lib/sms";
 
 const bodySchema = z.object({
   talepId: z.string().min(1),
@@ -31,6 +32,11 @@ export async function POST(req: NextRequest) {
   }
 
   const isSahibi = talep.userId === user.id;
+  // Arayuzdeki kilit tek basina yetmez: konusma baslatmak (talep sahibine yazmak)
+  // Pro ozelligi, sunucuda da kontrol edilir. Talep sahibi gelen mesajlara cevap verebilir.
+  if (!isSahibi && !proAktifMi(user)) {
+    return NextResponse.json({ error: "Becayiş mesajlaşması Pro üyelik gerektirir." }, { status: 403 });
+  }
   if (isSahibi && !parsed.data.konusmaKarsiId) {
     return NextResponse.json(
       { error: "Hangi konuşmaya cevap verdiğiniz belirtilmedi." },

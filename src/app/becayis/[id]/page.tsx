@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Lock, MapPin, MessageCircle, User } from "lucide-react";
+import { MapPin, MessageCircle, User } from "lucide-react";
+import { KilitliOzellik } from "@/components/KilitliOzellik";
 import { getTalepDetay } from "@/lib/becayis";
 import { getCurrentUser } from "@/lib/auth";
 import { Card } from "@/components/ui/card";
@@ -49,25 +49,19 @@ export default async function BecayisDetayPage({
         {!isSahibi && (
           <div className="pt-2">
             {user && !isPremium ? (
-              <div className="relative flex min-h-36 items-center justify-center">
-                <div className="pointer-events-none blur-sm select-none">
+              <KilitliOzellik
+                mevcutPlan={user.abonelikPlani}
+                gerekenPlan="PRO"
+                baslik="Becayiş mesajlaşması Pro'da"
+                ozellikler={["Talep sahibine site içinden mesaj gönder", "Cevap gelince bildirim ve SMS ile haberdar ol"]}
+              >
+                <div className="flex min-h-64 items-center justify-center">
                   <span className={buttonVariants({ className: "w-full sm:w-auto sm:px-8" })}>
                     <MessageCircle className="h-4 w-4" />
                     Mesaj Gönder
                   </span>
                 </div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Card className="items-center gap-2 border-primary/25 bg-white p-4 text-center shadow-xl shadow-primary/20">
-                    <Lock className="h-5 w-5 text-primary" />
-                    <p className="max-w-xs text-sm font-medium text-slate-800">
-                      Mesaj gönderebilmek için hesabını yükselt.
-                    </p>
-                    <Link href="/profilim/abonelik" className={buttonVariants({ size: "sm" })}>
-                      Hesabınızı Yükseltin
-                    </Link>
-                  </Card>
-                </div>
-              </div>
+              </KilitliOzellik>
             ) : (
               <MessageWidget
                 talepId={talep.id}

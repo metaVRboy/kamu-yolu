@@ -49,6 +49,9 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const [lastScrapeAt, user] = await Promise.all([getLastSuccessfulScrapeAt(), getCurrentUser()]);
   const fotografUrl = user ? await profilFotografiUrl(user.id) : null;
+  // Pro+ "reklamsiz deneyim": reklam kodu, reklam alanlari ve engelleyici uyarisi hic yuklenmez.
+  // (getCurrentUser suresi dolan plani zaten UCRETSIZ dondurur.)
+  const reklamsiz = user?.abonelikPlani === "PRO_PLUS";
 
   return (
     <html lang="tr" className={cn("h-full antialiased", inter.variable, "font-sans")}>
@@ -60,11 +63,13 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             JS calistirmayan basit dogrulama/tarama araclari bunu Google'in
             istedigi kod olarak tanimayabiliyor. Bu yuzden burada bilerek
             duz/native bir <script> etiketi kullaniliyor (next/script degil). */}
-        <script
-          async
-          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`}
-          crossOrigin="anonymous"
-        />
+        {!reklamsiz && (
+          <script
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`}
+            crossOrigin="anonymous"
+          />
+        )}
         <header className="sticky top-0 z-40 border-b border-border bg-white/90 backdrop-blur-xl">
           <div className="relative flex w-full items-center justify-between gap-4 px-4 py-3 sm:px-6">
             <div className="flex items-center gap-3">
@@ -97,14 +102,14 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         </header>
 
         <div className="mx-auto flex w-full max-w-[1600px] flex-1 items-start justify-center gap-4 px-2">
-          <AdSlot side="left" slotId="7192164037" />
+          {!reklamsiz && <AdSlot side="left" slotId="7192164037" />}
           <main className="min-w-0 flex-1">
             <Suspense fallback={null}>
               <GezinmeKaydi />
             </Suspense>
             <PageTransition>{children}</PageTransition>
           </main>
-          <AdSlot side="right" slotId="3758342177" />
+          {!reklamsiz && <AdSlot side="right" slotId="3758342177" />}
         </div>
 
         <footer className="relative overflow-hidden border-t border-primary/40 bg-slate-900 pt-14 pb-8 text-slate-300">
@@ -202,7 +207,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         </footer>
         <Toaster />
         <CerezBildirimi />
-        <ReklamEngelleyiciKontrol />
+        {!reklamsiz && <ReklamEngelleyiciKontrol />}
        </AuthModalProvider>
       </body>
     </html>

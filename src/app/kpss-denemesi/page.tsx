@@ -2,8 +2,9 @@ import Link from "next/link";
 import { BookOpen, ChartColumnBig, Clock, GraduationCap, History, ListChecks, MousePointerClick, School, Timer } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
-import { bugunkuDurumlar, sonDenemeler } from "@/lib/kpssDeneme";
+import { bugunkuDurumlar, haftalikHak, sonDenemeler } from "@/lib/kpssDeneme";
 import { SayfaBasligi } from "@/components/SayfaBasligi";
+import { KilitliOzellik } from "@/components/KilitliOzellik";
 import {
   DENEME_DUZEYLERI,
   DERS_DAGILIMI,
@@ -27,15 +28,16 @@ const fmt = (n: number) => n.toLocaleString("tr-TR", { maximumFractionDigits: 2 
 const ADIMLAR = [
   { ikon: MousePointerClick, baslik: "Düzeyini seç", metin: "Ortaöğretim, Önlisans ya da Lisans; her düzeyin kendi günlük denemesi var." },
   { ikon: Timer, baslik: `${SINAV_SURESI_DK} dakikada ${TOPLAM_SORU} soru`, metin: "Gerçek KPSS formatı ve süresi. Soruları işaretleyip sonra dönebilirsin." },
-  { ikon: ChartColumnBig, baslik: "Raporunu al", metin: "Ders karnen, konu bazlı uyarılar ve önceki denemene göre gelişimin hazır." },
+  { ikon: ChartColumnBig, baslik: "Raporunu al", metin: "Pro'da ders karnen ve konu bazlı uyarılar, Pro+'da önceki denemene göre gelişimin hazır." },
 ];
 
 export default async function KpssDenemesiHubPage() {
   const user = await getCurrentUser();
-  const [havuzSayilari, durumlar, gecmis] = await Promise.all([
+  const [havuzSayilari, durumlar, gecmis, hak] = await Promise.all([
     prisma.denemeSoru.groupBy({ by: ["duzey"], _count: { _all: true } }),
     user ? bugunkuDurumlar(user.id) : null,
     user ? sonDenemeler(user.id) : [],
+    user ? haftalikHak(user.id, user.abonelikPlani) : null,
   ]);
   const sayiByDuzey = new Map(havuzSayilari.map((h) => [h.duzey, h._count._all]));
 
@@ -45,7 +47,7 @@ export default async function KpssDenemesiHubPage() {
         ikon={GraduationCap}
         breadcrumb={[{ ad: "Ana Sayfa", href: "/" }, { ad: "KPSS Denemesi" }]}
         baslik="KPSS Deneme Sınavı"
-        aciklama="Her gün yenilenen, gerçek KPSS formatında deneme. O gün giren herkes aynı soruları görür; sınav sonunda ders karnen ve konu bazlı çalışma tavsiyelerin hazırlanır."
+        aciklama="Her gün yenilenen, gerçek KPSS formatında deneme. O gün giren herkes aynı soruları görür; Pro'da sınav sonunda ders karnen ve konu bazlı çalışma tavsiyelerin hazırlanır."
         cipler={[
           { etiket: `${TOPLAM_SORU} soru`, ikon: ListChecks },
           { etiket: `${SINAV_SURESI_DK} dakika`, ikon: Clock },
@@ -53,7 +55,29 @@ export default async function KpssDenemesiHubPage() {
         ]}
       />
 
-      <div className="mt-8 grid gap-5 md:grid-cols-3">
+      <div className="mt-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-primary/10 bg-white px-5 py-3 text-sm shadow-sm">
+        <p className="text-slate-700">
+          {!user ? (
+            "Ücretsiz planda haftada toplam 1, Pro'da toplam 3 deneme; Pro+'da sınırsız. Sınav sonu rapor Pro ile açılır."
+          ) : hak?.limit === null ? (
+            <>
+              <strong className="text-slate-900">Pro+</strong> · Sınırsız deneme, rapor ve konu gelişim takibi açık.
+            </>
+          ) : (
+            <>
+              Bu hafta toplam <strong className="text-slate-900 tabular-nums">{hak?.kullanilan}/{hak?.limit}</strong> deneme hakkını kullandın (tüm düzeyler dahil)
+              {user.abonelikPlani === "UCRETSIZ" ? " · Sınav sonu rapor Pro'da" : " · Konu gelişim takibi Pro+'da"}. Hak pazartesi yenilenir.
+            </>
+          )}
+        </p>
+        {user?.abonelikPlani !== "PRO_PLUS" && (
+          <Link href="/profilim/abonelik" className="shrink-0 text-sm font-semibold text-primary hover:underline">
+            Planları gör →
+          </Link>
+        )}
+      </div>
+
+      <div className="mt-5 grid gap-5 md:grid-cols-3">
         {DENEME_DUZEYLERI.map((d) => {
           const duzey = d as DenemeDuzeyi;
           const tema = DUZEY_TEMA[duzey];
@@ -108,13 +132,26 @@ export default async function KpssDenemesiHubPage() {
                         <span className={cn("text-2xl font-bold tabular-nums", tema.metin)}>{bugun.puan === null ? "—" : fmt(bugun.puan)}</span>
                       </p>
                       <Link href={href} className="flex justify-center rounded-full border border-primary/20 px-4 py-2.5 text-sm font-bold text-slate-800 hover:bg-slate-50">
-                        Raporunu gör
+                        {user?.abonelikPlani === "UCRETSIZ" ? "Sonucunu gör" : "Raporunu gör"}
                       </Link>
                     </div>
                   ) : bugun?.durum === "suruyor" ? (
                     <Link href={href} className="flex justify-center rounded-full bg-amber-500 px-4 py-2.5 text-sm font-bold text-white hover:bg-amber-600">
                       Süren işliyor · Devam et
                     </Link>
+                  ) : hak?.doldu && user ? (
+                    <KilitliOzellik
+                      kompakt
+                      mevcutPlan={user.abonelikPlani}
+                      gerekenPlan={user.abonelikPlani === "UCRETSIZ" ? "PRO" : "PRO_PLUS"}
+                      baslik={`Haftalık toplam ${hak.limit} hakkın doldu`}
+                    >
+                      <div className="flex min-h-40 items-end">
+                        <span className={cn("flex w-full justify-center rounded-full px-4 py-2.5 text-sm font-bold text-white", tema.buton)}>
+                          Sınava Başla
+                        </span>
+                      </div>
+                    </KilitliOzellik>
                   ) : (
                     <Link href={href} className={cn("flex justify-center rounded-full px-4 py-2.5 text-sm font-bold text-white", tema.buton)}>
                       Sınava Başla

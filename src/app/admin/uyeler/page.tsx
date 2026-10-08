@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { AdminUyePlani } from "@/components/AdminUyePlani";
+import { aktifProKosulu, proAktifMi } from "@/lib/sms";
 
 export const metadata = { title: "Üye Yönetimi — Kamu Yolu" };
 
@@ -13,11 +14,11 @@ export default async function AdminUyelerPage({ searchParams }: { searchParams: 
   if (!user.isAdmin) redirect("/");
 
   const q = (await searchParams).q?.trim() ?? "";
-  // Arama yoksa ucretli plani olanlar listelenir.
+  // Arama yoksa ucretli plani AKTIF olanlar listelenir (bitis tarihi gecmisler degil).
   const uyeler = await prisma.user.findMany({
     where: q
       ? { OR: [{ email: { contains: q, mode: "insensitive" } }, { adSoyad: { contains: q, mode: "insensitive" } }] }
-      : { abonelikPlani: { not: "UCRETSIZ" } },
+      : aktifProKosulu(),
     orderBy: { createdAt: "desc" },
     take: 30,
     select: { id: true, adSoyad: true, email: true, abonelikPlani: true, abonelikBitis: true, telefonDogrulandi: true },
@@ -44,7 +45,7 @@ export default async function AdminUyelerPage({ searchParams }: { searchParams: 
       </form>
 
       <p className="mt-4 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-        {q ? `"${q}" için ${uyeler.length} sonuç` : `Ücretli plandaki üyeler (${uyeler.length})`}
+        {q ? `"${q}" için ${uyeler.length} sonuç` : `Aktif ücretli üyeler (${uyeler.length})`}
       </p>
       <ul className="mt-2 divide-y divide-primary/10 rounded-2xl border border-primary/15 bg-white">
         {uyeler.map((u) => (
@@ -55,6 +56,11 @@ export default async function AdminUyelerPage({ searchParams }: { searchParams: 
                 {u.email}
                 {u.telefonDogrulandi && " · telefon doğrulanmış"}
               </p>
+              {u.abonelikPlani !== "UCRETSIZ" && !proAktifMi(u) && (
+                <span className="mt-1 inline-block rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
+                  Süresi doldu · Ücretsiz plan uygulanıyor
+                </span>
+              )}
             </div>
             <AdminUyePlani
               userId={u.id}

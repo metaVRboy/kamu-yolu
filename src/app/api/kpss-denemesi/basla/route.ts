@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
-import { getBugununDenemesi, girisVeyaDevamEt } from "@/lib/kpssDeneme";
+import { DenemeHakkiDolduError, getBugununDenemesi, girisVeyaDevamEt } from "@/lib/kpssDeneme";
 import { gecerliDenemeDuzeyiMi } from "@/lib/kpssDenemeSabitler";
 
 const bodySchema = z.object({ duzey: z.string() });
@@ -19,9 +19,10 @@ export async function POST(req: NextRequest) {
 
   try {
     const gunlukDeneme = await getBugununDenemesi(parsed.data.duzey);
-    const katilim = await girisVeyaDevamEt(user.id, gunlukDeneme.id);
+    const katilim = await girisVeyaDevamEt(user.id, user.abonelikPlani, gunlukDeneme.id);
     return NextResponse.json({ katilimId: katilim.id });
   } catch (e) {
+    if (e instanceof DenemeHakkiDolduError) return NextResponse.json({ error: e.message }, { status: 403 });
     return NextResponse.json({ error: e instanceof Error ? e.message : "Sınav başlatılamadı." }, { status: 500 });
   }
 }

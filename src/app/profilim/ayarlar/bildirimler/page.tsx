@@ -1,7 +1,6 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Crown } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
+import { KilitliOzellik } from "@/components/KilitliOzellik";
 import { proAktifMi, smsSaglayiciTanimli, telefonGoster } from "@/lib/sms";
 import { AyarKarti, AyarlarSayfasi } from "@/components/AyarlarSayfasi";
 import { SmsTercihleri, TelefonDogrulama } from "@/components/HesapAyarlari";
@@ -13,23 +12,28 @@ export default async function BildirimAyarlariPage() {
   if (!user) redirect("/giris");
 
   if (!proAktifMi(user)) {
+    // Ekran ayni kalir, bulanik ve tiklanamaz (inert); API'ler de Pro kontrolu yapar.
     return (
       <AyarlarSayfasi userId={user.id}>
-        <AyarKarti baslik="SMS bildirimleri">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <p className="max-w-md text-sm text-slate-700">
-              Bölümüne uygun yeni ilanları ve becayiş mesajlarını anında SMS ile almak <strong>Pro</strong> üyelere özeldir.
-              Site içi bildirimlerin her üyelikte açık.
-            </p>
-            <Link
-              href="/profilim/abonelik"
-              className="inline-flex items-center gap-2 rounded-2xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
-            >
-              <Crown className="h-4 w-4" />
-              Planları gör
-            </Link>
+        <KilitliOzellik
+          mevcutPlan={user.abonelikPlani}
+          gerekenPlan="PRO"
+          baslik="SMS bildirimleri Pro'da"
+          ozellikler={[
+            "Bölümüne uygun yeni ilan çıkınca anında SMS",
+            "Becayiş talebine mesaj gelince SMS",
+            "Site içi bildirimler her planda açık",
+          ]}
+        >
+          <div className="space-y-6">
+            <AyarKarti baslik="Telefon numarası" aciklama="SMS bildirimleri yalnızca doğrulanmış numarana gönderilir.">
+              <TelefonDogrulama dogrulanmisTelefon={null} />
+            </AyarKarti>
+            <AyarKarti baslik="SMS bildirimleri" aciklama="Hangi bildirimlerin SMS ile gelmesini istediğini seç. Site içi bildirimler her zaman açık.">
+              <SmsTercihleri telefonDogrulandi={false} ilk={{ smsIlanBildirimi: true, smsBecayisBildirimi: true }} />
+            </AyarKarti>
           </div>
-        </AyarKarti>
+        </KilitliOzellik>
       </AyarlarSayfasi>
     );
   }

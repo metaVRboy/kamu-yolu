@@ -1,13 +1,14 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { ArrowDownRight, ArrowUpRight, CheckCircle2, CircleAlert, ListChecks, MinusCircle, OctagonAlert, Target, X, XCircle } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, CheckCircle2, TrendingUp, CircleAlert, ListChecks, MinusCircle, OctagonAlert, Target, X, XCircle } from "lucide-react";
 import { DERS_LABEL, DUZEY_LABEL, DUZEY_TEMA, type DenemeDuzeyi, type ExamSoru } from "@/lib/kpssDenemeSabitler";
 import { dersKarnesi, konuAnalizi, type KonuDurumu, type KonuSonucu } from "@/lib/kpssDenemeAnaliz";
 import { KesirliMetin } from "@/components/KesirliMetin";
 import { SoruGovdesi } from "@/components/SoruGovdesi";
 import { SoruHaritasi } from "@/components/SoruHaritasi";
+import { KilitliOzellik } from "@/components/KilitliOzellik";
 import { cn } from "@/lib/utils";
 
 type SonucSorusu = ExamSoru & { dogruCevap: number; aciklama: string | null; konu: string | null };
@@ -109,6 +110,78 @@ function PuanHalkasi({ puan, renk }: { puan: number; renk: string }) {
   );
 }
 
+type Gelisim = {
+  tarihMetni: string;
+  netFark: number;
+  puanFark: number;
+  dersFarklari: { ders: string; fark: number }[];
+  degisimler: { ders: string; konu: string; eski: KonuDurumu; yeni: KonuDurumu }[];
+};
+
+const DURUM_SIRASI: Record<KonuDurumu, number> = { kirmizi: 0, sari: 1, yesil: 2 };
+
+// Kilitli onizleme icin ornek veri (gercek kullanici verisi degil).
+const ORNEK_GELISIM: Gelisim = {
+  tarihMetni: "1 Ekim",
+  netFark: 6.25,
+  puanFark: 5.2,
+  dersFarklari: [
+    { ders: "TURKCE", fark: 2.5 },
+    { ders: "MATEMATIK", fark: 3.75 },
+    { ders: "TARIH", fark: -0.5 },
+  ],
+  degisimler: [
+    { ders: "MATEMATIK", konu: "Sayısal Mantık", eski: "kirmizi", yeni: "sari" },
+    { ders: "TURKCE", konu: "Paragraf", eski: "sari", yeni: "yesil" },
+    { ders: "TARIH", konu: "Osmanlı Siyasi Tarihi", eski: "yesil", yeni: "sari" },
+  ],
+};
+
+/** Konu gelisim takibi: gecen denemeye gore net/puan farki ve durumu degisen konular. */
+function GelisimBolumu({ gelisim }: { gelisim: Gelisim | null }) {
+  return (
+    <section className="rounded-3xl border border-primary/10 bg-white p-6 shadow-sm">
+      <h2 className="flex items-center gap-2 font-sans text-base font-bold text-slate-900">
+        <TrendingUp className="h-5 w-5 text-primary" />
+        Konu gelişim takibi
+      </h2>
+      {!gelisim ? (
+        <p className="mt-2 text-sm text-muted-foreground">Bu düzeydeki ilk denemen; bir sonraki denemenden itibaren gelişimin burada görünecek.</p>
+      ) : (
+        <>
+          <p className="mt-1 text-sm text-slate-600">
+            Geçen denemene göre ({gelisim.tarihMetni}): <Fark deger={gelisim.netFark} /> · <Fark deger={gelisim.puanFark} birim="puan" />
+          </p>
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <ul className="space-y-2">
+              {gelisim.dersFarklari.map((d) => (
+                <li key={d.ders} className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2 text-sm">
+                  <span className="font-medium text-slate-800">{DERS_LABEL[d.ders as keyof typeof DERS_LABEL]}</span>
+                  <Fark deger={d.fark} />
+                </li>
+              ))}
+            </ul>
+            <ul className="space-y-2">
+              {gelisim.degisimler.length === 0 && <li className="text-sm text-muted-foreground">Konu durumlarında değişiklik yok.</li>}
+              {gelisim.degisimler.map((k) => {
+                const ilerledi = DURUM_SIRASI[k.yeni] > DURUM_SIRASI[k.eski];
+                return (
+                  <li key={`${k.ders}|${k.konu}`} className={cn("rounded-xl border px-3 py-2 text-sm", KONU_STIL[k.yeni].kart)}>
+                    <span className="font-semibold text-slate-900">{k.konu}</span>{" "}
+                    <span className={cn("text-xs font-bold", ilerledi ? "text-emerald-700" : "text-red-700")}>
+                      {DURUM_ADI[k.eski]} → {DURUM_ADI[k.yeni]} ({ilerledi ? "ilerledi" : "geriledi"})
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </>
+      )}
+    </section>
+  );
+}
+
 export function DenemeSonucEkrani({
   sorular,
   cevaplar,
@@ -118,7 +191,9 @@ export function DenemeSonucEkrani({
   puan,
   duzey,
   onceki,
+  plan,
 }: {
+  /** UCRETSIZ'de sunucu ornek (sahte cevapli) veri gonderir; rapor bulanik onizlemedir. */
   sorular: SonucSorusu[];
   cevaplar: Record<string, number>;
   dogruSayisi: number;
@@ -126,7 +201,9 @@ export function DenemeSonucEkrani({
   bosSayisi: number;
   puan: number;
   duzey: DenemeDuzeyi;
+  /** Yalniz Pro+'da dolu (konu gelisim takibi). */
   onceki: OncekiOzet | null;
+  plan: "UCRETSIZ" | "PRO" | "PRO_PLUS";
 }) {
   const [incelenenIndex, setIncelenenIndex] = useState(Math.max(0, sorular.findIndex((s) => durum(s) === "yanlis")));
   const [secilenKonu, setSecilenKonu] = useState<KonuSonucu | null>(null);
@@ -138,6 +215,36 @@ export function DenemeSonucEkrani({
   const karne = dersKarnesi(sorular, cevaplar);
   const konular = konuAnalizi(sorular, cevaplar);
   const oncelikliler = konular.filter((k) => k.durum !== "yesil").slice(0, 3);
+  const gelisim: Gelisim | null = onceki && {
+    tarihMetni: onceki.tarihMetni,
+    netFark: net - onceki.net,
+    puanFark: puan - onceki.puan,
+    dersFarklari: karne.flatMap((d) => (onceki.dersNetleri[d.ders] === undefined ? [] : [{ ders: d.ders, fark: d.net - onceki.dersNetleri[d.ders]! }])),
+    degisimler: konular.flatMap((k) => {
+      const eski = onceki.konuDurumlari[`${k.ders}|${k.konu}`];
+      return eski && eski !== k.durum ? [{ ders: k.ders, konu: k.konu, eski, yeni: k.durum }] : [];
+    }),
+  };
+  // Ucretsiz planda rapor gercek duzeniyle ama ornek veriyle, bulanik gosterilir.
+  const raporuSar = (icerik: ReactNode) =>
+    plan === "UCRETSIZ" ? (
+      <KilitliOzellik
+        mevcutPlan={plan}
+        gerekenPlan="PRO"
+        uzun
+        baslik="Sınav sonu raporun Pro'da"
+        ozellikler={[
+          "Ders karnesi: her derste doğru, yanlış, boş ve net",
+          "Konu bazlı çalışma tavsiyeleri: kırmızı, sarı, yeşil uyarılar",
+          "Soruların doğru cevapları ve açıklamaları",
+          "Pro'da haftada toplam 3, Pro+'da sınırsız deneme",
+        ]}
+      >
+        {icerik}
+      </KilitliOzellik>
+    ) : (
+      icerik
+    );
 
   function durum(s: SonucSorusu): "dogru" | "yanlis" | "bos" {
     const verilen = cevaplar[s.id];
@@ -178,11 +285,6 @@ export function DenemeSonucEkrani({
             <div className="mt-4">
               <Serit dogru={dogruSayisi} yanlis={yanlisSayisi} bos={bosSayisi} kalin />
             </div>
-            {onceki && (
-              <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-slate-600">
-                Geçen denemene göre ({onceki.tarihMetni}): <Fark deger={net - onceki.net} /> · <Fark deger={puan - onceki.puan} birim="puan" />
-              </p>
-            )}
           </div>
         </div>
         <p className="border-t border-primary/5 px-6 py-3 text-xs text-muted-foreground sm:px-8">
@@ -190,6 +292,21 @@ export function DenemeSonucEkrani({
         </p>
       </section>
 
+      {plan === "PRO_PLUS" ? (
+        <GelisimBolumu gelisim={gelisim} />
+      ) : (
+        <KilitliOzellik
+          mevcutPlan={plan}
+          gerekenPlan="PRO_PLUS"
+          baslik="Konu gelişim takibi Pro+'da"
+          ozellikler={["Geçen denemene göre net ve puan farkın", "Hangi konuda ilerlediğin, hangisinde gerilediğin", "Her gün sınırsız deneme"]}
+        >
+          <GelisimBolumu gelisim={ORNEK_GELISIM} />
+        </KilitliOzellik>
+      )}
+
+      {raporuSar(
+      <div className="space-y-6">
       {/* Ders karnesi */}
       <section className="rounded-3xl border border-primary/10 bg-white p-6 shadow-sm">
         <h2 className="flex items-center gap-2 font-sans text-base font-bold text-slate-900">
@@ -378,6 +495,8 @@ export function DenemeSonucEkrani({
           </aside>
         </div>
       </div>
+      </div>,
+      )}
 
       <p className="text-center text-sm">
         <Link href="/kpss-denemesi" className="font-semibold text-primary hover:underline">

@@ -167,6 +167,9 @@ model User {
   // Admin panelden suresiz/sureli verilen planin bitisi; gecince plan
   // UCRETSIZ sayilir (getCurrentUser + bildirim sorgulari).
   abonelikBitis       DateTime?
+  // Odeme altyapisi gelince donem sonunda otomatik yenileme. Iptal = false yapmak:
+  // abonelikBitis'e dokunulmaz, kullanici odenen donem sonuna kadar plani kullanir.
+  otomatikYenileme    Boolean  @default(true)
   // SMS ile dogrulanmis telefon (yalniz Pro); `telefon` degisirse sifirlanir.
   telefonDogrulandi   DateTime?
   // SMS bildirim tercihleri (Pro) - varsayilan kapali, acik onayla acilir.

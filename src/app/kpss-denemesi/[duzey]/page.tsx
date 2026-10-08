@@ -2,12 +2,15 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
 import { ArrowLeft, CalendarCheck, Clock, Flag, GraduationCap, LayoutGrid, ListChecks, MinusCircle, Target } from "lucide-react";
+import { KilitliOzellik } from "@/components/KilitliOzellik";
 import { getCurrentUser } from "@/lib/auth";
 import {
+  HAFTALIK_DENEME_HAKKI,
   getBugununDenemesi,
   getDenemeSorulari,
   getKatilim,
   denemeyiBitir,
+  haftalikHak,
   kalanSureMs,
   oncekiDenemeOzeti,
   sinavaGuvenliHaleGetir,
@@ -33,17 +36,28 @@ import { cn } from "@/lib/utils";
 const GUN = new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "long", year: "numeric", weekday: "long", timeZone: "Europe/Istanbul" });
 const KISA_GUN = new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "long", timeZone: "UTC" }); // GunlukDeneme.tarih UTC gece yarisi
 
-const KURALLAR = [
-  { ikon: Clock, metin: `${SINAV_SURESI_DK} dakika; süre başladıktan sonra durdurulamaz.` },
-  { ikon: MinusCircle, metin: "4 yanlış 1 doğruyu götürür; emin olmadığın soruyu boş bırakabilirsin." },
-  { ikon: CalendarCheck, metin: "Bu düzeyde günde bir kez sınava girebilirsin." },
-  { ikon: Flag, metin: "Soruları işaretleyip sonra dönebilirsin." },
-  { ikon: LayoutGrid, metin: "Soru haritasıyla bölümler arasında serbestçe gezinebilirsin." },
-];
+const PLAN_ADI = { UCRETSIZ: "Ücretsiz", PRO: "Pro", PRO_PLUS: "Pro+" } as const;
+type Plan = keyof typeof PLAN_ADI;
+
+/** Kurallardaki deneme hakki satiri; giris yapilmamissa tum planlar ozetlenir. */
+function hakMetni(plan: Plan | null): string {
+  if (!plan) return "Ücretsiz planda haftada toplam 1, Pro'da toplam 3 deneme hakkı var; Pro+'da sınırsız.";
+  const limit = HAFTALIK_DENEME_HAKKI[plan];
+  return limit === null
+    ? "Pro+ ile sınırsız deneme: her gün her düzeyin denemesini çözebilirsin."
+    : `${PLAN_ADI[plan]} planında haftada toplam ${limit} deneme hakkın var (tüm düzeyler dahil); hak pazartesi yenilenir.`;
+}
 
 /** Baslangic ekrani: duzey renginde bant, bolumler/sureler tablosu, kurallar ve eylem alani. */
-function BaslangicKarti({ duzey, eylem }: { duzey: DenemeDuzeyi; eylem: ReactNode }) {
+function BaslangicKarti({ duzey, plan, eylem }: { duzey: DenemeDuzeyi; plan: Plan | null; eylem: ReactNode }) {
   const tema = DUZEY_TEMA[duzey];
+  const KURALLAR = [
+    { ikon: Clock, metin: `${SINAV_SURESI_DK} dakika; süre başladıktan sonra durdurulamaz.` },
+    { ikon: MinusCircle, metin: "4 yanlış 1 doğruyu götürür; emin olmadığın soruyu boş bırakabilirsin." },
+    { ikon: CalendarCheck, metin: hakMetni(plan) },
+    { ikon: Flag, metin: "Soruları işaretleyip sonra dönebilirsin." },
+    { ikon: LayoutGrid, metin: "Soru haritasıyla bölümler arasında serbestçe gezinebilirsin." },
+  ];
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
       <Link href="/kpss-denemesi" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
@@ -128,13 +142,16 @@ function BaslangicKarti({ duzey, eylem }: { duzey: DenemeDuzeyi; eylem: ReactNod
           {eylem}
           <p className="flex items-center gap-1.5 text-xs text-slate-600">
             <Target className={cn("h-3.5 w-3.5", tema.metin)} />
-            Sınav sonunda ders karnen ve konu bazlı çalışma tavsiyelerin hazırlanır.
+            {plan === "UCRETSIZ"
+              ? "Sınav sonunda puanını görürsün; ders karnesi ve konu tavsiyeleri Pro'da."
+              : "Sınav sonunda ders karnen ve konu bazlı çalışma tavsiyelerin hazırlanır."}
           </p>
         </div>
       </section>
     </div>
   );
 }
+
 
 export default async function KpssDenemesiDuzeyPage({ params }: { params: Promise<{ duzey: string }> }) {
   const { duzey: slug } = await params;
@@ -164,6 +181,7 @@ export default async function KpssDenemesiDuzeyPage({ params }: { params: Promis
     return (
       <BaslangicKarti
         duzey={duzey}
+        plan={null}
         eylem={
           <>
             <p className="text-sm font-medium text-slate-700">Sınava girebilmek için giriş yapmalısın.</p>
@@ -188,24 +206,70 @@ export default async function KpssDenemesiDuzeyPage({ params }: { params: Promis
     katilim = await denemeyiBitir(katilim.id, user.id);
   }
 
+  const plan = user.abonelikPlani;
+
   if (!katilim) {
-    return <BaslangicKarti duzey={duzey} eylem={<DenemeBaslaButonu duzeySlug={slug} renk={tema.buton} />} />;
+    const hak = await haftalikHak(user.id, plan);
+    return (
+      <BaslangicKarti
+        duzey={duzey}
+        plan={plan}
+        eylem={
+          hak.doldu ? (
+            <div className="w-full">
+              <KilitliOzellik
+                mevcutPlan={plan}
+                gerekenPlan={plan === "UCRETSIZ" ? "PRO" : "PRO_PLUS"}
+                baslik={`Bu haftaki toplam ${hak.limit} deneme hakkını kullandın`}
+                ozellikler={[
+                  "Hakkın pazartesi yenilenir",
+                  ...(plan === "UCRETSIZ" ? ["Pro: haftada toplam 3 deneme ve sınav sonu rapor"] : []),
+                  "Pro+: sınırsız deneme, rapor ve konu gelişim takibi",
+                ]}
+              >
+                <div className="flex min-h-64 items-center justify-center">
+                  <span className={cn("rounded-full px-8 py-3.5 text-base font-bold text-white", tema.buton)}>Sınava Başla</span>
+                </div>
+              </KilitliOzellik>
+            </div>
+          ) : (
+            <>
+              <DenemeBaslaButonu duzeySlug={slug} renk={tema.buton} />
+              {hak.limit !== null && (
+                <p className="text-xs font-medium text-slate-600">
+                  Bu hafta toplam {hak.kullanilan}/{hak.limit} deneme hakkını kullandın (tüm düzeyler dahil).
+                </p>
+              )}
+            </>
+          )
+        }
+      />
+    );
   }
 
   const sorular = await getDenemeSorulari(gunlukDeneme.soruIdler);
 
   if (katilim.bitisZamani) {
-    const onceki = await oncekiDenemeOzeti(user.id, duzey, katilim.id);
+    // Ucretsiz: rapor bulanik onizleme. Gercek dogru cevap/aciklama/kullanici cevaplari
+    // tarayiciya GITMEZ (devtools'tan okunurdu); yerine sabit desenli ornek veri gider.
+    const ucretsiz = plan === "UCRETSIZ";
+    const raporSorulari = ucretsiz ? sorular.map((s, i) => ({ ...s, dogruCevap: i % 5, aciklama: null })) : sorular;
+    const raporCevaplari = ucretsiz
+      ? Object.fromEntries(sorular.flatMap((s, i) => (i % 6 === 5 ? [] : [[s.id, i % 4 === 3 ? (i + 1) % 5 : i % 5]])))
+      : (katilim.cevaplar as Record<string, number>);
+    // Konu gelisim takibi (gecen denemeyle karsilastirma) yalniz Pro+.
+    const onceki = plan === "PRO_PLUS" ? await oncekiDenemeOzeti(user.id, duzey, katilim.id) : null;
     return (
       <DenemeSonucEkrani
-        sorular={sorular}
-        cevaplar={katilim.cevaplar as Record<string, number>}
+        sorular={raporSorulari}
+        cevaplar={raporCevaplari}
         dogruSayisi={katilim.dogruSayisi ?? 0}
         yanlisSayisi={katilim.yanlisSayisi ?? 0}
         bosSayisi={katilim.bosSayisi ?? 0}
         puan={katilim.puan ?? 0}
         duzey={duzey}
         onceki={onceki && { ...onceki, tarihMetni: KISA_GUN.format(onceki.tarih) }}
+        plan={plan}
       />
     );
   }

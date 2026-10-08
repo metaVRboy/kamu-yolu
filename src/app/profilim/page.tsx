@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Briefcase, Inbox, Lock, MessageCircle, Repeat, UserRound } from "lucide-react";
+import { Briefcase, Inbox, MessageCircle, Repeat, UserRound } from "lucide-react";
+import { KilitliOzellik } from "@/components/KilitliOzellik";
 import { SayfaBasligi } from "@/components/SayfaBasligi";
 import { getCurrentUser } from "@/lib/auth";
 import { getOkunmamisIlgilendiklerimSayisi, getOkunmamisMesajSayisi, getTaleplerim } from "@/lib/becayis";
@@ -163,36 +164,33 @@ export default async function ProfilimPage() {
             tamamla.
           </p>
         ) : (
-          <div className="relative mt-4">
-            <div
-              className={cn(
-                "grid grid-cols-1 gap-4 sm:grid-cols-2",
-                !isPremium && "pointer-events-none blur-sm select-none",
-              )}
-            >
-              {tekIlanKartlari(gosterilenIlanlar).map((grup) => (
-                <IlanVitrinKarti
-                  key={grup.ilk.id}
-                  grup={grup}
-                  logoUrl={logolar.get(grup.ilk.institutionName) ?? null}
-                  nitelikOzeti
-                />
-              ))}
-            </div>
-
-            {!isPremium && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Card className="items-center gap-3 border-primary/25 bg-white p-6 text-center shadow-xl shadow-primary/20">
-                  <Lock className="h-6 w-6 text-primary" />
-                  <p className="max-w-xs text-sm font-medium text-slate-800">
-                    Sana özel {kisiselIlanlar.length} ilan bulundu. Görmek için hesabını yükselt.
-                  </p>
-                  <Link href="/profilim/abonelik" className={buttonVariants({ size: "sm" })}>
-                    Hesabınızı Yükseltin
-                  </Link>
-                </Card>
-              </div>
-            )}
+          <div className="mt-4">
+            {(() => {
+              const liste = (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {tekIlanKartlari(gosterilenIlanlar).map((grup) => (
+                    <IlanVitrinKarti
+                      key={grup.ilk.id}
+                      grup={grup}
+                      logoUrl={logolar.get(grup.ilk.institutionName) ?? null}
+                      nitelikOzeti
+                    />
+                  ))}
+                </div>
+              );
+              return isPremium ? (
+                liste
+              ) : (
+                <KilitliOzellik
+                  mevcutPlan={user.abonelikPlani}
+                  gerekenPlan="PRO"
+                  baslik={`Sana özel ${kisiselIlanlar.length} ilan bulundu`}
+                  ozellikler={["Bölümüne ve öğrenim düzeyine uygun ilanlar tek listede", "Yeni ilan çıkınca öncelikli bildirim ve SMS"]}
+                >
+                  {liste}
+                </KilitliOzellik>
+              );
+            })()}
           </div>
         )}
       </div>

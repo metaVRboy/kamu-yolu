@@ -89,12 +89,45 @@ export async function getKatilim(userId: string, gunlukDenemeId: string) {
   return prisma.denemeKatilim.findUnique({ where: { userId_gunlukDenemeId: { userId, gunlukDenemeId } } });
 }
 
-/** "Sınava Başla" tiklanince cagrilir - kaydi olusturur (sinav saati o an baslar). */
-export async function girisVeyaDevamEt(userId: string, gunlukDenemeId: string) {
-  return prisma.denemeKatilim.upsert({
-    where: { userId_gunlukDenemeId: { userId, gunlukDenemeId } },
-    update: {},
-    create: { userId, gunlukDenemeId },
+type Plan = "UCRETSIZ" | "PRO" | "PRO_PLUS";
+
+/** Plan basina haftalik deneme hakki (tum duzeyler toplam); null = her duzeyde her gun. */
+export const HAFTALIK_DENEME_HAKKI: Record<Plan, number | null> = { UCRETSIZ: 1, PRO: 3, PRO_PLUS: null };
+
+/** Bu haftanin pazartesisi, GunlukDeneme.tarih ile ayni bicimde (Istanbul gunu, UTC gece yarisi). */
+function haftaBasi(): Date {
+  const bugun = bugununTarihi();
+  return new Date(bugun.getTime() - ((bugun.getUTCDay() + 6) % 7) * 86_400_000);
+}
+
+// Sayim denemenin kendi tarihine gore: uygulama ve veritabani saatleri karsilastirilmaz.
+const buHaftakiKatilimlar = (userId: string) => ({ userId, gunlukDeneme: { tarih: { gte: haftaBasi() } } });
+
+/** Kullanicinin bu haftaki deneme hakki; sinirsiz planda limit null. */
+export async function haftalikHak(userId: string, plan: Plan) {
+  const limit = HAFTALIK_DENEME_HAKKI[plan];
+  const kullanilan = limit === null ? 0 : await prisma.denemeKatilim.count({ where: buHaftakiKatilimlar(userId) });
+  return { limit, kullanilan, doldu: limit !== null && kullanilan >= limit };
+}
+
+export class DenemeHakkiDolduError extends Error {}
+
+/**
+ * "Sınava Başla" tiklanince cagrilir - kaydi olusturur (sinav saati o an baslar).
+ * Ayni gunun suren denemesine donmek hak harcamaz; yeni deneme haftalik hakka tabidir.
+ */
+export async function girisVeyaDevamEt(userId: string, plan: Plan, gunlukDenemeId: string) {
+  return prisma.$transaction(async (tx) => {
+    // Ayni kullanicinin es zamanli baslatmalari sirayla islenir; yoksa iki farkli
+    // duzeyi ayni anda baslatip haftalik hakki asabilir.
+    await tx.$queryRaw`SELECT 1 FROM pg_advisory_xact_lock(hashtext(${userId}))`;
+    const mevcut = await tx.denemeKatilim.findUnique({ where: { userId_gunlukDenemeId: { userId, gunlukDenemeId } } });
+    if (mevcut) return mevcut;
+    const limit = HAFTALIK_DENEME_HAKKI[plan];
+    if (limit !== null && (await tx.denemeKatilim.count({ where: buHaftakiKatilimlar(userId) })) >= limit) {
+      throw new DenemeHakkiDolduError("Bu haftaki deneme hakkını kullandın.");
+    }
+    return tx.denemeKatilim.create({ data: { userId, gunlukDenemeId } });
   });
 }
 
