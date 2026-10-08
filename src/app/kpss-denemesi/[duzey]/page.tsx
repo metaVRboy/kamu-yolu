@@ -220,6 +220,7 @@ export default async function KpssDenemesiDuzeyPage({ params }: { params: Promis
               <KilitliOzellik
                 mevcutPlan={plan}
                 gerekenPlan={plan === "UCRETSIZ" ? "PRO" : "PRO_PLUS"}
+                kaynak="deneme-hakki"
                 baslik={`Bu haftaki toplam ${hak.limit} deneme hakkını kullandın`}
                 ozellikler={[
                   "Hakkın pazartesi yenilenir",

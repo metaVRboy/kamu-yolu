@@ -214,3 +214,53 @@
 .animate-menu-slide-left {
   animation: menu-slide-from-left 0.18s ease-out;
 }
+
+/* Uyelik yukseltme penceresi: acilista hafif buyuyerek gelir; tac yavasca suzulur;
+   Pro+ kartinin cercevesinde akan renk parlamasi. */
+@keyframes yukselt-ac {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes tac-suzul {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-4deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(4deg);
+  }
+}
+
+@keyframes cerceve-akis {
+  to {
+    background-position: 200% 0;
+  }
+}
+
+.animate-yukselt-ac {
+  animation: yukselt-ac 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.animate-tac-suzul {
+  animation: tac-suzul 3.2s ease-in-out infinite;
+}
+
+.animate-cerceve-akis {
+  background-size: 200% 100%;
+  animation: cerceve-akis 3s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-yukselt-ac,
+  .animate-tac-suzul,
+  .animate-cerceve-akis {
+    animation: none;
+  }
+}

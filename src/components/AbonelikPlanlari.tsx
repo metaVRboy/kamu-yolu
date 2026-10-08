@@ -5,8 +5,8 @@ import { Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-
-type PlanKey = "UCRETSIZ" | "PRO" | "PRO_PLUS";
+import { YukseltButonu } from "@/components/YukseltmePenceresi";
+import { PLAN_ADI, PLAN_FIYATI, tl, type Plan as PlanKey } from "@/lib/planlar";
 
 // Fiyatlar: rakip/pazar arastirmasina dayali oneri (becayis.net, kariyer.net,
 // ihale takip siteleri kiyaslamasi) - odeme altyapisi henuz baglanmadigi
@@ -37,8 +37,8 @@ const PLANLAR: {
   {
     key: "PRO",
     ad: "Pro",
-    aylikFiyat: "39 TL",
-    yillikFiyat: "349 TL",
+    aylikFiyat: tl(PLAN_FIYATI.PRO.aylik),
+    yillikFiyat: tl(PLAN_FIYATI.PRO.yillik),
     aciklama: "Aktif iş arayanlar için.",
     populer: true,
     ozellikler: [
@@ -53,8 +53,8 @@ const PLANLAR: {
   {
     key: "PRO_PLUS",
     ad: "Pro+",
-    aylikFiyat: "79 TL",
-    yillikFiyat: "699 TL",
+    aylikFiyat: tl(PLAN_FIYATI.PRO_PLUS.aylik),
+    yillikFiyat: tl(PLAN_FIYATI.PRO_PLUS.yillik),
     aciklama: "En kapsamlı deneyim.",
     ozellikler: [
       "Pro'daki her şey",
@@ -65,11 +65,8 @@ const PLANLAR: {
   },
 ];
 
-const PLAN_ETIKET: Record<PlanKey, string> = {
-  UCRETSIZ: "Standart",
-  PRO: "Pro",
-  PRO_PLUS: "Pro+",
-};
+const PLAN_ETIKET = PLAN_ADI;
+const SIRA: Record<PlanKey, number> = { UCRETSIZ: 0, PRO: 1, PRO_PLUS: 2 };
 
 export function AbonelikPlanlari({ mevcutPlan }: { mevcutPlan: PlanKey }) {
   const [donem, setDonem] = useState<"aylik" | "yillik">("aylik");
@@ -147,14 +144,25 @@ export function AbonelikPlanlari({ mevcutPlan }: { mevcutPlan: PlanKey }) {
                   <div className="mt-auto rounded-xl border border-primary/25 bg-primary/10 px-4 py-2 text-center text-sm font-semibold text-primary">
                     Mevcut Planın
                   </div>
-                ) : (
+                ) : plan.key === "UCRETSIZ" || SIRA[plan.key] < SIRA[mevcutPlan] ? (
                   <button
                     type="button"
                     disabled
                     className="mt-auto w-full cursor-not-allowed rounded-xl bg-slate-200 px-4 py-2 text-sm font-semibold text-slate-500"
                   >
-                    {plan.key === "UCRETSIZ" ? "İndirgeme Yakında" : `${PLAN_ETIKET[plan.key]}'e Yükselt`}
+                    İndirgeme Yakında
                   </button>
+                ) : (
+                  <YukseltButonu
+                    plan={plan.key}
+                    kaynak="genel"
+                    className={cn(
+                      "mt-auto w-full rounded-xl bg-gradient-to-r px-4 py-2.5 text-sm font-bold text-white shadow-md transition-transform hover:scale-[1.02]",
+                      plan.key === "PRO_PLUS" ? "from-violet-600 to-fuchsia-600" : "from-blue-600 to-indigo-600",
+                    )}
+                  >
+                    {PLAN_ETIKET[plan.key]}&apos;ya Yükselt
+                  </YukseltButonu>
                 )}
               </Card>
             </div>
@@ -163,8 +171,7 @@ export function AbonelikPlanlari({ mevcutPlan }: { mevcutPlan: PlanKey }) {
       </div>
 
       <p className="mt-6 text-center text-xs text-muted-foreground">
-        Yükseltme işlemleri ödeme altyapısı tamamlanınca açılacak; fiyatlar o zamana
-        kadar değişebilir.
+        Ödeme altyapısı çok yakında açılıyor; şimdi yerini ayırırsan açıldığında ilk sen haberdar olursun.
       </p>
     </div>
   );

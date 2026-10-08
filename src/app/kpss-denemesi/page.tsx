@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { bugunkuDurumlar, haftalikHak, sonDenemeler } from "@/lib/kpssDeneme";
 import { SayfaBasligi } from "@/components/SayfaBasligi";
 import { KilitliOzellik } from "@/components/KilitliOzellik";
+import { YukseltButonu } from "@/components/YukseltmePenceresi";
 import {
   DENEME_DUZEYLERI,
   DERS_DAGILIMI,
@@ -71,9 +72,13 @@ export default async function KpssDenemesiHubPage() {
           )}
         </p>
         {user?.abonelikPlani !== "PRO_PLUS" && (
-          <Link href="/profilim/abonelik" className="shrink-0 text-sm font-semibold text-primary hover:underline">
+          <YukseltButonu
+            plan={user?.abonelikPlani === "PRO" ? "PRO_PLUS" : undefined}
+            kaynak="deneme-hakki"
+            className="shrink-0 text-sm font-semibold text-primary hover:underline"
+          >
             Planları gör →
-          </Link>
+          </YukseltButonu>
         )}
       </div>
 
@@ -144,6 +149,7 @@ export default async function KpssDenemesiHubPage() {
                       kompakt
                       mevcutPlan={user.abonelikPlani}
                       gerekenPlan={user.abonelikPlani === "UCRETSIZ" ? "PRO" : "PRO_PLUS"}
+                      kaynak="deneme-hakki"
                       baslik={`Haftalık toplam ${hak.limit} hakkın doldu`}
                     >
                       <div className="flex min-h-40 items-end">

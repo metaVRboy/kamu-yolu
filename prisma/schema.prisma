@@ -179,6 +179,7 @@ model User {
   smsIzinTarihi       DateTime?
   telefonDogrulama    TelefonDogrulamaKodu?
   smsGonderimleri     SmsGonderim[]
+  yukseltmeTalebi     YukseltmeTalebi?
 }
 
 model TelefonDogrulamaKodu {
@@ -188,6 +189,20 @@ model TelefonDogrulamaKodu {
   kod       String
   expiresAt DateTime
   createdAt DateTime @default(now())
+}
+
+// Odeme altyapisi gelene kadar "Acilinca haber ver": kullanici basina son istedigi
+// plan/donem (talep olcumu + odeme acilinca e-posta listesi). kaynak = hangi
+// yukseltme butonundan geldi (ör. "rapor", "sms").
+model YukseltmeTalebi {
+  id         String        @id @default(cuid())
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String        @unique
+  plan       AbonelikPlani
+  yillik     Boolean
+  kaynak     String
+  olusturma  DateTime      @default(now())
+  guncelleme DateTime      @updatedAt
 }
 
 // Gonderilen (ya da saglayici yokken test modunda yazilan) her SMS.

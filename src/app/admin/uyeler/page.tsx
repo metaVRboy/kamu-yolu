@@ -24,9 +24,33 @@ export default async function AdminUyelerPage({ searchParams }: { searchParams: 
     select: { id: true, adSoyad: true, email: true, abonelikPlani: true, abonelikBitis: true, telefonDogrulandi: true },
   });
 
+  // "Acilinca haber ver" talepleri: odeme acilinca e-posta listesi + hangi plana/butona ilgi var.
+  const [talepDagilimi, kaynakDagilimi] = await Promise.all([
+    prisma.yukseltmeTalebi.groupBy({ by: ["plan", "yillik"], _count: { _all: true } }),
+    prisma.yukseltmeTalebi.groupBy({ by: ["kaynak"], _count: { _all: true }, orderBy: { _count: { kaynak: "desc" } } }),
+  ]);
+  const toplamTalep = talepDagilimi.reduce((t, d) => t + d._count._all, 0);
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6 sm:py-20">
       <h1 className="font-sans text-2xl font-bold tracking-tight text-primary sm:text-3xl">Üye Yönetimi</h1>
+
+      <section className="mt-6 rounded-2xl border border-primary/15 bg-white p-4">
+        <h2 className="text-sm font-bold text-slate-900">Yükseltme talepleri (açılınca haber ver) · {toplamTalep}</h2>
+        <div className="mt-2 flex flex-wrap gap-2 text-xs">
+          {talepDagilimi.map((d) => (
+            <span key={`${d.plan}-${d.yillik}`} className="rounded-full bg-primary/10 px-2.5 py-1 font-semibold text-primary">
+              {d.plan === "PRO_PLUS" ? "Pro+" : "Pro"} · {d.yillik ? "yıllık" : "aylık"}: {d._count._all}
+            </span>
+          ))}
+          {toplamTalep === 0 && <span className="text-muted-foreground">Henüz talep yok.</span>}
+        </div>
+        {kaynakDagilimi.length > 0 && (
+          <p className="mt-2 text-xs text-muted-foreground">
+            Geldiği yer: {kaynakDagilimi.map((k) => `${k.kaynak} (${k._count._all})`).join(", ")}
+          </p>
+        )}
+      </section>
       <p className="mt-1 text-sm text-muted-foreground">
         Ödeme altyapısı gelene kadar Pro / Pro+ üyelikleri buradan elle verilir. Bitiş tarihi boş bırakılırsa üyelik süresizdir;
         tarih geçince üye otomatik olarak Ücretsiz plana döner.

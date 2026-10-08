@@ -25,6 +25,7 @@ import { LEVEL_LABEL } from "@/lib/labels";
 import { slugify } from "@/lib/slug";
 import { SITE_URL } from "@/lib/site";
 import { cn } from "@/lib/utils";
+import { YukseltButonu } from "@/components/YukseltmePenceresi";
 
 export const revalidate = 300;
 
@@ -370,12 +371,9 @@ export default async function HaberDetayPage({
             <p className="mt-1 text-xs text-muted-foreground">
               Bölümüne uygun yeni ilan ve haberleri kaçırma.
             </p>
-            <Link
-              href="/profilim/abonelik"
-              className={cn(buttonVariants({ size: "sm" }), "mt-3 w-full")}
-            >
+            <YukseltButonu plan="PRO" kaynak="sms" className={cn(buttonVariants({ size: "sm" }), "mt-3 w-full")}>
               Bildirimleri Aç
-            </Link>
+            </YukseltButonu>
           </div>
         </aside>
       </div>

@@ -184,6 +184,7 @@ export default async function ProfilimPage() {
                 <KilitliOzellik
                   mevcutPlan={user.abonelikPlani}
                   gerekenPlan="PRO"
+                  kaynak="ozel-ilanlar"
                   baslik={`Sana özel ${kisiselIlanlar.length} ilan bulundu`}
                   ozellikler={["Bölümüne ve öğrenim düzeyine uygun ilanlar tek listede", "Yeni ilan çıkınca öncelikli bildirim ve SMS"]}
                 >

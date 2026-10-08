@@ -110,6 +110,11 @@ export async function haftalikHak(userId: string, plan: Plan) {
   return { limit, kullanilan, doldu: limit !== null && kullanilan >= limit };
 }
 
+/** Bu hafta (pazartesiden beri) tum kullanicilarin baslattigi deneme sayisi - yukseltme penceresindeki gercek sayi. */
+export function buHaftakiDenemeSayisi() {
+  return prisma.denemeKatilim.count({ where: { gunlukDeneme: { tarih: { gte: haftaBasi() } } } });
+}
+
 export class DenemeHakkiDolduError extends Error {}
 
 /**

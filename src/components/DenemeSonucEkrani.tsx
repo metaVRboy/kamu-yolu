@@ -231,6 +231,7 @@ export function DenemeSonucEkrani({
       <KilitliOzellik
         mevcutPlan={plan}
         gerekenPlan="PRO"
+        kaynak="rapor"
         uzun
         baslik="Sınav sonu raporun Pro'da"
         ozellikler={[
@@ -298,6 +299,7 @@ export function DenemeSonucEkrani({
         <KilitliOzellik
           mevcutPlan={plan}
           gerekenPlan="PRO_PLUS"
+          kaynak="gelisim"
           baslik="Konu gelişim takibi Pro+'da"
           ozellikler={["Geçen denemene göre net ve puan farkın", "Hangi konuda ilerlediğin, hangisinde gerilediğin", "Her gün sınırsız deneme"]}
         >

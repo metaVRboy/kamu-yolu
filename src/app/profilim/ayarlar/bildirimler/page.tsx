@@ -18,6 +18,7 @@ export default async function BildirimAyarlariPage() {
         <KilitliOzellik
           mevcutPlan={user.abonelikPlani}
           gerekenPlan="PRO"
+          kaynak="sms"
           baslik="SMS bildirimleri Pro'da"
           ozellikler={[
             "Bölümüne uygun yeni ilan çıkınca anında SMS",

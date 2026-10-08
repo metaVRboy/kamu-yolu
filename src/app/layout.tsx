@@ -17,6 +17,7 @@ import { PageTransition } from "@/components/PageTransition";
 import { Toaster } from "@/components/ui/toast";
 import { CerezBildirimi } from "@/components/CerezBildirimi";
 import { ReklamEngelleyiciKontrol } from "@/components/ReklamEngelleyiciKontrol";
+import { YukseltmeProvider } from "@/components/YukseltmePenceresi";
 import { AuthModalProvider } from "@/components/AuthModal";
 import { HeaderAuthButton } from "@/components/HeaderAuthButton";
 import { GezinmeKaydi } from "@/components/GeriDonLinki";
@@ -57,6 +58,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="tr" className={cn("h-full antialiased", inter.variable, "font-sans")}>
       <body className="flex min-h-full flex-col text-foreground">
        <AuthModalProvider>
+       <YukseltmeProvider>
         {/* next/script (afterInteractive/beforeInteractive fark etmeksizin)
             src'yi ham HTML'de duz bir <script src=...> etiketi olarak degil,
             istemci tarafi bir yukleyici cagrisi icinde gomuyor - AdSense'in
@@ -208,6 +210,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <Toaster />
         <CerezBildirimi />
         {!reklamsiz && <ReklamEngelleyiciKontrol />}
+       </YukseltmeProvider>
        </AuthModalProvider>
       </body>
     </html>

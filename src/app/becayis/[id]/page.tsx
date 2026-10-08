@@ -52,6 +52,7 @@ export default async function BecayisDetayPage({
               <KilitliOzellik
                 mevcutPlan={user.abonelikPlani}
                 gerekenPlan="PRO"
+                kaynak="becayis-mesaj"
                 baslik="Becayiş mesajlaşması Pro'da"
                 ozellikler={["Talep sahibine site içinden mesaj gönder", "Cevap gelince bildirim ve SMS ile haberdar ol"]}
               >

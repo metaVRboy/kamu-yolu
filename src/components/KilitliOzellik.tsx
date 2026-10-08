@@ -1,9 +1,8 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
 import { Crown, Lock } from "lucide-react";
+import { YukseltButonu } from "@/components/YukseltmePenceresi";
+import type { Plan, YukseltmeKaynagi } from "@/lib/planlar";
 import { cn } from "@/lib/utils";
-
-type Plan = "UCRETSIZ" | "PRO" | "PRO_PLUS";
 
 /**
  * Planin erisemedigi ozellik: icerik ekranda kalir ama bulanik ve tiklanamaz;
@@ -19,9 +18,12 @@ export function KilitliOzellik({
   children,
   kompakt = false,
   uzun = false,
+  kaynak,
 }: {
   mevcutPlan: Plan;
   gerekenPlan: "PRO" | "PRO_PLUS";
+  /** Yukseltme penceresinin basligi ve vurgulanan karsilastirma satiri. */
+  kaynak: YukseltmeKaynagi;
   baslik: string;
   ozellikler?: string[];
   children: ReactNode;
@@ -59,16 +61,18 @@ export function KilitliOzellik({
           )}
           <div className="mt-3 flex flex-wrap justify-center gap-2">
             {proSecenegi && (
-              <Link
-                href="/profilim/abonelik"
+              <YukseltButonu
+                plan="PRO"
+                kaynak={kaynak}
                 className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
               >
                 <Crown className="h-4 w-4" />
                 Pro&apos;ya yükselt
-              </Link>
+              </YukseltButonu>
             )}
-            <Link
-              href="/profilim/abonelik"
+            <YukseltButonu
+              plan="PRO_PLUS"
+              kaynak={kaynak}
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold",
                 proSecenegi
@@ -78,7 +82,7 @@ export function KilitliOzellik({
             >
               <Crown className="h-4 w-4" />
               Pro+&apos;ya yükselt
-            </Link>
+            </YukseltButonu>
           </div>
         </div>
       </div>
