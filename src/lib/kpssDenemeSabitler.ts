@@ -44,6 +44,38 @@ export const DUZEY_LABEL: Record<EducationLevel, string> = {
 
 export const DENEME_DUZEYLERI: EducationLevel[] = ["LISE", "ONLISANS", "LISANS"];
 
+/**
+ * Deneme sayfalarinda her duzeyin kendi renk tonu (site genelindeki duzey
+ * renkleriyle ayni aile): Ortaogretim yesil-turkuaz, Onlisans gok mavisi, Lisans mor.
+ */
+export const DUZEY_TEMA = {
+  LISE: { zemin: "from-emerald-500 to-teal-600", acik: "bg-emerald-50", metin: "text-emerald-700", kenar: "border-emerald-200", buton: "bg-emerald-600 hover:bg-emerald-700" },
+  ONLISANS: { zemin: "from-sky-500 to-blue-600", acik: "bg-sky-50", metin: "text-sky-700", kenar: "border-sky-200", buton: "bg-sky-600 hover:bg-sky-700" },
+  LISANS: { zemin: "from-violet-500 to-indigo-600", acik: "bg-violet-50", metin: "text-violet-700", kenar: "border-violet-200", buton: "bg-violet-600 hover:bg-violet-700" },
+} as const satisfies Partial<Record<EducationLevel, Record<string, string>>>;
+
+export type DenemeDuzeyi = keyof typeof DUZEY_TEMA;
+
+/** Ders basina onerilen sure: 130 dakikanin soru sayisina orani (toplam 130). */
+export const ONERILEN_SURE_DK: Record<DenemeDers, number> = {
+  TURKCE: 32,
+  MATEMATIK: 33,
+  TARIH: 29,
+  COGRAFYA: 19,
+  VATANDASLIK: 10,
+  GUNCEL: 7,
+};
+
+/** Derslerin sabit renkleri (sinav sonu karnesi ve ders dagilimi seridi). */
+export const DERS_RENGI: Record<DenemeDers, string> = {
+  TURKCE: "bg-rose-500",
+  MATEMATIK: "bg-blue-500",
+  TARIH: "bg-amber-500",
+  COGRAFYA: "bg-emerald-500",
+  VATANDASLIK: "bg-violet-500",
+  GUNCEL: "bg-slate-500",
+};
+
 export function gecerliDenemeDuzeyiMi(deger: string): deger is EducationLevel {
   return (DENEME_DUZEYLERI as string[]).includes(deger);
 }

@@ -32,6 +32,7 @@ async function havuzuYaz(duzey: EducationLevel, sorular: SeedSoru[]) {
       ders: soru.ders,
       grupId: soru.grupId ?? null,
       geometri: soru.geometri ?? false,
+      konu: soru.konu ?? null,
       gorselSvg: soru.gorselSvg ?? null,
       secenekler: soru.secenekler,
       dogruCevap: soru.dogruCevap,

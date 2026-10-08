@@ -12,6 +12,8 @@ export type SeedSoru = {
   // GOMULMEZ, gercek sinav sirasina gore arayuzde dinamik hesaplanir.
   grupId?: string;
   geometri?: boolean;
+  // Ders ici konu; sinav sonu konu analizinde kullanilir (ör. "Kesirler ve Ondalık Sayılar").
+  konu?: string;
   gorselSvg?: string;
   secenekler: [string, string, string, string, string];
   dogruCevap: number;

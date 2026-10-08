@@ -517,6 +517,9 @@ model DenemeSoru {
   // Matematik bolumundeki geometri sorulari - soru haritasinda ayri
   // "Geometri" grubu olarak gosterilir.
   geometri        Boolean        @default(false)
+  // Ders ici konu (ör. "Kesirler ve Ondalık Sayılar") - sinav sonu konu
+  // analizi ve calisma tavsiyesi bunun uzerinden yapilir.
+  konu            String?
   // 5 sik (A-E), sirayla
   secenekler      String[]
   // Dogru sikkin secenekler dizisindeki indeksi (0-4)

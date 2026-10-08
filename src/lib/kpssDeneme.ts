@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import type { EducationLevel } from "@/generated/prisma/client";
+import type { DenemeDers, EducationLevel } from "@/generated/prisma/client";
+import { dersKarnesi, konuAnalizi, type KonuDurumu } from "@/lib/kpssDenemeAnaliz";
 import { DERS_SIRASI, DERS_DAGILIMI, DERS_LABEL, DUZEY_LABEL, SINAV_SURESI_DK, type ExamSoru } from "@/lib/kpssDenemeSabitler";
 
 /** Turkiye takvim gunu (sunucu hangi saat diliminde calisirsa calissin). */
@@ -156,4 +157,67 @@ export async function denemeyiBitir(katilimId: string, userId: string) {
     where: { id: katilimId },
     data: { bitisZamani: new Date(), ...sonucuHesapla(katilim.cevaplar as Record<string, number>, sorular) },
   });
+}
+
+/**
+ * Sinav sonu "gecen denemene gore" karsilastirmasi: ayni duzeyde bitirilmis bir
+ * onceki deneme varsa net/puan ve ders netleri ile konu durumlari doner.
+ */
+export async function oncekiDenemeOzeti(userId: string, duzey: EducationLevel, haricKatilimId: string) {
+  const onceki = await prisma.denemeKatilim.findFirst({
+    where: { userId, id: { not: haricKatilimId }, bitisZamani: { not: null }, gunlukDeneme: { duzey } },
+    orderBy: { bitisZamani: "desc" },
+    include: { gunlukDeneme: { select: { tarih: true, soruIdler: true } } },
+  });
+  if (!onceki) return null;
+  const sorular = await prisma.denemeSoru.findMany({
+    where: { id: { in: onceki.gunlukDeneme.soruIdler } },
+    select: { id: true, ders: true, konu: true, dogruCevap: true },
+  });
+  const cevaplar = onceki.cevaplar as Record<string, number>;
+  return {
+    tarih: onceki.gunlukDeneme.tarih,
+    net: (onceki.dogruSayisi ?? 0) - (onceki.yanlisSayisi ?? 0) / 4,
+    puan: onceki.puan ?? 0,
+    dersNetleri: Object.fromEntries(dersKarnesi(sorular, cevaplar).map((d) => [d.ders, d.net])) as Partial<Record<DenemeDers, number>>,
+    konuDurumlari: Object.fromEntries(konuAnalizi(sorular, cevaplar).map((k) => [`${k.ders}|${k.konu}`, k.durum])) as Record<string, KonuDurumu>,
+  };
+}
+
+export type OncekiDenemeOzeti = NonNullable<Awaited<ReturnType<typeof oncekiDenemeOzeti>>>;
+
+/** Deneme ana sayfasindaki "Son denemelerin" listesi (bitirilmis olanlar, en yeni once). */
+export async function sonDenemeler(userId: string, adet = 5) {
+  const katilimlar = await prisma.denemeKatilim.findMany({
+    where: { userId, bitisZamani: { not: null } },
+    orderBy: { bitisZamani: "desc" },
+    take: adet,
+    include: { gunlukDeneme: { select: { duzey: true, tarih: true } } },
+  });
+  return katilimlar.map((k) => ({
+    id: k.id,
+    duzey: k.gunlukDeneme.duzey,
+    tarih: k.gunlukDeneme.tarih,
+    dogru: k.dogruSayisi ?? 0,
+    yanlis: k.yanlisSayisi ?? 0,
+    bos: k.bosSayisi ?? 0,
+    net: (k.dogruSayisi ?? 0) - (k.yanlisSayisi ?? 0) / 4,
+    puan: k.puan ?? 0,
+  }));
+}
+
+/** Ana sayfadaki duzey kartlari: kullanicinin bugunku denemesi durumu (yok / suruyor / bitti + puan). */
+export async function bugunkuDurumlar(userId: string) {
+  const katilimlar = await prisma.denemeKatilim.findMany({
+    where: { userId, gunlukDeneme: { tarih: bugununTarihi() } },
+    select: { bitisZamani: true, baslangicZamani: true, puan: true, dogruSayisi: true, yanlisSayisi: true, gunlukDeneme: { select: { duzey: true } } },
+  });
+  return new Map(
+    katilimlar.map((k) => [
+      k.gunlukDeneme.duzey,
+      k.bitisZamani || kalanSureMs(k.baslangicZamani) <= 0
+        ? { durum: "bitti" as const, puan: k.puan, net: (k.dogruSayisi ?? 0) - (k.yanlisSayisi ?? 0) / 4 }
+        : { durum: "suruyor" as const },
+    ]),
+  );
 }

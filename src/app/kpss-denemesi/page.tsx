@@ -1,23 +1,51 @@
 import Link from "next/link";
-import { GraduationCap, Clock, ListChecks } from "lucide-react";
+import { BookOpen, ChartColumnBig, Clock, GraduationCap, History, ListChecks, MousePointerClick, School, Timer } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth";
+import { bugunkuDurumlar, sonDenemeler } from "@/lib/kpssDeneme";
 import { SayfaBasligi } from "@/components/SayfaBasligi";
-import { DENEME_DUZEYLERI, DUZEY_LABEL, SINAV_SURESI_DK, TOPLAM_SORU } from "@/lib/kpssDenemeSabitler";
+import {
+  DENEME_DUZEYLERI,
+  DERS_DAGILIMI,
+  DERS_LABEL,
+  DERS_RENGI,
+  DERS_SIRASI,
+  DUZEY_LABEL,
+  DUZEY_TEMA,
+  SINAV_SURESI_DK,
+  TOPLAM_SORU,
+  type DenemeDuzeyi,
+} from "@/lib/kpssDenemeSabitler";
+import { cn } from "@/lib/utils";
 
 export const metadata = { title: "KPSS Deneme Sınavı — Kamu Yolu" };
-export const revalidate = 60;
+
+const DUZEY_IKONU = { LISE: School, ONLISANS: BookOpen, LISANS: GraduationCap } as const;
+const TARIH = new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }); // GunlukDeneme.tarih UTC gece yarisi
+const fmt = (n: number) => n.toLocaleString("tr-TR", { maximumFractionDigits: 2 });
+
+const ADIMLAR = [
+  { ikon: MousePointerClick, baslik: "Düzeyini seç", metin: "Ortaöğretim, Önlisans ya da Lisans; her düzeyin kendi günlük denemesi var." },
+  { ikon: Timer, baslik: `${SINAV_SURESI_DK} dakikada ${TOPLAM_SORU} soru`, metin: "Gerçek KPSS formatı ve süresi. Soruları işaretleyip sonra dönebilirsin." },
+  { ikon: ChartColumnBig, baslik: "Raporunu al", metin: "Ders karnen, konu bazlı uyarılar ve önceki denemene göre gelişimin hazır." },
+];
 
 export default async function KpssDenemesiHubPage() {
-  const havuzSayilari = await prisma.denemeSoru.groupBy({ by: ["duzey"], _count: { _all: true } });
+  const user = await getCurrentUser();
+  const [havuzSayilari, durumlar, gecmis] = await Promise.all([
+    prisma.denemeSoru.groupBy({ by: ["duzey"], _count: { _all: true } }),
+    user ? bugunkuDurumlar(user.id) : null,
+    user ? sonDenemeler(user.id) : [],
+  ]);
   const sayiByDuzey = new Map(havuzSayilari.map((h) => [h.duzey, h._count._all]));
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <SayfaBasligi
         ikon={GraduationCap}
         breadcrumb={[{ ad: "Ana Sayfa", href: "/" }, { ad: "KPSS Denemesi" }]}
         baslik="KPSS Deneme Sınavı"
-        aciklama="Her gün yenilenen, gerçek KPSS formatında deneme sınavına gir. O gün giren herkes aynı soruları görür; sınav bitince doğru/yanlış/boş sayılarını ve puanını görebilir, yanlış yaptığın sorulara dönüp doğru cevabı inceleyebilirsin."
+        aciklama="Her gün yenilenen, gerçek KPSS formatında deneme. O gün giren herkes aynı soruları görür; sınav sonunda ders karnen ve konu bazlı çalışma tavsiyelerin hazırlanır."
         cipler={[
           { etiket: `${TOPLAM_SORU} soru`, ikon: ListChecks },
           { etiket: `${SINAV_SURESI_DK} dakika`, ikon: Clock },
@@ -25,42 +53,141 @@ export default async function KpssDenemesiHubPage() {
         ]}
       />
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-3">
-        {DENEME_DUZEYLERI.map((duzey) => {
-          const hazirSoruSayisi = sayiByDuzey.get(duzey) ?? 0;
-          const hazirMi = hazirSoruSayisi >= TOPLAM_SORU;
+      <div className="mt-8 grid gap-5 md:grid-cols-3">
+        {DENEME_DUZEYLERI.map((d) => {
+          const duzey = d as DenemeDuzeyi;
+          const tema = DUZEY_TEMA[duzey];
+          const Ikon = DUZEY_IKONU[duzey];
+          const hazir = (sayiByDuzey.get(duzey) ?? 0) >= TOPLAM_SORU;
+          const bugun = durumlar?.get(duzey);
+          const href = `/kpss-denemesi/${duzey.toLowerCase()}`;
           return (
-            <div key={duzey} className="flex flex-col rounded-2xl border border-primary/15 bg-white p-5">
-              <h2 className="text-lg font-semibold text-slate-800">{DUZEY_LABEL[duzey]}</h2>
-              <div className="mt-2 space-y-1 text-xs text-muted-foreground">
-                <p className="flex items-center gap-1.5">
-                  <ListChecks className="h-3.5 w-3.5" /> {TOPLAM_SORU} soru (60 Genel Yetenek + 60 Genel Kültür)
-                </p>
-                <p className="flex items-center gap-1.5">
-                  <Clock className="h-3.5 w-3.5" /> {SINAV_SURESI_DK} dakika
-                </p>
+            <article key={duzey} className="flex flex-col overflow-hidden rounded-3xl border border-primary/10 bg-white shadow-sm transition-shadow hover:shadow-xl hover:shadow-primary/10">
+              <div className={cn("relative overflow-hidden bg-gradient-to-br px-6 pt-6 pb-5 text-white", tema.zemin)}>
+                <div aria-hidden className="absolute inset-0 opacity-20 [background-image:radial-gradient(circle,white_1px,transparent_1.5px)] [background-size:18px_18px]" />
+                <Ikon aria-hidden className="absolute -right-5 -bottom-7 h-32 w-32 text-white/15" strokeWidth={1.25} />
+                <div className="relative">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/30">
+                    <Ikon className="h-6 w-6" />
+                  </span>
+                  <h2 className="mt-3 font-sans text-2xl font-bold tracking-tight">{DUZEY_LABEL[duzey]}</h2>
+                  <p className="mt-1 text-xs font-semibold text-white/85">{hazir ? "Bugünün denemesi hazır" : "Soru havuzu hazırlanıyor"}</p>
+                </div>
               </div>
-              {hazirMi ? (
-                <Link
-                  href={`/kpss-denemesi/${duzey.toLowerCase()}`}
-                  className="mt-4 inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
-                >
-                  Sınava Başla
-                </Link>
-              ) : (
-                <span className="mt-4 inline-flex items-center justify-center rounded-lg border border-dashed border-primary/25 px-4 py-2 text-sm font-medium text-muted-foreground">
-                  Yakında
-                </span>
-              )}
-            </div>
+
+              <div className="flex flex-1 flex-col p-6">
+                <p className="flex items-center gap-3 text-sm text-slate-600">
+                  <span className="flex items-center gap-1.5">
+                    <ListChecks className="h-4 w-4" /> {TOPLAM_SORU} soru
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="h-4 w-4" /> {SINAV_SURESI_DK} dk
+                  </span>
+                </p>
+                <div className="mt-4 flex h-2 gap-0.5 overflow-hidden rounded-full" title="Derslerin soru dağılımı">
+                  {DERS_SIRASI.map((ders) => (
+                    <div key={ders} className={DERS_RENGI[ders]} style={{ width: `${(DERS_DAGILIMI[ders] / TOPLAM_SORU) * 100}%` }} />
+                  ))}
+                </div>
+                <ul className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+                  {DERS_SIRASI.map((ders) => (
+                    <li key={ders} className="flex items-center gap-1">
+                      <span className={cn("h-1.5 w-1.5 rounded-full", DERS_RENGI[ders])} />
+                      {DERS_LABEL[ders]} {DERS_DAGILIMI[ders]}
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="mt-auto pt-6">
+                  {!hazir ? (
+                    <span className="flex justify-center rounded-full border border-dashed border-primary/25 px-4 py-2.5 text-sm font-medium text-muted-foreground">Yakında</span>
+                  ) : bugun?.durum === "bitti" ? (
+                    <div className="space-y-3">
+                      <p className={cn("flex items-baseline justify-between rounded-2xl px-4 py-3", tema.acik)}>
+                        <span className="text-xs font-semibold text-slate-600">Bugünkü puanın</span>
+                        <span className={cn("text-2xl font-bold tabular-nums", tema.metin)}>{bugun.puan === null ? "—" : fmt(bugun.puan)}</span>
+                      </p>
+                      <Link href={href} className="flex justify-center rounded-full border border-primary/20 px-4 py-2.5 text-sm font-bold text-slate-800 hover:bg-slate-50">
+                        Raporunu gör
+                      </Link>
+                    </div>
+                  ) : bugun?.durum === "suruyor" ? (
+                    <Link href={href} className="flex justify-center rounded-full bg-amber-500 px-4 py-2.5 text-sm font-bold text-white hover:bg-amber-600">
+                      Süren işliyor · Devam et
+                    </Link>
+                  ) : (
+                    <Link href={href} className={cn("flex justify-center rounded-full px-4 py-2.5 text-sm font-bold text-white", tema.buton)}>
+                      Sınava Başla
+                    </Link>
+                  )}
+                </div>
+              </div>
+            </article>
           );
         })}
       </div>
 
-      <p className="mt-8 text-xs text-muted-foreground">
-        Sorular gerçek ÖSYM soruları değildir; Kamu Yolu tarafından KPSS formatına uygun olarak hazırlanan özgün
-        deneme sorularıdır. Sınav sonundaki puan, resmi ÖSYM puanı değildir; sadece net üzerinden hesaplanan
-        pratik bir deneme puanıdır.
+      <section className="mt-12">
+        <h2 className="font-sans text-xl font-bold tracking-tight text-slate-900">Nasıl çalışır?</h2>
+        <ol className="mt-4 grid gap-4 md:grid-cols-3">
+          {ADIMLAR.map(({ ikon: Ikon, baslik, metin }, i) => (
+            <li key={baslik} className="flex gap-4 rounded-3xl border border-primary/10 bg-white p-5 shadow-sm">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <Ikon className="h-5 w-5" />
+              </span>
+              <span>
+                <span className="text-xs font-bold text-muted-foreground">{i + 1}. adım</span>
+                <span className="block font-semibold text-slate-900">{baslik}</span>
+                <span className="mt-0.5 block text-sm text-slate-600">{metin}</span>
+              </span>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      {gecmis.length > 0 && (
+        <section className="mt-12">
+          <h2 className="flex items-center gap-2 font-sans text-xl font-bold tracking-tight text-slate-900">
+            <History className="h-5 w-5 text-primary" />
+            Son denemelerin
+          </h2>
+          <div className="mt-4 overflow-x-auto rounded-3xl border border-primary/10 bg-white shadow-sm">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b border-primary/10 text-xs text-muted-foreground">
+                <tr>
+                  <th className="px-5 py-3 font-semibold">Tarih</th>
+                  <th className="px-5 py-3 font-semibold">Düzey</th>
+                  <th className="px-5 py-3 text-right font-semibold">D / Y / B</th>
+                  <th className="px-5 py-3 text-right font-semibold">Net</th>
+                  <th className="px-5 py-3 text-right font-semibold">Puan</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-primary/5">
+                {gecmis.map((g) => {
+                  const tema = DUZEY_TEMA[g.duzey as DenemeDuzeyi];
+                  return (
+                    <tr key={g.id}>
+                      <td className="px-5 py-3 whitespace-nowrap text-slate-700">{TARIH.format(g.tarih)}</td>
+                      <td className="px-5 py-3">
+                        <span className={cn("rounded-full px-2.5 py-0.5 text-xs font-semibold", tema?.acik, tema?.metin)}>{DUZEY_LABEL[g.duzey]}</span>
+                      </td>
+                      <td className="px-5 py-3 text-right whitespace-nowrap text-slate-600 tabular-nums">
+                        {g.dogru} / {g.yanlis} / {g.bos}
+                      </td>
+                      <td className="px-5 py-3 text-right font-semibold tabular-nums">{fmt(g.net)}</td>
+                      <td className="px-5 py-3 text-right font-bold text-slate-900 tabular-nums">{fmt(g.puan)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
+      <p className="mt-10 text-xs text-muted-foreground">
+        Sorular gerçek ÖSYM soruları değildir; Kamu Yolu tarafından KPSS formatına uygun olarak hazırlanan özgün deneme sorularıdır. Sınav
+        sonundaki puan resmi ÖSYM puanı değildir; net üzerinden hesaplanan pratik bir deneme puanıdır.
       </p>
     </div>
   );

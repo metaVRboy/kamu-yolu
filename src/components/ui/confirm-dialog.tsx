@@ -19,6 +19,7 @@ export function ConfirmDialog({
   onConfirm,
   loading,
   onayEtiketi = "Sil",
+  tehlikeli = true,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -27,6 +28,8 @@ export function ConfirmDialog({
   onConfirm: () => void;
   loading?: boolean;
   onayEtiketi?: string;
+  // false: olumlu eylem onayi (ör. sinavi baslat) - kirmizi degil ana renk buton.
+  tehlikeli?: boolean;
 }) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -37,7 +40,7 @@ export function ConfirmDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={loading}>Vazgeç</AlertDialogCancel>
-          <AlertDialogAction variant="destructive" disabled={loading} onClick={onConfirm}>
+          <AlertDialogAction variant={tehlikeli ? "destructive" : "default"} disabled={loading} onClick={onConfirm}>
             {loading ? (onayEtiketi === "Sil" ? "Siliniyor..." : "İşleniyor...") : onayEtiketi}
           </AlertDialogAction>
         </AlertDialogFooter>
