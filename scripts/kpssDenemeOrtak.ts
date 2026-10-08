@@ -82,3 +82,21 @@ export function iklimGrafigi(sicaklik: number[], yagis: number[]) {
   return `<svg viewBox="0 0 420 340" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif" fill="#1e293b">${sicaklikPaneli}${yagisPaneli}</svg>`;
 }
 
+/** Tek serili sutun grafigi; degerler `adim`in katlari secilir ki grafikten tam okunabilsin. */
+export function sutunGrafigi(etiketler: string[], degerler: number[], max: number, adim: number, baslik: string) {
+  const sol = 44;
+  const genislik = 340;
+  const ust = 34;
+  const yukseklik = 170;
+  const y = (v: number) => ust + yukseklik - (v / max) * yukseklik;
+  const x = (i: number) => sol + (genislik * (i + 0.5)) / etiketler.length;
+  let s = `<text x="${sol}" y="${ust - 14}" font-size="12" font-weight="700">${baslik}</text>`;
+  for (let v = 0; v <= max; v += adim) {
+    s += `<line x1="${sol}" y1="${y(v)}" x2="${sol + genislik}" y2="${y(v)}" stroke="#cbd5e1" stroke-width="0.7"/><text x="${sol - 6}" y="${y(v) + 4}" font-size="10" text-anchor="end" fill="#475569">${v}</text>`;
+  }
+  s += degerler.map((v, i) => `<rect x="${x(i) - 16}" y="${y(v)}" width="32" height="${y(0) - y(v)}" fill="#2563eb"/>`).join("");
+  s += `<line x1="${sol}" y1="${y(0)}" x2="${sol + genislik}" y2="${y(0)}" stroke="#1e293b" stroke-width="1.2"/>`;
+  s += etiketler.map((e, i) => `<text x="${x(i)}" y="${y(0) + 16}" font-size="11" text-anchor="middle" fill="#475569">${e}</text>`).join("");
+  return `<svg viewBox="0 0 400 230" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif" fill="#1e293b">${s}</svg>`;
+}
+

@@ -7,25 +7,7 @@
  * gruplar, 57-60 geometri (gorselli). Genel Kultur Lisans havuzundan farkli
  * konu/olaylarla; cografya gorselleri gercek veriyle (Natural Earth, MGM).
  */
-import { iklimGrafigi, turkiyeHaritasi, type SeedSoru } from "./kpssDenemeOrtak";
-
-/** Tek serili sutun grafigi; degerler `adim`in katlari secilir ki grafikten tam okunabilsin. */
-function sutunGrafigi(etiketler: string[], degerler: number[], max: number, adim: number, baslik: string) {
-  const sol = 44;
-  const genislik = 340;
-  const ust = 34;
-  const yukseklik = 170;
-  const y = (v: number) => ust + yukseklik - (v / max) * yukseklik;
-  const x = (i: number) => sol + (genislik * (i + 0.5)) / etiketler.length;
-  let s = `<text x="${sol}" y="${ust - 14}" font-size="12" font-weight="700">${baslik}</text>`;
-  for (let v = 0; v <= max; v += adim) {
-    s += `<line x1="${sol}" y1="${y(v)}" x2="${sol + genislik}" y2="${y(v)}" stroke="#cbd5e1" stroke-width="0.7"/><text x="${sol - 6}" y="${y(v) + 4}" font-size="10" text-anchor="end" fill="#475569">${v}</text>`;
-  }
-  s += degerler.map((v, i) => `<rect x="${x(i) - 16}" y="${y(v)}" width="32" height="${y(0) - y(v)}" fill="#2563eb"/>`).join("");
-  s += `<line x1="${sol}" y1="${y(0)}" x2="${sol + genislik}" y2="${y(0)}" stroke="#1e293b" stroke-width="1.2"/>`;
-  s += etiketler.map((e, i) => `<text x="${x(i)}" y="${y(0) + 16}" font-size="11" text-anchor="middle" fill="#475569">${e}</text>`).join("");
-  return `<svg viewBox="0 0 400 230" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif" fill="#1e293b">${s}</svg>`;
-}
+import { iklimGrafigi, sutunGrafigi, turkiyeHaritasi, type SeedSoru } from "./kpssDenemeOrtak";
 
 const UYKU =
   "Uykunun yalnızca bedenin dinlenmesi olduğunu düşünmek yaygın bir yanılgıdır. Araştırmalar, uyku sırasında beynin gün içinde edindiği bilgileri ayıklayıp önemli olanları kalıcı belleğe aktardığını gösteriyor. Bu nedenle sınav öncesinde uykusuz kalarak çalışan öğrenci, öğrendiklerinin bir bölümünü hatırlamakta zorlanabilir. Üstelik uykusuzluk dikkat süresini kısaltır, tepki süresini uzatır; uzun süre uykusuz kalan bir sürücünün dikkat düzeyinin alkollü bir sürücününkine benzeyebileceği belirtiliyor. Uzmanlar yetişkinler için gecede yedi ile dokuz saatlik uykuyu öneriyor; ama yalnızca sürenin değil, her gün düzenli saatlerde yatıp kalkmanın da en az o kadar önemli olduğunu vurguluyor.";
