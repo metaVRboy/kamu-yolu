@@ -12,7 +12,10 @@ const BASE_URL = "https://api.kariyerkapisi.gov.tr/api";
 // baglanti asamasinda hicbir yanit donmeden takiliyor (30sn+ bekletildi).
 // Bu yuzden zaman asimi kisa tutulup hizli basarisiz olmasi saglaniyor;
 // otomatik tarama bu ortamda calistirilmamali, bkz. scripts/run-scrape.cmd.
-const dispatcher = new Agent({ connectTimeout: 8_000 });
+// Baglanti kurulduktan sonra API yaniti yarida birakabiliyor; undici'nin
+// varsayilan 300sn header/body beklemesi x 3 deneme, yerel gorevin 15 dk
+// suresini tek istekte dolduruyordu (gorev oldurulup tarama yarida kaliyordu).
+const dispatcher = new Agent({ connectTimeout: 8_000, headersTimeout: 20_000, bodyTimeout: 20_000 });
 
 // Kariyer Kapisi resmi kamu ise alim portalinin herkese acik (girissiz)
 // JSON API'leri. Bu uc noktalar tarayicidan devtools ile tespit edilmistir;
