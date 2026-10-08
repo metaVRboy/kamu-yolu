@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ArrowUpDown, SlidersHorizontal, X } from "lucide-react";
 import type { BolumSiralamaSatiri } from "@/lib/kpssIstatistik";
@@ -67,6 +68,12 @@ export function BolumSiralamaPaneli({
     const params = new URLSearchParams(searchParams.toString());
     degistir(params);
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  }
+
+  function bolumHref(id: string) {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("bolum", id);
+    return `${pathname}?${params.toString()}#bolum-analizi`;
   }
 
   function uygula() {
@@ -209,22 +216,25 @@ export function BolumSiralamaPaneli({
           <p className="py-2 text-xs text-muted-foreground">Seçilen aralıkta veri bulunamadı.</p>
         )}
         {siraliListe.map((b, i) => (
-          <li
-            key={b.id}
-            data-bolum-id={b.id}
-            className={`flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 ${
-              b.id === seciliBolumId ? "bg-primary/10 ring-1 ring-primary/30" : "hover:bg-slate-50"
-            }`}
-          >
-            <span className="flex min-w-0 items-center gap-2 text-slate-700">
-              <span className="w-7 shrink-0 text-right text-xs text-muted-foreground tabular-nums">{i + 1}.</span>
-              <span
-                title={LEVEL_LABEL[b.ogrenimDuzeyi]}
-                className={cn("h-2 w-2 shrink-0 rounded-full bg-gradient-to-br", DUZEY_TEMA[b.ogrenimDuzeyi].zemin)}
-              />
-              <span className="truncate">{b.ad}</span>
-            </span>
-            <span className="shrink-0 font-medium text-primary">{b.toplam.toLocaleString("tr-TR")}</span>
+          <li key={b.id} data-bolum-id={b.id}>
+            {/* Tiklayinca bolum karnesi acilir; karne tablonun ustunde oldugu icin #bolum-analizi'ne kayar. */}
+            <Link
+              href={bolumHref(b.id)}
+              aria-current={b.id === seciliBolumId ? "true" : undefined}
+              className={`group flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 ${
+                b.id === seciliBolumId ? "bg-primary/10 ring-1 ring-primary/30" : "hover:bg-slate-50"
+              }`}
+            >
+              <span className="flex min-w-0 items-center gap-2 text-slate-700">
+                <span className="w-7 shrink-0 text-right text-xs text-muted-foreground tabular-nums">{i + 1}.</span>
+                <span
+                  title={LEVEL_LABEL[b.ogrenimDuzeyi]}
+                  className={cn("h-2 w-2 shrink-0 rounded-full bg-gradient-to-br", DUZEY_TEMA[b.ogrenimDuzeyi].zemin)}
+                />
+                <span className="truncate group-hover:text-primary group-hover:underline">{b.ad}</span>
+              </span>
+              <span className="shrink-0 font-medium text-primary">{b.toplam.toLocaleString("tr-TR")}</span>
+            </Link>
           </li>
         ))}
       </ol>
