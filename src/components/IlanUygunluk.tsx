@@ -61,7 +61,7 @@ export function IlanUygunluk({ ilanId }: { ilanId: string }) {
           <ul className="mt-3 space-y-2">
             <Satir durum={cevap.bolum.durum}>
               {cevap.bolum.durum === "sart-yok" && "Bu ilanda bölüm şartı yok."}
-              {cevap.bolum.durum === "uygun" && <>Bölümün (<strong>{cevap.bolum.profilBolumu}</strong>) bu ilanın aradığı bölümler arasında.</>}
+              {cevap.bolum.durum === "uygun" && <>Bölümün (<strong>{cevap.bolum.profilBolumu}</strong>) bu ilan için uygun.</>}
               {cevap.bolum.durum === "uygun-degil" && "Profilindeki bölüm, bu ilanın aradığı bölümler arasında görünmüyor."}
               {cevap.bolum.durum === "bilinmiyor" && "Profilinde bölüm seçili değil."}
             </Satir>
