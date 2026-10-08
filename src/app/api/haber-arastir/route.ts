@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { adminApi } from "@/lib/admin";
 import { researchHaberler } from "@/lib/haberResearch";
 import { haberleriEkleVeTekillestir } from "@/lib/haberDedupe";
 
@@ -18,7 +19,8 @@ function isAuthorized(req: NextRequest): boolean {
 }
 
 async function runHaberArastir(req: NextRequest) {
-  if (!isAuthorized(req)) {
+  // Admin panelindeki "Şimdi araştır" butonu admin oturumuyla cagirir.
+  if (!isAuthorized(req) && !(req.method === "POST" && (await adminApi()))) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 

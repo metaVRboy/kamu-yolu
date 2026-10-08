@@ -143,9 +143,18 @@ export async function getCurrentUser() {
   return planiGuncelle(user);
 }
 
-/** Admin panelden sureli verilen planin suresi dolduysa kullanici her yerde UCRETSIZ gorulur. */
-function planiGuncelle<T extends { abonelikPlani: string; abonelikBitis: Date | null }>(user: T): T {
+/**
+ * Admin panelden sureli verilen planin suresi dolduysa kullanici her yerde UCRETSIZ gorulur.
+ * Admin askiya aldiysa tum oturumlari gecersiz sayilir (null).
+ */
+function planiGuncelle<T extends { abonelikPlani: string; abonelikBitis: Date | null; askiyaAlindi: Date | null }>(user: T): T | null {
+  if (user.askiyaAlindi) return null;
   return user.abonelikBitis && user.abonelikBitis.getTime() <= Date.now() ? { ...user, abonelikPlani: "UCRETSIZ" } : user;
+}
+
+/** Askiya alinmis hesaba giris denendiginde gosterilen mesaj. */
+export function askiMesaji(neden: string | null) {
+  return `Hesabın askıya alındı${neden ? `: ${neden}` : "."} Bir hata olduğunu düşünüyorsan bizimle iletişime geç.`;
 }
 
 export async function requireUser() {

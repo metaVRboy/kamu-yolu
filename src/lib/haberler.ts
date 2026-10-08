@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { haberSuresiGectiMi } from "@/lib/haberYayin";
 
@@ -22,10 +23,22 @@ export async function getYayindakiHaberler() {
   return yayindakiler();
 }
 
-/** Admin paneli: suresi gecenler dahil tum haberler. */
-export async function getAllHaberler() {
-  return prisma.haber.findMany({ orderBy: { yayinTarihi: "desc" } });
+/** Admin paneli: suresi gecenler dahil, aramaya uyan son 50 haber. */
+export async function getAllHaberler(q = "") {
+  return prisma.haber.findMany({
+    where: q ? { OR: [{ baslik: { contains: q, mode: "insensitive" } }, { ozet: { contains: q, mode: "insensitive" } }] } : {},
+    orderBy: { yayinTarihi: "desc" },
+    take: 50,
+  });
 }
+
+/** Admin haber ekleme/duzenleme formu. */
+export const haberFormSchema = z.object({
+  baslik: z.string().trim().min(2).max(160),
+  ozet: z.string().trim().min(2).max(2000),
+  kaynakUrl: z.string().trim().url().max(500).optional().or(z.literal("")),
+  gorselUrl: z.string().trim().url().max(500).optional().or(z.literal("")),
+});
 
 /**
  * Bir bolumle eslesen haberleri dondurur - bolum sayfasindaki "Ilgili

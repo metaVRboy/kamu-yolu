@@ -75,6 +75,7 @@ export async function GET(req: NextRequest) {
           });
     }
 
+    if (user.askiyaAlindi) return NextResponse.redirect(`${SITE_URL}/giris?hata=askida`);
     await createSession(user.id, user.tokenVersion);
     const res = NextResponse.redirect(`${SITE_URL}/profilim`);
     res.cookies.delete("google_oauth_state");

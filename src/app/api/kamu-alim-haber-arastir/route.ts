@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { adminApi } from "@/lib/admin";
 import { fetchIsinolsaIlanlari } from "@/scraper/isinolsaClient";
 import { fetchSecmeyemektarifleriMakaleleri } from "@/scraper/secmeyemektarifleriClient";
 import { researchKamuAlimLeads, type KamuAlimLead } from "@/lib/kamuAlimLeadResearch";
@@ -28,7 +29,8 @@ function isAuthorized(req: NextRequest): boolean {
 }
 
 async function runKamuAlimHaberArastir(req: NextRequest) {
-  if (!isAuthorized(req)) {
+  // Admin panelindeki "Şimdi araştır" butonu admin oturumuyla cagirir.
+  if (!isAuthorized(req) && !(req.method === "POST" && (await adminApi()))) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 

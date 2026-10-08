@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { adminSayfasi } from "@/lib/admin";
 import { aktifProKosulu } from "@/lib/sms";
 import { buHaftakiDenemeSayisi } from "@/lib/kpssDeneme";
+import { taramaKaynaklari } from "@/lib/adminIlan";
 import { AdminBaslik, AdminKart, IstatistikKutusu } from "@/components/admin/AdminUI";
 import { cn } from "@/lib/utils";
 
@@ -28,8 +29,7 @@ export default async function AdminPanelPage() {
     prisma.user.count({ where: { ...aktifProKosulu(), abonelikPlani: "PRO" } }),
     prisma.user.count({ where: { ...aktifProKosulu(), abonelikPlani: "PRO_PLUS" } }),
     prisma.posting.count({ where: { isActive: true } }),
-    // Her kaynagin bitmis son taramasi (RUNNING takili kalanlar sayilmaz)
-    prisma.scrapeRun.findMany({ where: { status: { not: "RUNNING" } }, orderBy: { startedAt: "desc" }, distinct: ["sourceName"] }),
+    taramaKaynaklari(),
     buHaftakiDenemeSayisi(),
     prisma.yukseltmeTalebi.count(),
     prisma.haber.count({ where: { yayinTarihi: { gte: gunOnce(7) } } }),
@@ -47,7 +47,7 @@ export default async function AdminPanelPage() {
     return { anahtar, etiket: GUN.format(t), sayi: sayiByGun.get(anahtar) ?? 0 };
   });
   const enCok = Math.max(1, ...seri.map((s) => s.sayi));
-  const basarisizTarama = sonTaramalar.filter((t) => t.status === "FAILED");
+  const basarisizTarama = sonTaramalar.filter((t) => t.gecikti);
 
   return (
     <>
@@ -57,12 +57,14 @@ export default async function AdminPanelPage() {
         <div className="flex items-start gap-3 rounded-3xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
           <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
           <div>
-            <p className="font-bold">Son tarama başarısız: {basarisizTarama.map((t) => t.sourceName).join(", ")}</p>
-            {basarisizTarama.map((t) => (
-              <p key={t.id} className="mt-0.5 text-xs">
-                {t.sourceName} · {TARIH.format(t.startedAt)} · {t.errorMessage?.slice(0, 160) ?? "hata mesajı yok"}
-              </p>
-            ))}
+            <p className="font-bold">24 saattir başarılı tarama yok: {basarisizTarama.map((t) => t.sourceName).join(", ")}</p>
+            <p className="mt-0.5 text-xs">
+              Bu kaynağın ilanları güncellenmiyor.{" "}
+              <Link href="/admin/taramalar" className="font-bold underline">
+                Taramalar sayfasında
+              </Link>{" "}
+              nedenine bak.
+            </p>
           </div>
         </div>
       )}
@@ -89,17 +91,17 @@ export default async function AdminPanelPage() {
           </div>
         </AdminKart>
 
-        <AdminKart baslik="Taramalar">
+        <AdminKart baslik="Son başarılı taramalar">
           <ul className="space-y-2">
             {sonTaramalar.map((t) => (
-              <li key={t.id} className="flex items-center justify-between gap-2 rounded-xl bg-slate-50 px-3 py-2 text-sm">
+              <li key={t.sourceName} className="flex items-center justify-between gap-2 rounded-xl bg-slate-50 px-3 py-2 text-sm">
                 <span className="flex items-center gap-2 font-medium text-slate-800">
-                  {t.status === "SUCCESS" ? <CheckCircle2 className="h-4 w-4 text-emerald-600" /> : <AlertTriangle className="h-4 w-4 text-red-600" />}
+                  {t.gecikti ? <AlertTriangle className="h-4 w-4 text-red-600" /> : <CheckCircle2 className="h-4 w-4 text-emerald-600" />}
                   {t.sourceName}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  {TARIH.format(t.startedAt)}
-                  {t.postingsFound != null && ` · ${t.postingsFound} ilan`}
+                  {t.sonBasari ? TARIH.format(t.sonBasari) : "hiç"}
+                  {t.ilanSayisi != null && ` · ${t.ilanSayisi} ilan`}
                 </span>
               </li>
             ))}

@@ -371,7 +371,8 @@ export async function linkDepartmentToExistingPostings(
   const terms = [department.name, ...department.aliases.map((a) => a.alias)];
 
   const postings = await prisma.posting.findMany({
-    where: { isActive: true, departmentRequirementRaw: { not: null } },
+    // Admin'in elle sectigi bolumlere dokunulmaz.
+    where: { isActive: true, adminDuzenledi: false, departmentRequirementRaw: { not: null } },
     select: { id: true, departmentRequirementRaw: true },
   });
 

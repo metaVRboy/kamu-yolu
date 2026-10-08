@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { createSession, isSessionConfigured, verifyPassword } from "@/lib/auth";
+import { askiMesaji, createSession, isSessionConfigured, verifyPassword } from "@/lib/auth";
 import { clearFailures, getLockoutState, lockoutMessage, recordFailure } from "@/lib/authAbuse";
 import { verifyTurnstileToken } from "@/lib/turnstile";
 
@@ -54,6 +54,7 @@ export async function POST(req: NextRequest) {
     }
 
     await clearFailures(email);
+    if (user.askiyaAlindi) return NextResponse.json({ error: askiMesaji(user.askiNedeni) }, { status: 403 });
     await createSession(user.id, user.tokenVersion, beniHatirla ?? true);
 
     return NextResponse.json({ id: user.id, adSoyad: user.adSoyad, email: user.email });

@@ -74,24 +74,28 @@ async function upsertPosting(
 
   const existing = await prisma.posting.findUnique({
     where: { externalId },
-    select: { id: true },
+    select: { id: true, adminGizli: true, adminDuzenledi: true },
   });
+  // Admin duzeltmeleri korunur: gizlenen ilan aktiflesmez, duzenlenen alanlar ezilmez.
+  const adminKoru = existing?.adminDuzenledi ?? false;
 
   const posting = await prisma.posting.upsert({
     where: { externalId },
     update: {
-      title,
-      institutionName: ilan.kurumAdi,
+      ...(!adminKoru && {
+        title,
+        institutionName: ilan.kurumAdi,
+        educationLevels,
+        isDepartmentRestricted,
+        applicationStart: ilan.basTarih ? new Date(ilan.basTarih) : null,
+        applicationEnd: ilan.bitTarih ? new Date(ilan.bitTarih) : null,
+      }),
       institutionType,
       ilanTuru: ilan.ilanTuru ?? null,
       iller,
       sourceUrl,
-      educationLevels,
       departmentRequirementRaw: requirementText,
-      isDepartmentRestricted,
-      applicationStart: ilan.basTarih ? new Date(ilan.basTarih) : null,
-      applicationEnd: ilan.bitTarih ? new Date(ilan.bitTarih) : null,
-      isActive: true,
+      isActive: !existing?.adminGizli,
       scrapedAt: new Date(),
     },
     create: {
@@ -113,10 +117,11 @@ async function upsertPosting(
     },
   });
 
-  await prisma.postingDepartment.deleteMany({
+  // Admin bolumleri elle duzelttiyse eslesmeye dokunma.
+  if (!adminKoru) await prisma.postingDepartment.deleteMany({
     where: { postingId: posting.id },
   });
-  for (const match of matches) {
+  for (const match of adminKoru ? [] : matches) {
     await prisma.postingDepartment.create({
       data: {
         postingId: posting.id,

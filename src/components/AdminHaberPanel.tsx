@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -39,14 +39,26 @@ export function AdminHaberPanel({ haberler }: { haberler: Haber[] }) {
   const [loading, setLoading] = useState(false);
   const [silinecek, setSilinecek] = useState<Haber | null>(null);
   const [siliniyor, setSiliniyor] = useState(false);
+  // Doluysa form bu haberi duzenler, bossa yeni haber ekler.
+  const [duzenlenen, setDuzenlenen] = useState<string | null>(null);
+
+  function formuDoldur(h: Haber | null) {
+    setDuzenlenen(h?.id ?? null);
+    setBaslik(h?.baslik ?? "");
+    setOzet(h?.ozet ?? "");
+    setKaynakUrl(h?.kaynakUrl ?? "");
+    setGorselUrl(h?.gorselUrl ?? "");
+    setError(null);
+    if (h) window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/haberler", {
-        method: "POST",
+      const res = await fetch(duzenlenen ? `/api/admin/haberler/${duzenlenen}` : "/api/admin/haberler", {
+        method: duzenlenen ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ baslik, ozet, kaynakUrl: kaynakUrl || undefined, gorselUrl: gorselUrl || undefined }),
       });
@@ -55,11 +67,8 @@ export function AdminHaberPanel({ haberler }: { haberler: Haber[] }) {
         setError(data.error ?? "Bir şeyler ters gitti.");
         return;
       }
-      setBaslik("");
-      setOzet("");
-      setKaynakUrl("");
-      setGorselUrl("");
-      toast.success("Haber yayınlandı.");
+      toast.success(duzenlenen ? "Haber güncellendi." : "Haber yayınlandı.");
+      formuDoldur(null);
       router.refresh();
     } finally {
       setLoading(false);
@@ -125,9 +134,16 @@ export function AdminHaberPanel({ haberler }: { haberler: Haber[] }) {
             />
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button type="submit" disabled={loading}>
-            {loading ? "Yayınlanıyor..." : "Haberi Yayınla"}
-          </Button>
+          <div className="flex gap-2">
+            <Button type="submit" disabled={loading}>
+              {loading ? "Kaydediliyor..." : duzenlenen ? "Değişiklikleri Kaydet" : "Haberi Yayınla"}
+            </Button>
+            {duzenlenen && (
+              <Button type="button" variant="outline" onClick={() => formuDoldur(null)}>
+                Vazgeç
+              </Button>
+            )}
+          </div>
         </form>
       </Card>
 
@@ -143,14 +159,19 @@ export function AdminHaberPanel({ haberler }: { haberler: Haber[] }) {
                 </a>
               )}
             </div>
-            <button
-              type="button"
-              onClick={() => setSilinecek(h)}
-              aria-label="Sil"
-              className="text-muted-foreground hover:text-destructive"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
+            <div className="flex shrink-0 gap-2">
+              <button type="button" onClick={() => formuDoldur(h)} aria-label="Düzenle" className="text-muted-foreground hover:text-primary">
+                <Pencil className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setSilinecek(h)}
+                aria-label="Sil"
+                className="text-muted-foreground hover:text-destructive"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
           </Card>
         ))}
       </div>

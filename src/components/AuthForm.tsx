@@ -22,6 +22,7 @@ const GOOGLE_HATA_MESAJLARI: Record<string, string> = {
   google: "Google ile giriş başarısız oldu. Lütfen tekrar deneyin.",
   "google-email": "Google hesabının e-postası doğrulanmamış görünüyor.",
   "google-yapilandirma": "Google ile giriş şu anda kullanılamıyor.",
+  askida: "Hesabın askıya alındı. Bir hata olduğunu düşünüyorsan bizimle iletişime geç.",
 };
 
 function GoogleIcon() {

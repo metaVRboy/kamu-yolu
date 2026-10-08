@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { adminApi } from "@/lib/admin";
 import { scrapeMemurlarNet } from "@/scraper/scrapeMemurlarNet";
 
 export const maxDuration = 290;
@@ -19,7 +20,8 @@ function isAuthorized(req: NextRequest): boolean {
 }
 
 async function runScrape(req: NextRequest) {
-  if (!isAuthorized(req)) {
+  // Admin panelindeki "Şimdi tara" butonu admin oturumuyla cagirir.
+  if (!isAuthorized(req) && !(req.method === "POST" && (await adminApi()))) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 

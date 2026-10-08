@@ -1,29 +1,17 @@
 import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
-import { getCurrentUser } from "@/lib/auth";
+import { revalidatePath } from "next/cache";
+import { adminApi } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
+import { haberFormSchema } from "@/lib/haberler";
 import { buildHaberSlug } from "@/lib/slug";
 
-const bodySchema = z.object({
-  baslik: z.string().trim().min(2).max(160),
-  ozet: z.string().trim().min(2).max(2000),
-  kaynakUrl: z.string().trim().url().max(500).optional().or(z.literal("")),
-  gorselUrl: z.string().trim().url().max(500).optional().or(z.literal("")),
-});
-
 export async function POST(req: NextRequest) {
-  const user = await getCurrentUser();
-  if (!user?.isAdmin) {
-    return NextResponse.json({ error: "Yetkiniz yok." }, { status: 403 });
-  }
+  if (!(await adminApi())) return NextResponse.json({ error: "Yetkiniz yok." }, { status: 403 });
 
-  const parsed = bodySchema.safeParse(await req.json().catch(() => null));
+  const parsed = haberFormSchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
-    return NextResponse.json(
-      { error: parsed.error.issues[0]?.message ?? "Geçersiz bilgiler." },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Geçersiz bilgiler." }, { status: 400 });
   }
 
   const id = randomUUID();
@@ -37,5 +25,7 @@ export async function POST(req: NextRequest) {
       gorselUrl: parsed.data.gorselUrl || null,
     },
   });
+  // Ana sayfa / haberler ISR (5 dk) beklemeden guncellensin.
+  revalidatePath("/", "layout");
   return NextResponse.json({ id: haber.id });
 }
