@@ -7,7 +7,7 @@ export const PLAN_ADI: Record<Plan, string> = { UCRETSIZ: "Standart", PRO: "Pro"
 
 /** TL, KDV dahil. */
 export const PLAN_FIYATI: Record<UcretliPlan, { aylik: number; yillik: number }> = {
-  PRO: { aylik: 39, yillik: 349 },
+  PRO: { aylik: 59, yillik: 529 },
   PRO_PLUS: { aylik: 79, yillik: 699 },
 };
 

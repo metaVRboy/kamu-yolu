@@ -73,7 +73,7 @@ export default function MesafeliSatisSozlesmesiPage() {
                   SMS ile anlık ilan bildirimi, bölüme özel bildirimler, becayiş modülünde site
                   içi mesajlaşma, haftada toplam 3 KPSS deneme sınavı ve sınav sonu rapor
                 </td>
-                <td className="border border-border p-2">39 TL / ay</td>
+                <td className="border border-border p-2">59 TL / ay</td>
               </tr>
               <tr>
                 <td className="border border-border p-2">Pro+</td>
