@@ -55,7 +55,8 @@ export function KpssBolumSecici({ bolumler, seciliAd }: { bolumler: KpssBolum[];
     setActiveIndex(-1);
     const params = new URLSearchParams(searchParams.toString());
     params.set("bolum", bolum.id);
-    router.push(`${pathname}?${params.toString()}`);
+    // Sayfa basina ziplamasin; karne arama kutusunun hemen altinda acilir.
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
   }
 
   function temizle() {
@@ -64,7 +65,7 @@ export function KpssBolumSecici({ bolumler, seciliAd }: { bolumler: KpssBolum[];
     const params = new URLSearchParams(searchParams.toString());
     params.delete("bolum");
     const q = params.toString();
-    router.push(q ? `${pathname}?${q}` : pathname);
+    router.push(q ? `${pathname}?${q}` : pathname, { scroll: false });
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {

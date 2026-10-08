@@ -23,6 +23,12 @@ function formatEksen(n: number, bicim: DegerBicimi): string {
   return n.toLocaleString("tr-TR");
 }
 
+/** Cubuk ustu etiket: milyonlarda dar sutuna sigsin diye kisa bicim (5,42M). */
+function formatEtiket(n: number, bicim: DegerBicimi): string {
+  if (bicim === "milyon") return `${(n / 1_000_000).toLocaleString("tr-TR", { maximumFractionDigits: 2 })}M`;
+  return n.toLocaleString("tr-TR");
+}
+
 /**
  * Tek seri, sifirdan yukselen animasyonlu sutun grafigi. Hem resmi
  * istihdam (milyonlar) hem KPSS bolum alim (onlarca/yuzlerce) verisi
@@ -57,6 +63,8 @@ export function YillikSutunGrafik({
     (enIyi, s, i) => (s.deger > veriler[enIyi].deger ? i : enIyi),
     0,
   );
+  // Son tamamlanmis yil koyu renkte one cikar (ara donem cubugu zaten kesikli).
+  const sonIndex = veriler.findLastIndex((s) => !s.isaretli);
 
   return (
     <div>
@@ -76,7 +84,9 @@ export function YillikSutunGrafik({
         <div className="absolute inset-y-0 left-14 right-0 flex items-end gap-[2px]">
           {veriler.map((s, i) => {
             const yuzde = (s.deger / tavan) * 100;
-            const etiketliMi = i === enYuksekIndex || i === veriler.length - 1;
+            // Her cubukta deger yazar (tek bir sivri yil digerlerini okunmaz kilmasin);
+            // dar ekranda sadece en yuksek ve son yil.
+            const herZamanEtiketli = i === enYuksekIndex || i === veriler.length - 1;
             return (
               <div
                 key={s.yil}
@@ -87,14 +97,20 @@ export function YillikSutunGrafik({
                 onBlur={() => setAktifIndex(null)}
                 tabIndex={0}
               >
-                {etiketliMi && (
-                  <span className="mb-1 whitespace-nowrap text-[10px] font-medium text-slate-600">
-                    {formatDeger(s.deger)}
-                  </span>
-                )}
+                <span
+                  className={`mb-1 whitespace-nowrap text-[10px] font-medium tabular-nums ${
+                    i === sonIndex ? "font-bold text-primary" : "text-slate-500"
+                  } ${herZamanEtiketli ? "" : "hidden lg:block"}`}
+                >
+                  {formatEtiket(s.deger, bicim)}
+                </span>
                 <div
-                  className={`w-full max-w-5 rounded-t ${
-                    s.isaretli ? "border-2 border-dashed border-primary/60 bg-primary/20" : "bg-primary"
+                  className={`w-full max-w-7 rounded-t-md ${
+                    s.isaretli
+                      ? "border-2 border-dashed border-primary/60 bg-primary/20"
+                      : i === sonIndex
+                        ? "bg-primary"
+                        : "bg-primary/45"
                   } transition-[height] duration-700 ease-out ${aktifIndex === i ? "brightness-110" : ""}`}
                   style={{
                     height: yukseldi ? `${yuzde}%` : "0%",
@@ -121,8 +137,10 @@ export function YillikSutunGrafik({
 
       <div className="mt-1 flex gap-[2px] pl-14">
         {veriler.map((s) => (
-          <span key={s.yil} className="flex-1 text-center text-[9px] text-muted-foreground">
-            {String(s.yil).slice(2)}
+          <span key={s.yil} className="flex-1 text-center text-[9px] text-muted-foreground sm:text-[10px]">
+            {/* Dar ekranda 4 haneli yillar ust uste biner. */}
+            <span className="sm:hidden">&apos;{String(s.yil).slice(2)}</span>
+            <span className="hidden sm:inline">{s.yil}</span>
           </span>
         ))}
       </div>

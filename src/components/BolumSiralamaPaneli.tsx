@@ -4,8 +4,17 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ArrowUpDown, SlidersHorizontal, X } from "lucide-react";
 import type { BolumSiralamaSatiri } from "@/lib/kpssIstatistik";
+import { DUZEY_TEMA } from "@/lib/kpssDenemeSabitler";
+import { LEVEL_LABEL } from "@/lib/labels";
+import { cn } from "@/lib/utils";
 
 const TUMU = "__tumu__";
+const DUZEY_SEKMELERI = [
+  [TUMU, "Tümü"],
+  ["LISE", "Lise"],
+  ["ONLISANS", "Önlisans"],
+  ["LISANS", "Lisans"],
+] as const;
 
 export function BolumSiralamaPaneli({
   siralama,
@@ -31,7 +40,6 @@ export function BolumSiralamaPaneli({
   // Taslak secimler - "Uygula"ya basilana kadar URL'e (dolayisiyla sorguya) yansimaz.
   const [taslakBaslangic, setTaslakBaslangic] = useState(uygulananBaslangic);
   const [taslakBitis, setTaslakBitis] = useState(uygulananBitis);
-  const [taslakDuzey, setTaslakDuzey] = useState(uygulananDuzey);
 
   // Siralama yonu sayfa yenilemeden, tamamen client-side degisir (sunucudan
   // gelen liste zaten "azalan" sirali - "artan" icin sadece ters ceviriyoruz).
@@ -42,7 +50,7 @@ export function BolumSiralamaPaneli({
   }, [siralama, siraYon]);
 
   const yillar = Array.from({ length: sonYil - ilkYil + 1 }, (_, i) => ilkYil + i);
-  const filtreAktif = uygulananBaslangic !== TUMU || uygulananBitis !== TUMU || uygulananDuzey !== TUMU;
+  const filtreAktif = uygulananBaslangic !== TUMU || uygulananBitis !== TUMU;
 
   const efektifBaslangic = uygulananBaslangic === TUMU ? ilkYil : Number(uygulananBaslangic);
   const efektifBitis = uygulananBitis === TUMU ? sonYil : Number(uygulananBitis);
@@ -52,34 +60,39 @@ export function BolumSiralamaPaneli({
   function filtreyiAc() {
     setTaslakBaslangic(uygulananBaslangic);
     setTaslakBitis(uygulananBitis);
-    setTaslakDuzey(uygulananDuzey);
     setFiltreAcik((v) => !v);
   }
 
-  function uygula() {
+  function parametreleriYaz(degistir: (params: URLSearchParams) => void) {
     const params = new URLSearchParams(searchParams.toString());
-    if (taslakBaslangic === TUMU) params.delete("siraBaslangic");
-    else params.set("siraBaslangic", taslakBaslangic);
-    if (taslakBitis === TUMU) params.delete("siraBitis");
-    else params.set("siraBitis", taslakBitis);
-    if (taslakDuzey === TUMU) params.delete("siraDuzey");
-    else params.set("siraDuzey", taslakDuzey);
-    router.push(`${pathname}?${params.toString()}`);
+    degistir(params);
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  }
+
+  function uygula() {
+    parametreleriYaz((params) => {
+      if (taslakBaslangic === TUMU) params.delete("siraBaslangic");
+      else params.set("siraBaslangic", taslakBaslangic);
+      if (taslakBitis === TUMU) params.delete("siraBitis");
+      else params.set("siraBitis", taslakBitis);
+    });
     setFiltreAcik(false);
   }
 
   // Bir bolum secildiginde (ör. KPSS arama kutusundan), siralama listesinde
-  // o bolumun satirina otomatik kaydir ve vurgula.
+  // o bolumun satirina otomatik kaydir ve vurgula. Sadece liste kayar -
+  // scrollIntoView tum sayfayi da asagidaki tabloya kaydirirdi.
   useEffect(() => {
-    if (!seciliBolumId || !listRef.current) return;
-    const satir = listRef.current.querySelector(`[data-bolum-id="${CSS.escape(seciliBolumId)}"]`);
-    satir?.scrollIntoView({ block: "center" });
+    const liste = listRef.current;
+    if (!seciliBolumId || !liste) return;
+    const satir = liste.querySelector<HTMLElement>(`[data-bolum-id="${CSS.escape(seciliBolumId)}"]`);
+    if (satir) liste.scrollTop = satir.offsetTop - liste.clientHeight / 2;
   }, [seciliBolumId]);
 
   return (
-    <div className="rounded-xl border border-primary/15 bg-slate-50/60 p-3">
+    <div className="rounded-3xl border border-primary/10 bg-white p-6 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-sm font-semibold text-slate-700">En Çok Atama Yapılan Bölümler</h3>
+        <h3 className="font-sans text-base font-bold text-slate-900">En Çok Atama Yapılan Bölümler</h3>
         <div className="flex items-center gap-1.5">
           <div className="relative">
             <select
@@ -139,19 +152,6 @@ export function BolumSiralamaPaneli({
               ))}
             </select>
           </label>
-          <label className="flex flex-col gap-1 text-[11px] text-muted-foreground">
-            Öğrenim Düzeyi
-            <select
-              value={taslakDuzey}
-              onChange={(e) => setTaslakDuzey(e.target.value)}
-              className="rounded-lg border border-primary/20 px-1.5 py-1 text-xs"
-            >
-              <option value={TUMU}>Tümü</option>
-              <option value="LISE">Lise</option>
-              <option value="ONLISANS">Önlisans</option>
-              <option value="LISANS">Lisans</option>
-            </select>
-          </label>
           <button
             type="button"
             onClick={uygula}
@@ -170,14 +170,40 @@ export function BolumSiralamaPaneli({
         </div>
       )}
 
-      <div className="mt-2.5 flex items-center justify-between gap-2 rounded-t-lg border border-b-0 border-primary/15 bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-500">
+      {/* Duzey sekmeleri KPSS denemesindeki duzey renklerinde; tiklayinca hemen uygulanir. */}
+      <div className="mt-3 flex flex-wrap gap-1.5" role="tablist" aria-label="Öğrenim düzeyi">
+        {DUZEY_SEKMELERI.map(([deger, etiket]) => {
+          const secili = uygulananDuzey === deger;
+          return (
+            <button
+              key={deger}
+              type="button"
+              role="tab"
+              aria-selected={secili}
+              onClick={() =>
+                parametreleriYaz((params) => (deger === TUMU ? params.delete("siraDuzey") : params.set("siraDuzey", deger)))
+              }
+              className={cn(
+                "rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors",
+                !secili && "border-primary/15 text-slate-600 hover:bg-slate-50",
+                secili && deger === TUMU && "border-primary bg-primary text-primary-foreground",
+                secili && deger !== TUMU && [DUZEY_TEMA[deger].acik, DUZEY_TEMA[deger].metin, DUZEY_TEMA[deger].kenar],
+              )}
+            >
+              {etiket}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mt-3 flex items-center justify-between gap-2 rounded-t-xl border border-b-0 border-primary/15 bg-slate-50 px-3 py-1.5 text-[11px] font-semibold text-slate-500">
         <span>Bölüm Adı</span>
         <span>Yıl Aralığı: {yilAraligiMetni}</span>
         <span>Alım Sayısı</span>
       </div>
       <ol
         ref={listRef}
-        className="max-h-72 space-y-1 overflow-y-auto rounded-b-lg border border-primary/15 p-1 pr-1 text-sm"
+        className="relative max-h-96 space-y-0.5 overflow-y-auto rounded-b-xl border border-primary/15 p-1 text-sm"
       >
         {siraliListe.length === 0 && (
           <p className="py-2 text-xs text-muted-foreground">Seçilen aralıkta veri bulunamadı.</p>
@@ -186,12 +212,17 @@ export function BolumSiralamaPaneli({
           <li
             key={b.id}
             data-bolum-id={b.id}
-            className={`flex items-baseline justify-between gap-2 rounded-lg px-2 py-1 ${
-              b.id === seciliBolumId ? "bg-primary/10 ring-1 ring-primary/30" : ""
+            className={`flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 ${
+              b.id === seciliBolumId ? "bg-primary/10 ring-1 ring-primary/30" : "hover:bg-slate-50"
             }`}
           >
-            <span className="truncate text-slate-700">
-              <span className="text-muted-foreground">{i + 1}.</span> {b.ad}
+            <span className="flex min-w-0 items-center gap-2 text-slate-700">
+              <span className="w-7 shrink-0 text-right text-xs text-muted-foreground tabular-nums">{i + 1}.</span>
+              <span
+                title={LEVEL_LABEL[b.ogrenimDuzeyi]}
+                className={cn("h-2 w-2 shrink-0 rounded-full bg-gradient-to-br", DUZEY_TEMA[b.ogrenimDuzeyi].zemin)}
+              />
+              <span className="truncate">{b.ad}</span>
             </span>
             <span className="shrink-0 font-medium text-primary">{b.toplam.toLocaleString("tr-TR")}</span>
           </li>

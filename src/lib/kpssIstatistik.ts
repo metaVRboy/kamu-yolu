@@ -20,8 +20,9 @@ export async function getKpssBolumListesi(): Promise<KpssBolum[]> {
 }
 
 export type KpssBolumVerisi = {
+  // Toplam icin DB'deki toplamKontenjan sutunu KULLANILMAZ: kazima "genel satir"indan
+  // gelir, cogu bolumde 0. Toplam yillik satirlardan hesaplanir (siralama ile ayni).
   yillikAlimlar: { yil: number; kontenjan: number }[];
-  toplamKontenjan: number;
   minPuan: number | null;
   maxPuan: number | null;
 };
@@ -35,7 +36,6 @@ export async function getKpssBolumVerisi(id: string): Promise<KpssBolumVerisi | 
 
   return {
     yillikAlimlar: bolum.yillikAlimlar.map((y) => ({ yil: y.yil, kontenjan: y.kontenjan })),
-    toplamKontenjan: bolum.toplamKontenjan,
     minPuan: bolum.minPuan,
     maxPuan: bolum.maxPuan,
   };
