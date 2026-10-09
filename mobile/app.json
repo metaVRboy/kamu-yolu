@@ -35,6 +35,15 @@
           "image": "./assets/splash-icon.png",
           "imageWidth": 220
         }
+      ],
+      "expo-sharing",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Profil fotoğrafını seçmek için fotoğraflarına erişim izni gerekiyor.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
       ]
     ],
     "experiments": {

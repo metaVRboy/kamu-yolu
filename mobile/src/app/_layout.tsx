@@ -41,6 +41,15 @@ export default function KokDuzen() {
         <Stack.Screen name="kpss/[duzey]" options={{ title: "KPSS Denemesi" }} />
         <Stack.Screen name="kpss-puan" options={{ title: "KPSS Puan Hesaplama" }} />
         <Stack.Screen name="yukselt" options={{ headerShown: false, presentation: "modal" }} />
+        <Stack.Screen name="becayis/[id]" options={{ title: "Becayiş Talebi" }} />
+        <Stack.Screen name="becayis/talep-olustur" options={{ title: "Talep Oluştur" }} />
+        <Stack.Screen name="becayis/taleplerim" options={{ title: "Mevcut Taleplerim" }} />
+        <Stack.Screen name="becayis/ilgilendiklerim" options={{ title: "İlgilendiğim İlanlar" }} />
+        <Stack.Screen name="bildirimler" options={{ title: "Bildirimler" }} />
+        <Stack.Screen name="ayarlar" options={{ title: "Ayarlar" }} />
+        <Stack.Screen name="abonelik" options={{ title: "Aboneliğim" }} />
+        <Stack.Screen name="destek" options={{ title: "İletişim ve Destek" }} />
+        <Stack.Screen name="analiz" options={{ title: "Alım Analizi" }} />
       </Stack>
     </OturumSaglayici>
   );

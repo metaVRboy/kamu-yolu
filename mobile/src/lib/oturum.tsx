@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { api } from "@/lib/api";
+import type { Plan } from "@/lib/kpss";
 
-export type Kullanici = { id: string; adSoyad: string; email: string; isAdmin: boolean };
+export type Kullanici = { id: string; adSoyad: string; email: string; isAdmin: boolean; plan: Plan };
 
 type OturumDegeri = {
   // undefined: henuz bilinmiyor (ilk acilis), null: giris yok.

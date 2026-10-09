@@ -12,11 +12,28 @@ import { renk } from "@/lib/tema";
 const KOD_GECERLILIK_SANIYE = 120;
 
 // Sitedeki sifre standardi (src/lib/authValidation.ts).
-const SIFRE_KURALLARI = [
+export const SIFRE_KURALLARI = [
   { ad: "En az 8 karakter", test: (s: string) => s.length >= 8 },
   { ad: "En az bir harf", test: (s: string) => /[A-Za-zÇĞİÖŞÜçğıöşü]/.test(s) },
   { ad: "En az bir rakam", test: (s: string) => /[0-9]/.test(s) },
 ];
+
+/** Sitedeki PasswordRequirementsHint: saglanan kural yesil tikli. */
+export function SifreIpucu({ sifre }: { sifre: string }) {
+  return (
+    <View style={{ marginTop: 6, gap: 2 }}>
+      {SIFRE_KURALLARI.map((k) => {
+        const ok = k.test(sifre);
+        return (
+          <View key={k.ad} style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+            {ok ? <Check size={12} color="#059669" /> : <X size={12} color={renk.soluk} />}
+            <T style={{ fontSize: 12, color: ok ? "#059669" : renk.soluk }}>{k.ad}</T>
+          </View>
+        );
+      })}
+    </View>
+  );
+}
 
 const sayfaAc = (yol: string) => WebBrowser.openBrowserAsync(SITE + yol);
 
@@ -169,17 +186,7 @@ export function GirisFormu({ mod }: { mod: "giris" | "kayit" }) {
                   }
                 />
                 {mod === "kayit" && (
-                  <View style={{ marginTop: 6, gap: 2 }}>
-                    {SIFRE_KURALLARI.map((k) => {
-                      const ok = k.test(sifre);
-                      return (
-                        <View key={k.ad} style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                          {ok ? <Check size={12} color="#059669" /> : <X size={12} color={renk.soluk} />}
-                          <T style={{ fontSize: 12, color: ok ? "#059669" : renk.soluk }}>{k.ad}</T>
-                        </View>
-                      );
-                    })}
-                  </View>
+                  <SifreIpucu sifre={sifre} />
                 )}
               </View>
               {mod === "giris" && (

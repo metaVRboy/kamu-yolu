@@ -1,16 +1,17 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Pressable, RefreshControl, ScrollView, StyleSheet, useWindowDimensions, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
-import { ArrowRight, ArrowUpRight } from "lucide-react-native";
+import { router, useFocusEffect } from "expo-router";
+import { ArrowRight, ArrowUpRight, Bell } from "lucide-react-native";
 import { BolumBasligi, HataKutusu, Kart, T, Yukleniyor } from "@/bilesenler/ui";
 import { BolumArama } from "@/bilesenler/BolumArama";
 import { IlanKarti } from "@/bilesenler/IlanKarti";
 import { HaberGorsel, HaberKarti } from "@/bilesenler/HaberKarti";
 import { useVeri } from "@/lib/api";
 import { sayi } from "@/lib/bicim";
+import { useOturum } from "@/lib/oturum";
 import { renk } from "@/lib/tema";
 import type { AnaSayfaVeri, HaberKartiVeri } from "@/lib/tipler";
 
@@ -22,6 +23,7 @@ export default function AnaSayfa() {
     <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: "#fff" }}>
       <View style={s.ust}>
         <Image source={require("../../../assets/logo.png")} style={{ width: 54, height: 40 }} contentFit="contain" />
+        <Zil />
       </View>
       {hata && !veri ? (
         <HataKutusu mesaj={hata} tekrar={yenile} />
@@ -169,8 +171,27 @@ function HaberKaruseli({ haberler }: { haberler: HaberKartiVeri[] }) {
   );
 }
 
+/** Sitedeki bildirim zili: okunmamis varsa kirmizi nokta; dokununca bildirimler ekrani. */
+function Zil() {
+  const { kullanici } = useOturum();
+  const { veri, yenile } = useVeri<{ okunmamisSayisi: number }>(kullanici === undefined ? null : `/api/bildirimler?u=${kullanici?.id ?? ""}`);
+  useFocusEffect(
+    useCallback(() => {
+      yenile(false);
+    }, [yenile]),
+  );
+  return (
+    <Pressable onPress={() => router.push("/bildirimler")} hitSlop={8} style={s.zil} accessibilityLabel="Bildirimler">
+      <Bell size={19} color="#475569" />
+      {!!veri?.okunmamisSayisi && <View style={s.nokta} />}
+    </Pressable>
+  );
+}
+
 const s = StyleSheet.create({
-  ust: { height: 56, justifyContent: "center", paddingHorizontal: 16, borderBottomWidth: 1, borderBottomColor: renk.kenar, backgroundColor: "#fff" },
+  zil: { width: 38, height: 38, borderRadius: 10, borderWidth: 1, borderColor: renk.kenar, alignItems: "center", justifyContent: "center" },
+  nokta: { position: "absolute", top: 8, right: 9, width: 8, height: 8, borderRadius: 4, backgroundColor: "#ef4444" },
+  ust: { height: 56, flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, borderBottomWidth: 1, borderBottomColor: renk.kenar, backgroundColor: "#fff" },
   istatistik: { marginTop: 28, flexDirection: "row", width: "100%", borderTopWidth: 1, borderTopColor: renk.kenar, paddingTop: 18 },
   detayButon: { alignSelf: "flex-start", flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "#fff", borderRadius: 999, paddingHorizontal: 16, paddingVertical: 9, marginTop: 4 },
   kapanis: { marginTop: 40, borderRadius: 16, backgroundColor: renk.birincil, paddingHorizontal: 24, paddingVertical: 48, alignItems: "center" },

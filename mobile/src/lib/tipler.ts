@@ -108,6 +108,42 @@ export type ProfilVeri = {
     duzey: string | null;
     duzeyAdi: string | null;
   } | null;
+  aktifTalepler: { id: string; meslek: string; mevcutIl: string; mevcutIlce: string | null }[];
+  sonMesajlar: { id: string; karsiAdSoyad: string; mesaj: string; okundu: boolean }[];
+  okunmamisMesaj: number;
+  okunmamisIlgilendiklerim: number;
   kisiselIlanSayisi: number;
   kisiselIlanlar: IlanKartiVeri[];
+};
+
+export type BecayisOzet = { id: string; meslek: string; kurumTuru: string | null; mevcutIl: string; mevcutIlce: string | null; istenenIller: string[] };
+export type BecayisDetay = BecayisOzet & { aciklama: string | null; sahipAd: string; sahibi: boolean };
+export type BecayisMesaj = { id: string; gonderenId: string | null; mesaj: string; createdAt: string; sikayetEdildi: boolean };
+export type BecayisSohbet = { karsiId: string; karsiAdSoyad: string; okunmamisSayisi: number; mesajlar: BecayisMesaj[] };
+type BecayisKendi = Omit<BecayisOzet, "kurumTuru"> & { isActive: boolean };
+export type TaleplerimVeri = { kullaniciId: string; talepler: (BecayisKendi & { threads: BecayisSohbet[] })[] };
+export type IlgilendiklerimVeri = {
+  kullaniciId: string;
+  talepler: (BecayisKendi & { ilanSahibiAdSoyad: string; okunmamisSayisi: number; mesajlar: BecayisMesaj[] })[];
+};
+
+export type OturumSatiri = { id: string; cihaz: string; olusturma: string; sonGorulme: string; buCihaz: boolean };
+export type AyarlarVeri = {
+  adSoyad: string;
+  email: string;
+  telefon: string | null;
+  meslek: string | null;
+  kurumTuru: string | null;
+  kamuCalisaniDegil: boolean;
+  departmentId: string | null;
+  educationLevel: string | null;
+  fotografUrl: string | null;
+  uyelikTarihi: string;
+  girisYontemleri: string;
+  plan: "UCRETSIZ" | "PRO" | "PRO_PLUS";
+  sifreVar: boolean;
+  googleBagli: boolean;
+  oturumlar: OturumSatiri[];
+  sms: { pro: boolean; hazirDegil: boolean; dogrulanmisTelefon: string | null; smsIlanBildirimi: boolean; smsBecayisBildirimi: boolean };
+  kvkkOnayTarihi: string | null;
 };

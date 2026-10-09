@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View, type StyleProp, type TextProps, type TextStyle, type ViewStyle } from "react-native";
+import { ActivityIndicator, Alert, Platform, Pressable, StyleSheet, Text, TextInput, View, type StyleProp, type TextProps, type TextStyle, type ViewStyle } from "react-native";
 import { Check, Eye, EyeOff, type LucideIcon } from "lucide-react-native";
 import { golge, renk, yazi } from "@/lib/tema";
 
@@ -199,3 +199,15 @@ const g = StyleSheet.create({
   girdi: { flex: 1, fontFamily: yazi.normal, fontSize: 15, color: renk.yazi, paddingVertical: 12 },
   kare: { width: 20, height: 20, borderRadius: 5, borderWidth: 1.5, borderColor: "#94a3b8", alignItems: "center", justifyContent: "center", marginTop: 1 },
 });
+
+/** Sitedeki ConfirmDialog: geri alinamaz islem oncesi onay (web onizlemede tarayici penceresi). */
+export function onayIste(baslik: string, aciklama: string, onayEtiketi: string, onayla: () => void) {
+  if (Platform.OS === "web") {
+    if (window.confirm(`${baslik}\n\n${aciklama}`)) onayla();
+    return;
+  }
+  Alert.alert(baslik, aciklama, [
+    { text: "Vazgeç", style: "cancel" },
+    { text: onayEtiketi, style: "destructive", onPress: onayla },
+  ]);
+}

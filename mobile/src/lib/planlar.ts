@@ -24,9 +24,9 @@ export const KAYNAK_METNI: Record<string, { baslik: string; alt: string }> = {
   "becayis-mesaj": { baslik: "Becayiş eşini bul, hemen yaz", alt: "Talep sahipleriyle site içinden doğrudan mesajlaş." },
   "becayis-talep": { baslik: "Becayiş talebini yayımla", alt: "Talebin herkese açık listelensin, yer değiştirmek isteyenler sana ulaşsın." },
   "ozel-ilanlar": { baslik: "Sana özel ilanları gör", alt: "Bölümüne ve öğrenim düzeyine uygun ilanlar tek listede." },
-  reklamsiz: { baslik: "Reklamsız, odaklı bir deneyim", alt: "Hiç reklam görmeden ilanlara ve denemelere odaklan." },
 };
 
+// Uygulamada hic reklam yok; sitedeki "Reklamsiz deneyim" satiri burada gosterilmez.
 export const KARSILASTIRMA: { ozellik: string; kaynak?: string; degerler: Record<Plan, boolean | string> }[] = [
   { ozellik: "Tüm ilanlar ve bölüme göre arama", degerler: { UCRETSIZ: true, PRO: true, PRO_PLUS: true } },
   { ozellik: "Haftalık KPSS denemesi", kaynak: "deneme-hakki", degerler: { UCRETSIZ: "1", PRO: "3", PRO_PLUS: "Sınırsız" } },
@@ -37,6 +37,5 @@ export const KARSILASTIRMA: { ozellik: string; kaynak?: string; degerler: Record
   { ozellik: "Becayiş talebi oluşturma", kaynak: "becayis-talep", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
   { ozellik: "Becayiş mesajlaşması", kaynak: "becayis-mesaj", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
   { ozellik: "Bana özel ilanlar", kaynak: "ozel-ilanlar", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
-  { ozellik: "Reklamsız deneyim", kaynak: "reklamsiz", degerler: { UCRETSIZ: false, PRO: false, PRO_PLUS: true } },
   { ozellik: "Öncelikli destek", degerler: { UCRETSIZ: false, PRO: false, PRO_PLUS: true } },
 ];

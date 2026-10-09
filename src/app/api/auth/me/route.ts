@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
+import { proAktifMi } from "@/lib/sms";
 
 export async function GET() {
   const user = await getCurrentUser();
@@ -10,6 +11,8 @@ export async function GET() {
       adSoyad: user.adSoyad,
       email: user.email,
       isAdmin: user.isAdmin,
+      // Uygulama icin etkin plan (suresi dolmus abonelik ucretsiz sayilir).
+      plan: proAktifMi(user) ? user.abonelikPlani : "UCRETSIZ",
     },
   });
 }
