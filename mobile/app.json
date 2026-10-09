@@ -48,6 +48,19 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "owner": "emrhnkc",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "b40dc646-0415-4212-a1e2-cb580395b283"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/b40dc646-0415-4212-a1e2-cb580395b283"
     }
   }
 }
