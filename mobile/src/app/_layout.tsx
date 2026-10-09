@@ -38,6 +38,9 @@ export default function KokDuzen() {
         <Stack.Screen name="kayit" options={{ title: "Kayıt Ol", presentation: "modal" }} />
         <Stack.Screen name="sifremi-unuttum" options={{ title: "Şifremi Unuttum" }} />
         <Stack.Screen name="profil-duzenle" options={{ title: "Profil Bilgilerim" }} />
+        <Stack.Screen name="kpss/[duzey]" options={{ title: "KPSS Denemesi" }} />
+        <Stack.Screen name="kpss-puan" options={{ title: "KPSS Puan Hesaplama" }} />
+        <Stack.Screen name="yukselt" options={{ headerShown: false, presentation: "modal" }} />
       </Stack>
     </OturumSaglayici>
   );
