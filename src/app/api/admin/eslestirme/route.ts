@@ -6,6 +6,7 @@ import { adminApi } from "@/lib/admin";
 import { ilanSayfalariniYenile } from "@/lib/adminIlan";
 import { createDepartmentFromResearch, linkDepartmentToExistingPostings } from "@/lib/matching";
 import { slugify } from "@/lib/slug";
+import { islemKaydet } from "@/lib/islemKaydi";
 
 const ifade = z.string().trim().min(2, "En az 2 harf.").max(150);
 const bodySchema = z.discriminatedUnion("islem", [
@@ -16,7 +17,8 @@ const bodySchema = z.discriminatedUnion("islem", [
 
 /** Bolum eslestirme kurallari: es anlamli ifade ekle/sil, yeni bolum ekle. Eklenen kural mevcut ilanlara hemen uygulanir. */
 export async function POST(req: NextRequest) {
-  if (!(await adminApi())) return NextResponse.json({ error: "Yetkiniz yok." }, { status: 403 });
+  const admin = await adminApi();
+  if (!admin) return NextResponse.json({ error: "Yetkiniz yok." }, { status: 403 });
   const parsed = bodySchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Geçersiz bilgiler." }, { status: 400 });
   const b = parsed.data;
@@ -31,6 +33,7 @@ export async function POST(req: NextRequest) {
       throw e;
     }
     baglanan = await linkDepartmentToExistingPostings(b.departmentId);
+    await islemKaydet(admin, "eslestirme.ifade-ekle", `"${b.alias}" (${baglanan} ilan)`, "/admin/eslestirme");
   } else if (b.islem === "alias-sil") {
     const alias = await prisma.departmentAlias.findUnique({ where: { id: b.aliasId } });
     if (!alias) return NextResponse.json({ error: "İfade bulunamadı." }, { status: 404 });
@@ -39,12 +42,14 @@ export async function POST(req: NextRequest) {
       prisma.departmentAlias.delete({ where: { id: alias.id } }),
       prisma.postingDepartment.deleteMany({ where: { departmentId: alias.departmentId, matchedAlias: alias.alias, posting: { adminDuzenledi: false } } }),
     ]);
+    await islemKaydet(admin, "eslestirme.ifade-sil", `"${alias.alias}"`, "/admin/eslestirme");
   } else {
     if (await prisma.department.findUnique({ where: { slug: slugify(b.name) }, select: { id: true } })) {
       return NextResponse.json({ error: "Bu bölüm zaten var; ifadeyi listeden ekle." }, { status: 409 });
     }
     const bolum = await createDepartmentFromResearch(b);
     baglanan = await linkDepartmentToExistingPostings(bolum.id);
+    await islemKaydet(admin, "eslestirme.bolum-ekle", `${b.name} (${baglanan} ilan)`, "/admin/eslestirme");
   }
   ilanSayfalariniYenile();
   return NextResponse.json({ ok: true, baglanan });

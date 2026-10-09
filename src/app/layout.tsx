@@ -22,6 +22,9 @@ import { SayfaYuklemeCizgisi } from "@/components/SayfaYuklemeCizgisi";
 import { AuthModalProvider } from "@/components/AuthModal";
 import { HeaderAuthButton } from "@/components/HeaderAuthButton";
 import { GezinmeKaydi } from "@/components/GeriDonLinki";
+import { DuyuruSeridi } from "@/components/DuyuruSeridi";
+import { getSiteAyarlari } from "@/lib/siteAyarlari";
+import { Wrench } from "lucide-react";
 import "./globals.css";
 
 // Site genelinde tek font: Inter. Baslik/govde ayrimi icin ayri bir serif
@@ -49,7 +52,10 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const [lastScrapeAt, user] = await Promise.all([getLastSuccessfulScrapeAt(), getCurrentUser()]);
+  const [lastScrapeAt, user, ayar] = await Promise.all([getLastSuccessfulScrapeAt(), getCurrentUser(), getSiteAyarlari()]);
+  // Bakim modunda ziyaretciler sayfa yerine bakim mesajini gorur; admin siteyi normal kullanir
+  // (header acik kalir: admin giris yapabilsin). API'ler ve taramalar calismaya devam eder.
+  const bakimda = ayar.bakimModu && !user?.isAdmin;
   const fotografUrl = user ? await profilFotografiUrl(user.id) : null;
   // Pro+ "reklamsiz deneyim": reklam kodu, reklam alanlari ve engelleyici uyarisi hic yuklenmez.
   // (getCurrentUser suresi dolan plani zaten UCRETSIZ dondurur.)
@@ -72,6 +78,12 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`}
             crossOrigin="anonymous"
           />
+        )}
+        {ayar.seritMetni && <DuyuruSeridi metin={ayar.seritMetni} link={ayar.seritLink} tur={ayar.seritTur} />}
+        {ayar.bakimModu && user?.isAdmin && (
+          <p className="bg-amber-100 px-4 py-1.5 text-center text-xs font-semibold text-amber-900">
+            Bakım modu açık: ziyaretçiler bakım sayfasını görüyor. <Link href="/admin/ayarlar" className="underline">Kapat</Link>
+          </p>
         )}
         <header className="sticky top-0 z-40 border-b border-border bg-white/90 backdrop-blur-xl">
           <div className="relative flex w-full items-center justify-between gap-4 px-4 py-3 sm:px-6">
@@ -114,7 +126,19 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             <Suspense fallback={null}>
               <GezinmeKaydi />
             </Suspense>
-            <PageTransition>{children}</PageTransition>
+            {bakimda ? (
+              <div className="mx-auto my-16 max-w-lg rounded-3xl border border-primary/10 bg-white p-8 text-center shadow-sm">
+                <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                  <Wrench className="h-7 w-7" />
+                </span>
+                <h1 className="mt-4 text-2xl font-bold tracking-tight text-slate-900">Kısa bir bakımdayız</h1>
+                <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                  {ayar.bakimMesaji || "Kamu Yolu'nu daha iyi hale getirmek için kısa bir çalışma yapıyoruz. Lütfen biraz sonra tekrar dene."}
+                </p>
+              </div>
+            ) : (
+              <PageTransition>{children}</PageTransition>
+            )}
           </main>
           {!reklamsiz && <AdSlot side="right" slotId="3758342177" />}
         </div>
@@ -161,6 +185,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                 <li><Link href="/kpss-puan-hesaplama" className="transition-colors hover:text-white">KPSS Puan Hesaplama</Link></li>
                 <li><Link href="/kpss-denemesi" className="transition-colors hover:text-white">KPSS Denemesi</Link></li>
                 <li><Link href="/becayis" className="transition-colors hover:text-white">Becayiş İlanları</Link></li>
+                <li><Link href="/destek" className="transition-colors hover:text-white">İletişim ve Destek</Link></li>
               </ul>
             </div>
 

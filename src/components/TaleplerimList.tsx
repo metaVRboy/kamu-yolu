@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { cn } from "@/lib/utils";
+import { BecayisMesajBalonu } from "@/components/BecayisMesajBalonu";
 
 type Mesaj = {
   id: string;
@@ -14,6 +15,7 @@ type Mesaj = {
   mesaj: string;
   createdAt: string;
   okundu: boolean;
+  sikayetEdildi: Date | null;
 };
 
 type Thread = {
@@ -121,17 +123,7 @@ function ThreadPanel({ talepId, thread, currentUserId }: { talepId: string; thre
       {open && (
         <div className="space-y-2 border-t border-primary/10 p-3">
           {thread.mesajlar.map((m) => (
-            <div
-              key={m.id}
-              className={cn(
-                "max-w-[85%] rounded-2xl px-3 py-2 text-sm",
-                m.gonderenId === currentUserId
-                  ? "ml-auto bg-primary text-primary-foreground"
-                  : "bg-slate-100 text-slate-800",
-              )}
-            >
-              {m.mesaj}
-            </div>
+            <BecayisMesajBalonu key={m.id} m={m} benim={m.gonderenId === currentUserId} />
           ))}
           <div className="flex gap-2 pt-1">
             <input

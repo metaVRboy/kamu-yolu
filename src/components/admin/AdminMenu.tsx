@@ -2,7 +2,22 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BadgePercent, Bell, FileText, GitMerge, LayoutDashboard, MessageSquareText, Newspaper, Radar, Users } from "lucide-react";
+import {
+  ArrowLeftRight,
+  BadgePercent,
+  Bell,
+  FileText,
+  GitMerge,
+  GraduationCap,
+  History,
+  LayoutDashboard,
+  LifeBuoy,
+  MessageSquareText,
+  Newspaper,
+  Radar,
+  Settings,
+  Users,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const MENU = [
@@ -14,6 +29,11 @@ const MENU = [
   { href: "/admin/eslestirme", ad: "Bölüm eşleştirme", ikon: GitMerge },
   { href: "/admin/taramalar", ad: "Taramalar", ikon: Radar },
   { href: "/admin/haberler", ad: "Haberler", ikon: Newspaper },
+  { href: "/admin/becayis", ad: "Becayiş", ikon: ArrowLeftRight },
+  { href: "/admin/kpss", ad: "KPSS denemesi", ikon: GraduationCap },
+  { href: "/admin/destek", ad: "Destek kutusu", ikon: LifeBuoy },
+  { href: "/admin/ayarlar", ad: "Site ayarları", ikon: Settings },
+  { href: "/admin/islem-kaydi", ad: "İşlem kaydı", ikon: History },
   { href: "/admin/sms", ad: "SMS kayıtları", ikon: MessageSquareText },
 ];
 

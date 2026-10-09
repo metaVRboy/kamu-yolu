@@ -198,6 +198,43 @@ export async function denemeyiBitir(katilimId: string, userId: string) {
 }
 
 /**
+ * Admin bir sorunun dogru cevabini duzeltince, o soruyu iceren bitmis denemeler
+ * yeni cevap anahtariyla yeniden puanlanir (aksi halde eski net/puan yanlis kalir).
+ */
+export async function katilimlariYenidenPuanla(soruId: string) {
+  const denemeler = await prisma.gunlukDeneme.findMany({
+    where: { soruIdler: { has: soruId } },
+    select: { soruIdler: true, katilimlar: { where: { bitisZamani: { not: null } }, select: { id: true, cevaplar: true } } },
+  });
+  let sayi = 0;
+  for (const d of denemeler) {
+    if (d.katilimlar.length === 0) continue;
+    const sorular = await prisma.denemeSoru.findMany({ where: { id: { in: d.soruIdler } }, select: { id: true, dogruCevap: true } });
+    await prisma.$transaction(
+      d.katilimlar.map((k) => prisma.denemeKatilim.update({ where: { id: k.id }, data: sonucuHesapla(k.cevaplar as Record<string, number>, sorular) })),
+    );
+    sayi += d.katilimlar.length;
+  }
+  return sayi;
+}
+
+/** Bitmis denemelerde bir sorunun sik dagilimi: [A..E sayilari], bos sayisi. */
+export async function soruSikDagilimi(soruId: string) {
+  const katilimlar = await prisma.denemeKatilim.findMany({
+    where: { bitisZamani: { not: null }, gunlukDeneme: { soruIdler: { has: soruId } } },
+    select: { cevaplar: true },
+  });
+  const siklar = [0, 0, 0, 0, 0];
+  let bos = 0;
+  for (const k of katilimlar) {
+    const c = (k.cevaplar as Record<string, number>)[soruId];
+    if (c === undefined) bos++;
+    else siklar[c]++;
+  }
+  return { siklar, bos, toplam: katilimlar.length };
+}
+
+/**
  * Sinav sonu "gecen denemene gore" karsilastirmasi: ayni duzeyde bitirilmis bir
  * onceki deneme varsa net/puan ve ders netleri ile konu durumlari doner.
  */

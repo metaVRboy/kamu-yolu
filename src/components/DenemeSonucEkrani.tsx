@@ -10,6 +10,7 @@ import { KesirliMetin } from "@/components/KesirliMetin";
 import { SoruGovdesi } from "@/components/SoruGovdesi";
 import { SoruHaritasi } from "@/components/SoruHaritasi";
 import { KilitliOzellik } from "@/components/KilitliOzellik";
+import { SoruHataBildir } from "@/components/SoruHataBildir";
 import { cn } from "@/lib/utils";
 
 type SonucSorusu = ExamSoru & { dogruCevap: number; aciklama: string | null; konu: string | null };
@@ -519,6 +520,7 @@ export function DenemeSonucEkrani({
                 <KesirliMetin metin={incelenen.aciklama} />
               </p>
             )}
+            <SoruHataBildir key={incelenen.id} soruId={incelenen.id} />
           </div>
           <aside className="mt-4 lg:sticky lg:top-20 lg:mt-0 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
             <SoruHaritasi

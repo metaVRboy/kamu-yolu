@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { adminApi } from "@/lib/admin";
+import { islemKaydet } from "@/lib/islemKaydi";
 
 const bodySchema = z.discriminatedUnion("islem", [
   z.object({ islem: z.literal("askiya-al"), neden: z.string().trim().max(300).optional() }),
@@ -30,7 +31,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (id === admin.id && (b.islem === "askiya-al" || (b.islem === "admin" && !b.deger))) {
     return NextResponse.json({ error: "Bu işlemi kendi hesabına uygulayamazsın." }, { status: 400 });
   }
-  if (!(await prisma.user.findUnique({ where: { id }, select: { id: true } }))) {
+  const uye = await prisma.user.findUnique({ where: { id }, select: { email: true } });
+  if (!uye) {
     return NextResponse.json({ error: "Üye bulunamadı." }, { status: 404 });
   }
 
@@ -44,5 +46,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   } else {
     await prisma.user.update({ where: { id }, data: { isAdmin: b.deger } });
   }
+  const ek = b.islem === "askiya-al" && b.neden ? ` (${b.neden})` : b.islem === "admin" ? ` → ${b.deger ? "admin" : "admin değil"}` : "";
+  await islemKaydet(admin, `uye.${b.islem}`, uye.email + ek, `/admin/uyeler/${id}`);
   return NextResponse.json({ ok: true });
 }

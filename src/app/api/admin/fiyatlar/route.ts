@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { adminApi } from "@/lib/admin";
+import { islemKaydet } from "@/lib/islemKaydi";
 import { fiyatlariGuncelle } from "@/lib/fiyatlar";
 import { UCRETLI_PLANLAR } from "@/lib/planlar";
 
@@ -11,7 +12,8 @@ const bodySchema = z.object({ PRO: donemler, PRO_PLUS: donemler });
 
 /** Liste fiyatlarini gunceller; sitedeki tum fiyatlar (sozlesmeler dahil) hemen yenilenir. */
 export async function PUT(req: NextRequest) {
-  if (!(await adminApi())) return NextResponse.json({ error: "Yetkiniz yok." }, { status: 403 });
+  const admin = await adminApi();
+  if (!admin) return NextResponse.json({ error: "Yetkiniz yok." }, { status: 403 });
   const parsed = bodySchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Fiyatlar 1 ile 100.000 TL arasında tam sayı olmalı." }, { status: 400 });
 
@@ -21,5 +23,7 @@ export async function PUT(req: NextRequest) {
     ),
   );
   fiyatlariGuncelle();
+  const f = parsed.data;
+  await islemKaydet(admin, "fiyat.guncelle", `Pro ${f.PRO.aylik}/${f.PRO.yillik} TL · Pro+ ${f.PRO_PLUS.aylik}/${f.PRO_PLUS.yillik} TL`, "/admin/fiyatlar");
   return NextResponse.json({ ok: true });
 }

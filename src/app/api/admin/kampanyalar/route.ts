@@ -3,6 +3,7 @@ import { z } from "zod";
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { adminApi, istanbulTarihi } from "@/lib/admin";
+import { islemKaydet } from "@/lib/islemKaydi";
 import { fiyatlariGuncelle } from "@/lib/fiyatlar";
 
 const yerelTarih = z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/);
@@ -59,5 +60,6 @@ export async function POST(req: NextRequest) {
     throw e;
   }
   fiyatlariGuncelle();
+  await islemKaydet(admin, "kampanya.olustur", `${b.ad} (${b.indirimTuru === "yuzde" ? `%${b.deger}` : `${b.deger} TL`})`, "/admin/fiyatlar");
   return NextResponse.json({ ok: true });
 }

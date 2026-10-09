@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { adminApi, istanbulTarihi } from "@/lib/admin";
 import { DENEME_DUZEYLERI } from "@/lib/kpssDenemeSabitler";
+import { islemKaydet } from "@/lib/islemKaydi";
 import { duyurulariYenile, hedefKitleSayisi } from "@/lib/notifications";
 
 const hedefSchema = z.discriminatedUnion("hedefTur", [
@@ -73,5 +74,6 @@ export async function POST(req: NextRequest) {
     },
   });
   duyurulariYenile();
+  await islemKaydet(admin, "bildirim.yayinla", baslik, "/admin/bildirimler");
   return NextResponse.json({ id: duyuru.id });
 }

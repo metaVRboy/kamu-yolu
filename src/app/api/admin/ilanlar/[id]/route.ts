@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { adminApi } from "@/lib/admin";
+import { islemKaydet } from "@/lib/islemKaydi";
 import { ilanFormSchema, ilanSayfalariniYenile, sonGun } from "@/lib/adminIlan";
 
 const bodySchema = z.union([
@@ -10,11 +11,12 @@ const bodySchema = z.union([
 ]);
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  if (!(await adminApi())) return NextResponse.json({ error: "Yetkiniz yok." }, { status: 403 });
+  const admin = await adminApi();
+  if (!admin) return NextResponse.json({ error: "Yetkiniz yok." }, { status: 403 });
   const parsed = bodySchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Geçersiz bilgiler." }, { status: 400 });
   const { id } = await params;
-  const ilan = await prisma.posting.findUnique({ where: { id }, select: { id: true, applicationEnd: true } });
+  const ilan = await prisma.posting.findUnique({ where: { id }, select: { id: true, title: true, applicationEnd: true } });
   if (!ilan) return NextResponse.json({ error: "İlan bulunamadı." }, { status: 404 });
   const b = parsed.data;
 
@@ -37,5 +39,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     ]);
   }
   ilanSayfalariniYenile();
+  await islemKaydet(admin, "islem" in b ? `ilan.${b.islem}` : "ilan.duzenle", "islem" in b ? ilan.title : b.duzenle.title, `/admin/ilanlar/${id}`);
   return NextResponse.json({ ok: true });
 }

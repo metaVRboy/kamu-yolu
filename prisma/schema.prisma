@@ -35,16 +35,16 @@ enum InstitutionType {
 }
 
 model Department {
-  id        String           @id @default(cuid())
-  name      String           @unique
-  slug      String           @unique
-  level     EducationLevel   // bu bolumun hangi ogrenim derecesine ait oldugu (onlisans/lisans vb.)
+  id        String              @id @default(cuid())
+  name      String              @unique
+  slug      String              @unique
+  level     EducationLevel // bu bolumun hangi ogrenim derecesine ait oldugu (onlisans/lisans vb.)
   aliases   DepartmentAlias[]
   postings  PostingDepartment[]
   haberler  HaberDepartment[]
   users     User[]
-  createdAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
 }
 
 model DepartmentAlias {
@@ -63,12 +63,12 @@ model Posting {
   title                    String
   institutionName          String
   institutionType          InstitutionType  @default(DIGER)
-  ilanTuru                 String?          // kaynaktaki ham ilan turu (ör. "Sözleşmeli Personel İlanları", "İşçi İlanları")
+  ilanTuru                 String? // kaynaktaki ham ilan turu (ör. "Sözleşmeli Personel İlanları", "İşçi İlanları")
   iller                    String[]         @default([]) // kontenjanin acildigi il/iller
-  sourceName               String           // ör. "Kariyer Kapısı"
+  sourceName               String // ör. "Kariyer Kapısı"
   sourceUrl                String
   educationLevels          EducationLevel[] @default([])
-  departmentRequirementRaw String?          // ilanın ham "aranan nitelikler" metni
+  departmentRequirementRaw String? // ilanın ham "aranan nitelikler" metni
   isDepartmentRestricted   Boolean          @default(false)
   applicationStart         DateTime?
   applicationEnd           DateTime?
@@ -117,78 +117,80 @@ model PostingDepartment {
   postingId    String
   department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
   departmentId String
-  matchedAlias String?    // eşleşmeyi tetikleyen alias/terim (denetim ve hata ayıklama için)
+  matchedAlias String? // eşleşmeyi tetikleyen alias/terim (denetim ve hata ayıklama için)
 
   @@unique([postingId, departmentId])
 }
 
 model User {
-  id             String          @id @default(cuid())
-  email          String          @unique
+  id                String          @id @default(cuid())
+  email             String          @unique
   // Google ile kayit olan kullanicilarda sifre yoktur (null) - bu durumda
   // e-posta/sifre ile giris reddedilir, sadece Google OAuth ile giris
   // yapilabilir.
-  passwordHash   String?
+  passwordHash      String?
   // Google hesabinin benzersiz kimligi ("sub" claim'i) - e-posta ile degil
   // bununla eslestirme yapilir, cunku e-posta kullanici tarafindan Google
   // disinda da degistirilebilir/yeniden kullanilabilir.
-  googleId       String?         @unique
-  adSoyad        String
-  telefon        String?
-  meslek         String?
-  kurumTuru      String?
+  googleId          String?         @unique
+  adSoyad           String
+  telefon           String?
+  meslek            String?
+  kurumTuru         String?
   // Isaretliyse kullanici acikca "kamu calisani degilim" demistir; bu
   // durumda kurumTuru/meslek alanlari gecersiz sayilir (arayuzde de
   // tiklanamaz olur). "Henuz cevaplanmadi" (null alanlar) ile bu ikisini
   // ayirt etmek icin ayri bir alan.
-  kamuCalisaniDegil Boolean @default(false)
+  kamuCalisaniDegil Boolean         @default(false)
   // Odeme altyapisi henuz yok - bu alan simdilik elle/ileride kurulacak
   // odeme sistemiyle guncellenecek. "Pro" rozeti ve premium ozellik
   // kilitleri bu alana gore calisir.
-  abonelikPlani  AbonelikPlani   @default(UCRETSIZ)
-  departmentId   String?
-  department     Department?     @relation(fields: [departmentId], references: [id])
-  educationLevel EducationLevel?
-  isAdmin        Boolean         @default(false)
+  abonelikPlani     AbonelikPlani   @default(UCRETSIZ)
+  departmentId      String?
+  department        Department?     @relation(fields: [departmentId], references: [id])
+  educationLevel    EducationLevel?
+  isAdmin           Boolean         @default(false)
   // Kayit formundaki KVKK onay kutucugu isaretlendiginde doldurulur; bu
   // ozellikten once kayit olmus hesaplarda bos olabilir.
-  kvkkOnayTarihi DateTime?
-  createdAt      DateTime        @default(now())
+  kvkkOnayTarihi    DateTime?
+  createdAt         DateTime        @default(now())
   // Sifre degistirildiginde artirilir; o anda gecerli tum oturumlarin
   // (JWT'lerin) kimlik dogrulamasi bu deger uzerinden yapilir, boylece
   // sifre degisince tum cihazlardaki eski oturumlar aninda gecersiz olur.
-  tokenVersion   Int             @default(0)
+  tokenVersion      Int             @default(0)
 
-  becayisTalepleri BecayisTalep[]
-  gonderdigiMesajlar BecayisMesaj[] @relation("MesajGonderen")
-  bildirimler      Bildirim[]
+  becayisTalepleri        BecayisTalep[]
+  gonderdigiMesajlar      BecayisMesaj[]        @relation("MesajGonderen")
+  bildirimler             Bildirim[]
   sifreSifirlamaTokenlari PasswordResetToken[]
-  denemeKatilimlari DenemeKatilim[]
-  oturumlar        Oturum[]
-  profilFotografi  ProfilFotografi?
-  epostaDegisikligi EpostaDegisiklikKodu?
+  denemeKatilimlari       DenemeKatilim[]
+  oturumlar               Oturum[]
+  profilFotografi         ProfilFotografi?
+  epostaDegisikligi       EpostaDegisiklikKodu?
 
   // Admin panelden suresiz/sureli verilen planin bitisi; gecince plan
   // UCRETSIZ sayilir (getCurrentUser + bildirim sorgulari).
-  abonelikBitis       DateTime?
+  abonelikBitis        DateTime?
   // Odeme altyapisi gelince donem sonunda otomatik yenileme. Iptal = false yapmak:
   // abonelikBitis'e dokunulmaz, kullanici odenen donem sonuna kadar plani kullanir.
-  otomatikYenileme    Boolean  @default(true)
+  otomatikYenileme     Boolean               @default(true)
   // Zilin Genel sekmesini en son actigi an (uygulama saati); sonrasindaki duyurular okunmamis.
-  duyuruGorulme       DateTime?
+  duyuruGorulme        DateTime?
   // Admin askiya aldiysa: oturumlari gecersiz, giris yapamaz (neden kullaniciya gosterilir).
-  askiyaAlindi        DateTime?
-  askiNedeni          String?
+  askiyaAlindi         DateTime?
+  askiNedeni           String?
   // SMS ile dogrulanmis telefon (yalniz Pro); `telefon` degisirse sifirlanir.
-  telefonDogrulandi   DateTime?
+  telefonDogrulandi    DateTime?
   // SMS bildirim tercihleri (Pro) - varsayilan kapali, acik onayla acilir.
-  smsIlanBildirimi    Boolean  @default(false)
-  smsBecayisBildirimi Boolean  @default(false)
+  smsIlanBildirimi     Boolean               @default(false)
+  smsBecayisBildirimi  Boolean               @default(false)
   // Ilk kez SMS iznini verdigi an (onay kaydi).
-  smsIzinTarihi       DateTime?
-  telefonDogrulama    TelefonDogrulamaKodu?
-  smsGonderimleri     SmsGonderim[]
-  yukseltmeTalebi     YukseltmeTalebi?
+  smsIzinTarihi        DateTime?
+  telefonDogrulama     TelefonDogrulamaKodu?
+  smsGonderimleri      SmsGonderim[]
+  yukseltmeTalebi      YukseltmeTalebi?
+  destekMesajlari      DestekMesaji[]
+  soruHataBildirimleri SoruHataBildirimi[]
 }
 
 model TelefonDogrulamaKodu {
@@ -216,9 +218,9 @@ model YukseltmeTalebi {
 
 // Gonderilen (ya da saglayici yokken test modunda yazilan) her SMS.
 model SmsGonderim {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   // Hesap silinince kayit da silinir (telefon kisisel veri).
-  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      String?
   telefon     String
   metin       String
@@ -231,7 +233,7 @@ model SmsGonderim {
   // ILAN SMS'inin kapsadigi en son bildirimin createdAt'i. Sonraki tarama bundan
   // yenileri sayar - SMS'in kendi zamani kullanilmaz (farkli saatler kayabilir).
   kapsamSonu  DateTime?
-  olusturma   DateTime @default(now())
+  olusturma   DateTime  @default(now())
 
   @@index([userId, tur, olusturma])
   @@index([olusturma])
@@ -323,18 +325,22 @@ model BecayisTalep {
 // konusmaKarsiId, talep sahibi disindaki tarafin userId'sini tutarak ayni
 // talep altindaki farkli konusma "thread"lerini birbirinden ayirir.
 model BecayisMesaj {
-  id             String       @id @default(cuid())
-  talep          BecayisTalep @relation(fields: [talepId], references: [id], onDelete: Cascade)
-  talepId        String
+  id               String       @id @default(cuid())
+  talep            BecayisTalep @relation(fields: [talepId], references: [id], onDelete: Cascade)
+  talepId          String
   // Gonderen hesabini silerse mesaj karsi tarafin sohbeti bozulmasin diye kalir; gonderen bosalir ("Silinmis kullanici").
-  gonderen       User?        @relation("MesajGonderen", fields: [gonderenId], references: [id], onDelete: SetNull)
-  gonderenId     String?
-  konusmaKarsiId String
-  mesaj          String
-  okundu         Boolean      @default(false)
-  createdAt      DateTime     @default(now())
+  gonderen         User?        @relation("MesajGonderen", fields: [gonderenId], references: [id], onDelete: SetNull)
+  gonderenId       String?
+  konusmaKarsiId   String
+  mesaj            String
+  okundu           Boolean      @default(false)
+  createdAt        DateTime     @default(now())
+  // Alici "uygunsuz" diye sikayet ettiyse; admin inceler (mesaji siler / gondereni askiya alir) ya da yok sayar.
+  sikayetEdildi    DateTime?
+  sikayetIncelendi DateTime?
 
   @@index([talepId, konusmaKarsiId])
+  @@index([sikayetEdildi])
 }
 
 // Site yoneticisinin (admin panelden) yayimladigi, tum kullanicilarin
@@ -388,23 +394,23 @@ model Kampanya {
 // sendika haberleri, gundemdeki konular vb.) - admin panelden yayimlanir,
 // ana sayfada "Haberler" bolumunde gosterilir.
 model Haber {
-  id          String   @id @default(cuid())
+  id           String   @id @default(cuid())
   // Basliktan turetilen, SEO icin okunakli benzersiz URL parcasi - her
   // haberin kendi sayfasi (/haberler/[slug]) bu alanla adreslenir.
-  slug        String   @unique
-  baslik      String
-  ozet        String
-  kaynakUrl   String?
+  slug         String   @unique
+  baslik       String
+  ozet         String
+  kaynakUrl    String?
   // Kaynak makalenin og:image/twitter:image meta etiketinden alinan gorsel
   // URL'si - kurumun/haberin kendi yayinladigi kucuk onizleme gorseli,
   // bulunamazsa null (arayuzde yerine bir simge/gradyan gosterilir).
-  gorselUrl   String?
+  gorselUrl    String?
   // gorselUrl bir kurum logosu ise true (Wikimedia'dan gelen kurum
   // logolari kucuk/kare oldugu icin arayuzde farkli gosterilir - tam
   // kaplama yerine ortalanmis/dolgu ile).
-  gorselLogoMu Boolean @default(false)
-  yayinTarihi DateTime @default(now())
-  createdAt   DateTime @default(now())
+  gorselLogoMu Boolean  @default(false)
+  yayinTarihi  DateTime @default(now())
+  createdAt    DateTime @default(now())
 
   // Asagidaki yapilandirilmis alanlarin tumu SADECE haberin dogrulanmis
   // kaynak metninden (bkz. haberDetayCikar.ts) cikarilir - metinde acikca
@@ -423,7 +429,7 @@ model Haber {
   // Serbest metin ayrinti bolumleri (neAciklandi, basvuruTakvimi,
   // kimlerBasvurabilir, ozelSartlar, dikkatEdilmesiGerekenler, sss[]) -
   // hepsi opsiyonel, bkz. HaberDetayExtract tipi (src/lib/haberDetayCikar.ts).
-  detaylar Json?
+  detaylar         Json?
 
   departments HaberDepartment[]
 
@@ -541,12 +547,12 @@ model KpssYillikAlim {
 // kullanilir - ayri bir foreign key yok cunku iki kaynagin id sistemleri
 // farkli (biri memurlar.net kaynakli, biri doğrudan ÖSYM kodu).
 model DgsGecis {
-  id            String @id @default(cuid())
-  onlisansKodu  String
-  onlisansAdi   String
-  lisansKodu    String
-  lisansAdi     String
-  puanTuru      String
+  id           String @id @default(cuid())
+  onlisansKodu String
+  onlisansAdi  String
+  lisansKodu   String
+  lisansAdi    String
+  puanTuru     String
 
   @@index([onlisansAdi])
 }
@@ -565,42 +571,101 @@ enum DenemeDers {
 // Her gun GunlukDeneme bu havuzdan ornekleme yaparak o gunun sabit soru
 // setini olusturur - sorular kullaniciya ozel degil, herkese ayni yayinlanir.
 model DenemeSoru {
-  id              String         @id @default(cuid())
-  duzey           EducationLevel
-  ders            DenemeDers
-  soruMetni       String
+  id               String              @id @default(cuid())
+  duzey            EducationLevel
+  ders             DenemeDers
+  soruMetni        String
   // Ortak metinli (bir parca/bilgi + birden fazla soru) bloklarda kardes
   // sorular ayni grupId'yi paylasir. Soru numaralari ("20-21. sorular...")
   // METNE GOMULMEZ - gunun denemesindeki GERCEK pozisyona gore (bu alan
   // kullanilarak) arayuzde DINAMIK hesaplanir; aksi halde soru havuzdaki
   // sirasi degistiginde (ör. yeni soru eklenince) sabit numaralar yanlis
   // kalirdi.
-  grupId          String?
+  grupId           String?
   // Geometri/cografya gibi gorsel gerektiren sorularda inline SVG (ornegin
   // "<svg viewBox=...>...</svg>") - yoksa null, soru sadece metinle gosterilir.
-  gorselSvg       String?
+  gorselSvg        String?
   // Matematik bolumundeki geometri sorulari - soru haritasinda ayri
   // "Geometri" grubu olarak gosterilir.
-  geometri        Boolean        @default(false)
+  geometri         Boolean             @default(false)
   // Ders ici konu (ör. "Kesirler ve Ondalık Sayılar") - sinav sonu konu
   // analizi ve calisma tavsiyesi bunun uzerinden yapilir.
-  konu            String?
+  konu             String?
   // 5 sik (A-E), sirayla
-  secenekler      String[]
+  secenekler       String[]
   // Dogru sikkin secenekler dizisindeki indeksi (0-4)
-  dogruCevap      Int
-  aciklama        String?
-  olusturmaTarihi DateTime       @default(now())
+  dogruCevap       Int
+  aciklama         String?
+  olusturmaTarihi  DateTime            @default(now())
   // Gercek KPSS kitapciklarinda sorular konuya gore sabit bir sirada gelir
   // (ör. geometri her zaman Matematik bolumunun son sorulari, ortak metinli
   // sorular bir arada) - gunluk deneme olustururken bu yazim sirasi (sira
   // alaninin kucukten buyuge) korunur, RASTGELE karistirilmaz.
-  sira            Int            @default(0)
+  sira             Int                 @default(0)
   // Gunluk deneme secimi "en az kullanilani oncelikle sec" stratejisiyle
   // calisiyor - tekrar sikligini dusurmek icin.
-  kullanimSayisi  Int            @default(0)
+  kullanimSayisi   Int                 @default(0)
+  hataBildirimleri SoruHataBildirimi[]
 
   @@index([duzey, ders, kullanimSayisi])
+}
+
+// Ogrencinin cozum ekranindan "bu soruda hata var" bildirimi; admin soruyu duzeltip cozuldu isaretler.
+model SoruHataBildirimi {
+  id        String     @id @default(cuid())
+  soru      DenemeSoru @relation(fields: [soruId], references: [id], onDelete: Cascade)
+  soruId    String
+  user      User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId    String?
+  aciklama  String
+  cozuldu   DateTime?
+  createdAt DateTime   @default(now())
+
+  @@unique([soruId, userId])
+  @@index([cozuldu])
+}
+
+// Iletisim/destek formu. plan gonderim anindaki plan: Pro+ mesajlari kutuda once gelir.
+model DestekMesaji {
+  id         String        @id @default(cuid())
+  user       User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId     String?
+  ad         String
+  email      String
+  konu       String
+  mesaj      String
+  plan       AbonelikPlani @default(UCRETSIZ)
+  yanit      String?
+  yanitlandi DateTime?
+  kapatildi  DateTime?
+  createdAt  DateTime      @default(now())
+
+  @@index([kapatildi, createdAt])
+}
+
+// Tek satirlik site ayarlari (id hep 1): bakim modu + tum sayfalarin ustundeki duyuru seridi.
+model SiteAyarlari {
+  id          Int      @id @default(1)
+  bakimModu   Boolean  @default(false)
+  bakimMesaji String?
+  seritMetni  String?
+  seritLink   String?
+  seritTur    String   @default("bilgi") // bilgi | uyari | kampanya
+  guncelleme  DateTime @updatedAt
+}
+
+// Admin panelindeki her degisiklik: kim, ne zaman, ne yapti (adminAdi: admin silinse de okunur kalsin).
+model AdminIslem {
+  id        String   @id @default(cuid())
+  adminId   String?
+  adminAdi  String
+  islem     String
+  hedef     String?
+  link      String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([islem])
 }
 
 // Bir duzey+tarih icin SABIT soru seti - olusturulduktan sonra degismez,

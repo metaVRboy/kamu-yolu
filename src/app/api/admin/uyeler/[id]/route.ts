@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { islemKaydet } from "@/lib/islemKaydi";
 
 const bodySchema = z.object({
   abonelikPlani: z.enum(["UCRETSIZ", "PRO", "PRO_PLUS"]),
@@ -25,8 +26,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   const { id } = await params;
   const guncel = await prisma.user
-    .update({ where: { id }, data: { abonelikPlani, abonelikBitis: bitis }, select: { abonelikPlani: true, abonelikBitis: true } })
+    .update({ where: { id }, data: { abonelikPlani, abonelikBitis: bitis }, select: { abonelikPlani: true, abonelikBitis: true, email: true } })
     .catch(() => null);
   if (!guncel) return NextResponse.json({ error: "Kullanıcı bulunamadı." }, { status: 404 });
-  return NextResponse.json(guncel);
+  await islemKaydet(admin, "uye.plan", `${guncel.email} → ${abonelikPlani}${abonelikBitis ? ` (${abonelikBitis})` : ""}`, `/admin/uyeler/${id}`);
+  return NextResponse.json({ abonelikPlani: guncel.abonelikPlani, abonelikBitis: guncel.abonelikBitis });
 }

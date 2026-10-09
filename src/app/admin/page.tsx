@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AlertTriangle, BadgePercent, Bell, CheckCircle2, Crown, GraduationCap, Newspaper, Radar, Rocket, UserPlus, Users } from "lucide-react";
+import { AlertTriangle, BadgePercent, Bell, CheckCircle2, Crown, GraduationCap, Inbox, Newspaper, Radar, Rocket, UserPlus, Users } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { adminSayfasi } from "@/lib/admin";
 import { aktifProKosulu } from "@/lib/sms";
@@ -22,7 +22,7 @@ function gunOnce(n: number, simdi = Date.now()) {
 
 export default async function AdminPanelPage() {
   await adminSayfasi();
-  const [toplamUye, yedi, otuz, pro, proPlus, aktifIlan, sonTaramalar, haftalikDeneme, talepSayisi, haftalikHaber, sonUyeler, gunluk] = await Promise.all([
+  const [toplamUye, yedi, otuz, pro, proPlus, aktifIlan, sonTaramalar, haftalikDeneme, talepSayisi, haftalikHaber, sonUyeler, gunluk, bekleyenDestek, bekleyenSikayet, bekleyenSoruHatasi] = await Promise.all([
     prisma.user.count(),
     prisma.user.count({ where: { createdAt: { gte: gunOnce(7) } } }),
     prisma.user.count({ where: { createdAt: { gte: gunOnce(30) } } }),
@@ -38,7 +38,15 @@ export default async function AdminPanelPage() {
     prisma.$queryRaw<{ gun: string; sayi: bigint }[]>`
       SELECT to_char(("createdAt" AT TIME ZONE 'UTC') AT TIME ZONE 'Europe/Istanbul', 'YYYY-MM-DD') AS gun, count(*) AS sayi
       FROM "User" WHERE "createdAt" >= ${gunOnce(30)} GROUP BY 1`,
+    prisma.destekMesaji.count({ where: { kapatildi: null } }),
+    prisma.becayisMesaj.count({ where: { sikayetEdildi: { not: null }, sikayetIncelendi: null } }),
+    prisma.soruHataBildirimi.count({ where: { cozuldu: null } }),
   ]);
+  const bekleyenIsler = [
+    { sayi: bekleyenDestek, ad: "destek mesajı", href: "/admin/destek" },
+    { sayi: bekleyenSikayet, ad: "şikayet edilen becayiş mesajı", href: "/admin/becayis" },
+    { sayi: bekleyenSoruHatasi, ad: "KPSS soru hata bildirimi", href: "/admin/kpss" },
+  ].filter((b) => b.sayi > 0);
 
   const sayiByGun = new Map(gunluk.map((g) => [g.gun, Number(g.sayi)]));
   const seri = Array.from({ length: 30 }, (_, i) => {
@@ -66,6 +74,18 @@ export default async function AdminPanelPage() {
               nedenine bak.
             </p>
           </div>
+        </div>
+      )}
+
+      {bekleyenIsler.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 rounded-3xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          <Inbox className="h-5 w-5 shrink-0" />
+          <span className="font-bold">Seni bekleyenler:</span>
+          {bekleyenIsler.map((b) => (
+            <Link key={b.href} href={b.href} className="rounded-full bg-white px-3 py-1 font-semibold shadow-sm hover:bg-amber-100">
+              {b.sayi} {b.ad}
+            </Link>
+          ))}
         </div>
       )}
 
