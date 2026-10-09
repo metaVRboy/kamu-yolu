@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { randomBytes } from "crypto";
 import { SITE_URL } from "@/lib/site";
 
 export const GOOGLE_CALLBACK_PATH = "/api/auth/google/callback";
 
 /** Kullaniciyi Google'in kendi onay ekranina yonlendirir. */
-export async function GET() {
+export async function GET(req: NextRequest) {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   if (!clientId) {
     return NextResponse.redirect(`${SITE_URL}/giris?hata=google-yapilandirma`);
@@ -31,5 +31,9 @@ export async function GET() {
     path: "/",
     maxAge: 600,
   });
+  // Mobil uygulama girisi telefonun tarayicisinda baslatir; callback oturumu uygulamaya kodla dondurur.
+  if (req.nextUrl.searchParams.get("uygulama") === "1") {
+    res.cookies.set("google_oauth_uygulama", "1", { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", maxAge: 600 });
+  }
   return res;
 }

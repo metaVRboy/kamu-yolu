@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { createSession } from "@/lib/auth";
+import { createSession, uygulamaGirisKoduOlustur } from "@/lib/auth";
+import { UYGULAMA_DONUS } from "@/lib/uygulama";
 import { SITE_URL } from "@/lib/site";
 import { GOOGLE_CALLBACK_PATH } from "../route";
 
@@ -17,7 +18,11 @@ export async function GET(req: NextRequest) {
   const state = url.searchParams.get("state");
   const cookieState = req.cookies.get("google_oauth_state")?.value;
 
-  const basarisizYonlendirme = NextResponse.redirect(`${SITE_URL}/giris?hata=google`);
+  // Uygulamadan baslatildiysa sonuc (kod ya da hata) uygulamaya doner, tarayicida kalmaz.
+  const uygulama = req.cookies.get("google_oauth_uygulama")?.value === "1";
+  const hataYonlendir = (hata: string) =>
+    NextResponse.redirect(uygulama ? `${UYGULAMA_DONUS}?hata=${hata}` : `${SITE_URL}/giris?hata=${hata}`);
+  const basarisizYonlendirme = hataYonlendir("google");
 
   if (!code || !state || !cookieState || state !== cookieState) {
     return basarisizYonlendirme;
@@ -51,7 +56,7 @@ export async function GET(req: NextRequest) {
     const profil = (await profilRes.json()) as GoogleProfil;
 
     if (!profil.email || !profil.email_verified) {
-      return NextResponse.redirect(`${SITE_URL}/giris?hata=google-email`);
+      return hataYonlendir("google-email");
     }
     const email = profil.email.toLowerCase();
 
@@ -75,9 +80,15 @@ export async function GET(req: NextRequest) {
           });
     }
 
-    if (user.askiyaAlindi) return NextResponse.redirect(`${SITE_URL}/giris?hata=askida`);
-    await createSession(user.id, user.tokenVersion);
-    const res = NextResponse.redirect(`${SITE_URL}/profilim`);
+    if (user.askiyaAlindi) return hataYonlendir("askida");
+    let res: NextResponse;
+    if (uygulama) {
+      res = NextResponse.redirect(`${UYGULAMA_DONUS}?kod=${encodeURIComponent(await uygulamaGirisKoduOlustur(user.id))}`);
+      res.cookies.delete("google_oauth_uygulama");
+    } else {
+      await createSession(user.id, user.tokenVersion);
+      res = NextResponse.redirect(`${SITE_URL}/profilim`);
+    }
     res.cookies.delete("google_oauth_state");
     return res;
   } catch (err) {

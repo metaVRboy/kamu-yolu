@@ -66,7 +66,11 @@ export async function createSession(
   const oturum = await prisma.oturum.create({
     data: { userId, cihaz: cihazAdi((await headers()).get("user-agent")) },
   });
-  const token = await new SignJWT({ userId, tokenVersion, oturumId: oturum.id })
+  await oturumCereziYaz(userId, tokenVersion, oturum.id, beniHatirla);
+}
+
+async function oturumCereziYaz(userId: string, tokenVersion: number, oturumId: string, beniHatirla: boolean) {
+  const token = await new SignJWT({ userId, tokenVersion, oturumId })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime(`${SESSION_MAX_AGE_SECONDS}s`)
@@ -84,6 +88,38 @@ export async function createSession(
     // saklanacagini belirler.
     maxAge: beniHatirla ? SESSION_MAX_AGE_SECONDS : undefined,
   });
+}
+
+// Mobil uygulamada Google girisi telefonun tarayicisinda yapilir; oturum uygulamaya bu
+// kisa omurlu, TEK KULLANIMLIK kodla tasinir. Oturum kapali (kapatildi dolu) olusur, kod
+// kullanilinca acilir: ayni kod ikinci kez oturum acamaz.
+const UYGULAMA_KODU_SURESI_MS = 3 * 60_000;
+
+export async function uygulamaGirisKoduOlustur(userId: string) {
+  const oturum = await prisma.oturum.create({ data: { userId, cihaz: "Kamu Yolu uygulaması", kapatildi: new Date() } });
+  return new SignJWT({ oturumId: oturum.id, amac: "uygulama-giris" })
+    .setProtectedHeader({ alg: "HS256" })
+    .setExpirationTime(`${UYGULAMA_KODU_SURESI_MS / 1000}s`)
+    .sign(getSecretKey());
+}
+
+/** Kodu dogrular, oturumu acar ve bu istegin (mobil uygulamanin fetch cerez deposu) cerezine yazar. */
+export async function uygulamaGirisKoduKullan(kod: string): Promise<boolean> {
+  const payload = await jwtVerify(kod, getSecretKey()).then((r) => r.payload).catch(() => null);
+  if (payload?.amac !== "uygulama-giris" || typeof payload.oturumId !== "string") return false;
+  const oturumId = payload.oturumId;
+  const { count } = await prisma.oturum.updateMany({
+    where: { id: oturumId, kapatildi: { not: null }, olusturma: { gte: new Date(Date.now() - UYGULAMA_KODU_SURESI_MS) } },
+    data: { kapatildi: null },
+  });
+  if (count !== 1) return false;
+  const oturum = await prisma.oturum.findUniqueOrThrow({ where: { id: oturumId }, include: { user: { select: { tokenVersion: true, askiyaAlindi: true } } } });
+  if (oturum.user.askiyaAlindi) {
+    await prisma.oturum.update({ where: { id: oturumId }, data: { kapatildi: new Date() } });
+    return false;
+  }
+  await oturumCereziYaz(oturum.userId, oturum.user.tokenVersion, oturumId, true);
+  return true;
 }
 
 /** Cerezi siler ve bu cihazin oturum kaydini kapatir (cikis yap). */
