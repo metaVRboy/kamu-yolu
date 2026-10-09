@@ -150,6 +150,9 @@ async function upsertPosting(
  * Her cagri icin bir ScrapeRun kaydi tutar, boylece otomatik/zamanlanmis
  * calismalarin basarili olup olmadigi ve ne zaman calistigi denetlenebilir.
  */
+// Yerel gorevin log'unda nerede takildigi gorulsun diye saatli adim satirlari.
+const adim = (mesaj: string) => console.log(`[${new Date().toLocaleTimeString("tr-TR", { timeZone: "Europe/Istanbul" })}] ${mesaj}`);
+
 export async function scrapeKariyerKapisi(
   prisma: PrismaClient,
 ): Promise<ScrapeSummary> {
@@ -158,16 +161,20 @@ export async function scrapeKariyerKapisi(
   });
 
   try {
+    adim("Süresi geçen ilanlar kapatılıyor");
     await expireOverduePostings();
 
+    adim("İlan listesi alınıyor");
     const ilanList = await fetchIlanList();
+    adim(`${ilanList.length} ilan listelendi`);
 
     const seenExternalIds = new Set<string>();
     const unmatchedTexts: string[] = [];
     const dupIndex = await buildCrossSourceDuplicateIndex(SOURCE_NAME);
 
-    for (const ilan of ilanList) {
+    for (const [i, ilan] of ilanList.entries()) {
       if (ilan.sonDurumu !== "Aktif") continue;
+      adim(`${i + 1}/${ilanList.length} ${ilan.kurumAdi}`);
 
       let altIlanlar;
       try {
