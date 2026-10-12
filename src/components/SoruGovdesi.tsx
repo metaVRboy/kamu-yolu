@@ -17,9 +17,12 @@ export function SoruGovdesi({ sorular, index }: { sorular: ExamSoru[]; index: nu
         <KesirliMetin metin={soru.grupId ? soruMetniNumarali(soru.soruMetni, index + 1) : soru.soruMetni} />
       </p>
       {soru.gorselSvg && (
-        <div
-          className="mx-auto mt-4 max-w-md [&_svg]:h-auto [&_svg]:w-full"
-          dangerouslySetInnerHTML={{ __html: soru.gorselSvg }}
+        // <img> ile: icindeki <script>/on* calismaz (XSS kapali). SVG'ler xmlns'li ve kendi fontunu tasiyor.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={`data:image/svg+xml;charset=utf-8,${encodeURIComponent(soru.gorselSvg)}`}
+          alt="Soru görseli"
+          className="mx-auto mt-4 h-auto w-full max-w-md"
         />
       )}
     </>
