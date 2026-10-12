@@ -1,43 +1,24 @@
 import Link from "next/link";
-import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { adminSayfasi } from "@/lib/admin";
-import { aktifProKosulu, proAktifMi } from "@/lib/sms";
+import { UYE_FILTRELERI, uyeFiltresiMi, uyeKosulu, uyeRozetleri } from "@/lib/adminUye";
 import { AdminBaslik, AdminKart } from "@/components/admin/AdminUI";
+import { AdminUyeListesi } from "@/components/admin/AdminUyeListesi";
 import { cn } from "@/lib/utils";
 
 export const metadata = { title: "Üyeler — Admin" };
 
 const SAYFA_BOYU = 30;
 const TARIH = new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "short", year: "numeric", timeZone: "Europe/Istanbul" });
-const FILTRELER = [
-  ["hepsi", "Tümü"],
-  ["ucretli", "Aktif ücretli"],
-  ["ucretsiz", "Ücretsiz"],
-  ["askida", "Askıda"],
-  ["admin", "Adminler"],
-] as const;
-type Filtre = (typeof FILTRELER)[number][0];
-
-function filtreKosulu(f: Filtre): Prisma.UserWhereInput {
-  if (f === "ucretli") return aktifProKosulu();
-  if (f === "ucretsiz") return { NOT: aktifProKosulu() };
-  if (f === "askida") return { askiyaAlindi: { not: null } };
-  if (f === "admin") return { isAdmin: true };
-  return {};
-}
 
 export default async function AdminUyelerPage({ searchParams }: { searchParams: Promise<{ q?: string; filtre?: string; sayfa?: string }> }) {
   await adminSayfasi();
   const p = await searchParams;
   const q = p.q?.trim() ?? "";
-  const filtre = (FILTRELER.some(([k]) => k === p.filtre) ? p.filtre : "hepsi") as Filtre;
+  const filtre = uyeFiltresiMi(p.filtre) ? p.filtre : "hepsi";
   const sayfa = Math.max(1, Number(p.sayfa) || 1);
 
-  const where: Prisma.UserWhereInput = {
-    ...filtreKosulu(filtre),
-    ...(q && { OR: [{ email: { contains: q, mode: "insensitive" } }, { adSoyad: { contains: q, mode: "insensitive" } }] }),
-  };
+  const where = uyeKosulu(filtre, q);
   const [toplam, uyeler, talepDagilimi, kaynakDagilimi] = await Promise.all([
     prisma.user.count({ where }),
     prisma.user.findMany({
@@ -85,7 +66,7 @@ export default async function AdminUyelerPage({ searchParams }: { searchParams: 
           </button>
         </form>
         <div className="mt-3 flex flex-wrap gap-1.5">
-          {FILTRELER.map(([k, ad]) => (
+          {UYE_FILTRELERI.map(([k, ad]) => (
             <Link
               key={k}
               href={url({ filtre: k })}
@@ -96,30 +77,14 @@ export default async function AdminUyelerPage({ searchParams }: { searchParams: 
           ))}
         </div>
 
-        <p className="mt-4 text-xs font-semibold text-muted-foreground">{toplam.toLocaleString("tr-TR")} üye</p>
-        <ul className="mt-2 divide-y divide-primary/10">
-          {uyeler.map((u) => {
-            const ucretli = proAktifMi(u);
-            return (
-              <li key={u.id}>
-                <Link href={`/admin/uyeler/${u.id}`} className="flex flex-wrap items-center justify-between gap-3 rounded-xl px-2 py-3 hover:bg-slate-50">
-                  <span className="min-w-0">
-                    <span className="flex flex-wrap items-center gap-1.5 text-sm font-semibold text-slate-900">
-                      {u.adSoyad}
-                      {ucretli && <span className="rounded-full bg-violet-100 px-2 py-0.5 text-[11px] font-bold text-violet-700">{u.abonelikPlani === "PRO_PLUS" ? "Pro+" : "Pro"}</span>}
-                      {!ucretli && u.abonelikPlani !== "UCRETSIZ" && <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-bold text-amber-700">süresi doldu</span>}
-                      {u.isAdmin && <span className="rounded-full bg-slate-900 px-2 py-0.5 text-[11px] font-bold text-white">admin</span>}
-                      {u.askiyaAlindi && <span className="rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-bold text-red-700">askıda</span>}
-                    </span>
-                    <span className="block truncate text-xs text-muted-foreground">{u.email}</span>
-                  </span>
-                  <span className="text-xs text-muted-foreground">{TARIH.format(u.createdAt)}</span>
-                </Link>
-              </li>
-            );
-          })}
-          {uyeler.length === 0 && <li className="py-6 text-center text-sm text-muted-foreground">Sonuç yok.</li>}
-        </ul>
+        {/* key: filtre/arama degisince secim sifirlansin ("filtredeki tumu" baska kumeye uygulanmasin). */}
+        <AdminUyeListesi
+          key={`${filtre}|${q}`}
+          toplam={toplam}
+          filtre={filtre}
+          q={q}
+          uyeler={uyeler.map((u) => ({ id: u.id, adSoyad: u.adSoyad, email: u.email, rozetler: uyeRozetleri(u), sag: TARIH.format(u.createdAt) }))}
+        />
 
         {sayfaSayisi > 1 && (
           <div className="mt-4 flex items-center justify-between text-sm">

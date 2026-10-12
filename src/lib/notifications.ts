@@ -22,13 +22,20 @@ export async function createBildirim(params: {
   });
 }
 
-export async function getOkunmamisBildirimSayisi(userId: string): Promise<number> {
-  return prisma.bildirim.count({ where: { userId, okundu: false } });
+/**
+ * Kisisel bildirimler Pro ozelligi; ama adminin uyeye ozel gonderdigi mesajlar ve destek
+ * yanitlari her planda gorunur (ucretsiz uye kendi destek yanitini kacirmasin).
+ */
+export const HERKESE_ACIK_BILDIRIMLER = ["ADMIN", "DESTEK_YANIT"];
+const turKosulu = (sadeceHerkeseAcik: boolean) => (sadeceHerkeseAcik ? { tur: { in: HERKESE_ACIK_BILDIRIMLER } } : {});
+
+export async function getOkunmamisBildirimSayisi(userId: string, sadeceHerkeseAcik = false): Promise<number> {
+  return prisma.bildirim.count({ where: { userId, okundu: false, ...turKosulu(sadeceHerkeseAcik) } });
 }
 
-export async function getBanaOzelBildirimler(userId: string, limit = 30) {
+export async function getBanaOzelBildirimler(userId: string, limit = 30, sadeceHerkeseAcik = false) {
   return prisma.bildirim.findMany({
-    where: { userId },
+    where: { userId, ...turKosulu(sadeceHerkeseAcik) },
     orderBy: { createdAt: "desc" },
     take: limit,
   });
@@ -98,8 +105,9 @@ export async function deleteBildirim(id: string, userId: string) {
   await prisma.bildirim.deleteMany({ where: { id, userId } });
 }
 
-export async function deleteTumBildirimler(userId: string) {
-  await prisma.bildirim.deleteMany({ where: { userId } });
+/** sadeceHerkeseAcik: ucretsiz uye yalniz gordugu bildirimleri siler (Pro'ya gecince digerleri dursun). */
+export async function deleteTumBildirimler(userId: string, sadeceHerkeseAcik = false) {
+  await prisma.bildirim.deleteMany({ where: { userId, ...turKosulu(sadeceHerkeseAcik) } });
 }
 
 /**

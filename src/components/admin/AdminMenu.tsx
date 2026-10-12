@@ -17,6 +17,7 @@ import {
   Radar,
   Settings,
   Users,
+  Crown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -25,6 +26,7 @@ const MENU = [
   { href: "/admin/bildirimler", ad: "Bildirimler", ikon: Bell },
   { href: "/admin/fiyatlar", ad: "Fiyat ve kampanyalar", ikon: BadgePercent },
   { href: "/admin/uyeler", ad: "Üyeler", ikon: Users },
+  { href: "/admin/uyeler/pro-plus", ad: "Pro+ aboneleri", ikon: Crown },
   { href: "/admin/ilanlar", ad: "İlanlar", ikon: FileText },
   { href: "/admin/eslestirme", ad: "Bölüm eşleştirme", ikon: GitMerge },
   { href: "/admin/taramalar", ad: "Taramalar", ikon: Radar },
@@ -40,11 +42,15 @@ const MENU = [
 /** Admin yan menusu; dar ekranda ustte yatay kaydirilan sekmeler. */
 export function AdminMenu() {
   const pathname = usePathname();
+  // Ic ice yollarda (/admin/uyeler ve /admin/uyeler/pro-plus) yalniz en uzun eslesen aktif.
+  const aktifHref = MENU.map((m) => m.href)
+    .filter((h) => (h === "/admin" ? pathname === "/admin" : pathname === h || pathname.startsWith(`${h}/`)))
+    .sort((a, b) => b.length - a.length)[0];
   return (
     <nav className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 lg:sticky lg:top-24 lg:mx-0 lg:w-60 lg:shrink-0 lg:flex-col lg:self-start lg:overflow-visible lg:rounded-3xl lg:border lg:border-primary/10 lg:bg-white lg:p-3 lg:shadow-sm">
       <p className="hidden px-3 pt-1 pb-2 text-[11px] font-bold tracking-widest text-muted-foreground uppercase lg:block">Admin paneli</p>
       {MENU.map(({ href, ad, ikon: Ikon }) => {
-        const aktif = href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
+        const aktif = href === aktifHref;
         return (
           <Link
             key={href}

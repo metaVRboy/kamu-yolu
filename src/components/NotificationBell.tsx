@@ -117,6 +117,43 @@ export function NotificationBell({ isLoggedIn }: { isLoggedIn: boolean }) {
     await fetch("/api/bildirimler", { method: "DELETE" });
   }
 
+  const ozelListe = (
+    <>
+      <div className="flex justify-end px-1 pb-1">
+        <button type="button" onClick={handleDeleteAll} className="text-xs font-medium text-muted-foreground hover:text-red-600">
+          Tümünü sil
+        </button>
+      </div>
+      {banaOzel.map((b) => {
+        const content = (
+          <div className={cn("rounded-xl p-3 pr-2 hover:bg-primary/5", !b.okundu && "bg-primary/5")}>
+            <p className="text-sm font-medium text-slate-900">{b.baslik}</p>
+            {b.icerik && <p className="mt-0.5 text-xs text-muted-foreground">{b.icerik}</p>}
+          </div>
+        );
+        return (
+          <div key={b.id} className="flex items-center gap-1">
+            {b.link ? (
+              <Link href={b.link} className="min-w-0 flex-1">
+                {content}
+              </Link>
+            ) : (
+              <div className="min-w-0 flex-1">{content}</div>
+            )}
+            <button
+              type="button"
+              onClick={() => handleDeleteOne(b.id)}
+              aria-label="Bildirimi sil"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-red-50 hover:text-red-600"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        );
+      })}
+    </>
+  );
+
   return (
     <div className="relative" ref={panelRef}>
       <button
@@ -195,6 +232,9 @@ export function NotificationBell({ isLoggedIn }: { isLoggedIn: boolean }) {
                   .
                 </p>
               ) : kilit.kilitli ? (
+                // Ucretsizde yalniz admin mesajlari ve destek yanitlari gelir; altinda kilitli onizleme.
+                <>
+                {banaOzel.length > 0 && ozelListe}
                 <KilitliOzellik
                   kompakt
                   mevcutPlan={kilit.plan ?? "UCRETSIZ"}
@@ -211,47 +251,11 @@ export function NotificationBell({ isLoggedIn }: { isLoggedIn: boolean }) {
                     ))}
                   </div>
                 </KilitliOzellik>
+                </>
               ) : banaOzel.length === 0 ? (
                 <p className="p-3 text-sm text-muted-foreground">Henüz bildirimin yok.</p>
               ) : (
-                <>
-                  <div className="flex justify-end px-1 pb-1">
-                    <button
-                      type="button"
-                      onClick={handleDeleteAll}
-                      className="text-xs font-medium text-muted-foreground hover:text-red-600"
-                    >
-                      Tümünü sil
-                    </button>
-                  </div>
-                  {banaOzel.map((b) => {
-                    const content = (
-                      <div className={cn("rounded-xl p-3 pr-2 hover:bg-primary/5", !b.okundu && "bg-primary/5")}>
-                        <p className="text-sm font-medium text-slate-900">{b.baslik}</p>
-                        {b.icerik && <p className="mt-0.5 text-xs text-muted-foreground">{b.icerik}</p>}
-                      </div>
-                    );
-                    return (
-                      <div key={b.id} className="flex items-center gap-1">
-                        {b.link ? (
-                          <Link href={b.link} className="min-w-0 flex-1">
-                            {content}
-                          </Link>
-                        ) : (
-                          <div className="min-w-0 flex-1">{content}</div>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteOne(b.id)}
-                          aria-label="Bildirimi sil"
-                          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-red-50 hover:text-red-600"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    );
-                  })}
-                </>
+                ozelListe
               ))}
           </div>
         </div>

@@ -5,14 +5,14 @@ import { proAktifMi } from "@/lib/sms";
 
 export async function GET() {
   const user = await getCurrentUser();
-  // Kisisel bildirimler Pro; genel duyurular (hedefine uyanlar) herkese. Ucretsizde eski
-  // kisisel bildirimler de gonderilmez (panelde bulanik ornek gosterilir).
+  // Kisisel bildirimler Pro; genel duyurular (hedefine uyanlar) herkese. Ucretsizde yalniz
+  // admin mesajlari ve destek yanitlari gelir, digerlerinin yerine bulanik ornek gosterilir.
   const pro = !!user && proAktifMi(user);
 
   const [duyurular, banaOzel, bildirimOkunmamis] = await Promise.all([
     kullaniciDuyurulari(user),
-    pro ? getBanaOzelBildirimler(user.id) : Promise.resolve([]),
-    pro ? getOkunmamisBildirimSayisi(user.id) : Promise.resolve(0),
+    user ? getBanaOzelBildirimler(user.id, 30, !pro) : Promise.resolve([]),
+    user ? getOkunmamisBildirimSayisi(user.id, !pro) : Promise.resolve(0),
   ]);
   // Zili en son actigindan sonra yayinlanan duyurular okunmamis sayilir (kirmizi nokta).
   const sonGorulme = user ? (user.duyuruGorulme ?? user.createdAt).getTime() : Infinity;
@@ -33,6 +33,6 @@ export async function DELETE() {
     return NextResponse.json({ error: "Giriş yapmalısınız." }, { status: 401 });
   }
 
-  await deleteTumBildirimler(user.id);
+  await deleteTumBildirimler(user.id, !proAktifMi(user));
   return NextResponse.json({ ok: true });
 }

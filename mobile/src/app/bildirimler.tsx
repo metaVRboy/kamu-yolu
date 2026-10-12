@@ -47,6 +47,27 @@ export default function Bildirimler() {
     api("/api/bildirimler", { method: "DELETE" }).catch(() => {});
   }
 
+  const ozelListe = (
+    <>
+      <Pressable onPress={hepsiniSil} hitSlop={6} style={{ alignSelf: "flex-end" }}>
+        <T w="orta" style={{ fontSize: 12, color: renk.soluk }}>
+          Tümünü sil
+        </T>
+      </Pressable>
+      {banaOzel.map((b) => (
+        <View key={b.id} style={[s.kart, { flexDirection: "row", alignItems: "center", gap: 8 }, !b.okundu && { backgroundColor: renk.birincilZemin }]}>
+          <Pressable disabled={!b.link} onPress={() => b.link && siteLinkiAc(b.link)} style={{ flex: 1 }}>
+            <T w="orta">{b.baslik}</T>
+            {!!b.icerik && <T style={s.icerik}>{b.icerik}</T>}
+          </Pressable>
+          <Pressable onPress={() => sil(b.id)} hitSlop={8}>
+            <Trash2 size={16} color={renk.soluk} />
+          </Pressable>
+        </View>
+      ))}
+    </>
+  );
+
   return (
     <View style={{ flex: 1 }}>
       <View style={s.sekmeler}>
@@ -79,6 +100,9 @@ export default function Bildirimler() {
               ))
             )
           ) : veri.banaOzelKilitli ? (
+            // Ucretsizde yalniz admin mesajlari ve destek yanitlari gelir; altinda kilitli onizleme.
+            <>
+            {banaOzel.length > 0 && ozelListe}
             <KilitliOzellik mevcutPlan={veri.plan ?? "UCRETSIZ"} gerekenPlan="PRO" kaynak="bildirim" baslik="Kişisel bildirimler Pro'da">
               <View style={{ minHeight: 340, gap: 8 }}>
                 {ORNEK.map((b, i) => (
@@ -89,27 +113,11 @@ export default function Bildirimler() {
                 ))}
               </View>
             </KilitliOzellik>
+            </>
           ) : banaOzel.length === 0 ? (
             <Bos metin="Henüz bildirimin yok." />
           ) : (
-            <>
-              <Pressable onPress={hepsiniSil} hitSlop={6} style={{ alignSelf: "flex-end" }}>
-                <T w="orta" style={{ fontSize: 12, color: renk.soluk }}>
-                  Tümünü sil
-                </T>
-              </Pressable>
-              {banaOzel.map((b) => (
-                <View key={b.id} style={[s.kart, { flexDirection: "row", alignItems: "center", gap: 8 }, !b.okundu && { backgroundColor: renk.birincilZemin }]}>
-                  <Pressable disabled={!b.link} onPress={() => b.link && siteLinkiAc(b.link)} style={{ flex: 1 }}>
-                    <T w="orta">{b.baslik}</T>
-                    {!!b.icerik && <T style={s.icerik}>{b.icerik}</T>}
-                  </Pressable>
-                  <Pressable onPress={() => sil(b.id)} hitSlop={8}>
-                    <Trash2 size={16} color={renk.soluk} />
-                  </Pressable>
-                </View>
-              ))}
-            </>
+            ozelListe
           )}
         </ScrollView>
       )}
