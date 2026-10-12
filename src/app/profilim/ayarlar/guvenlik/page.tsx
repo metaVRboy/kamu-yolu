@@ -9,7 +9,8 @@ export const metadata = { title: "Güvenlik Ayarları — Kamu Yolu" };
 
 const OTURUM_OMRU_MS = 30 * 24 * 60 * 60 * 1000; // JWT suresi; daha eski oturumlar zaten gecersiz
 
-export default async function GuvenlikAyarlariPage() {
+export default async function GuvenlikAyarlariPage({ searchParams }: { searchParams: Promise<{ google?: string }> }) {
+  const { google } = await searchParams;
   const user = await getCurrentUser();
   if (!user) redirect("/giris");
 
@@ -30,7 +31,7 @@ export default async function GuvenlikAyarlariPage() {
       </AyarKarti>
 
       <AyarKarti baslik="Google hesabı">
-        <GoogleBaglantisi bagli={!!user.googleId} sifreVar={sifreVar} />
+        <GoogleBaglantisi bagli={!!user.googleId} sifreVar={sifreVar} sonuc={google} />
       </AyarKarti>
 
       <AyarKarti baslik="Aktif oturumlar" aciklama="Hesabına giriş yapılmış tarayıcı ve cihazlar. Tanımadığın bir oturum görürsen kapat ve şifreni değiştir.">

@@ -346,11 +346,27 @@ function SifreDegistir({ sifreVar, degisti }: { sifreVar: boolean; degisti: () =
 }
 
 function GoogleBaglantisi({ bagli, sifreVar, degisti }: { bagli: boolean; sifreVar: boolean; degisti: () => void }) {
+  // Tarayicida uygulamanin oturumu yok: once kisa omurlu baglama kodu alinir, Google o kodla acilir.
+  async function bagla() {
+    try {
+      const { kod } = await api<{ kod: string }>("/api/auth/google/bagla-kodu", { method: "POST" });
+      const r = await WebBrowser.openAuthSessionAsync(`${SITE}/api/auth/google?bagla=${encodeURIComponent(kod)}&uygulama=1`, "kamuyolu://google-bagla");
+      if (r.type !== "success") return;
+      const sonuc = r.url.match(/sonuc=([\w-]+)/)?.[1];
+      if (sonuc === "baglandi") Alert.alert("Google hesabın bağlandı.", "Artık Google ile de giriş yapabilirsin.");
+      else Alert.alert("Bağlanamadı.", sonuc === "baska-hesap" ? "Bu Google hesabı başka bir Kamu Yolu hesabına bağlı." : "Lütfen tekrar dene.");
+      degisti();
+    } catch (e) {
+      Alert.alert("Bağlanamadı.", hataMetni(e));
+    }
+  }
+
   if (!bagli) {
     return (
-      <T style={{ color: renk.soluk, lineHeight: 20 }}>
-        Hesabına bağlı bir Google hesabı yok. Giriş sayfasında “Google ile devam et”i seçersen, aynı e-posta adresli Google hesabın otomatik olarak bağlanır.
-      </T>
+      <View style={{ gap: 10 }}>
+        <T style={{ color: renk.soluk, lineHeight: 20 }}>Hesabına bağlı bir Google hesabı yok. Bağlarsan Google ile tek dokunuşla giriş yapabilirsin.</T>
+        <Buton tur="cerceve" etiket="Google hesabını bağla" onPress={bagla} />
+      </View>
     );
   }
   return (
@@ -366,7 +382,7 @@ function GoogleBaglantisi({ bagli, sifreVar, degisti }: { bagli: boolean; sifreV
           tur="cerceve"
           etiket="Bağlantıyı kaldır"
           onPress={() =>
-            onayIste("Google bağlantısı kaldırılsın mı?", "Bundan sonra yalnızca e-posta adresin ve şifrenle giriş yapabilirsin.", "Kaldır", () =>
+            onayIste("Google bağlantısı kaldırılsın mı?", "Bundan sonra yalnızca e-posta adresin ve şifrenle giriş yapabilirsin. İstediğinde buradan yeniden bağlayabilirsin.", "Kaldır", () =>
               api("/api/profil/google", { method: "DELETE" }).then(
                 () => {
                   Alert.alert("Google bağlantısı kaldırıldı.", "Artık e-posta ve şifrenle giriş yapacaksın.");

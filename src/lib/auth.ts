@@ -103,6 +103,20 @@ export async function uygulamaGirisKoduOlustur(userId: string) {
     .sign(getSecretKey());
 }
 
+/**
+ * Google hesabi baglama: giris yapmis kullanicinin kimligi OAuth gidis-donusunde imzali, kisa
+ * omurlu bir jetonla tasinir (mobilde tarayicinin site oturumu olmadigi icin URL'de de gider).
+ */
+export async function googleBaglaJetonu(userId: string, sureSn = 600) {
+  return new SignJWT({ userId, amac: "google-bagla" }).setProtectedHeader({ alg: "HS256" }).setExpirationTime(`${sureSn}s`).sign(getSecretKey());
+}
+
+export async function googleBaglaJetonuCoz(jeton: string | undefined | null): Promise<string | null> {
+  if (!jeton) return null;
+  const p = await jwtVerify(jeton, getSecretKey()).then((r) => r.payload).catch(() => null);
+  return p?.amac === "google-bagla" && typeof p.userId === "string" ? p.userId : null;
+}
+
 /** Kodu dogrular, oturumu acar ve bu istegin (mobil uygulamanin fetch cerez deposu) cerezine yazar. */
 export async function uygulamaGirisKoduKullan(kod: string): Promise<boolean> {
   const payload = await jwtVerify(kod, getSecretKey()).then((r) => r.payload).catch(() => null);

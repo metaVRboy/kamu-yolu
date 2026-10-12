@@ -1,8 +1,8 @@
 import { after, NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { guvenlikEpostasi } from "@/lib/email";
-import { createSession, uygulamaGirisKoduOlustur } from "@/lib/auth";
-import { UYGULAMA_DONUS } from "@/lib/uygulama";
+import { createSession, googleBaglaJetonuCoz, uygulamaGirisKoduOlustur } from "@/lib/auth";
+import { UYGULAMA_DONUS, UYGULAMA_GOOGLE_BAGLA } from "@/lib/uygulama";
 import { SITE_URL } from "@/lib/site";
 import { GOOGLE_CALLBACK_PATH } from "../route";
 
@@ -55,6 +55,21 @@ export async function GET(req: NextRequest) {
     });
     if (!profilRes.ok) throw new Error(`Profil alinamadi: ${profilRes.status}`);
     const profil = (await profilRes.json()) as GoogleProfil;
+
+    // Baglama akisi (Ayarlar > Guvenlik): secilen Google hesabi oturumdaki kullaniciya baglanir, giris yapilmaz.
+    const baglaUserId = await googleBaglaJetonuCoz(req.cookies.get("google_oauth_bagla")?.value);
+    if (baglaUserId) {
+      const baska = await prisma.user.findUnique({ where: { googleId: profil.sub }, select: { id: true } });
+      let sonuc = "baska-hesap";
+      if (!baska || baska.id === baglaUserId) {
+        const u = await prisma.user.update({ where: { id: baglaUserId }, data: { googleId: profil.sub, googleBaglamaKapali: false } });
+        after(() => guvenlikEpostasi(u.email, u.adSoyad, "hesabına bir Google hesabı bağlandı"));
+        sonuc = "baglandi";
+      }
+      const res = NextResponse.redirect(uygulama ? `${UYGULAMA_GOOGLE_BAGLA}?sonuc=${sonuc}` : `${SITE_URL}/profilim/ayarlar/guvenlik?google=${sonuc}`);
+      for (const c of ["google_oauth_state", "google_oauth_bagla", "google_oauth_uygulama"]) res.cookies.delete(c);
+      return res;
+    }
 
     if (!profil.email || !profil.email_verified) {
       return hataYonlendir("google-email");

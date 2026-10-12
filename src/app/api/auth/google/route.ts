@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomBytes } from "crypto";
 import { SITE_URL } from "@/lib/site";
+import { getCurrentUser, googleBaglaJetonu, googleBaglaJetonuCoz } from "@/lib/auth";
 
 export const GOOGLE_CALLBACK_PATH = "/api/auth/google/callback";
 
@@ -31,9 +32,20 @@ export async function GET(req: NextRequest) {
     path: "/",
     maxAge: 600,
   });
+  const cerez = { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax" as const, path: "/", maxAge: 600 };
   // Mobil uygulama girisi telefonun tarayicisinda baslatir; callback oturumu uygulamaya kodla dondurur.
-  if (req.nextUrl.searchParams.get("uygulama") === "1") {
-    res.cookies.set("google_oauth_uygulama", "1", { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", maxAge: 600 });
+  // Onceki yarim kalmis akisin cerezleri kalmasin (giris, baglamaya donusmesin).
+  if (req.nextUrl.searchParams.get("uygulama") === "1") res.cookies.set("google_oauth_uygulama", "1", cerez);
+  else res.cookies.delete("google_oauth_uygulama");
+  res.cookies.delete("google_oauth_bagla");
+
+  // Baglama: sitede oturum cerezinden, uygulamada /api/auth/google/bagla-kodu'ndan alinan jetondan
+  // kimlik alinir; callback secilen Google hesabini bu kullaniciya baglar (giris yapmaz).
+  const bagla = req.nextUrl.searchParams.get("bagla");
+  if (bagla) {
+    const userId = bagla === "1" ? (await getCurrentUser())?.id : await googleBaglaJetonuCoz(bagla);
+    if (!userId) return NextResponse.redirect(`${SITE_URL}/giris`);
+    res.cookies.set("google_oauth_bagla", await googleBaglaJetonu(userId), cerez);
   }
   return res;
 }

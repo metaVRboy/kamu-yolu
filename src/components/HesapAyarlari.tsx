@@ -225,7 +225,12 @@ export function EpostaDegistirForm({ email, sifreVar }: { email: string; sifreVa
   );
 }
 
-export function GoogleBaglantisi({ bagli, sifreVar }: { bagli: boolean; sifreVar: boolean }) {
+const GOOGLE_SONUC: Record<string, { metin: string; iyi: boolean }> = {
+  baglandi: { metin: "Google hesabın bağlandı. Artık Google ile de giriş yapabilirsin.", iyi: true },
+  "baska-hesap": { metin: "Bu Google hesabı başka bir Kamu Yolu hesabına bağlı. Farklı bir Google hesabı seç.", iyi: false },
+};
+
+export function GoogleBaglantisi({ bagli, sifreVar, sonuc }: { bagli: boolean; sifreVar: boolean; sonuc?: string }) {
   const router = useRouter();
   const [onay, setOnay] = useState(false);
   const [yukleniyor, setYukleniyor] = useState(false);
@@ -243,33 +248,47 @@ export function GoogleBaglantisi({ bagli, sifreVar }: { bagli: boolean; sifreVar
     }
   }
 
+  const bilgi = sonuc ? GOOGLE_SONUC[sonuc] : undefined;
+  const sonucKutusu = bilgi && (
+    <p className={cn("mb-3 rounded-xl px-3 py-2 text-sm font-medium", bilgi.iyi ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-700")}>{bilgi.metin}</p>
+  );
   if (!bagli) {
     return (
-      <p className="text-sm text-muted-foreground">
-        Hesabına bağlı bir Google hesabı yok. Giriş sayfasında “Google ile devam et”i seçersen, aynı e-posta adresli Google hesabın otomatik olarak bağlanır.
-      </p>
+      <div>
+        {sonucKutusu}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-muted-foreground">Hesabına bağlı bir Google hesabı yok. Bağlarsan Google ile tek tıkla giriş yapabilirsin.</p>
+          {/* Duz baglanti: OAuth tam sayfa yonlendirmeyle Google'a gider. */}
+          <a href="/api/auth/google?bagla=1" className="inline-flex h-9 items-center rounded-xl border border-primary/20 px-3 text-sm font-semibold text-slate-800 hover:bg-slate-50">
+            Google hesabını bağla
+          </a>
+        </div>
+      </div>
     );
   }
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3">
-      <p className="text-sm text-slate-700">
-        <span className="font-semibold text-emerald-700">Bağlı.</span> Google hesabınla giriş yapabilirsin.
-        {!sifreVar && <span className="block text-muted-foreground">Bağlantıyı kaldırmak için önce yukarıdan bir şifre belirlemelisin.</span>}
-      </p>
-      {sifreVar && (
-        <Button type="button" variant="outline" onClick={() => setOnay(true)}>
-          Bağlantıyı kaldır
-        </Button>
-      )}
-      <ConfirmDialog
-        open={onay}
-        onOpenChange={setOnay}
-        title="Google bağlantısı kaldırılsın mı?"
-        description="Bundan sonra yalnızca e-posta adresin ve şifrenle giriş yapabilirsin."
-        onConfirm={kaldir}
-        loading={yukleniyor}
-        onayEtiketi="Kaldır"
-      />
+    <div>
+      {sonucKutusu}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-slate-700">
+          <span className="font-semibold text-emerald-700">Bağlı.</span> Google hesabınla giriş yapabilirsin.
+          {!sifreVar && <span className="block text-muted-foreground">Bağlantıyı kaldırmak için önce yukarıdan bir şifre belirlemelisin.</span>}
+        </p>
+        {sifreVar && (
+          <Button type="button" variant="outline" onClick={() => setOnay(true)}>
+            Bağlantıyı kaldır
+          </Button>
+        )}
+        <ConfirmDialog
+          open={onay}
+          onOpenChange={setOnay}
+          title="Google bağlantısı kaldırılsın mı?"
+          description="Bundan sonra yalnızca e-posta adresin ve şifrenle giriş yapabilirsin. İstediğinde buradan yeniden bağlayabilirsin."
+          onConfirm={kaldir}
+          loading={yukleniyor}
+          onayEtiketi="Kaldır"
+        />
+      </div>
     </div>
   );
 }
