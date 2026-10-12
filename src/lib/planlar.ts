@@ -57,7 +57,12 @@ export type YukseltmeKaynagi =
   | "becayis-mesaj"
   | "becayis-talep"
   | "ozel-ilanlar"
-  | "reklamsiz";
+  | "reklamsiz"
+  // Periyodik tanitim penceresinin donusumlu mesajlari (hangisi daha cok "haber ver" aliyor olculur).
+  | "tanitim-ilan"
+  | "tanitim-kpss"
+  | "tanitim-becayis"
+  | "tanitim-proplus";
 
 export const KAYNAK_METNI: Record<YukseltmeKaynagi, { baslik: string; alt: string }> = {
   genel: { baslik: "Kamu Yolu'nun tamamını aç", alt: "Bölümüne uygun ilanları ilk sen öğren, KPSS'ye her gün hazırlan." },
@@ -70,6 +75,10 @@ export const KAYNAK_METNI: Record<YukseltmeKaynagi, { baslik: string; alt: strin
   "becayis-talep": { baslik: "Becayiş talebini yayımla", alt: "Talebin herkese açık listelensin, yer değiştirmek isteyenler sana ulaşsın." },
   "ozel-ilanlar": { baslik: "Sana özel ilanları gör", alt: "Bölümüne ve öğrenim düzeyine uygun ilanlar tek listede." },
   reklamsiz: { baslik: "Reklamsız, odaklı bir deneyim", alt: "Hiç reklam görmeden ilanlara ve denemelere odaklan." },
+  "tanitim-ilan": { baslik: "Yeni ilanı herkesten önce öğren", alt: "Bölümüne uygun ilan çıktığı an SMS ve bildirimle haberin olsun." },
+  "tanitim-kpss": { baslik: "KPSS'ye her gün daha güçlü hazırlan", alt: "Ders karnen, soru çözümlerin ve gelişimin tek ekranda." },
+  "tanitim-becayis": { baslik: "Becayiş eşini bul, hemen yaz", alt: "Talebini yayımla, ilgilenenlerle site içinden mesajlaş." },
+  "tanitim-proplus": { baslik: "Sınırsız hazırlığa geç", alt: "Sınırsız deneme, konu bazlı değerlendirme ve reklamsız deneyim." },
 };
 
 /** Karsilastirma satirlari: true = var, false = yok, metin = plana gore deger. */

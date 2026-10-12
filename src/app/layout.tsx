@@ -18,6 +18,7 @@ import { PageTransition } from "@/components/PageTransition";
 import { Toaster } from "@/components/ui/toast";
 import { CerezBildirimi } from "@/components/CerezBildirimi";
 import { ReklamEngelleyiciKontrol } from "@/components/ReklamEngelleyiciKontrol";
+import { YukseltmeTanitimi } from "@/components/YukseltmeTanitimi";
 import { YukseltmeProvider } from "@/components/YukseltmePenceresi";
 import { SayfaYuklemeCizgisi } from "@/components/SayfaYuklemeCizgisi";
 import { AuthModalProvider } from "@/components/AuthModal";
@@ -242,6 +243,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <Toaster />
         <CerezBildirimi />
         {!reklamsiz && <ReklamEngelleyiciKontrol />}
+        {/* Periyodik Pro/Pro+ tanitimi: Pro+ uyeye ve bakim ekranina hic konmaz. */}
+        {!bakimda && user?.abonelikPlani !== "PRO_PLUS" && <YukseltmeTanitimi />}
        </YukseltmeProvider>
        </AuthModalProvider>
       </body>
