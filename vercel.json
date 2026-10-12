@@ -1,10 +1,6 @@
 {
   "crons": [
     {
-      "path": "/api/scrape",
-      "schedule": "0 6,9,12,15 * * *"
-    },
-    {
       "path": "/api/haber-arastir",
       "schedule": "0 6,9,12,15 * * *"
     },
