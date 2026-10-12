@@ -3,8 +3,30 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { ArrowLeftRight, BellRing, CalendarClock, Check, Crown, Flame, GraduationCap, Infinity as Sonsuz, Sparkles, TrendingUp, X } from "lucide-react";
+import {
+  ArrowLeftRight,
+  BellRing,
+  BriefcaseBusiness,
+  CalendarClock,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  ClipboardList,
+  Crown,
+  Flame,
+  GraduationCap,
+  Headset,
+  Infinity as Sonsuz,
+  MessageSquareText,
+  ShieldCheck,
+  Smartphone,
+  Sparkles,
+  Target,
+  TrendingUp,
+  X,
+} from "lucide-react";
 import { useYukseltme } from "@/components/YukseltmePenceresi";
+import { DERS_SIRASI, SINAV_SURESI_DK, TOPLAM_SORU } from "@/lib/kpssDenemeSabitler";
 import { kalanSureMetni, tl, type FiyatTablosu, type KampanyaOzeti, type Plan, type UcretliPlan, type YukseltmeKaynagi } from "@/lib/planlar";
 import { cn } from "@/lib/utils";
 
@@ -21,10 +43,9 @@ type Veri = {
 const ARALIK_MS = 10 * 60_000;
 const GEZINME_SN = 10;
 const SON_ANAHTAR = "kyTanitimSon";
-const SIRA_ANAHTAR = "kyTanitimSira";
 // Sinav ekrani, admin, giris/sifre akislari ve zaten plan sayfasi: pencere burada kesintiye yol acar.
 const HARIC = [/^\/admin/, /^\/kpss-denemesi\/[^/]+/, /^\/giris/, /^\/kayit-ol/, /^\/sifre/, /^\/profilim\/abonelik/];
-const DONUSUM: YukseltmeKaynagi[] = ["tanitim-ilan", "tanitim-kpss", "tanitim-becayis"];
+const OTOMATIK_GECIS_MS = 6000;
 
 // localStorage gizli modda/engellenmisse atabilir; o zaman bellekte tutulur (sayfa yenilenince sifirlanir).
 const bellek: Record<string, string> = {};
@@ -53,7 +74,7 @@ export function YukseltmeTanitimi() {
   const yukseltmeAc = useYukseltme();
   const pathname = usePathname();
   const yolRef = useRef(pathname);
-  const [acik, setAcik] = useState<{ veri: Veri; kaynak: YukseltmeKaynagi } | null>(null);
+  const [acik, setAcik] = useState<Veri | null>(null);
   const acikRef = useRef(false);
 
   useEffect(() => {
@@ -82,10 +103,8 @@ export function YukseltmeTanitimi() {
       try {
         const veri: Veri = await fetch("/api/yukseltme-tanitim").then((r) => (r.ok ? r.json() : Promise.reject()));
         if (veri.plan === "PRO_PLUS") return;
-        const sira = Number(oku(SIRA_ANAHTAR) ?? 0);
-        yaz(SIRA_ANAHTAR, String(sira + 1));
         acikRef.current = true;
-        setAcik({ veri, kaynak: veri.plan === "PRO" ? "tanitim-proplus" : DONUSUM[sira % DONUSUM.length] });
+        setAcik(veri);
       } catch {
         // Veri alinamadi: bu tur atlanir.
       } finally {
@@ -106,73 +125,163 @@ export function YukseltmeTanitimi() {
   if (!acik) return null;
   return (
     <Pencere
-      veri={acik.veri}
-      kaynak={acik.kaynak}
+      veri={acik}
       kapat={kapat}
-      sec={(plan) => {
+      sec={(plan, kaynak) => {
         kapat();
-        yukseltmeAc({ plan, kaynak: acik.kaynak });
+        yukseltmeAc({ plan, kaynak });
       }}
     />
   );
 }
 
-/** Donusumlu manset: her biri gercek sayilarla; sayi anlamsiz kucukse sayisiz metin. */
-function manset(v: Veri, kaynak: YukseltmeKaynagi): { ust: string; baslik: ReactNode; alt: string; cipler: { ikon: typeof Flame; metin: string }[] } {
-  const vurgu = (s: ReactNode) => <span className="bg-gradient-to-r from-amber-200 to-yellow-100 bg-clip-text text-transparent">{s}</span>;
-  if (kaynak === "tanitim-proplus") {
-    return {
-      ust: "Pro'dan bir adım öteye",
-      baslik: <>Sınırsız hazırlığa {vurgu("Pro+ ile")} geç</>,
-      alt: "Haftalık deneme sınırı kalkar, her konuda nerede olduğunu ve gelişimini görürsün.",
-      cipler: [
-        ...(v.haftalikDeneme >= 50 ? [{ ikon: TrendingUp, metin: `Bu hafta ${sayi(v.haftalikDeneme)} deneme çözüldü` }] : []),
-        { ikon: Sonsuz, metin: "Sınırsız KPSS denemesi" },
-      ],
-    };
+type Slayt = {
+  kaynak: YukseltmeKaynagi; // CTA'ya basildiginda gorunen slayt kaydedilir: hangi ozellik ikna ediyor olculur
+  ikon: typeof Flame;
+  ust: string;
+  baslik: ReactNode;
+  alt: string;
+  cipler: { ikon: typeof Flame; metin: string }[];
+  gorsel?: ReactNode;
+};
+
+const vurgu = (s: ReactNode) => <span className="bg-gradient-to-r from-amber-200 to-yellow-100 bg-clip-text text-transparent">{s}</span>;
+
+/**
+ * Kaydirilabilir ozellik slaytlari: once SMS, sonra ilanlar, KPSS, becayis, Pro+ farki. Tum sayilar
+ * gercek; anlamsiz kucukse sayisiz metin. Pro uye yalniz Pro+'in kattiklarini gorur.
+ */
+function slaytlar(v: Veri): Slayt[] {
+  const b = v.bolum;
+  const denemeCipi = v.haftalikDeneme >= 50 ? [{ ikon: TrendingUp, metin: `Bu hafta ${sayi(v.haftalikDeneme)} deneme çözüldü` }] : [];
+  const konu: Slayt = {
+    kaynak: "tanitim-proplus",
+    ikon: Target,
+    ust: "Pro+ · Konu analizi",
+    baslik: <>Hangi {vurgu("konuyu")} çalışman gerektiğini gör</>,
+    alt: "Her denemeden sonra konu konu nerede olduğunu ve önceki denemene göre gelişimini adım adım izle.",
+    cipler: [
+      { ikon: Target, metin: "Konu bazlı değerlendirme" },
+      { ikon: TrendingUp, metin: "Deneme deneme gelişim takibi" },
+    ],
+  };
+  const reklamsiz: Slayt = {
+    kaynak: "tanitim-proplus",
+    ikon: ShieldCheck,
+    ust: "Pro+ · Odaklı deneyim",
+    baslik: <>{vurgu("Reklamsız")} çalış, öncelikli destek al</>,
+    alt: "Hiç reklam görmeden ilanlara ve denemelere odaklan; destek talebin sıranın önüne geçer.",
+    cipler: [
+      { ikon: ShieldCheck, metin: "Sitede hiç reklam yok" },
+      { ikon: Headset, metin: "Öncelikli destek" },
+    ],
+  };
+  const kpssGorsel = (
+    <div className="grid grid-cols-3 gap-2">
+      {[
+        [String(TOPLAM_SORU), "soru"],
+        [String(SINAV_SURESI_DK), "dakika"],
+        [String(DERS_SIRASI.length), "ders"],
+      ].map(([s, e]) => (
+        <div key={e} className="rounded-2xl bg-white/15 px-3 py-2.5 text-center ring-1 ring-white/25 sm:px-4 sm:py-3">
+          <p className="font-sans text-2xl font-extrabold tabular-nums sm:text-3xl">{s}</p>
+          <p className="text-[11px] font-semibold text-white/75">{e}</p>
+        </div>
+      ))}
+    </div>
+  );
+
+  if (v.plan === "PRO") {
+    return [
+      {
+        kaynak: "tanitim-proplus",
+        ikon: Sonsuz,
+        ust: "Pro+ · Sınırsız deneme",
+        baslik: <>Haftalık sınır yok, {vurgu("istediğin kadar")} çöz</>,
+        alt: "Pro'da haftada 3 deneme hakkın var; Pro+ ile sınır kalkar, hazırlığın hiç yarıda kalmaz.",
+        cipler: [...denemeCipi, { ikon: GraduationCap, metin: "Ders karnesi ve çözümler dahil" }],
+        gorsel: kpssGorsel,
+      },
+      konu,
+      reklamsiz,
+    ];
   }
-  if (kaynak === "tanitim-kpss") {
-    return {
-      ust: "KPSS hazırlığı",
-      baslik: v.haftalikDeneme >= 50 ? <>Bu hafta {vurgu(`${sayi(v.haftalikDeneme)} deneme`)} çözüldü. Sen ne durumdasın?</> : <>KPSS&apos;ye {vurgu("her gün")} daha güçlü hazırlan</>,
-      alt: "Pro'da ders karnen ve her sorunun çözümü, Pro+'da konu bazlı değerlendirme ve gelişim takibi.",
+
+  // Ornek SMS: metin sms-ilan-bildirimi'ndeki sablonun aynisi; sayi bolumun bu haftaki gercek ilan sayisi.
+  const ornekSayi = b && b.buHafta > 0 ? b.buHafta : 1;
+  return [
+    {
+      kaynak: "tanitim-ilan",
+      ikon: MessageSquareText,
+      ust: "SMS ile ilan bildirimi",
+      baslik: <>Yeni ilan çıktığı an {vurgu("telefonuna SMS")} gelsin</>,
+      alt: "Bölümüne uygun bir ilan yayımlandığında siteye girmeni beklemeden haber veririz; başvuru süresini kaçırmazsın.",
       cipler: [
-        { ikon: GraduationCap, metin: "Gerçek KPSS formatında günlük deneme" },
-        { ikon: TrendingUp, metin: "Ders ders netin ve gelişimin" },
+        { ikon: Smartphone, metin: "Uygulama gerekmez, düz SMS" },
+        { ikon: BellRing, metin: "Site içi bildirim de gelir" },
       ],
-    };
-  }
-  if (kaynak === "tanitim-becayis") {
-    return {
+      gorsel: (
+        <div className="w-full max-w-xs rounded-2xl bg-white/95 p-3 text-slate-800 shadow-xl shadow-indigo-950/30 ring-1 ring-white/60">
+          <div className="flex items-center gap-2 text-[11px] text-slate-500">
+            <span className="flex h-5 w-5 items-center justify-center rounded-md bg-emerald-500 text-white">
+              <MessageSquareText className="h-3 w-3" />
+            </span>
+            <b className="text-slate-700">Mesajlar</b>
+            <span className="ml-auto">örnek</span>
+          </div>
+          <p className="mt-1.5 text-[13px] leading-snug">
+            <b>Kamu Yolu:</b> Bölümüne uygun {ornekSayi} yeni ilan yayımlandı. Profilindeki Bana Özel İlanlar bölümüne göz at.
+          </p>
+        </div>
+      ),
+    },
+    {
+      kaynak: "tanitim-ilan",
+      ikon: BriefcaseBusiness,
+      ust: b ? `Sana özel ilanlar · ${b.ad}` : "Sana özel ilanlar",
+      baslik:
+        b && b.aktif > 0 ? (
+          <>
+            Bölümüne uygun şu an {vurgu(`${sayi(b.aktif)} aktif ilan`)} var
+          </>
+        ) : (
+          <>Şu an {vurgu(`${sayi(v.aktifIlan)} aktif kamu ilanı`)} var</>
+        ),
+      alt: "Bölümüne ve öğrenim düzeyine uygun ilanlar tek listede; yüzlerce ilan arasında kaybolmazsın.",
+      cipler: b
+        ? [
+            ...(b.buHafta > 0 ? [{ ikon: Sparkles, metin: `${sayi(b.buHafta)} tanesi bu hafta yayımlandı` }] : []),
+            ...(b.yakindaBiten > 0 ? [{ ikon: CalendarClock, metin: `${sayi(b.yakindaBiten)} tanesinin başvurusu 7 gün içinde bitiyor` }] : []),
+            ...(b.buHafta + b.yakindaBiten === 0 ? [{ ikon: BellRing, metin: "Yenisi çıkınca anında haberin olsun" }] : []),
+          ]
+        : [{ ikon: BellRing, metin: "Profiline bölümünü ekle, sana uygun ilanları ilk sen gör" }],
+    },
+    {
+      kaynak: "tanitim-kpss",
+      ikon: GraduationCap,
+      ust: "KPSS denemeleri",
+      baslik: v.haftalikDeneme >= 50 ? <>Bu hafta {vurgu(`${sayi(v.haftalikDeneme)} deneme`)} çözüldü. Sen ne durumdasın?</> : <>KPSS&apos;ye {vurgu("gerçek formatta")} hazırlan</>,
+      alt: "Pro'da haftada 3 deneme, ders ders netin ve her sorunun açıklamalı çözümü; Pro+'da sınırsız deneme.",
+      cipler: [
+        { ikon: ClipboardList, metin: "Ders karnesi ve çözümler" },
+        { ikon: Sonsuz, metin: "Pro+ ile sınırsız" },
+      ],
+      gorsel: kpssGorsel,
+    },
+    {
+      kaynak: "tanitim-becayis",
+      ikon: ArrowLeftRight,
       ust: "Becayiş",
       baslik: v.becayisTalep > 0 ? <>{vurgu(`${sayi(v.becayisTalep)} aktif becayiş talebi`)} eşini arıyor</> : <>Becayiş eşini {vurgu("Kamu Yolu'nda")} bul</>,
-      alt: "Pro ile talebini yayımla, ilgilenenlerle iletişim bilgin gizli kalarak site içinden mesajlaş.",
+      alt: "Talebini yayımla, ilgilenenlerle iletişim bilgin gizli kalarak site içinden mesajlaş.",
       cipler: [
         { ikon: ArrowLeftRight, metin: "Talep oluştur ve mesajlaş" },
         { ikon: BellRing, metin: "Mesaj gelince bildirim ve SMS" },
       ],
-    };
-  }
-  const b = v.bolum;
-  return {
-    ust: b ? b.ad : "Kamu ilanları",
-    baslik:
-      b && b.aktif > 0 ? (
-        <>
-          Bölümüne uygun şu an {vurgu(`${sayi(b.aktif)} aktif ilan`)} var
-        </>
-      ) : (
-        <>Şu an {vurgu(`${sayi(v.aktifIlan)} aktif kamu ilanı`)} var</>
-      ),
-    alt: "Pro ile bölümüne uygun yeni ilan çıktığı an SMS ve bildirimle herkesten önce öğren.",
-    cipler: b
-      ? [
-          ...(b.buHafta > 0 ? [{ ikon: Sparkles, metin: `${sayi(b.buHafta)} tanesi bu hafta yayımlandı` }] : []),
-          ...(b.yakindaBiten > 0 ? [{ ikon: CalendarClock, metin: `${sayi(b.yakindaBiten)} tanesinin başvurusu 7 gün içinde bitiyor` }] : []),
-          ...(b.buHafta + b.yakindaBiten === 0 ? [{ ikon: BellRing, metin: "Yenisi çıkınca anında haberin olsun" }] : []),
-        ]
-      : [{ ikon: BellRing, metin: "Profiline bölümünü ekle, sana uygun ilanları ilk sen gör" }],
-  };
+    },
+    konu,
+    reklamsiz,
+  ];
 }
 
 const PLAN_KART: Record<UcretliPlan, { ad: string; rozet: string; maddeler: string[]; kart: string; buton: string; vurgu: string }> = {
@@ -194,7 +303,23 @@ const PLAN_KART: Record<UcretliPlan, { ad: string; rozet: string; maddeler: stri
   },
 };
 
-function Pencere({ veri, kaynak, kapat, sec }: { veri: Veri; kaynak: YukseltmeKaynagi; kapat: () => void; sec: (p: UcretliPlan) => void }) {
+/** Seridi i. slayta kaydirir; sondan sonra basa, bastan once sona sarar. */
+const kaydir = (el: HTMLDivElement | null, i: number, n: number) => el?.scrollTo({ left: ((i + n) % n) * el.clientWidth, behavior: "smooth" });
+
+function Pencere({ veri, kapat, sec }: { veri: Veri; kapat: () => void; sec: (p: UcretliPlan, k: YukseltmeKaynagi) => void }) {
+  const slayt = slaytlar(veri);
+  const [aktif, setAktif] = useState(0);
+  const [durdu, setDurdu] = useState(false);
+  const seritRef = useRef<HTMLDivElement>(null);
+  const git = (i: number) => kaydir(seritRef.current, i, slayt.length);
+
+  // Kullanici dokunana kadar slaytlar kendiliginden doner; hareket azaltma tercihinde hic donmez.
+  useEffect(() => {
+    if (durdu || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const t = setTimeout(() => kaydir(seritRef.current, aktif + 1, slayt.length), OTOMATIK_GECIS_MS);
+    return () => clearTimeout(t);
+  }, [durdu, aktif, slayt.length]);
+
   useEffect(() => {
     const tus = (e: KeyboardEvent) => e.key === "Escape" && kapat();
     document.addEventListener("keydown", tus);
@@ -206,7 +331,6 @@ function Pencere({ veri, kaynak, kapat, sec }: { veri: Veri; kaynak: YukseltmeKa
     };
   }, [kapat]);
 
-  const m = manset(veri, kaynak);
   const planlar: UcretliPlan[] = veri.plan === "PRO" ? ["PRO_PLUS"] : ["PRO", "PRO_PLUS"];
   const kampanya = veri.fiyat.kampanya;
 
@@ -228,38 +352,91 @@ function Pencere({ veri, kaynak, kapat, sec }: { veri: Veri; kaynak: YukseltmeKa
           <X className="h-4 w-4" />
         </button>
 
-        {/* Ust: marka renklerinde manset */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-indigo-700 via-blue-600 to-violet-600 px-5 pt-6 pb-5 text-white sm:px-10 sm:pt-8 sm:pb-7">
+        {/* Ust: marka renklerinde, kaydirilabilir ozellik slaytlari. Ilk dokunusta otomatik gecis durur. */}
+        <div
+          className="relative overflow-hidden bg-gradient-to-br from-indigo-700 via-blue-600 to-violet-600 pt-6 pb-4 text-white sm:pt-8 sm:pb-5"
+          onPointerDown={() => setDurdu(true)}
+          onWheel={() => setDurdu(true)}
+          onTouchStart={() => setDurdu(true)}
+          onKeyDown={() => setDurdu(true)}
+        >
           <div aria-hidden className="absolute inset-0 opacity-20 [background-image:radial-gradient(circle,white_1px,transparent_1.5px)] [background-size:18px_18px]" />
           <div aria-hidden className="absolute -top-24 -left-16 h-64 w-64 rounded-full bg-fuchsia-400/30 blur-3xl" />
           <div aria-hidden className="absolute -right-10 -bottom-28 h-72 w-72 rounded-full bg-sky-300/30 blur-3xl" />
           <Image src="/brand/kamu-yolu-emblem.png" alt="" width={300} height={300} loading="eager" className="pointer-events-none absolute -right-10 -bottom-12 h-56 w-56 opacity-10 brightness-0 invert" />
 
-          <div className="relative">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 shadow-[0_0_40px_rgba(255,255,255,0.35)] ring-1 ring-white/30">
-                <Crown className="animate-tac-suzul h-6 w-6 text-amber-300" />
-              </span>
-              <span className="rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold tracking-widest uppercase ring-1 ring-white/25">{m.ust}</span>
-              {kampanya && (
-                <span className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-rose-500 to-orange-500 px-3 py-1 text-[11px] font-bold shadow-lg shadow-rose-900/30">
-                  <Flame className="h-3.5 w-3.5" />
-                  {kampanya.ad} · {kalanSureMetni(kampanya.kalanMs)}
-                </span>
-              )}
-            </div>
-            <h2 id="tanitim-baslik" className="mt-3 max-w-xl pr-6 font-sans text-xl leading-tight font-extrabold tracking-tight sm:mt-4 sm:text-[2rem]">
-              {m.baslik}
+          <div className="relative flex flex-wrap items-center gap-2 px-5 pr-14 sm:px-14">
+            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/15 shadow-[0_0_40px_rgba(255,255,255,0.35)] ring-1 ring-white/30">
+              <Crown className="animate-tac-suzul h-5 w-5 text-amber-300" />
+            </span>
+            <h2 id="tanitim-baslik" className="font-sans text-base font-extrabold sm:text-lg">
+              {veri.plan === "PRO" ? "Pro+ ile neler kazanırsın?" : "Pro ile neler kazanırsın?"}
             </h2>
-            <p className="mt-1.5 max-w-xl text-[13px] text-white/85 sm:mt-2 sm:text-base">{m.alt}</p>
-            <div className="mt-3 flex flex-wrap gap-1.5 sm:mt-4 sm:gap-2">
-              {m.cipler.map(({ ikon: Ikon, metin }) => (
-                <span key={metin} className="flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold ring-1 ring-white/20">
-                  <Ikon className="h-3.5 w-3.5 text-amber-200" />
-                  {metin}
-                </span>
+            {kampanya && (
+              <span className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-rose-500 to-orange-500 px-3 py-1 text-[11px] font-bold shadow-lg shadow-rose-900/30">
+                <Flame className="h-3.5 w-3.5" />
+                {kampanya.ad} · {kalanSureMetni(kampanya.kalanMs)}
+              </span>
+            )}
+          </div>
+
+          <div className="relative mt-4 sm:mt-5">
+            <div
+              ref={seritRef}
+              onScroll={(e) => setAktif(Math.round(e.currentTarget.scrollLeft / e.currentTarget.clientWidth))}
+              className="flex snap-x snap-mandatory overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            >
+              {slayt.map((s, i) => (
+                <section key={i} aria-roledescription="slayt" aria-label={`${i + 1} / ${slayt.length}`} className="w-full shrink-0 snap-center px-5 sm:px-14">
+                  <div className="grid h-full content-start gap-4 sm:content-center sm:items-center sm:grid-cols-[1fr_auto] sm:gap-6">
+                    <div>
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold tracking-wider uppercase ring-1 ring-white/25">
+                        <s.ikon className="h-3.5 w-3.5 text-amber-200" />
+                        {s.ust}
+                      </span>
+                      <h3 className="mt-2.5 font-sans text-xl leading-tight font-extrabold tracking-tight sm:text-[1.75rem]">{s.baslik}</h3>
+                      <p className="mt-1.5 text-[13px] text-white/85 sm:mt-2 sm:text-[15px]">{s.alt}</p>
+                      <div className="mt-3 flex flex-wrap gap-1.5 sm:gap-2">
+                        {s.cipler.map(({ ikon: Ikon, metin }) => (
+                          <span key={metin} className="flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold ring-1 ring-white/20">
+                            <Ikon className="h-3.5 w-3.5 text-amber-200" />
+                            {metin}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    {s.gorsel && <div className="sm:w-72">{s.gorsel}</div>}
+                  </div>
+                </section>
               ))}
             </div>
+            {[
+              { yon: -1, Ikon: ChevronLeft, yer: "left-2", ad: "Önceki özellik" },
+              { yon: 1, Ikon: ChevronRight, yer: "right-2", ad: "Sonraki özellik" },
+            ].map(({ yon, Ikon, yer, ad }) => (
+              <button
+                key={yon}
+                type="button"
+                onClick={() => git(aktif + yon)}
+                aria-label={ad}
+                className={cn("absolute top-1/2 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/15 ring-1 ring-white/30 backdrop-blur transition-colors hover:bg-white/30 sm:flex", yer)}
+              >
+                <Ikon className="h-5 w-5" />
+              </button>
+            ))}
+          </div>
+
+          <div className="relative mt-4 flex justify-center gap-1.5">
+            {slayt.map((s, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => git(i)}
+                aria-label={`${i + 1}. özellik: ${s.ust}`}
+                aria-current={i === aktif}
+                className={cn("h-2 rounded-full transition-all", i === aktif ? "w-6 bg-white" : "w-2 bg-white/40 hover:bg-white/70")}
+              />
+            ))}
           </div>
         </div>
 
@@ -296,7 +473,7 @@ function Pencere({ veri, kaynak, kapat, sec }: { veri: Veri; kaynak: YukseltmeKa
                 </ul>
                 <button
                   type="button"
-                  onClick={() => sec(p)}
+                  onClick={() => sec(p, slayt[aktif].kaynak)}
                   className={cn("mt-4 w-full rounded-xl bg-gradient-to-r px-4 py-3 text-sm font-bold text-white shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.99]", k.buton)}
                 >
                   {k.ad}&apos;ya geç
