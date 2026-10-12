@@ -12,3 +12,20 @@ export const TURKIYE_ILLERI = [
   "Kırıkkale", "Batman", "Şırnak", "Bartın", "Ardahan", "Iğdır", "Yalova",
   "Karabük", "Kilis", "Osmaniye", "Düzce",
 ] as const;
+
+const IL_BUYUK = new Map(TURKIYE_ILLERI.map((il) => [il.toLocaleUpperCase("tr-TR"), il]));
+
+/**
+ * Ilanin ham konum metinlerinde ("ANKARA / ÇANKAYA", "Kurum / Antalya, Burdur") acikca gecen
+ * illerin resmi adlari. Il adi gecmeyen metin ("BAKANLIK MERKEZ TEŞKİLATI", "TÜRKİYE GENELİ") il vermez.
+ */
+export function ilanIlleri(hamIller: string[]): string[] {
+  const bulunan = new Set<string>();
+  for (const ham of hamIller) {
+    for (const parca of ham.split(/[/,;]/)) {
+      const il = IL_BUYUK.get(parca.trim().replace(/\s+/g, " ").toLocaleUpperCase("tr-TR"));
+      if (il) bulunan.add(il);
+    }
+  }
+  return [...bulunan];
+}

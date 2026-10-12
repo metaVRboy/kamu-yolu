@@ -2,6 +2,7 @@ import { Prisma } from "@/generated/prisma/client";
 import type { EducationLevel } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/slug";
+import { ilanIlleri } from "@/lib/iller";
 
 export type PostingWithDepartments = Awaited<
   ReturnType<typeof getPostingsForDepartment>
@@ -45,15 +46,20 @@ function buildFilterWhere(filters?: PostingFilters): Prisma.PostingWhereInput {
   if (filters?.kurumAdi) {
     where.institutionName = filters.kurumAdi;
   }
-  if (filters?.il) {
-    where.iller = { has: filters.il };
-  }
   if (filters?.departmentRequirement === "var") {
     where.isDepartmentRestricted = true;
   } else if (filters?.departmentRequirement === "yok") {
     where.isDepartmentRestricted = false;
   }
   return where;
+}
+
+/**
+ * Il filtresi: ham konum metni ilce/kurum adi icerebildigi icin ("ANKARA / ÇANKAYA") SQL'de degil,
+ * metinden cikarilan resmi il adlarina gore uygulanir. Il adi gecmeyen ilanlar ("TÜRKİYE GENELİ") eslesmez.
+ */
+function ileGore<T extends { iller: string[] }>(ilanlar: T[], il?: string): T[] {
+  return il ? ilanlar.filter((p) => ilanIlleri(p.iller).includes(il)) : ilanlar;
 }
 
 /**
@@ -76,7 +82,7 @@ export async function getPostingsForDepartment(
     include: { departments: { include: { department: true } } },
   });
 
-  return postings;
+  return ileGore(postings, filters?.il);
 }
 
 /** Bir bolumun (filtre uygulanmadan once) sonuc kumesindeki mevcut filtre secenekleri. */
@@ -102,15 +108,13 @@ function summarizeFilters(
   for (const p of postings) {
     institutionTypes.add(p.institutionType);
     if (p.ilanTuru) ilanTurleri.add(p.ilanTuru);
-    for (const il of p.iller) {
-      if (il.trim()) iller.add(il.trim());
-    }
+    for (const il of ilanIlleri(p.iller)) iller.add(il);
   }
 
   return {
     institutionTypes: Array.from(institutionTypes).sort(),
     ilanTurleri: Array.from(ilanTurleri).sort(),
-    iller: Array.from(iller).sort(),
+    iller: Array.from(iller).sort((a, b) => a.localeCompare(b, "tr")),
   };
 }
 
@@ -123,7 +127,7 @@ export async function getPostingsForLevel(
   level: EducationLevel,
   filters?: PostingFilters,
 ) {
-  return prisma.posting.findMany({
+  const postings = await prisma.posting.findMany({
     where: {
       isActive: true,
       educationLevels: { has: level },
@@ -131,6 +135,7 @@ export async function getPostingsForLevel(
     },
     orderBy: [{ applicationEnd: "asc" }, { publishedAt: "desc" }],
   });
+  return ileGore(postings, filters?.il);
 }
 
 export async function getAvailableFiltersForLevel(level: EducationLevel) {
@@ -147,13 +152,14 @@ export async function getAvailableFiltersForLevel(level: EducationLevel) {
 
 /** Sistemdeki TUM aktif ilanlar - "Tum Ilanlar" sayfasinin kaynagi. */
 export async function getAllActivePostings(filters?: PostingFilters) {
-  return prisma.posting.findMany({
+  const postings = await prisma.posting.findMany({
     where: {
       isActive: true,
       ...buildFilterWhere(filters),
     },
     orderBy: [{ applicationEnd: "asc" }, { publishedAt: "desc" }],
   });
+  return ileGore(postings, filters?.il);
 }
 
 export async function getAvailableFiltersForAll() {
