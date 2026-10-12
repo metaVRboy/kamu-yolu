@@ -250,6 +250,12 @@ model Oturum {
   olusturma  DateTime  @default(now())
   sonGorulme DateTime  @default(now())
   kapatildi  DateTime?
+  // Admin iki asamali dogrulama: panele girmek icin bu oturumda e-postaya giden kod
+  // dogrulanmis olmali (12 saat gecerli). Kod yalniz SHA-256 ozeti olarak saklanir.
+  adminDogrulama DateTime?
+  adminKodOzeti  String?
+  adminKodBitis  DateTime?
+  adminKodDeneme Int       @default(0)
 
   @@index([userId])
 }

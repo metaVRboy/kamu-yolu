@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { getCurrentUser } from "@/lib/auth";
+import { adminApi } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 import { islemKaydet } from "@/lib/islemKaydi";
 
@@ -12,8 +12,8 @@ const bodySchema = z.object({
 
 /** Admin: odeme altyapisi gelene kadar planlar elle verilir. */
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const admin = await getCurrentUser();
-  if (!admin?.isAdmin) return NextResponse.json({ error: "Yetkiniz yok." }, { status: 403 });
+  const admin = await adminApi();
+  if (!admin) return NextResponse.json({ error: "Yetkiniz yok." }, { status: 403 });
 
   const parsed = bodySchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Geçersiz bilgiler." }, { status: 400 });

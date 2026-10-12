@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 
 /** Kayit turleri ve panelde gorunen adlari. Anahtarin "kategori." oneki filtrelemede kullanilir. */
 export const ISLEM_ADI = {
+  "admin.dogrulama": "Admin paneline kodla giriş yaptı",
   "bildirim.yayinla": "Bildirim yayınladı",
   "bildirim.geri-cek": "Bildirimi geri çekti",
   "bildirim.sil": "Bildirimi sildi",
