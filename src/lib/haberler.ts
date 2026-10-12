@@ -36,8 +36,9 @@ export async function getAllHaberler(q = "") {
 export const haberFormSchema = z.object({
   baslik: z.string().trim().min(2).max(160),
   ozet: z.string().trim().min(2).max(2000),
-  kaynakUrl: z.string().trim().url().max(500).optional().or(z.literal("")),
-  gorselUrl: z.string().trim().url().max(500).optional().or(z.literal("")),
+  // Yalniz http(s): zod .url() "javascript:" da kabul eder.
+  kaynakUrl: z.url({ protocol: /^https?$/ }).trim().max(500).optional().or(z.literal("")),
+  gorselUrl: z.url({ protocol: /^https?$/ }).trim().max(500).optional().or(z.literal("")),
 });
 
 /**

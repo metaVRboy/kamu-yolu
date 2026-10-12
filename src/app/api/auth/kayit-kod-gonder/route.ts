@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { hashPassword, isSessionConfigured } from "@/lib/auth";
-import { sendEmail } from "@/lib/email";
+import { kacis, sendEmail } from "@/lib/email";
 import { passwordSchema } from "@/lib/authValidation";
 import { verifyTurnstileToken } from "@/lib/turnstile";
 
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
       to: email,
       subject: "Kamu Yolu — Doğrulama Kodu",
       html: `
-        <p>Merhaba ${adSoyad},</p>
+        <p>Merhaba ${kacis(adSoyad)},</p>
         <p>Kamu Yolu hesabını oluşturmak için doğrulama kodun:</p>
         <p style="font-size: 28px; font-weight: bold; letter-spacing: 4px;">${code}</p>
         <p>Bu kod ${KOD_GECERLILIK_DAKIKA} dakika geçerlidir. Bu isteği sen yapmadıysan bu e-postayı yok sayabilirsin.</p>

@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+import { headers } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
 import { getLastSuccessfulScrapeAt } from "@/lib/matching";
@@ -59,7 +60,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const fotografUrl = user ? await profilFotografiUrl(user.id) : null;
   // Pro+ "reklamsiz deneyim": reklam kodu, reklam alanlari ve engelleyici uyarisi hic yuklenmez.
   // (getCurrentUser suresi dolan plani zaten UCRETSIZ dondurur.)
-  const reklamsiz = user?.abonelikPlani === "PRO_PLUS";
+  // x-reklamsiz: proxy sifre sifirlama sayfasinda koyar; adres cubugundaki gizli token reklam sunucularina gitmesin.
+  const reklamsiz = user?.abonelikPlani === "PRO_PLUS" || (await headers()).get("x-reklamsiz") === "1";
 
   return (
     <html lang="tr" className={cn("h-full antialiased", inter.variable, "font-sans")}>

@@ -43,6 +43,8 @@ export async function POST(req: NextRequest) {
   const [guncel] = await prisma.$transaction([
     prisma.user.update({ where: { id: user.id }, data: { passwordHash, tokenVersion: { increment: 1 } } }),
     prisma.oturum.updateMany({ where: { userId: user.id, kapatildi: null }, data: { kapatildi: new Date() } }),
+    // Bekleyen sifirlama baglantilari da gecersiz (sifre degisti; eski link hesabi yeniden acmasin).
+    prisma.passwordResetToken.deleteMany({ where: { userId: user.id } }),
   ]);
   await createSession(guncel.id, guncel.tokenVersion);
 

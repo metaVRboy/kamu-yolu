@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { clearFailures, getLockoutState, lockoutMessage, recordFailure } from "@/lib/authAbuse";
 import { guvenlikEpostasi } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
+import { adminDurumu } from "@/lib/admin";
 
 const bodySchema = z.object({ kod: z.string().trim().length(6, "Kod 6 haneli olmalı.") });
 
@@ -11,6 +12,11 @@ const bodySchema = z.object({ kod: z.string().trim().length(6, "Kod 6 haneli olm
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Giriş yapmalısınız." }, { status: 401 });
+  // Admin e-postasi iki asamali dogrulama kodunun gittigi adres: kodu dogrulanmamis oturum degistiremez
+  // (calinmis sifre/cerezle adresi degistirip kodu kendine aldirmak).
+  if (user.isAdmin && !(await adminDurumu()).dogrulandi) {
+    return NextResponse.json({ error: "Admin hesabının e-postasını değiştirmek için önce admin doğrulamasını yap." }, { status: 403 });
+  }
 
   const parsed = bodySchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
@@ -37,6 +43,8 @@ export async function POST(req: NextRequest) {
     await prisma.$transaction([
       prisma.user.update({ where: { id: user.id }, data: { email: bekleyen.yeniEmail } }),
       prisma.epostaDegisiklikKodu.delete({ where: { userId: user.id } }),
+      // Eski adrese gitmis sifirlama baglantilari gecersiz olsun.
+      prisma.passwordResetToken.deleteMany({ where: { userId: user.id } }),
     ]);
   } catch {
     // Kod gonderildikten sonra ayni adresle baska biri kayit olmus olabilir (unique ihlali).

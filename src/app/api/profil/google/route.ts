@@ -15,7 +15,8 @@ export async function DELETE() {
     );
   }
 
-  await prisma.user.update({ where: { id: user.id }, data: { googleId: null } });
+  // Bayrak: sonraki Google girisi bu hesaba e-posta eslesmesiyle sessizce yeniden baglanmasin.
+  await prisma.user.update({ where: { id: user.id }, data: { googleId: null, googleBaglamaKapali: true } });
   await guvenlikEpostasi(user.email, user.adSoyad, "Google hesabı bağlantısı kaldırıldı");
   return NextResponse.json({ ok: true });
 }

@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { deleteMesajlar, getTalepDetay, sendMesaj } from "@/lib/becayis";
 import { proAktifMi } from "@/lib/sms";
 
+const SAATLIK_MESAJ = 30;
+
 const bodySchema = z.object({
   talepId: z.string().min(1),
   // Talep sahibi cevap verirken hangi konusmaya (hangi kullaniciya) cevap
@@ -45,9 +47,15 @@ export async function POST(req: NextRequest) {
   }
 
   const konusmaKarsiId = isSahibi ? parsed.data.konusmaKarsiId! : user.id;
-  // Karsi taraf hesabini silmisse mesaj (ve bildirimi) gidecek kimse yok.
-  if (isSahibi && !(await prisma.user.findUnique({ where: { id: konusmaKarsiId }, select: { id: true } }))) {
-    return NextResponse.json({ error: "Bu kullanıcı hesabını silmiş, mesaj gönderilemez." }, { status: 410 });
+  // Talep sahibi yalniz kendisine bu ilan icin yazmis birine cevap verebilir (yoksa id bilerek
+  // herkese sohbet acar, Pro kilidini da atlar). Karsi taraf hesabini sildiyse gonderenId bosalir,
+  // kosul yine saglanmaz.
+  if (isSahibi && !(await prisma.becayisMesaj.findFirst({ where: { talepId, konusmaKarsiId, gonderenId: konusmaKarsiId }, select: { id: true } }))) {
+    return NextResponse.json({ error: "Bu sohbet bulunamadı ya da karşı taraf hesabını silmiş." }, { status: 404 });
+  }
+  // Kullanici basina saatlik sinir: Pro hesapla tum ilanlara toplu mesaj (spam) atilmasin.
+  if ((await prisma.becayisMesaj.count({ where: { gonderenId: user.id, createdAt: { gte: new Date(Date.now() - 3_600_000) } } })) >= SAATLIK_MESAJ) {
+    return NextResponse.json({ error: "Bir saatte çok fazla mesaj gönderdin. Biraz sonra tekrar dene." }, { status: 429 });
   }
 
   const created = await sendMesaj({

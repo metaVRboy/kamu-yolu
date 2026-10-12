@@ -7,7 +7,7 @@ import { ilanFormSchema, ilanSayfalariniYenile, sonGun } from "@/lib/adminIlan";
 import { notifyUsersForMatchedPosting } from "@/lib/notifications";
 import { islemKaydet } from "@/lib/islemKaydi";
 
-const bodySchema = ilanFormSchema.extend({ sourceUrl: z.string().trim().url("Geçerli bir ilan bağlantısı gir.").max(500) });
+const bodySchema = ilanFormSchema.extend({ sourceUrl: z.url({ protocol: /^https?$/, error: "Geçerli bir ilan bağlantısı gir." }).trim().max(500) });
 
 /** Elle ilan ekleme: tarama bulamadigi ilanlar icin. Tarama bu kayda dokunmaz (kaynak "Kamu Yolu"). */
 export async function POST(req: NextRequest) {

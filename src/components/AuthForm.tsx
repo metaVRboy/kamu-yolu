@@ -21,6 +21,7 @@ const TURNSTILE_ETKIN = !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 const GOOGLE_HATA_MESAJLARI: Record<string, string> = {
   google: "Google ile giriş başarısız oldu. Lütfen tekrar deneyin.",
   "google-email": "Google hesabının e-postası doğrulanmamış görünüyor.",
+  "google-bagli-degil": "Bu e-postayla açılmış hesabın Google bağlantısını kaldırmışsın. E-posta adresin ve şifrenle giriş yap.",
   "google-yapilandirma": "Google ile giriş şu anda kullanılamıyor.",
   askida: "Hesabın askıya alındı. Bir hata olduğunu düşünüyorsan bizimle iletişime geç.",
 };

@@ -36,14 +36,21 @@ export async function POST(req: NextRequest) {
 
   const passwordHash = await hashPassword(password);
 
+  // Tek kullanim atomik: paralel iki istekten yalniz biri token'i "kullanildi" yapabilir.
+  const kullanim = await prisma.passwordResetToken.updateMany({ where: { id: resetToken.id, usedAt: null }, data: { usedAt: new Date() } });
+  if (kullanim.count !== 1) {
+    return NextResponse.json({ error: "Bu bağlantının süresi dolmuş veya daha önce kullanılmış." }, { status: 400 });
+  }
+
   // tokenVersion da artirilir: sifirlama linki calinmis/paylasilmis olabilir,
-  // bu da o an gecerli olabilecek her eski oturumu gecersiz kilar.
+  // bu da o an gecerli olabilecek her eski oturumu gecersiz kilar. Kullanicinin
+  // diger acik sifirlama baglantilari da iptal edilir.
   const [updatedUser] = await prisma.$transaction([
     prisma.user.update({
       where: { id: resetToken.userId },
       data: { passwordHash, tokenVersion: { increment: 1 } },
     }),
-    prisma.passwordResetToken.update({ where: { id: resetToken.id }, data: { usedAt: new Date() } }),
+    prisma.passwordResetToken.deleteMany({ where: { userId: resetToken.userId, id: { not: resetToken.id } } }),
     prisma.oturum.updateMany({ where: { userId: resetToken.userId, kapatildi: null }, data: { kapatildi: new Date() } }),
   ]);
 

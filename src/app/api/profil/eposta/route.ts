@@ -4,6 +4,7 @@ import { z } from "zod";
 import { getCurrentUser, sifreyiTeyitEt } from "@/lib/auth";
 import { sendEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
+import { adminDurumu } from "@/lib/admin";
 
 const KOD_GECERLILIK_DAKIKA = 10;
 const YENIDEN_GONDERIM_BEKLEME_SANIYE = 30;
@@ -17,6 +18,11 @@ const bodySchema = z.object({
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Giriş yapmalısınız." }, { status: 401 });
+  // Admin e-postasi iki asamali dogrulama kodunun gittigi adres: kodu dogrulanmamis oturum degistiremez
+  // (calinmis sifre/cerezle adresi degistirip kodu kendine aldirmak).
+  if (user.isAdmin && !(await adminDurumu()).dogrulandi) {
+    return NextResponse.json({ error: "Admin hesabının e-postasını değiştirmek için önce admin doğrulamasını yap." }, { status: 403 });
+  }
 
   const parsed = bodySchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {

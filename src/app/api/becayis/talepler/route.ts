@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+
+const AZAMI_ACIK_TALEP = 3;
 import { createTalep, deleteTalep } from "@/lib/becayis";
 import { proAktifMi } from "@/lib/sms";
 import { TURKIYE_ILLERI } from "@/lib/iller";
@@ -44,6 +47,11 @@ export async function POST(req: NextRequest) {
       { error: parsed.error.issues[0]?.message ?? "Geçersiz bilgiler." },
       { status: 400 },
     );
+  }
+
+  // Kullanici basina acik talep siniri: herkese acik liste sahte ilanla doldurulamasin.
+  if ((await prisma.becayisTalep.count({ where: { userId: user.id, isActive: true } })) >= AZAMI_ACIK_TALEP) {
+    return NextResponse.json({ error: `En fazla ${AZAMI_ACIK_TALEP} açık becayiş talebin olabilir. Yenisi için eskilerden birini sil.` }, { status: 400 });
   }
 
   const talep = await createTalep(user.id, parsed.data);

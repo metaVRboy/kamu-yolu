@@ -24,7 +24,8 @@ export async function sendEmail(params: { to: string; subject: string; html: str
   }
 }
 
-const kacis = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+/** E-posta HTML'ine konan kullanici metni (ad soyad vb.) HTML olarak yorumlanmasin. */
+export const kacis = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
 /**
  * Hesapta guvenlikle ilgili bir degisiklik oldugunda (sifre, e-posta, Google

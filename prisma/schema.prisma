@@ -133,6 +133,9 @@ model User {
   // bununla eslestirme yapilir, cunku e-posta kullanici tarafindan Google
   // disinda da degistirilebilir/yeniden kullanilabilir.
   googleId          String?         @unique
+  // Kullanici Google baglantisini kaldirdiysa, sonraki Google girisi bu hesaba e-posta
+  // eslesmesiyle sessizce yeniden baglanmaz (ele gecirilmis Google hesabiyla girilmesin).
+  googleBaglamaKapali Boolean       @default(false)
   adSoyad           String
   telefon           String?
   meslek            String?
@@ -256,6 +259,8 @@ model Oturum {
   adminKodOzeti  String?
   adminKodBitis  DateTime?
   adminKodDeneme Int       @default(0)
+  // Mobil uygulamanin tek kullanimlik giris kodu bu oturumu actiginda dolar (kod ikinci kez kullanilamaz).
+  kodKullanildi  DateTime?
 
   @@index([userId])
 }

@@ -8,7 +8,8 @@ import { islemKaydet } from "@/lib/islemKaydi";
 
 const KOD_OMRU_MS = 10 * 60_000;
 const YENIDEN_GONDERME_MS = 60_000;
-const AZAMI_DENEME = 5;
+// Oturum basina TOPLAM yanlis deneme (yeni kod istemek sayaci sifirlamaz; yoksa dakikada 5 deneme sinirsiz surerdi).
+const AZAMI_DENEME = 10;
 
 const bodySchema = z.discriminatedUnion("islem", [
   z.object({ islem: z.literal("gonder") }),
@@ -25,13 +26,16 @@ export async function POST(req: NextRequest) {
   const simdi = Date.now();
 
   if (parsed.data.islem === "gonder") {
-    const oturum = await prisma.oturum.findUnique({ where: { id: oturumId }, select: { adminKodBitis: true } });
+    const oturum = await prisma.oturum.findUnique({ where: { id: oturumId }, select: { adminKodBitis: true, adminKodDeneme: true } });
+    if ((oturum?.adminKodDeneme ?? 0) >= AZAMI_DENEME) {
+      return NextResponse.json({ error: "Çok fazla yanlış deneme. Güvenlik için çıkış yapıp tekrar giriş yap." }, { status: 400 });
+    }
     // Bitis - omur = gonderim ani; dakikada birden sik gonderme (posta kutusu spam'i).
     if (oturum?.adminKodBitis && oturum.adminKodBitis.getTime() - KOD_OMRU_MS + YENIDEN_GONDERME_MS > simdi) {
       return NextResponse.json({ error: "Yeni kod için 1 dakika bekle." }, { status: 429 });
     }
     const kod = randomInt(0, 1_000_000).toString().padStart(6, "0");
-    await prisma.oturum.update({ where: { id: oturumId }, data: { adminKodOzeti: kodOzeti(kod), adminKodBitis: new Date(simdi + KOD_OMRU_MS), adminKodDeneme: 0 } });
+    await prisma.oturum.update({ where: { id: oturumId }, data: { adminKodOzeti: kodOzeti(kod), adminKodBitis: new Date(simdi + KOD_OMRU_MS) } });
     try {
       await sendEmail({
         to: user.email,
@@ -45,12 +49,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true });
   }
 
-  // Deneme hakki atomik dusulur (paralel isteklerle 5 sinirinin asilmasi engellenir).
+  // Deneme hakki atomik dusulur (paralel isteklerle sinirin asilmasi engellenir).
   const hak = await prisma.oturum.updateMany({
     where: { id: oturumId, adminKodDeneme: { lt: AZAMI_DENEME }, adminKodBitis: { gt: new Date(simdi) }, adminKodOzeti: { not: null } },
     data: { adminKodDeneme: { increment: 1 } },
   });
-  if (hak.count === 0) return NextResponse.json({ error: "Kodun süresi doldu ya da çok fazla deneme yapıldı. Yeni kod iste." }, { status: 400 });
+  if (hak.count === 0) {
+    const o = await prisma.oturum.findUnique({ where: { id: oturumId }, select: { adminKodDeneme: true } });
+    return NextResponse.json(
+      { error: (o?.adminKodDeneme ?? 0) >= AZAMI_DENEME ? "Çok fazla yanlış deneme. Güvenlik için çıkış yapıp tekrar giriş yap." : "Kodun süresi doldu. Yeni kod iste." },
+      { status: 400 },
+    );
+  }
 
   const oturum = await prisma.oturum.findUnique({ where: { id: oturumId }, select: { adminKodOzeti: true } });
   const beklenen = Buffer.from(oturum?.adminKodOzeti ?? "", "hex");

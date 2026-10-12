@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
+import { after, NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { guvenlikEpostasi } from "@/lib/email";
 import { createSession, uygulamaGirisKoduOlustur } from "@/lib/auth";
 import { UYGULAMA_DONUS } from "@/lib/uygulama";
 import { SITE_URL } from "@/lib/site";
@@ -65,6 +66,9 @@ export async function GET(req: NextRequest) {
       // Ayni e-postayla sifreli bir hesap zaten varsa, mukerrer hesap
       // olusturmak yerine mevcut hesabi Google'a baglar.
       const mevcut = await prisma.user.findUnique({ where: { email } });
+      // Kullanici bu hesabin Google baglantisini kaldirdiysa e-posta eslesmesiyle yeniden baglanmaz.
+      if (mevcut?.googleBaglamaKapali) return hataYonlendir("google-bagli-degil");
+      if (mevcut) after(() => guvenlikEpostasi(mevcut.email, mevcut.adSoyad, "hesabına bir Google hesabı bağlandı"));
       user = mevcut
         ? await prisma.user.update({ where: { id: mevcut.id }, data: { googleId: profil.sub } })
         : await prisma.user.create({

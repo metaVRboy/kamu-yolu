@@ -1,5 +1,4 @@
-import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth";
+import { adminSayfasi } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 import { smsSaglayiciTanimli, telefonMaskele } from "@/lib/sms";
 import { cn } from "@/lib/utils";
@@ -15,9 +14,7 @@ const DURUM_RENGI: Record<string, string> = {
 };
 
 export default async function AdminSmsPage() {
-  const user = await getCurrentUser();
-  if (!user) redirect("/giris");
-  if (!user.isAdmin) redirect("/");
+  await adminSayfasi();
 
   const [kayitlar, ozet] = await Promise.all([
     prisma.smsGonderim.findMany({ orderBy: { olusturma: "desc" }, take: 100 }),

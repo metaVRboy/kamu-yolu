@@ -20,9 +20,11 @@ const GUNLUK_SINIR = 5;
 export async function POST(req: NextRequest) {
   const parsed = bodySchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Geçersiz bilgiler." }, { status: 400 });
-  const { ad, email, konu, mesaj, turnstileToken } = parsed.data;
+  const { ad, konu, mesaj, turnstileToken } = parsed.data;
 
   const user = await getCurrentUser();
+  // Uye yanitlari kendi adresine alir; baska birinin adresine Kamu Yolu adina e-posta gonderttirilemez.
+  const email = user?.email ?? parsed.data.email;
   // Giris yapmamis ziyaretci bot olabilir; uyelerin hesabi zaten dogrulanmis.
   if (!user && !(await verifyTurnstileToken(turnstileToken))) {
     return NextResponse.json({ error: "İnsan doğrulaması başarısız. Lütfen tekrar deneyin." }, { status: 400 });

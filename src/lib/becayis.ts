@@ -36,6 +36,8 @@ export async function getAktifTalepler(filters?: { il?: string; meslek?: string 
     },
     orderBy: { createdAt: "desc" },
     include: { user: { select: { adSoyad: true } } },
+    // ponytail: ust sinir; ilan sayisi buna yaklasirsa sayfalama eklenir.
+    take: 300,
   });
 }
 
@@ -94,9 +96,16 @@ export async function getIlgilendiklerim(userId: string) {
   const mesajlar = await prisma.becayisMesaj.findMany({
     where: { konusmaKarsiId: userId },
     orderBy: { createdAt: "asc" },
-    include: {
-      gonderen: { select: { id: true, adSoyad: true } },
-      talep: { include: { user: { select: { id: true, adSoyad: true } } } },
+    // Istemciye giden veri: yalniz gereken alanlar (tum talep satiri ve kullanici id'leri degil).
+    select: {
+      id: true,
+      talepId: true,
+      gonderenId: true,
+      mesaj: true,
+      createdAt: true,
+      okundu: true,
+      sikayetEdildi: true,
+      talep: { select: { id: true, userId: true, meslek: true, mevcutIl: true, mevcutIlce: true, istenenIller: true, isActive: true, user: { select: { adSoyad: true } } } },
     },
   });
 
@@ -117,7 +126,7 @@ export async function getIlgilendiklerim(userId: string) {
       istenenIller: talep.istenenIller,
       isActive: talep.isActive,
       ilanSahibiAdSoyad: talep.user.adSoyad,
-      mesajlar: talepMesajlari,
+      mesajlar: talepMesajlari.map(({ id, gonderenId, mesaj, createdAt, okundu, sikayetEdildi }) => ({ id, gonderenId, mesaj, createdAt, okundu, sikayetEdildi })),
       okunmamisSayisi: talepMesajlari.filter((m) => !m.okundu && m.gonderenId !== userId).length,
       sonMesajTarihi: talepMesajlari[talepMesajlari.length - 1].createdAt,
     }))
@@ -172,20 +181,27 @@ export async function sendMesaj(params: {
 
 export async function markThreadOkundu(talepId: string, karsiId: string, forUserId: string) {
   await prisma.becayisMesaj.updateMany({
-    where: { talepId, konusmaKarsiId: karsiId, gonderenId: { not: forUserId }, okundu: false },
+    // Yalniz sohbetin taraflari (ilgilenen ya da talep sahibi) okundu yapabilir.
+    where: { talepId, konusmaKarsiId: karsiId, gonderenId: { not: forUserId }, okundu: false, OR: [{ konusmaKarsiId: forUserId }, { talep: { userId: forUserId } }] },
     data: { okundu: true },
   });
 }
 
+/** Admin incelemesini bekleyen sikayetli mesaj: taraflar silemez (delil kaybolmasin). */
+const BEKLEYEN_SIKAYET = { sikayetEdildi: { not: null }, sikayetIncelendi: null };
+
 // konusmaKarsiId verilirse sadece o sohbet, verilmezse talebe ait tum sohbetler silinir.
 export async function deleteMesajlar(talepId: string, konusmaKarsiId?: string) {
   await prisma.becayisMesaj.deleteMany({
-    where: { talepId, ...(konusmaKarsiId ? { konusmaKarsiId } : {}) },
+    where: { talepId, ...(konusmaKarsiId ? { konusmaKarsiId } : {}), NOT: BEKLEYEN_SIKAYET },
   });
 }
 
+/** Incelenmemis sikayet varsa talep silinmez (mesajlar cascade ile giderdi), yayindan kaldirilir. */
 export async function deleteTalep(talepId: string, userId: string) {
-  await prisma.becayisTalep.deleteMany({ where: { id: talepId, userId } });
+  const sikayetli = await prisma.becayisMesaj.count({ where: { talepId, ...BEKLEYEN_SIKAYET } });
+  if (sikayetli) await prisma.becayisTalep.updateMany({ where: { id: talepId, userId }, data: { isActive: false } });
+  else await prisma.becayisTalep.deleteMany({ where: { id: talepId, userId } });
 }
 
 const BECAYIS_SMS_ARALIGI_MS = 30 * 60 * 1000;

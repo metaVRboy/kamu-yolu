@@ -23,6 +23,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ katilimId: katilim.id });
   } catch (e) {
     if (e instanceof DenemeHakkiDolduError) return NextResponse.json({ error: e.message }, { status: 403 });
-    return NextResponse.json({ error: e instanceof Error ? e.message : "Sınav başlatılamadı." }, { status: 500 });
+    // Ham hata metni (Prisma vb.) istemciye gitmesin.
+    console.error("Deneme başlatılamadı:", e);
+    return NextResponse.json({ error: "Sınav başlatılamadı, lütfen tekrar dene." }, { status: 500 });
   }
 }

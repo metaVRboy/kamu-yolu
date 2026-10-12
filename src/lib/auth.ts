@@ -108,9 +108,10 @@ export async function uygulamaGirisKoduKullan(kod: string): Promise<boolean> {
   const payload = await jwtVerify(kod, getSecretKey()).then((r) => r.payload).catch(() => null);
   if (payload?.amac !== "uygulama-giris" || typeof payload.oturumId !== "string") return false;
   const oturumId = payload.oturumId;
+  // kodKullanildi: kod tek kullanimlik (oturum sonradan kapatilsa bile ayni kod onu yeniden acamaz).
   const { count } = await prisma.oturum.updateMany({
-    where: { id: oturumId, kapatildi: { not: null }, olusturma: { gte: new Date(Date.now() - UYGULAMA_KODU_SURESI_MS) } },
-    data: { kapatildi: null },
+    where: { id: oturumId, kodKullanildi: null, kapatildi: { not: null }, olusturma: { gte: new Date(Date.now() - UYGULAMA_KODU_SURESI_MS) } },
+    data: { kapatildi: null, kodKullanildi: new Date() },
   });
   if (count !== 1) return false;
   const oturum = await prisma.oturum.findUniqueOrThrow({ where: { id: oturumId }, include: { user: { select: { tokenVersion: true, askiyaAlindi: true } } } });

@@ -23,8 +23,8 @@ export async function POST(req: NextRequest) {
   }
 
   const pending = await prisma.emailVerificationCode.findUnique({ where: { email } });
+  // Bekleyen kod yokken hata sayilmaz: yoksa herkes istek atarak baskasinin e-postasinin kaydini kilitlerdi.
   if (!pending || pending.usedAt || pending.expiresAt < new Date()) {
-    await recordFailure(abuseIdentifier);
     return NextResponse.json(
       { error: "Kodun süresi dolmuş. Lütfen yeni bir kod iste." },
       { status: 400 },

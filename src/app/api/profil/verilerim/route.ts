@@ -28,7 +28,8 @@ export async function GET() {
       },
     }),
     prisma.bildirim.findMany({ where: { userId: user.id }, omit: { userId: true } }),
-    prisma.oturum.findMany({ where: { userId: user.id }, omit: { userId: true } }),
+    // Acik alan listesi: oturum tablosuna sonradan eklenen guvenlik alanlari (admin kod ozeti vb.) disari cikmasin.
+    prisma.oturum.findMany({ where: { userId: user.id }, select: { id: true, cihaz: true, olusturma: true, sonGorulme: true, kapatildi: true } }),
     prisma.profilFotografi.findUnique({ where: { userId: user.id }, select: { guncellenme: true } }),
   ]);
 
