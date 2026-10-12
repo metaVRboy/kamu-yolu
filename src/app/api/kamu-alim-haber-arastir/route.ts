@@ -6,6 +6,7 @@ import { fetchIsinolsaIlanlari } from "@/scraper/isinolsaClient";
 import { fetchSecmeyemektarifleriMakaleleri } from "@/scraper/secmeyemektarifleriClient";
 import { researchKamuAlimLeads, type KamuAlimLead } from "@/lib/kamuAlimLeadResearch";
 import { haberleriEkleVeTekillestir } from "@/lib/haberDedupe";
+import { taramaKaydiyla } from "@/lib/taramaKaydi";
 
 export const maxDuration = 290;
 
@@ -38,97 +39,100 @@ async function runKamuAlimHaberArastir(req: NextRequest) {
   }
 
   try {
-    const [ilanlar, makaleler] = await Promise.all([
-      fetchIsinolsaIlanlari(),
-      fetchSecmeyemektarifleriMakaleleri(),
-    ]);
+    const sonuc = await taramaKaydiyla("Kamu Alım Haberleri", async () => {
+      const [ilanlar, makaleler] = await Promise.all([
+        fetchIsinolsaIlanlari(),
+        fetchSecmeyemektarifleriMakaleleri(),
+      ]);
 
-    const [islenenIsinolsaIdler, islenenSecmeIdler] = await Promise.all([
-      prisma.isinolsaLeadIslendi
-        .findMany({
-          where: { externalId: { in: ilanlar.map((i) => i.externalId) } },
-          select: { externalId: true },
-        })
-        .then((rows) => new Set(rows.map((l) => l.externalId))),
-      prisma.secmeyemektarifleriLeadIslendi
-        .findMany({
-          where: { externalId: { in: makaleler.map((m) => m.externalId) } },
-          select: { externalId: true },
-        })
-        .then((rows) => new Set(rows.map((l) => l.externalId))),
-    ]);
+      const [islenenIsinolsaIdler, islenenSecmeIdler] = await Promise.all([
+        prisma.isinolsaLeadIslendi
+          .findMany({
+            where: { externalId: { in: ilanlar.map((i) => i.externalId) } },
+            select: { externalId: true },
+          })
+          .then((rows) => new Set(rows.map((l) => l.externalId))),
+        prisma.secmeyemektarifleriLeadIslendi
+          .findMany({
+            where: { externalId: { in: makaleler.map((m) => m.externalId) } },
+            select: { externalId: true },
+          })
+          .then((rows) => new Set(rows.map((l) => l.externalId))),
+      ]);
 
-    const yeniIsinolsaLeadleri: KamuAlimLead[] = ilanlar
-      .filter((i) => !islenenIsinolsaIdler.has(i.externalId))
-      .slice(0, BATCH_SIZE_PER_KAYNAK)
-      .map((i) => ({ externalId: i.externalId, kurumAdi: i.kurumAdi, baslik: i.baslik }));
+      const yeniIsinolsaLeadleri: KamuAlimLead[] = ilanlar
+        .filter((i) => !islenenIsinolsaIdler.has(i.externalId))
+        .slice(0, BATCH_SIZE_PER_KAYNAK)
+        .map((i) => ({ externalId: i.externalId, kurumAdi: i.kurumAdi, baslik: i.baslik }));
 
-    const yeniSecmeLeadleri: KamuAlimLead[] = makaleler
-      .filter((m) => !islenenSecmeIdler.has(m.externalId))
-      .slice(0, BATCH_SIZE_PER_KAYNAK)
-      .map((m) => ({ externalId: m.externalId, baslik: m.baslik }));
+      const yeniSecmeLeadleri: KamuAlimLead[] = makaleler
+        .filter((m) => !islenenSecmeIdler.has(m.externalId))
+        .slice(0, BATCH_SIZE_PER_KAYNAK)
+        .map((m) => ({ externalId: m.externalId, baslik: m.baslik }));
 
-    const tumYeniLeadler = [...yeniIsinolsaLeadleri, ...yeniSecmeLeadleri];
+      const tumYeniLeadler = [...yeniIsinolsaLeadleri, ...yeniSecmeLeadleri];
 
-    if (tumYeniLeadler.length === 0) {
-      return NextResponse.json({
-        ok: true,
+      if (tumYeniLeadler.length === 0) {
+        return {
+          toplamLead: ilanlar.length + makaleler.length,
+          yeniLead: 0,
+          dogrulanan: 0,
+          eklenen: 0,
+          degistirilen: 0,
+        };
+      }
+
+      const sonuclar = await researchKamuAlimLeads(tumYeniLeadler);
+
+      const mevcutUrller = new Set(
+        (await prisma.haber.findMany({ select: { kaynakUrl: true } }))
+          .map((h) => h.kaynakUrl)
+          .filter((u): u is string => !!u),
+      );
+
+      const yeniHaberler = sonuclar.filter(
+        (s) => s.dogrulandi && s.resmiKaynakUrl && !mevcutUrller.has(s.resmiKaynakUrl),
+      );
+
+      const { eklenen, degistirilen } = await haberleriEkleVeTekillestir(
+        yeniHaberler.map((s) => ({
+          baslik: s.baslik!,
+          ozet: s.ozet!,
+          kaynakUrl: s.resmiKaynakUrl!,
+          gorselUrl: s.gorselUrl,
+          gorselLogoMu: s.gorselLogoMu,
+          departmentIds: s.departmentIds,
+          detay: s.detay,
+        })),
+      );
+
+      // Denenen HER lead'i (dogrulanmis olsun olmasin) kendi kaynagininin
+      // tablosunda isaretle ki tekrar tekrar arastirilmasin. ExternalId
+      // onekine (isinolsa:/secmeyemektarifleri:) gore ayristiriliyor.
+      const isinolsaSonuclari = sonuclar.filter((s) => s.externalId.startsWith("isinolsa:"));
+      const secmeSonuclari = sonuclar.filter((s) => s.externalId.startsWith("secmeyemektarifleri:"));
+
+      await Promise.all([
+        prisma.isinolsaLeadIslendi.createMany({
+          data: isinolsaSonuclari.map((s) => ({ externalId: s.externalId, bulundu: s.dogrulandi })),
+          skipDuplicates: true,
+        }),
+        prisma.secmeyemektarifleriLeadIslendi.createMany({
+          data: secmeSonuclari.map((s) => ({ externalId: s.externalId, bulundu: s.dogrulandi })),
+          skipDuplicates: true,
+        }),
+      ]);
+
+      return {
         toplamLead: ilanlar.length + makaleler.length,
-        yeniLead: 0,
-        dogrulanan: 0,
-        eklenenHaber: 0,
-      });
-    }
-
-    const sonuclar = await researchKamuAlimLeads(tumYeniLeadler);
-
-    const mevcutUrller = new Set(
-      (await prisma.haber.findMany({ select: { kaynakUrl: true } }))
-        .map((h) => h.kaynakUrl)
-        .filter((u): u is string => !!u),
-    );
-
-    const yeniHaberler = sonuclar.filter(
-      (s) => s.dogrulandi && s.resmiKaynakUrl && !mevcutUrller.has(s.resmiKaynakUrl),
-    );
-
-    const { eklenen, degistirilen } = await haberleriEkleVeTekillestir(
-      yeniHaberler.map((s) => ({
-        baslik: s.baslik!,
-        ozet: s.ozet!,
-        kaynakUrl: s.resmiKaynakUrl!,
-        gorselUrl: s.gorselUrl,
-        gorselLogoMu: s.gorselLogoMu,
-        departmentIds: s.departmentIds,
-        detay: s.detay,
-      })),
-    );
-
-    // Denenen HER lead'i (dogrulanmis olsun olmasin) kendi kaynagininin
-    // tablosunda isaretle ki tekrar tekrar arastirilmasin. ExternalId
-    // onekine (isinolsa:/secmeyemektarifleri:) gore ayristiriliyor.
-    const isinolsaSonuclari = sonuclar.filter((s) => s.externalId.startsWith("isinolsa:"));
-    const secmeSonuclari = sonuclar.filter((s) => s.externalId.startsWith("secmeyemektarifleri:"));
-
-    await Promise.all([
-      prisma.isinolsaLeadIslendi.createMany({
-        data: isinolsaSonuclari.map((s) => ({ externalId: s.externalId, bulundu: s.dogrulandi })),
-        skipDuplicates: true,
-      }),
-      prisma.secmeyemektarifleriLeadIslendi.createMany({
-        data: secmeSonuclari.map((s) => ({ externalId: s.externalId, bulundu: s.dogrulandi })),
-        skipDuplicates: true,
-      }),
-    ]);
-
-    return NextResponse.json({
-      ok: true,
-      toplamLead: ilanlar.length + makaleler.length,
-      yeniLead: tumYeniLeadler.length,
-      dogrulanan: sonuclar.filter((s) => s.dogrulandi).length,
-      eklenenHaber: eklenen,
-      degistirilenHaber: degistirilen,
+        yeniLead: tumYeniLeadler.length,
+        dogrulanan: sonuclar.filter((s) => s.dogrulandi).length,
+        eklenen,
+        degistirilen,
+      };
     });
+
+    return NextResponse.json({ ok: true, ...sonuc });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return NextResponse.json({ ok: false, error: message }, { status: 500 });

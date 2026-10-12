@@ -36,7 +36,7 @@ export default async function AdminTaramalarPage() {
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
               Son başarılı: {k.sonBasari ? TARIH.format(k.sonBasari) : "hiç"}
-              {k.ilanSayisi != null && ` · ${k.ilanSayisi} ilan`}
+              {k.ilanSayisi != null && ` · ${k.ilanSayisi} ${k.birim}`}
             </p>
           </div>
         ))}
@@ -55,8 +55,9 @@ export default async function AdminTaramalarPage() {
         <div className="space-y-1">
           <p className="font-bold">Kariyer Kapısı neden buradan taranmıyor?</p>
           <p>
-            Kariyer Kapısı, sitenin barındığı yurt dışı sunuculardan gelen bağlantıyı kabul etmiyor; o yüzden listedeki &quot;başarısız&quot; denemeler normal. Asıl tarama, bilgisayarındaki
-            <b> KamuYoluScraper</b> zamanlanmış göreviyle yapılıyor. Bilgisayar kapalıyken ya da uykudayken Kariyer Kapısı ilanları güncellenmez.
+            Kariyer Kapısı, sitenin barındığı yurt dışı sunuculardan gelen bağlantıyı kabul etmiyor; o yüzden yalnızca bilgisayarındaki
+            <b> KamuYoluScraper</b> zamanlanmış görevi tarıyor. Görev 10 dakikada bir kontrol eder: 09, 12, 15 ya da 18 taraması kaçmış ya da başarısız olmuşsa başarana kadar
+            tekrar dener. Bilgisayar kapalıyken ya da uykudayken Kariyer Kapısı ilanları güncellenmez.
           </p>
           {kk?.gecikti && <p className="font-semibold text-red-700">Şu an 24 saati aşkın süredir başarılı Kariyer Kapısı taraması yok: bilgisayarın açık ve internete bağlı olduğundan emin ol.</p>}
         </div>
@@ -70,7 +71,7 @@ export default async function AdminTaramalarPage() {
                 <th className="py-2 pr-3 font-semibold">Kaynak</th>
                 <th className="py-2 pr-3 font-semibold">Başlangıç</th>
                 <th className="py-2 pr-3 font-semibold">Durum</th>
-                <th className="py-2 pr-3 font-semibold">İlan</th>
+                <th className="py-2 pr-3 font-semibold">Adet</th>
                 <th className="py-2 font-semibold">Ayrıntı</th>
               </tr>
             </thead>

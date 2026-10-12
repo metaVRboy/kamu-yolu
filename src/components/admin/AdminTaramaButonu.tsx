@@ -17,8 +17,6 @@ const ETIKET: Record<string, string> = {
   toplamLead: "aday",
   yeniLead: "yeni aday",
   dogrulanan: "doğrulanan",
-  eklenenHaber: "eklenen haber",
-  degistirilenHaber: "değiştirilen haber",
 };
 
 /** Cron uc noktasini admin oturumuyla elle calistirir (1-3 dk surebilir). */

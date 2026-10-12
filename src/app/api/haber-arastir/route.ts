@@ -4,6 +4,7 @@ import { adminApi } from "@/lib/admin";
 import { islemKaydet } from "@/lib/islemKaydi";
 import { researchHaberler } from "@/lib/haberResearch";
 import { haberleriEkleVeTekillestir } from "@/lib/haberDedupe";
+import { taramaKaydiyla } from "@/lib/taramaKaydi";
 
 export const maxDuration = 290;
 
@@ -28,24 +29,21 @@ async function runHaberArastir(req: NextRequest) {
   }
 
   try {
-    const bulunanlar = await researchHaberler();
+    const sonuc = await taramaKaydiyla("Haber Araştırması", async () => {
+      const bulunanlar = await researchHaberler();
 
-    const mevcutUrller = new Set(
-      (await prisma.haber.findMany({ select: { kaynakUrl: true } }))
-        .map((h) => h.kaynakUrl)
-        .filter((u): u is string => !!u),
-    );
+      const mevcutUrller = new Set(
+        (await prisma.haber.findMany({ select: { kaynakUrl: true } }))
+          .map((h) => h.kaynakUrl)
+          .filter((u): u is string => !!u),
+      );
 
-    const yeniler = bulunanlar.filter((h) => !mevcutUrller.has(h.kaynakUrl));
-    const { eklenen, degistirilen } = await haberleriEkleVeTekillestir(yeniler);
-
-    return NextResponse.json({
-      ok: true,
-      bulunan: bulunanlar.length,
-      eklenen,
-      degistirilen,
-      atlanan: bulunanlar.length - yeniler.length,
+      const yeniler = bulunanlar.filter((h) => !mevcutUrller.has(h.kaynakUrl));
+      const { eklenen, degistirilen } = await haberleriEkleVeTekillestir(yeniler);
+      return { bulunan: bulunanlar.length, eklenen, degistirilen, atlanan: bulunanlar.length - yeniler.length };
     });
+
+    return NextResponse.json({ ok: true, ...sonuc });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return NextResponse.json({ ok: false, error: message }, { status: 500 });

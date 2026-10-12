@@ -90,43 +90,41 @@ type HaberAdayi = {
   kurumAdi: string;
 };
 
-/** Tek bir kategori sorgusunu calistirir. Basarisiz olursa (diger kategorileri etkilemeden) bos dizi doner. */
+/** Tek bir kategori sorgusunu calistirir. API hatasi firlatir (cagiran tek kategoriyi atlar). */
 async function researchHaberKategorisi(systemPrompt: string): Promise<HaberAdayi[]> {
-  try {
-    const res = await gemini.models.generateContent({
-      model: GEMINI_MODEL,
-      contents: "Güncel kamu personel alımı haberlerini araştır ve JSON ile cevap ver.",
-      config: {
-        systemInstruction: systemPrompt,
-        tools: [{ googleSearch: {} }],
-        responseMimeType: "application/json",
-        responseJsonSchema: toGeminiSchema(HaberSchema),
-      },
-    });
+  const res = await gemini.models.generateContent({
+    model: GEMINI_MODEL,
+    contents: "Güncel kamu personel alımı haberlerini araştır ve JSON ile cevap ver.",
+    config: {
+      systemInstruction: systemPrompt,
+      tools: [{ googleSearch: {} }],
+      responseMimeType: "application/json",
+      responseJsonSchema: toGeminiSchema(HaberSchema),
+    },
+  });
 
-    const parsedJson = parseGeminiJson(res.text);
-    if (!parsedJson) return [];
+  const parsedJson = parseGeminiJson(res.text);
+  if (!parsedJson) return [];
 
-    const result = HaberSchema.safeParse(parsedJson);
-    if (!result.success) return [];
+  const result = HaberSchema.safeParse(parsedJson);
+  if (!result.success) return [];
 
-    return result.data.haberler;
-  } catch (err) {
-    console.error("Haber kategori araştırması başarısız:", err);
-    return [];
-  }
+  return result.data.haberler;
 }
 
 /**
  * Kamu personel alimlariyla ilgili guncel haberleri web aramasiyla arastirir.
  * Tek genis sorgu yerine kurum kategorisine gore paralel, hedefli sorgular
  * calistirilir. Sadece gercek, kaynakli sonuclar doner; basarisiz olan
- * sorgular sessizce atlanir (diger kategoriler etkilenmez).
+ * sorgular atlanir (diger kategoriler etkilenmez). HEPSI basarisizsa hata
+ * firlatir - "0 haber" sessiz basari sayilmasin (kredi bitince 4 gun fark edilmedi).
  */
 export async function researchHaberler(): Promise<HaberResearchItem[]> {
-  const kategoriSonuclari = await Promise.all(
-    KATEGORI_PROMPTLARI.map((prompt) => researchHaberKategorisi(prompt)),
-  );
+  const denemeler = await Promise.allSettled(KATEGORI_PROMPTLARI.map((prompt) => researchHaberKategorisi(prompt)));
+  const hatalar = denemeler.flatMap((d) => (d.status === "rejected" ? [d.reason] : []));
+  for (const h of hatalar) console.error("Haber kategori araştırması başarısız:", h);
+  if (hatalar.length === denemeler.length) throw hatalar[0];
+  const kategoriSonuclari = denemeler.flatMap((d) => (d.status === "fulfilled" ? [d.value] : []));
   // Farkli kategori sorgulari ayni haberi (ayni ham grounding URL'siyle)
   // bulmus olabilir - pahali dogrulama adimindan once basitce tekillestir.
   const gorulenUrller = new Set<string>();

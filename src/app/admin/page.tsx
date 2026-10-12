@@ -121,7 +121,7 @@ export default async function AdminPanelPage() {
                 </span>
                 <span className="text-xs text-muted-foreground">
                   {t.sonBasari ? TARIH.format(t.sonBasari) : "hiç"}
-                  {t.ilanSayisi != null && ` · ${t.ilanSayisi} ilan`}
+                  {t.ilanSayisi != null && ` · ${t.ilanSayisi} ${t.birim}`}
                 </span>
               </li>
             ))}

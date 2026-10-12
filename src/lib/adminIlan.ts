@@ -39,6 +39,8 @@ export async function taramaKaynaklari(simdi = Date.now()) {
   return kaynaklar.map(({ sourceName }) => {
     const son = basarili.find((b) => b.sourceName === sourceName);
     const sonBasari = son?.finishedAt ?? null;
-    return { sourceName, sonBasari, ilanSayisi: son?.postingsFound ?? null, gecikti: !sonBasari || simdi - sonBasari.getTime() > GUN_MS };
+    // Haber arastirmalarinda postingsFound = eklenen haber sayisi.
+    const birim = sourceName.includes("Haber") ? "yeni haber" : "ilan";
+    return { sourceName, sonBasari, ilanSayisi: son?.postingsFound ?? null, birim, gecikti: !sonBasari || simdi - sonBasari.getTime() > GUN_MS };
   });
 }
