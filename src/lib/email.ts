@@ -1,27 +1,38 @@
 import { ILETISIM_EPOSTA, SITE_URL } from "@/lib/site";
+import { gunlukSayacArtir } from "@/lib/sayac";
 
+/**
+ * Resend ile gonderir. Basarisizlik "eposta-hata" gunluk sayacina yazilir (admin uyeler sayfasi):
+ * kota dolunca kayit kodlari sessizce gitmez olmasin. Zaman asimi: yanit gelmezse istek takili kalmasin.
+ */
 export async function sendEmail(params: { to: string; subject: string; html: string }) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) throw new Error("RESEND_API_KEY tanımlı değil.");
+  try {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) throw new Error("RESEND_API_KEY tanımlı değil.");
 
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      // Gercek kutu: kullanici "Yanitla" derse mesaj Workspace'e duser (Resend yalniz gonderir).
-      from: `Kamu Yolu <${ILETISIM_EPOSTA}>`,
-      to: params.to,
-      subject: params.subject,
-      html: params.html,
-    }),
-  });
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        // Gercek kutu: kullanici "Yanitla" derse mesaj Workspace'e duser (Resend yalniz gonderir).
+        from: `Kamu Yolu <${ILETISIM_EPOSTA}>`,
+        to: params.to,
+        subject: params.subject,
+        html: params.html,
+      }),
+      signal: AbortSignal.timeout(10_000),
+    });
 
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`E-posta gönderilemedi (${res.status}): ${text}`);
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new Error(`E-posta gönderilemedi (${res.status}): ${text}`);
+    }
+  } catch (err) {
+    await gunlukSayacArtir("eposta-hata").catch(() => {});
+    throw err;
   }
 }
 

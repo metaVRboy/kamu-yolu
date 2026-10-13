@@ -13,6 +13,16 @@ import { FilterBar } from "@/components/FilterBar";
 
 export const revalidate = 300;
 
+export async function generateMetadata({ params }: { params: Promise<{ level: string }> }) {
+  const { level: slug } = await params;
+  const level = LEVEL_SLUG_TO_ENUM[slug];
+  if (!level) return {};
+  const ad = LEVEL_LABEL[level] ?? level;
+  const baslik = `${ad} Mezunları İçin Kamu İlanları — Kamu Yolu`;
+  const aciklama = `${ad} mezunlarının başvurabileceği güncel kamu personel ve memur ilanları; bölüm şartı olan ve olmayan tüm ilanlar.`;
+  return { title: baslik, description: aciklama, alternates: { canonical: `/seviye/${slug}` } };
+}
+
 export default async function LevelResultsPage({
   params,
   searchParams,

@@ -155,6 +155,16 @@ function BaslangicKarti({ duzey, plan, eylem }: { duzey: DenemeDuzeyi; plan: Pla
 }
 
 
+export async function generateMetadata({ params }: { params: Promise<{ duzey: string }> }) {
+  const { duzey: slug } = await params;
+  const duzeyAdi = slug.toUpperCase();
+  if (!gecerliDenemeDuzeyiMi(duzeyAdi) || !(duzeyAdi in DUZEY_TEMA)) return {};
+  const ad = DUZEY_LABEL[duzeyAdi as DenemeDuzeyi];
+  const baslik = `${ad} KPSS Denemesi (Ücretsiz, Günlük) — Kamu Yolu`;
+  const aciklama = `Gerçek KPSS formatında ${ad} denemesi: ${TOPLAM_SORU} soru, ${SINAV_SURESI_DK} dakika. Her gün yeni deneme; ücretsiz planda haftada 1 deneme.`;
+  return { title: baslik, description: aciklama, alternates: { canonical: `/kpss-denemesi/${slug}` } };
+}
+
 export default async function KpssDenemesiDuzeyPage({ params }: { params: Promise<{ duzey: string }> }) {
   const { duzey: slug } = await params;
   const duzeyAdi = slug.toUpperCase();

@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/slug";
 import { SITE_URL } from "@/lib/site";
 
+// Build aninda donmasin: yeni ilanlar saatte bir eklensin.
+export const revalidate = 3600;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [departments, postings] = await Promise.all([
     prisma.department.findMany({ select: { slug: true, updatedAt: true } }),
@@ -20,6 +23,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/becayis`, changeFrequency: "daily", priority: 0.7 },
     { url: `${SITE_URL}/haberler`, changeFrequency: "daily", priority: 0.6 },
     { url: `${SITE_URL}/kpss-puan-hesaplama`, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${SITE_URL}/kpss-denemesi`, changeFrequency: "daily", priority: 0.7 },
+    { url: `${SITE_URL}/kpss-denemesi/lise`, changeFrequency: "daily", priority: 0.6 },
+    { url: `${SITE_URL}/kpss-denemesi/onlisans`, changeFrequency: "daily", priority: 0.6 },
+    { url: `${SITE_URL}/kpss-denemesi/lisans`, changeFrequency: "daily", priority: 0.6 },
+    { url: `${SITE_URL}/analiz`, changeFrequency: "weekly", priority: 0.4 },
     { url: `${SITE_URL}/destek`, changeFrequency: "yearly", priority: 0.3 },
     { url: `${SITE_URL}/amacimiz`, changeFrequency: "yearly", priority: 0.3 },
     { url: `${SITE_URL}/kvkk`, changeFrequency: "yearly", priority: 0.2 },

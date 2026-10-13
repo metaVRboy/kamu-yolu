@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { Prisma } from "@/generated/prisma/client";
 import type { EducationLevel } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
@@ -171,12 +172,19 @@ export async function getAvailableFiltersForAll() {
   return summarizeFilters(postings);
 }
 
+// Her sayfanin footer'inda gosterilir (layout): her istekte sorgulanmasin, 5 dk paylasilir.
+// unstable_cache JSON'a cevirdigi icin tarih metin olarak saklanip geri Date yapilir.
+const sonBasariliTarama = unstable_cache(
+  async () =>
+    (await prisma.scrapeRun.findFirst({ where: { status: "SUCCESS" }, orderBy: { finishedAt: "desc" }, select: { finishedAt: true } }))?.finishedAt?.toISOString() ??
+    null,
+  ["son-basarili-tarama"],
+  { revalidate: 300 },
+);
+
 export async function getLastSuccessfulScrapeAt(): Promise<Date | null> {
-  const lastRun = await prisma.scrapeRun.findFirst({
-    where: { status: "SUCCESS" },
-    orderBy: { finishedAt: "desc" },
-  });
-  return lastRun?.finishedAt ?? null;
+  const t = await sonBasariliTarama();
+  return t ? new Date(t) : null;
 }
 
 export async function getPostingById(id: string) {
@@ -196,16 +204,21 @@ export async function getLatestPostings(limit = 12) {
   });
 }
 
-export async function getHomepageStats() {
-  const [postingCount, institutionCount, departmentCount] = await Promise.all([
-    prisma.posting.count({ where: { isActive: true } }),
-    prisma.posting
-      .findMany({ where: { isActive: true }, select: { institutionName: true }, distinct: ["institutionName"] })
-      .then((rows) => rows.length),
-    prisma.department.count(),
-  ]);
-  return { postingCount, institutionCount, departmentCount };
-}
+// Ana sayfa sayaclari: tum aktif ilanlari tarar; reklam trafiginde her ziyarette degil 5 dk'da bir.
+export const getHomepageStats = unstable_cache(
+  async () => {
+    const [postingCount, institutionCount, departmentCount] = await Promise.all([
+      prisma.posting.count({ where: { isActive: true } }),
+      prisma.posting
+        .findMany({ where: { isActive: true }, select: { institutionName: true }, distinct: ["institutionName"] })
+        .then((rows) => rows.length),
+      prisma.department.count(),
+    ]);
+    return { postingCount, institutionCount, departmentCount };
+  },
+  ["ana-sayfa-sayaclari"],
+  { revalidate: 300 },
+);
 
 /**
  * Bir ilanin ham "aranan nitelikler" metnini, bilinen bolum adi/alias'lariyla

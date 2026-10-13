@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { buttonVariants } from "@/components/ui/button";
 import { Bell, GraduationCap } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import {
@@ -19,6 +21,17 @@ import { LEVEL_LABEL } from "@/lib/labels";
 import { YukseltButonu } from "@/components/YukseltmePenceresi";
 
 export const revalidate = 300;
+
+// Reklam acilis sayfasi: bolume ozgu baslik/aciklama, utm'li linkler tek adreste toplansin (canonical).
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const d = await prisma.department.findUnique({ where: { slug }, select: { name: true, level: true } });
+  if (!d) return {};
+  const baslik = `${d.name} Mezunları İçin Kamu İlanları — Kamu Yolu`;
+  const aciklama = `${d.name} (${LEVEL_LABEL[d.level] ?? d.level}) mezunlarının başvurabileceği güncel kamu personel ve memur ilanları, başvuru tarihleriyle.`;
+  // openGraph burada tanimlanmaz: tanimlanirsa layout'taki paylasim gorseli (opengraph-image) duser.
+  return { title: baslik, description: aciklama, alternates: { canonical: `/bolum/${slug}` } };
+}
 
 export default async function DepartmentResultsPage({
   params,
@@ -96,8 +109,27 @@ export default async function DepartmentResultsPage({
       <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {postings.length === 0 && (
           <div className="rounded-2xl border border-dashed border-primary/25 bg-primary/5 p-8 text-center text-sm text-muted-foreground sm:col-span-2 lg:col-span-3">
-            Seçtiğin kriterlere uyan aktif bir ilan bulunmuyor. Filtreleri
-            değiştirmeyi veya daha sonra tekrar kontrol etmeyi deneyebilirsin.
+            {tumIlanlar.length === 0 ? (
+              // Bolumlerin cogunda cogu zaman ozel ilan yok: ziyaretci bos sayfada kalmasin.
+              <>
+                <p className="font-semibold text-slate-800">Şu an {department.name} şartı arayan aktif bir ilan yok.</p>
+                <p className="mt-1">Bölüm şartı aramayan ilanlara da başvurabilirsin; yeni bir ilan çıkınca haber almak için listeye katıl.</p>
+                <div className="mt-4 flex flex-wrap justify-center gap-2">
+                  {seviyeSlug && (
+                    <Link href={`/seviye/${seviyeSlug}`} className={buttonVariants()}>
+                      {LEVEL_LABEL[department.level] ?? department.level} mezunlarının tüm ilanları
+                    </Link>
+                  )}
+                  {yukseltmeKartiGoster && (
+                    <YukseltButonu plan="PRO" kaynak="sms" className={buttonVariants({ variant: "outline" })}>
+                      Yeni ilan çıkınca haber ver
+                    </YukseltButonu>
+                  )}
+                </div>
+              </>
+            ) : (
+              "Seçtiğin kriterlere uyan aktif bir ilan bulunmuyor. Filtreleri değiştirmeyi veya daha sonra tekrar kontrol etmeyi deneyebilirsin."
+            )}
           </div>
         )}
         {tekIlanKartlari(postings).map((grup) => (

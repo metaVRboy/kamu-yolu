@@ -13,6 +13,9 @@ import { ClosingCtaSection } from "@/components/HomeMarketingSections";
 // dondurulmamali; her birkac dakikada bir yeniden olusturulur.
 export const revalidate = 300;
 
+// utm'li reklam linkleri tek adreste toplansin.
+export const metadata = { alternates: { canonical: "/" } };
+
 export default async function Home() {
   const [latestPostings, haberler, departmentRows, stats, postingCounts] = await Promise.all([
     // Ayni kurumun toplu ilanlari tek kartta birlesecegi icin genis bir pencere cekilir.

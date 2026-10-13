@@ -51,10 +51,14 @@ export const metadata: Metadata = {
   title: "Kamu Yolu — Bölümüne Göre Kamu İlanları",
   description:
     "Mezun olduğun bölümü seç, o bölüme uygun ve bölüm şartı olmayan güncel kamu personeli/memur ilanlarını listele.",
+  // Gorsel: app/opengraph-image.png (dosya kurali, tum sayfalara uygulanir).
+  openGraph: { siteName: "Kamu Yolu", locale: "tr_TR", type: "website" },
+  twitter: { card: "summary_large_image" },
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const [lastScrapeAt, user, ayar] = await Promise.all([getLastSuccessfulScrapeAt(), getCurrentUser(), getSiteAyarlari()]);
+  // Footer'daki tarama saati yan bilgi: alinamazsa sayfa yine acilsin.
+  const [lastScrapeAt, user, ayar] = await Promise.all([getLastSuccessfulScrapeAt().catch(() => null), getCurrentUser(), getSiteAyarlari()]);
   // Bakim modunda ziyaretciler sayfa yerine bakim mesajini gorur; admin siteyi normal kullanir
   // (header acik kalir: admin giris yapabilsin). API'ler ve taramalar calismaya devam eder.
   const bakimda = ayar.bakimModu && !user?.isAdmin;
@@ -98,11 +102,12 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             <div className="flex items-center gap-3">
               <SiteMenu />
               <Link href="/" className="shrink-0">
+                {/* Gosterim boyutu (en fazla ~53x40): 716px yazinca her sayfada 750-1080px'lik dosya iniyordu. */}
                 <Image
                   src="/brand/kamu-yolu-logo.png"
                   alt="Kamu Yolu"
-                  width={716}
-                  height={537}
+                  width={54}
+                  height={40}
                   className="h-9 w-auto sm:h-10"
                   priority
                 />

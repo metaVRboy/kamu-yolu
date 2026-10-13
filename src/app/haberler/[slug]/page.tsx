@@ -57,7 +57,9 @@ export async function generateMetadata({
     openGraph: {
       title: haber.baslik,
       description: haber.ozet,
-      images: haber.gorselUrl ? [haber.gorselUrl] : undefined,
+      // Kaynak sitenin gorseli paylasim kartina konmaz (telif + kirik link); sitenin kendi gorseli.
+      // openGraph tanimlandigi icin layout'taki dosya gorseli miras gelmez, acikca verilir.
+      images: ["/opengraph-image.png"],
       type: "article",
       publishedTime: haber.yayinTarihi.toISOString(),
     },
@@ -190,7 +192,7 @@ export default async function HaberDetayPage({
             {haber.baslik}
           </h1>
 
-          <p className="mt-2 text-sm text-muted-foreground">Kamu Yolu Haber Merkezi</p>
+          <p className="mt-2 text-sm text-muted-foreground">Kamu Yolu · Yapay zekâ desteğiyle özetlenmiştir; ayrıntılar için kaynağı kontrol et.</p>
 
           <div className="mt-5 rounded-xl border-l-4 border-primary bg-primary/5 p-4">
             <p className="text-sm font-medium text-slate-500">Haber Özeti</p>
@@ -290,7 +292,8 @@ export default async function HaberDetayPage({
           {haber.kaynakUrl && (
             <div className="mt-10 flex flex-col gap-3 rounded-2xl bg-slate-900 p-5 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-sm font-semibold text-white">Başvuru ve Resmî Kaynak</p>
+                {/* "Resmi" yalnizca kamu alan adinda; gazete/haber sitesi linki resmi kaynak degil. */}
+                <p className="text-sm font-semibold text-white">{/\.gov\.tr$/i.test(new URL(haber.kaynakUrl).hostname) ? "Başvuru ve Resmî Kaynak" : "Haberin Kaynağı"}</p>
                 <p className="mt-0.5 text-xs text-slate-300">
                   Başvuru tarihleri ve şartlar değişebileceğinden resmî ilanı kontrol edin.
                 </p>

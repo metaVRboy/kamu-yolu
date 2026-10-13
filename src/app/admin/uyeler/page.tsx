@@ -24,16 +24,22 @@ async function kampanyaOlcumu() {
         (select count(*) from "YukseltmeTalebi" t where (t.olusturma at time zone 'UTC' at time zone 'Europe/Istanbul')::date = g.gun) as talep
       from generate_series((now() at time zone 'Europe/Istanbul')::date - ${OLCUM_GUN - 1}::int, (now() at time zone 'Europe/Istanbul')::date, interval '1 day') as g(gun)
       order by g.gun desc`,
-    prisma.gunlukSayac.findMany({ where: { anahtar: "tanitim-gosterim", gun: { gte: baslangic } }, select: { gun: true, adet: true } }),
+    prisma.gunlukSayac.findMany({ where: { anahtar: { in: ["tanitim-gosterim", "eposta-hata"] }, gun: { gte: baslangic } }, select: { anahtar: true, gun: true, adet: true } }),
     prisma.$queryRaw<{ kaynak: string; uye: bigint; talep: bigint }[]>`
       select coalesce(u.kaynak->>'utm_source', u.kaynak->>'ref') as kaynak, count(*) as uye, count(t.id) as talep
       from "User" u left join "YukseltmeTalebi" t on t."userId" = u.id
       where u.kaynak is not null and u."createdAt" >= ${baslangic}
       group by 1 order by 2 desc limit 15`,
   ]);
-  const gosterim = new Map(gosterimler.map((g) => [g.gun.toISOString().slice(0, 10), g.adet]));
+  const sayac = new Map(gosterimler.map((g) => [`${g.anahtar}|${g.gun.toISOString().slice(0, 10)}`, g.adet]));
   return {
-    gunler: gunluk.map((g) => ({ gun: g.gun, uye: Number(g.uye), talep: Number(g.talep), gosterim: gosterim.get(g.gun) ?? 0 })),
+    gunler: gunluk.map((g) => ({
+      gun: g.gun,
+      uye: Number(g.uye),
+      talep: Number(g.talep),
+      gosterim: sayac.get(`tanitim-gosterim|${g.gun}`) ?? 0,
+      epostaHata: sayac.get(`eposta-hata|${g.gun}`) ?? 0,
+    })),
     kaynaklar: kaynaklar.map((k) => ({ kaynak: k.kaynak ?? "(bilinmiyor)", uye: Number(k.uye), talep: Number(k.talep) })),
   };
 }
@@ -104,6 +110,7 @@ export default async function AdminUyelerPage({ searchParams }: { searchParams: 
                 <th className="py-1 pr-3 font-semibold">Yeni üye</th>
                 <th className="py-1 pr-3 font-semibold">Tanıtım gösterimi</th>
                 <th className="py-1 pr-3 font-semibold">Yeni talep</th>
+                <th className="py-1 pr-3 font-semibold">E-posta hatası</th>
               </tr>
             </thead>
             <tbody>
@@ -113,6 +120,8 @@ export default async function AdminUyelerPage({ searchParams }: { searchParams: 
                   <td className="py-1 pr-3">{g.uye}</td>
                   <td className="py-1 pr-3">{g.gosterim}</td>
                   <td className="py-1 pr-3">{g.talep}</td>
+                  {/* Kayit kodu / sifre maili gitmedi: Resend kotasi veya anahtari kontrol edilmeli. */}
+                  <td className={cn("py-1 pr-3", g.epostaHata > 0 && "font-bold text-red-600")}>{g.epostaHata}</td>
                 </tr>
               ))}
             </tbody>
