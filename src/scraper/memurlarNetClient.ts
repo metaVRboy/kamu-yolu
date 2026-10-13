@@ -27,7 +27,7 @@ export const MEMURLAR_KATEGORILER = [
 
 const HEADERS = {
   "User-Agent":
-    "KamuYoluBot/0.1 (kamu ilanlarini bolume gore listeleyen acik kaynak proje; iletisim: emirhan.koc@sonayyatirim.com)",
+    "KamuYoluBot/0.1 (kamu ilanlarini bolume gore listeleyen acik kaynak proje; iletisim: info@kamuyolu.com)",
 };
 
 // Sayfa "acildi/kapandi" etiketlerini dengeli sayarak <div class="detail">

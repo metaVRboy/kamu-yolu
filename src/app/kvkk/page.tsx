@@ -1,6 +1,7 @@
 import { ShieldCheck } from "lucide-react";
 import { SayfaBasligi } from "@/components/SayfaBasligi";
 import Link from "next/link";
+import { ILETISIM_EPOSTA } from "@/lib/site";
 
 export const metadata = {
   title: "KVKK Aydınlatma Metni ve Gizlilik Politikası — Kamu Yolu",
@@ -87,8 +88,8 @@ export default function KvkkPage() {
             KVKK&apos;nın 11. maddesi uyarınca; verilerinizin işlenip işlenmediğini öğrenme, işlenmişse
             buna ilişkin bilgi talep etme, işlenme amacını öğrenme, yurt içinde/dışında aktarıldığı
             üçüncü kişileri bilme, eksik/yanlış işlenmişse düzeltilmesini isteme, silinmesini/yok
-            edilmesini talep etme haklarına sahipsiniz. Bu haklarınızı kullanmak için site üzerindeki
-            iletişim imkanlarından bize ulaşabilirsiniz.
+            edilmesini talep etme haklarına sahipsiniz. Bu haklarınızı kullanmak için {ILETISIM_EPOSTA}{" "}
+            adresine e-posta gönderebilir ya da site üzerindeki iletişim imkanlarından bize ulaşabilirsiniz.
           </p>
         </section>
 

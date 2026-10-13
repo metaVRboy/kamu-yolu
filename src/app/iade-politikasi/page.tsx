@@ -1,5 +1,6 @@
 import { RotateCcw } from "lucide-react";
 import { SayfaBasligi } from "@/components/SayfaBasligi";
+import { ILETISIM_EPOSTA } from "@/lib/site";
 export const metadata = {
   title: "İade Politikası — Kamu Yolu",
 };
@@ -93,7 +94,7 @@ export default function IadePolitikasiPage() {
             Onaylanan iadeler, ödemenin yapıldığı yönteme (kredi/banka kartı vb.) iş bankaları
             ve ödeme kuruluşunun işlem sürelerine bağlı olarak genellikle{" "}
             <YerTutucu>[X] iş günü</YerTutucu> içinde yansıtılır. İade talepleriniz için{" "}
-            <YerTutucu>[DESTEK E-POSTASI]</YerTutucu> adresinden bizimle iletişime
+            {ILETISIM_EPOSTA} adresinden bizimle iletişime
             geçebilirsiniz.
           </p>
         </section>

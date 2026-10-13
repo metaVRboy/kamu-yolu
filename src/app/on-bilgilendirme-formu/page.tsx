@@ -2,6 +2,7 @@ import { FileText } from "lucide-react";
 import { SayfaBasligi } from "@/components/SayfaBasligi";
 import { getFiyatlar } from "@/lib/fiyatlar";
 import { tl } from "@/lib/planlar";
+import { ILETISIM_EPOSTA } from "@/lib/site";
 export const metadata = {
   title: "Ön Bilgilendirme Formu — Kamu Yolu",
 };
@@ -42,7 +43,7 @@ export default async function OnBilgilendirmeFormuPage() {
             <li>Unvan: <YerTutucu>[ŞİRKET UNVANI]</YerTutucu></li>
             <li>Adres: <YerTutucu>[AÇIK ADRES]</YerTutucu></li>
             <li>Telefon: <YerTutucu>[TELEFON]</YerTutucu></li>
-            <li>E-posta: <YerTutucu>[E-POSTA ADRESİ]</YerTutucu></li>
+            <li>E-posta: {ILETISIM_EPOSTA}</li>
             <li>MERSİS No: <YerTutucu>[MERSİS NUMARASI]</YerTutucu></li>
           </ul>
         </section>
@@ -101,7 +102,7 @@ export default async function OnBilgilendirmeFormuPage() {
         <section>
           <h2 className="font-sans text-base font-semibold text-primary">6. Şikayet ve Başvuru Yolları</h2>
           <p>
-            Şikayetleriniz için öncelikle <YerTutucu>[DESTEK E-POSTASI]</YerTutucu> adresinden
+            Şikayetleriniz için öncelikle {ILETISIM_EPOSTA} adresinden
             bizimle iletişime geçebilirsiniz. Çözülemeyen uyuşmazlıklarda, Ticaret Bakanlığınca
             ilan edilen parasal sınırlar dahilinde yerleşim yerinizdeki Tüketici Hakem Heyeti
             veya Tüketici Mahkemesine başvurabilirsiniz.

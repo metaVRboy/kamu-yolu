@@ -2,6 +2,7 @@ import { FileSignature } from "lucide-react";
 import { SayfaBasligi } from "@/components/SayfaBasligi";
 import { getFiyatlar } from "@/lib/fiyatlar";
 import { tl } from "@/lib/planlar";
+import { ILETISIM_EPOSTA } from "@/lib/site";
 export const metadata = {
   title: "Mesafeli Satış Sözleşmesi — Kamu Yolu",
 };
@@ -41,7 +42,7 @@ export default async function MesafeliSatisSozlesmesiPage() {
             <li>Adres: <YerTutucu>[AÇIK ADRES]</YerTutucu></li>
             <li>Vergi Dairesi / No: <YerTutucu>[VERGİ DAİRESİ VE NUMARASI]</YerTutucu></li>
             <li>MERSİS No: <YerTutucu>[MERSİS NUMARASI]</YerTutucu></li>
-            <li>E-posta: <YerTutucu>[E-POSTA ADRESİ]</YerTutucu></li>
+            <li>E-posta: {ILETISIM_EPOSTA}</li>
           </ul>
           <p>
             <strong>ALICI</strong>: kamuyolu.com üzerinden üye olup ücretli abonelik satın alan

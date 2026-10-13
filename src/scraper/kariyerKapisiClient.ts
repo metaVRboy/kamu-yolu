@@ -23,7 +23,7 @@ const dispatcher = new Agent({ connectTimeout: 8_000, headersTimeout: 20_000, bo
 const HEADERS = {
   "Content-Type": "application/json",
   "User-Agent":
-    "KamuYoluBot/0.1 (kamu ilanlarini bolume gore listeleyen acik kaynak proje; iletisim: emirhan.koc@sonayyatirim.com)",
+    "KamuYoluBot/0.1 (kamu ilanlarini bolume gore listeleyen acik kaynak proje; iletisim: info@kamuyolu.com)",
 };
 
 function sleep(ms: number) {
