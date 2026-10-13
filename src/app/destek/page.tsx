@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { SayfaBasligi } from "@/components/SayfaBasligi";
 import { DestekFormu } from "@/components/DestekFormu";
+import { DESTEK_KONULARI } from "@/lib/destek";
 
 export const metadata = {
   title: "İletişim ve Destek — Kamu Yolu",
@@ -11,7 +12,10 @@ export const metadata = {
 
 const TARIH = new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Istanbul" });
 
-export default async function DestekPage() {
+export default async function DestekPage({ searchParams }: { searchParams: Promise<{ konu?: string }> }) {
+  // Ana sayfadaki "Bize ulasin" konu cipleri: yalniz bilinen konular kabul edilir.
+  const { konu } = await searchParams;
+  const ilkKonu = DESTEK_KONULARI.find((k) => k === konu);
   const user = await getCurrentUser();
   const gecmis = user
     ? await prisma.destekMesaji.findMany({ where: { userId: user.id }, orderBy: { createdAt: "desc" }, take: 20 })
@@ -28,7 +32,7 @@ export default async function DestekPage() {
       />
 
       <div className="mt-6">
-        <DestekFormu uye={user ? { adSoyad: user.adSoyad, email: user.email } : null} />
+        <DestekFormu uye={user ? { adSoyad: user.adSoyad, email: user.email } : null} ilkKonu={ilkKonu} />
       </div>
 
       {gecmis.length > 0 && (

@@ -7,7 +7,7 @@ import { kurumaGoreGrupla, kurumLogolari } from "@/lib/ilanVitrin";
 import { DepartmentSearch } from "@/components/DepartmentSearch";
 import { HaberlerSection } from "@/components/HaberlerSection";
 import { HeroHaberCarousel } from "@/components/HeroHaberCarousel";
-import { ClosingCtaSection } from "@/components/HomeMarketingSections";
+import { BizeUlasin } from "@/components/BizeUlasin";
 
 // Ilan verileri periyodik olarak degistigi icin sayfa build-time'da
 // dondurulmamali; her birkac dakikada bir yeniden olusturulur.
@@ -105,7 +105,7 @@ export default async function Home() {
       </section>
 
       <div className="mt-16">
-        <ClosingCtaSection />
+        <BizeUlasin />
       </div>
     </div>
   );

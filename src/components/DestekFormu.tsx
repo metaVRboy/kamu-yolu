@@ -8,11 +8,11 @@ import { DESTEK_KONULARI } from "@/lib/destek";
 
 const alan = "mt-1 w-full rounded-xl border border-primary/20 bg-white px-3 py-2.5 text-sm focus:border-primary/50 focus:outline-none";
 
-export function DestekFormu({ uye }: { uye: { adSoyad: string; email: string } | null }) {
+export function DestekFormu({ uye, ilkKonu }: { uye: { adSoyad: string; email: string } | null; ilkKonu?: string }) {
   const router = useRouter();
   const [ad, setAd] = useState(uye?.adSoyad ?? "");
   const [email, setEmail] = useState(uye?.email ?? "");
-  const [konu, setKonu] = useState<string>(DESTEK_KONULARI[0]);
+  const [konu, setKonu] = useState<string>(ilkKonu ?? DESTEK_KONULARI[0]);
   const [mesaj, setMesaj] = useState("");
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [turnstileTur, setTurnstileTur] = useState(0); // token tek kullanimlik: her gonderimden sonra yenilenir
