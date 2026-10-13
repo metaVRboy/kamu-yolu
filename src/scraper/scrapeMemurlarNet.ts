@@ -139,7 +139,8 @@ export async function scrapeMemurlarNet(prisma: PrismaClient): Promise<ScrapeSum
             isDepartmentRestricted,
             applicationEnd: detay.applicationEnd,
             publishedAt: detay.ilanGirisTarihi ?? new Date(),
-            isActive: true,
+            // Kaynak bazen suresi coktan dolmus ilani listede tutuyor: pasif dogsun.
+            isActive: !detay.applicationEnd || detay.applicationEnd >= new Date(),
           },
         });
 
@@ -157,7 +158,7 @@ export async function scrapeMemurlarNet(prisma: PrismaClient): Promise<ScrapeSum
           });
         }
 
-        if (!existing && matches.length > 0) {
+        if (!existing && posting.isActive && matches.length > 0) {
           const departments = await prisma.department.findMany({
             where: { id: { in: matches.map((m) => m.departmentId) } },
             select: { id: true, slug: true },
@@ -171,6 +172,9 @@ export async function scrapeMemurlarNet(prisma: PrismaClient): Promise<ScrapeSum
         await sleep(250);
       }
     }
+
+    // Basta da yapiliyor ama yukaridaki upsert'ler suresi dolmus ilanlari yeniden aktif ediyordu.
+    await expireOverduePostings();
 
     const staleResult = await prisma.posting.updateMany({
       where: {

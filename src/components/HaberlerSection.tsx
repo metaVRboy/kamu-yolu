@@ -85,7 +85,7 @@ export function HaberlerSection({
               <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-2">
                 <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <CalendarDays className="h-3.5 w-3.5" />
-                  {new Date(h.yayinTarihi).toLocaleDateString("tr-TR", { day: "2-digit", month: "long", year: "numeric" })}
+                  {new Date(h.yayinTarihi).toLocaleDateString("tr-TR", { day: "2-digit", month: "long", year: "numeric", timeZone: "Europe/Istanbul" })}
                 </span>
                 <Link
                   href={`/haberler/${h.slug}`}

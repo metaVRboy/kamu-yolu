@@ -85,7 +85,7 @@ export function IlanVitrinKarti({
           {ilk.applicationEnd && (
             <li className="flex items-center gap-1.5">
               <CalendarClock className="h-3.5 w-3.5 shrink-0 text-primary/70" />
-              Son başvuru: {ilk.applicationEnd.toLocaleDateString("tr-TR", { day: "2-digit", month: "long", year: "numeric" })}
+              Son başvuru: {ilk.applicationEnd.toLocaleDateString("tr-TR", { day: "2-digit", month: "long", year: "numeric", timeZone: "Europe/Istanbul" })}
             </li>
           )}
         </ul>

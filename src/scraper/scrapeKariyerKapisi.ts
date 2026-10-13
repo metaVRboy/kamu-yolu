@@ -113,7 +113,8 @@ async function upsertPosting(
       applicationStart: ilan.basTarih ? new Date(ilan.basTarih) : null,
       applicationEnd: ilan.bitTarih ? new Date(ilan.bitTarih) : null,
       publishedAt: ilan.basTarih ? new Date(ilan.basTarih) : new Date(),
-      isActive: true,
+      // Kaynak bazen suresi coktan dolmus ilani listede tutuyor: pasif dogsun.
+      isActive: !ilan.bitTarih || new Date(ilan.bitTarih) >= new Date(),
     },
   });
 
@@ -133,7 +134,7 @@ async function upsertPosting(
 
   // Sadece yeni eklenen ilanlar icin bildirim gonder; her taramada
   // ayni aktif ilan icin tekrar tekrar bildirim gitmesin.
-  if (!existing && matches.length > 0) {
+  if (!existing && posting.isActive && matches.length > 0) {
     const departments = await prisma.department.findMany({
       where: { id: { in: matches.map((m) => m.departmentId) } },
       select: { id: true, slug: true },
@@ -256,6 +257,9 @@ export async function scrapeKariyerKapisi(
       where: { isDemo: true, isActive: true },
       data: { isActive: false },
     });
+
+    // Basta da yapiliyor ama yukaridaki upsert'ler suresi dolmus ilanlari yeniden aktif ediyordu.
+    await expireOverduePostings();
 
     const staleResult = await prisma.posting.updateMany({
       where: {

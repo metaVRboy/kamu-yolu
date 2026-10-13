@@ -70,46 +70,46 @@ export async function haberleriEkleVeTekillestir(
 
   for (const { departmentIds, detay, ...aday } of adaylar) {
     const eslesenId = await ayniHaberIdBul(aday, mevcutlar);
+    const veri = {
+      ...aday,
+      kurumAdi: detay?.kurumAdi ?? null,
+      kadroPozisyon: detay?.kadroPozisyon ?? null,
+      kontenjan: detay?.kontenjan ?? null,
+      kategori: detay?.kategori ?? null,
+      istihdamTuru: detay?.istihdamTuru ?? null,
+      kpssTuru: detay?.kpssTuru ?? null,
+      ustYas: detay?.ustYas ?? null,
+      egitimSeviyeleri: (detay?.egitimSeviyeleri ?? []) as EducationLevel[],
+      basvuruBaslangic: detay?.basvuruBaslangic ? new Date(detay.basvuruBaslangic) : null,
+      basvuruBitis: detay?.basvuruBitis ? new Date(detay.basvuruBitis) : null,
+      detaylar: detay
+        ? {
+            neAciklandi: detay.neAciklandi,
+            basvuruTakvimi: detay.basvuruTakvimi,
+            kimlerBasvurabilir: detay.kimlerBasvurabilir,
+            ozelSartlar: detay.ozelSartlar,
+            dikkatEdilmesiGerekenler: detay.dikkatEdilmesiGerekenler,
+            sss: detay.sss,
+          }
+        : undefined,
+    };
+
+    let olusturulan: { id: string };
     if (eslesenId) {
-      // Haber kaydi silindiginde iliskili HaberDepartment satirlari da
-      // (onDelete: Cascade) otomatik silinir.
-      await prisma.haber.delete({ where: { id: eslesenId } });
+      // Eski kayit silinip yenisi acilmaz: id ve slug (yani paylasilmis/indekslenmis link) ayni kalir,
+      // icerik en guncel haliyle degisir ve haber listede en uste cikar.
+      const simdi = new Date();
+      olusturulan = await prisma.haber.update({ where: { id: eslesenId }, data: { ...veri, yayinTarihi: simdi, createdAt: simdi } });
+      await prisma.haberDepartment.deleteMany({ where: { haberId: eslesenId } });
       mevcutlar = mevcutlar.filter((m) => m.id !== eslesenId);
       degistirilen++;
     } else {
+      // Slug id'ye bagli oldugu icin (benzersizlik garantisi) id onceden
+      // uretilip slug ile birlikte tek seferde yazilir.
+      const id = randomUUID();
+      olusturulan = await prisma.haber.create({ data: { ...veri, id, slug: buildHaberSlug(aday.baslik, id) } });
       eklenen++;
     }
-
-    // Slug id'ye bagli oldugu icin (benzersizlik garantisi) id onceden
-    // uretilip slug ile birlikte tek seferde yazilir.
-    const id = randomUUID();
-    const olusturulan = await prisma.haber.create({
-      data: {
-        ...aday,
-        id,
-        slug: buildHaberSlug(aday.baslik, id),
-        kurumAdi: detay?.kurumAdi ?? null,
-        kadroPozisyon: detay?.kadroPozisyon ?? null,
-        kontenjan: detay?.kontenjan ?? null,
-        kategori: detay?.kategori ?? null,
-        istihdamTuru: detay?.istihdamTuru ?? null,
-        kpssTuru: detay?.kpssTuru ?? null,
-        ustYas: detay?.ustYas ?? null,
-        egitimSeviyeleri: (detay?.egitimSeviyeleri ?? []) as EducationLevel[],
-        basvuruBaslangic: detay?.basvuruBaslangic ? new Date(detay.basvuruBaslangic) : null,
-        basvuruBitis: detay?.basvuruBitis ? new Date(detay.basvuruBitis) : null,
-        detaylar: detay
-          ? {
-              neAciklandi: detay.neAciklandi,
-              basvuruTakvimi: detay.basvuruTakvimi,
-              kimlerBasvurabilir: detay.kimlerBasvurabilir,
-              ozelSartlar: detay.ozelSartlar,
-              dikkatEdilmesiGerekenler: detay.dikkatEdilmesiGerekenler,
-              sss: detay.sss,
-            }
-          : undefined,
-      },
-    });
     if (departmentIds.length > 0) {
       await prisma.haberDepartment.createMany({
         data: departmentIds.map((departmentId) => ({ haberId: olusturulan.id, departmentId })),

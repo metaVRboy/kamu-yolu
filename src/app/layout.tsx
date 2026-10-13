@@ -235,7 +235,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             </p>
             <p className="mt-1">
               {lastScrapeAt
-                ? `Veriler en son ${lastScrapeAt.toLocaleString("tr-TR", { dateStyle: "medium", timeStyle: "short" })} tarihinde güncellendi.`
+                ? `Veriler en son ${lastScrapeAt.toLocaleString("tr-TR", { dateStyle: "medium", timeStyle: "short", timeZone: "Europe/Istanbul" })} tarihinde güncellendi.`
                 : "Veriler henüz otomatik güncelleme almadı."}
             </p>
           </div>

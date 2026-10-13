@@ -52,9 +52,21 @@ function extractBalancedDiv(html: string, openTagStart: number): string {
   return html.slice(contentStart, i - 6);
 }
 
+/**
+ * Cloudflare e-posta gizlemesi: adres `data-cfemail` icinde hex olarak durur, ilk bayt anahtar,
+ * kalanlar anahtarla XOR'lanmis karakterler. Cozulmezse metne "[email protected]" kaliyordu.
+ */
+export function cfEpostaCoz(hex: string): string {
+  const anahtar = parseInt(hex.slice(0, 2), 16);
+  let sonuc = "";
+  for (let i = 2; i < hex.length; i += 2) sonuc += String.fromCharCode(parseInt(hex.slice(i, i + 2), 16) ^ anahtar);
+  return sonuc;
+}
+
 function stripHtmlTags(html: string): string {
   return decodeHtmlEntities(
     html
+      .replace(/<(a|span)[^>]*data-cfemail="([0-9a-f]+)"[^>]*>[\s\S]*?<\/\1>/gi, (_, _etiket, hex: string) => cfEpostaCoz(hex))
       .replace(/<(script|style)[^>]*>[\s\S]*?<\/\1>/gi, "")
       .replace(/<br\s*\/?>/gi, "\n")
       .replace(/<\/(p|div|li|h[1-6])>/gi, "\n")

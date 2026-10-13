@@ -39,7 +39,7 @@ type HaberDetaylar = {
 };
 
 function tarihFormatla(d: Date): string {
-  return d.toLocaleDateString("tr-TR", { day: "2-digit", month: "long", year: "numeric" });
+  return d.toLocaleDateString("tr-TR", { day: "2-digit", month: "long", year: "numeric", timeZone: "Europe/Istanbul" });
 }
 
 export async function generateMetadata({
