@@ -4,6 +4,7 @@ import { IlanGorsel } from "@/components/IlanGorsel";
 import { INSTITUTION_TYPE_LABEL, LEVEL_LABEL } from "@/lib/labels";
 import { duzgunHarf, kadroAdi, konumMetni, type IlanVitrinGrubu } from "@/lib/ilanVitrin";
 import { slugify } from "@/lib/slug";
+import { ilanMetniGosterilebilir } from "@/lib/ilanMetni";
 
 /**
  * Gorselli ilan karti: ana sayfa vitrini (kurum bazli grup) ve ilan
@@ -63,7 +64,7 @@ export function IlanVitrinKarti({
             <Layers className="h-3.5 w-3.5" />+{kadroSayisi - 1} farklı kadro daha
           </p>
         )}
-        {nitelikOzeti && ilk.departmentRequirementRaw && (
+        {nitelikOzeti && ilk.departmentRequirementRaw && ilanMetniGosterilebilir(ilk) && (
           <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-slate-500">
             {ilk.departmentRequirementRaw.replace(/\s+/g, " ").trim()}
           </p>

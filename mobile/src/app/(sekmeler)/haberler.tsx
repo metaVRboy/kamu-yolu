@@ -21,7 +21,7 @@ export default function Haberler() {
       ListHeaderComponent={
         <View>
           <SayfaBasligi
-            baslik="Haberler"
+            baslik="Kamu Alım Duyuruları"
             aciklama="Kamu personel alımları, toplu alım duyuruları ve gündemdeki gelişmeler. Başvuru süresi dolan haberler listeden otomatik kalkar."
             cipler={
               <>

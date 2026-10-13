@@ -13,6 +13,13 @@ export const UCRETLI_PLANLAR: UcretliPlan[] = ["PRO", "PRO_PLUS"];
  * yayinda olmaz, odeme vaatleri ("iptal et", "KDV dahil") gizlenir. Bkz. denetim 2026-10-13.
  */
 export const SATIS_ACIK = false;
+
+/**
+ * Kampanya/duyuru (ticari elektronik ileti) onayi toplama. Ticari Ileti Yonetmeligi m.7/11-12: onay 3 is
+ * gunu icinde IYS'ye kaydedilmezse gecersiz; IYS kaydi (vergi kaydi/sirket) yapilana kadar onay
+ * istenmez, kutucuk ve ayar gizli kalir. Veritabani alanlari ve API duruyor.
+ */
+export const TICARI_ILETI_ACIK = false;
 export type Donem = "aylik" | "yillik";
 
 /** Bir plan+donem fiyati (TL, KDV dahil): liste fiyati, kampanyali odenecek tutar ve kampanya etiketi. */

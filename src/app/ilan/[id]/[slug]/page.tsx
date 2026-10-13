@@ -20,6 +20,7 @@ import { getBenzerIlanlar, getPostingById } from "@/lib/matching";
 import { slugify } from "@/lib/slug";
 import { INSTITUTION_TYPE_LABEL, LEVEL_LABEL } from "@/lib/labels";
 import { SITE_URL } from "@/lib/site";
+import { ilanMetniGosterilebilir } from "@/lib/ilanMetni";
 import {
   basvuruIlerlemesi,
   duzgunHarf,
@@ -140,7 +141,8 @@ export default async function IlanDetayPage({
   const kalan = kalanGunSayisi(posting.applicationEnd);
   const kalanStil = kalanGunStili(kalan);
   const ilerleme = basvuruIlerlemesi(posting.applicationStart, posting.applicationEnd);
-  const maddeler = posting.departmentRequirementRaw ? nitelikMaddeleri(posting.departmentRequirementRaw) : [];
+  const metinGosterilir = ilanMetniGosterilebilir(posting);
+  const maddeler = metinGosterilir && posting.departmentRequirementRaw ? nitelikMaddeleri(posting.departmentRequirementRaw) : [];
   const sayfaUrl = `${SITE_URL}/ilan/${id}/${canonicalSlug}`;
   const tekBolum = bolumler.length === 1 ? bolumler[0] : null;
 
@@ -151,9 +153,8 @@ export default async function IlanDetayPage({
     "@context": "https://schema.org",
     "@type": "JobPosting",
     title: posting.title,
-    description:
-      posting.departmentRequirementRaw ??
-      `${posting.institutionName} tarafından yayımlanan resmi kamu personeli ilanı.`,
+    // Kendi ozetimiz: kaynak metni (ozellikle Memurlar.net) yapilandirilmis veriye kopyalanmaz.
+    description: `${posting.institutionName} tarafından yayımlanan "${posting.title}" kamu personeli ilanı. Başvuru şartları ve tam metin için ilanın kaynağına bakınız.`,
     datePosted: (posting.publishedAt ?? posting.createdAt).toISOString(),
     ...(posting.applicationEnd ? { validThrough: posting.applicationEnd.toISOString() } : {}),
     hiringOrganization: { "@type": "Organization", name: posting.institutionName },
@@ -265,6 +266,18 @@ export default async function IlanDetayPage({
           )}
 
           <IlanUygunluk ilanId={posting.id} />
+
+          {!metinGosterilir && (
+            <Bolum baslik="Aranan nitelikler" ikon={FileText}>
+              <p className="text-sm leading-relaxed text-slate-700">
+                Bu ilanın tam metni ve başvuru şartları yalnızca kaynağında yayımlanıyor. Başvurmadan önce şartları{" "}
+                <a href={posting.sourceUrl} target="_blank" rel="noopener noreferrer" className="font-medium text-primary underline">
+                  ilanın kaynak sayfasından
+                </a>{" "}
+                incele.
+              </p>
+            </Bolum>
+          )}
 
           {maddeler.length > 0 && (
             <Bolum baslik="Aranan nitelikler" ikon={FileText}>

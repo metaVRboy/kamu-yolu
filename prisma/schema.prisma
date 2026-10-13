@@ -307,6 +307,22 @@ model PasswordResetToken {
 // kayit bilgileri (sifre zaten hash'lenmis halde) ve e-postaya gonderilen
 // kod kisa sureligine yazilir. Kod dogrulaninca gercek User kaydi burdaki
 // bilgilerden olusturulur. E-posta basina tek aktif kayit oldugu icin
+// Yasal saklama kayitlari (src/lib/yasalKayit.ts). Kullaniciya bagli DEGIL (iliski yok): hesap silinse de
+// kanunen saklanir. 5651 m.5/3: kullanici icerigi (becayis ilani/mesaji) ve giris icin IP + zaman, 2 yil;
+// KVKK Silme Yonetmeligi m.7/3: silme islemi kaydi, 3 yil. ozet = satirin HMAC'i (butunluk).
+model YasalKayit {
+  id        String   @id @default(cuid())
+  zaman     DateTime @default(now())
+  islem     String
+  userId    String?
+  hedefId   String?
+  ip        String?
+  userAgent String?
+  ozet      String
+
+  @@index([islem, zaman])
+}
+
 // Kisisel veri icermeyen gunluk sayaclar (ör. "tanitim-gosterim"): talep oraninin paydasi.
 // Cerez gerektirmez; anahtar + gun basina tek satir, atomik artirilir.
 model GunlukSayac {

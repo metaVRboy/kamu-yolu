@@ -28,8 +28,8 @@ export function isYeni(yayinTarihi: string): boolean {
 export function HaberlerSection({
   haberler,
   showAllLink = true,
-  baslik = "Haberler",
-  aciklama = "Kamu personel alımları, toplu alım duyuruları ve gündemdeki gelişmeler.",
+  baslik = "Duyurular",
+  aciklama = "Kamu personel alımı duyurularının kaynağına bağlantılı kısa özetleri.",
   basliksiz = false,
   etiket,
   toplamSayi,
@@ -52,7 +52,7 @@ export function HaberlerSection({
           baslik={baslik}
           aciklama={aciklama}
           tumuHref={showAllLink ? "/haberler" : undefined}
-          tumuEtiket="Tüm haberler"
+          tumuEtiket="Tüm duyurular"
           sayac={toplamSayi}
         />
       )}

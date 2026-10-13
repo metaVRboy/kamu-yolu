@@ -82,7 +82,7 @@ export function BekleyenTalepGonder() {
       t = JSON.parse(sessionStorage.getItem(BEKLEYEN_TALEP) ?? "null");
       sessionStorage.removeItem(BEKLEYEN_TALEP);
     } catch {}
-    if (t) talepGonder(t).then(() => toast.success(`${PLAN_ADI[t.plan]} bekleme listesine eklendin.`, "Ödeme açıldığında sana e-posta ile haber vereceğiz."), () => {});
+    if (t) talepGonder(t).then(() => toast.success(`${PLAN_ADI[t.plan]} bekleme listesine eklendin.`, "Ödeme açıldığında sitede ve uygulamada bildirimle haber vereceğiz."), () => {});
   }, []);
   return null;
 }
@@ -270,8 +270,8 @@ function Pencere({ baslangicPlani, kaynak, kapat }: { baslangicPlani?: UcretliPl
               </span>
               <p className="mt-4 font-sans text-xl font-bold text-slate-900">Listeye eklendin!</p>
               <p className="mt-2 max-w-sm text-sm text-slate-600">
-                Ödeme altyapımız açıldığında <strong>{PLAN_ADI[secilen]} · {yillik ? "yıllık" : "aylık"}</strong> için sana e-posta ile
-                haber vereceğiz. İstediğin zaman bu pencereden listeden çıkabilirsin.
+                Ödeme altyapımız açıldığında <strong>{PLAN_ADI[secilen]} · {yillik ? "yıllık" : "aylık"}</strong> için sitede ve uygulamada
+                bildirimle haber vereceğiz. İstediğin zaman bu pencereden listeden çıkabilirsin.
               </p>
               <button type="button" onClick={kapat} className="mt-6 rounded-full bg-slate-900 px-6 py-2.5 text-sm font-semibold text-white hover:bg-slate-800">
                 Tamam
@@ -488,8 +488,9 @@ function Pencere({ baslangicPlani, kaynak, kapat }: { baslangicPlani?: UcretliPl
                       onayın alınır. Fiyatlar KDV dahildir.
                     </>
                   ) : (
-                    // Henuz satis yok: buton bir satin alma degil, yalnizca haber verme talebi.
-                    "Şu an ödeme alınmıyor. \"Açılınca haber ver\" ile yalnızca ödeme açıldığında bu plan için sana e-posta göndermemizi istemiş olursun."
+                    // Henuz satis yok: buton bir satin alma degil, yalnizca haber verme talebi. Haber e-postayla
+                    // degil site/uygulama ici bildirimle verilir: "satista" e-postasi ticari ileti (IYS ister).
+                    "Şu an ödeme alınmıyor. \"Açılınca haber ver\" ile yalnızca ödeme açıldığında sitede ve uygulamada bildirim almak istemiş olursun."
                   )}
                 </p>
               </div>

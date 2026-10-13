@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { KilitliOzellik } from "@/components/KilitliOzellik";
 import { proAktifMi, smsSaglayiciTanimli, telefonGoster } from "@/lib/sms";
+import { TICARI_ILETI_ACIK } from "@/lib/planlar";
 import { AyarKarti, AyarlarSayfasi } from "@/components/AyarlarSayfasi";
 import { SmsTercihleri, TelefonDogrulama, TicariIletiTercihi } from "@/components/HesapAyarlari";
 
@@ -11,8 +12,8 @@ export default async function BildirimAyarlariPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/giris");
 
-  // Plan kilidinin disinda: kampanya/duyuru onayi her uyenin hakki.
-  const ticariIleti = (
+  // Plan kilidinin disinda: kampanya/duyuru onayi her uyenin hakki. IYS kaydina kadar gizli (TICARI_ILETI_ACIK).
+  const ticariIleti = TICARI_ILETI_ACIK && (
     <AyarKarti baslik="Kampanya ve duyurular" aciklama="Ticari elektronik ileti onayı; vermek zorunlu değildir.">
       <TicariIletiTercihi ilk={user.ticariIletiOnay} />
     </AyarKarti>

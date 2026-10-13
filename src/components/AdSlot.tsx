@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 const ADSENSE_CLIENT_ID = "ca-pub-2932226916873749";
 
@@ -16,20 +17,28 @@ declare global {
  * olusturulup slotId buraya verildiginde gercek reklam yuklenir; slotId
  * henuz yoksa (birim olusturulmadiysa) yer tutucu gosterilir.
  */
+// Icerik olmayan / "cikmaz" ekranlarda reklam yok (AdSense: giris, kayit, hesap, hata sayfalari).
+// Duyuru (haber) detaylari yapay zeka ozeti: AdSense "insan kontrolu olmadan otomatik uretilmis icerik" kuralina
+// takilmasin diye reklamsiz (ve noindex).
+const REKLAMSIZ_YOLLAR = /^\/(giris|kayit-ol|sifre|profilim|admin|haberler\/.)/;
+
 export function AdSlot({ side, slotId }: { side: "left" | "right"; slotId?: string }) {
+  const yol = usePathname();
+  const gizli = REKLAMSIZ_YOLLAR.test(yol);
   useEffect(() => {
-    if (!slotId) return;
+    if (!slotId || gizli) return;
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
     } catch {
       // AdSense script henuz yuklenmemis/engellenmisse sessizce yok say -
       // ReklamEngelleyiciKontrol zaten ayri bir uyari gosteriyor.
     }
-  }, [slotId]);
+  }, [slotId, gizli]);
 
   return (
     <div className="sticky top-24 hidden h-[600px] w-[160px] shrink-0 2xl:block">
-      {slotId ? (
+      {/* Reklamsiz sayfada <ins> kaldirilir; donuste yeni ins olusur (dolu ins'e ikinci push hata verir). */}
+      {gizli ? null : slotId ? (
         <ins
           className="adsbygoogle"
           style={{ display: "inline-block", width: "160px", height: "600px" }}

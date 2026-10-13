@@ -34,6 +34,10 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 const ADSENSE_CLIENT_ID = "ca-pub-2932226916873749";
+// Google AB Kullanici Onayi Politikasi kapsami: AEA (AB 27 + IS, LI, NO) + Ingiltere + Isvicre.
+const CMP_ZORUNLU_ULKELER = new Set(
+  "AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE IS LI NO GB CH".split(" "),
+);
 
 export const revalidate = 300;
 
@@ -66,7 +70,11 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   // Pro+ "reklamsiz deneyim": reklam kodu, reklam alanlari ve engelleyici uyarisi hic yuklenmez.
   // (getCurrentUser suresi dolan plani zaten UCRETSIZ dondurur.)
   // x-reklamsiz: proxy sifre sifirlama sayfasinda koyar; adres cubugundaki gizli token reklam sunucularina gitmesin.
-  const reklamsiz = user?.abonelikPlani === "PRO_PLUS" || (await headers()).get("x-reklamsiz") === "1";
+  // AEA/Ingiltere/Isvicre ziyaretcisine reklam istenmez: oradaki trafik icin Google sertifikali bir onay
+  // araci (TCF CMP) zorunlu tutuyor; Turkiye icin kendi onay bandimiz yeterli (KVKK).
+  const basliklar = await headers();
+  const reklamsiz =
+    user?.abonelikPlani === "PRO_PLUS" || basliklar.get("x-reklamsiz") === "1" || CMP_ZORUNLU_ULKELER.has(basliklar.get("x-vercel-ip-country") ?? "");
 
   return (
     <html lang="tr" className={cn("h-full antialiased", inter.variable, "font-sans")}>
@@ -194,7 +202,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               <ul className="mt-4 space-y-2.5 text-sm text-slate-400">
                 <li><Link href="/" className="transition-colors hover:text-white">Ana Sayfa</Link></li>
                 <li><Link href="/amacimiz" className="transition-colors hover:text-white">Hakkımızda</Link></li>
-                <li><Link href="/haberler" className="transition-colors hover:text-white">Haberler</Link></li>
+                <li><Link href="/haberler" className="transition-colors hover:text-white">Duyurular</Link></li>
                 <li><Link href="/kpss-puan-hesaplama" className="transition-colors hover:text-white">KPSS Puan Hesaplama</Link></li>
                 <li><Link href="/kpss-denemesi" className="transition-colors hover:text-white">KPSS Denemesi</Link></li>
                 <li><Link href="/becayis" className="transition-colors hover:text-white">Becayiş İlanları</Link></li>
@@ -217,7 +225,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               <ul className="mt-4 space-y-2.5 text-sm text-slate-400">
                 <li><Link href="/kvkk" className="transition-colors hover:text-white">KVKK &amp; Gizlilik</Link></li>
                 <li><Link href="/kullanim-kosullari" className="transition-colors hover:text-white">Kullanım Koşulları</Link></li>
-                <li><Link href="/cerez-politikasi" className="transition-colors hover:text-white">Çerez Politikası</Link></li>
+                <li><Link href="/cerez-politikasi" className="transition-colors hover:text-white">Çerez Tercihleri</Link></li>
                 {/* Satis sozlesmeleri odeme acilinca yayina girer (SATIS_ACIK). */}
                 {SATIS_ACIK && (
                   <>
@@ -258,6 +266,11 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               <a href={`mailto:${ILETISIM_EPOSTA}`} className="underline hover:text-white">
                 {ILETISIM_EPOSTA}
               </a>
+            </p>
+            {/* 5651 Yonetmeligi m.5/2: yer saglayicinin unvan ve adresi. */}
+            <p className="mt-1">
+              Yer sağlayıcı: Vercel Inc., 440 N Barranca Avenue #4133, Covina, CA 91723, ABD · Veritabanı: Neon, LLC (Databricks, Inc.),
+              160 Spear Street, Suite 1300, San Francisco, CA 94105, ABD
             </p>
             <p className="mt-1">
               {lastScrapeAt

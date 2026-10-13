@@ -68,7 +68,7 @@ export function IlanListesi({ kapsam, deger, kurumAdi: ilkKurum }: { kapsam: "tu
       ListFooterComponent={
         veri.haberler.length > 0 ? (
           <View style={{ marginTop: 24, gap: 16 }}>
-            <BolumBasligi baslik="İlgili Haberler ve Duyurular" />
+            <BolumBasligi baslik="İlgili Duyurular" />
             {veri.haberler.map((h) => (
               <HaberKarti key={h.slug} h={h} />
             ))}

@@ -96,20 +96,20 @@ export function ReklamEngelleyiciKontrol() {
 
   if (durum !== "engellendi") return null;
 
+  // Sayfayi ortmeyen kucuk alt serit: tam ekran katman AdSense ("gezinmeyi engelleyen pop-up") ve
+  // Google Ads/Search ("tum sayfayi kapatan interstitial") politikalarina aykiri.
   return (
-    <div className="fixed inset-0 z-[999] flex items-center justify-center bg-slate-900/95 p-4 backdrop-blur-sm">
-      <div className="max-w-sm rounded-2xl bg-white p-6 text-center shadow-2xl">
-        <h2 className="font-sans text-lg font-bold text-primary">Reklam Engelleyici Tespit Edildi</h2>
-        <p className="mt-2 text-sm text-slate-600">
-          Kamu Yolu&apos;nun ücretsiz özelliklerini reklam gelirleriyle sunuyoruz. Bize destek
-          olmak istersen reklam engelleyicini bu site için kapatabilirsin.
-        </p>
-        <button type="button" onClick={kontrolEt} className="mt-4 w-full rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90">
-          Kapattım, Tekrar Dene
-        </button>
-        <button type="button" onClick={devamEt} className="mt-2 w-full rounded-xl px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100">
-          Şimdilik devam et
-        </button>
+    <div role="status" className="fixed inset-x-0 bottom-0 z-40 border-t border-amber-200 bg-amber-50/95 px-4 py-2.5 backdrop-blur sm:px-6">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 text-xs text-amber-900 sm:text-sm">
+        <p>Reklam engelleyici açık görünüyor. Ücretsiz özellikleri reklam gelirleriyle sunuyoruz; istersen bu site için kapatabilirsin.</p>
+        <div className="flex shrink-0 gap-2">
+          <button type="button" onClick={kontrolEt} className="rounded-lg bg-amber-600 px-3 py-1 font-semibold text-white hover:bg-amber-700">
+            Kapattım
+          </button>
+          <button type="button" onClick={devamEt} aria-label="Uyarıyı kapat" className="rounded-lg px-2 py-1 font-semibold hover:bg-amber-100">
+            Kapat
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import { destroySession, getCurrentUser, sifreyiTeyitEt } from "@/lib/auth";
 import { sendEmail } from "@/lib/email";
 import { SILME_ONAY_METNI } from "@/lib/authValidation";
 import { prisma } from "@/lib/prisma";
+import { yasalKayitYaz } from "@/lib/yasalKayit";
 
 const EDUCATION_LEVELS = [
   "ILKOGRETIM",
@@ -87,6 +88,8 @@ export async function DELETE(req: NextRequest) {
     prisma.destekMesaji.updateMany({ where: { userId: user.id }, data: { ad: "Silinmiş kullanıcı", email: "" } }),
     prisma.user.delete({ where: { id: user.id } }),
   ]);
+  // KVKK Silme Yonetmeligi m.7/3: silme isleminin kaydi 3 yil (kim/ne zaman; kisisel veri icermez, yalniz id).
+  await yasalKayitYaz("hesap-silindi", user.id);
   await destroySession();
 
   try {

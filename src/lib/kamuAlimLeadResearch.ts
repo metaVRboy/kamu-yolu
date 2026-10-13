@@ -2,7 +2,6 @@ import { z } from "zod";
 import { gemini, GEMINI_MODEL } from "@/lib/gemini";
 import { toGeminiSchema, parseGeminiJson } from "@/lib/geminiSchema";
 import { resolveGroundingUrl } from "@/lib/resolveGroundingUrl";
-import { extractOgImage } from "@/lib/extractOgImage";
 import { findInstitutionImage } from "@/lib/findInstitutionImage";
 import { verifyHaberKaynak } from "@/lib/verifyHaberKaynak";
 import { haberIcinBolumEslestir } from "@/lib/haberDepartmentMatch";
@@ -159,12 +158,8 @@ export async function researchKamuAlimLeads(
         haberDetayCikar({ baslik: sonuc.baslik, tamMetin: metin }),
       ]);
 
-      // Once haberin kendi kaynagindan gercek bir gorsel dene; yoksa
-      // kurumun Wikipedia'daki (acik lisansli) logosuna dus.
-      const ogGorsel = await extractOgImage(cozulmusUrl);
-      const kurumGorseli = ogGorsel
-        ? null
-        : await findInstitutionImage(detay?.kurumAdi ?? lead.kurumAdi ?? lead.baslik);
+      // Kaynak sitenin fotografi (og:image) KULLANILMAZ (FSEK: haber fotografi eser); yalniz kurum logosu.
+      const kurumGorseli = await findInstitutionImage(detay?.kurumAdi ?? lead.kurumAdi ?? lead.baslik);
 
       return {
         externalId: lead.externalId,
@@ -172,8 +167,8 @@ export async function researchKamuAlimLeads(
         baslik: sonuc.baslik,
         ozet: sonuc.ozet,
         resmiKaynakUrl: cozulmusUrl,
-        gorselUrl: ogGorsel ?? kurumGorseli,
-        gorselLogoMu: !ogGorsel && !!kurumGorseli,
+        gorselUrl: kurumGorseli,
+        gorselLogoMu: !!kurumGorseli,
         departmentIds,
         detay,
       };

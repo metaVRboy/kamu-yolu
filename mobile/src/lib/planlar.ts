@@ -7,6 +7,9 @@ export type FiyatTablosu = Record<UcretliPlan, Record<"aylik" | "yillik", DonemF
 
 export const PLAN_ADI: Record<Plan, string> = { UCRETSIZ: "Standart", PRO: "Pro", PRO_PLUS: "Pro+" };
 
+// Sitedeki TICARI_ILETI_ACIK ile ayni: IYS kaydina kadar kampanya/duyuru onayi istenmez (Ticari Ileti Yon. m.7/11).
+export const TICARI_ILETI_ACIK = false;
+
 export const tl = (n: number) => `${n.toLocaleString("tr-TR", Number.isInteger(n) ? {} : { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TL`;
 export const yillikTasarruf = (f: Record<"aylik" | "yillik", DonemFiyati>) => Math.max(0, Math.round((1 - f.yillik.odenecek / (f.aylik.odenecek * 12)) * 100));
 export const yillikBedavaAy = (t: FiyatTablosu) =>

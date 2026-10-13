@@ -13,7 +13,8 @@ export type MenuOgesi = { href?: string; label: string; items?: MenuOgesi[] };
 export const MENU: MenuOgesi[] = [
   { href: "/", label: "Ana Sayfa" },
   { href: "/amacimiz", label: "Hakkımızda" },
-  { href: "/haberler", label: "Haberler" },
+  // "Duyurular": kamu alim duyurusu ozetleri; haber sitesi (5187 internet haber sitesi) olarak konumlanmaz.
+  { href: "/haberler", label: "Duyurular" },
   {
     label: "İlanlar",
     items: [

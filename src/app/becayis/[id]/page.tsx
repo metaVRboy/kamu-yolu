@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { MessageWidget } from "@/components/MessageWidget";
+import { ILETISIM_EPOSTA } from "@/lib/site";
 
 // Kisiye ait talep: arama motorlarinda listelenmesin (ad kisaltilsa da meslek + il tanimlayici).
 export const metadata = { title: "Becayiş Talebi — Kamu Yolu", robots: { index: false } };
@@ -79,6 +80,15 @@ export default async function BecayisDetayPage({
           <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-800">
             Bu senin kendi talebin. Gelen mesajları &quot;Mevcut Taleplerim&quot; sayfandan görebilirsin.
           </p>
+        )}
+        {/* 5651: barindirilan kullanici icerigi icin bildirim kanali; talep numarasi konuya yazilir. */}
+        {!isSahibi && (
+          <a
+            href={`mailto:${ILETISIM_EPOSTA}?subject=${encodeURIComponent(`Becayiş ilanı bildirimi #${talep.id}`)}&body=${encodeURIComponent("Bildirme nedeniniz:\n")}`}
+            className="self-start text-xs text-muted-foreground underline hover:text-slate-700"
+          >
+            Uygunsuz içeriği bildir
+          </a>
         )}
       </Card>
     </div>

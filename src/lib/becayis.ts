@@ -2,6 +2,7 @@ import { after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { proAktifMi, sessizSaatMi, smsGonder, sonSmsSayisi } from "@/lib/sms";
 import { createBildirim } from "@/lib/notifications";
+import { yasalKayitYaz } from "@/lib/yasalKayit";
 
 export async function createTalep(
   userId: string,
@@ -14,7 +15,7 @@ export async function createTalep(
     aciklama?: string | null;
   },
 ) {
-  return prisma.becayisTalep.create({
+  const talep = await prisma.becayisTalep.create({
     data: {
       userId,
       meslek: data.meslek,
@@ -25,6 +26,8 @@ export async function createTalep(
       aciklama: data.aciklama || null,
     },
   });
+  await yasalKayitYaz("becayis-talep", userId, talep.id); // 5651: herkese acik kullanici icerigi
+  return talep;
 }
 
 /**
@@ -166,6 +169,7 @@ export async function sendMesaj(params: {
   if (!talep) throw new Error("Talep bulunamadı.");
 
   const created = await prisma.becayisMesaj.create({ data: params });
+  await yasalKayitYaz("becayis-mesaj", params.gonderenId, created.id); // 5651: barindirilan kullanici icerigi
 
   // Bildirim, mesaji ALAN tarafa gider: eger gonderen talep sahibiyse
   // karsi taraf (konusmaKarsiId) alici olur, degilse talep sahibi alici olur.

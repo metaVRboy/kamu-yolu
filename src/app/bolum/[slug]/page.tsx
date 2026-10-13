@@ -147,7 +147,7 @@ export default async function DepartmentResultsPage({
           <HaberlerSection
             haberler={ilgiliHaberler.map((h) => ({ ...h, yayinTarihi: h.yayinTarihi.toISOString() }))}
             showAllLink={false}
-            baslik="İlgili Haberler ve Duyurular"
+            baslik="İlgili Duyurular"
             aciklama={`${department.name} ile ilgili gündemdeki haberler ve duyurular.`}
           />
         </div>

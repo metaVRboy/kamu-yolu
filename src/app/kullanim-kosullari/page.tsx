@@ -62,6 +62,14 @@ export default function KullanimKosullariPage() {
             <li>Profilinizde paylaştığınız bölüm, öğrenim düzeyi ve diğer bilgilerin doğru ve güncel olması sizin sorumluluğunuzdadır.</li>
             <li>18 yaşından küçük kullanıcılar siteye üye olamaz.</li>
           </ul>
+          {/* 6563 s. Kanun m.3: elektronik ortamda sozlesme kurulmadan once verilmesi gereken bilgiler. */}
+          <p>
+            <strong>Üyelik sözleşmesinin kurulması:</strong> Üyelik ücretsizdir ve Türkçe olarak kurulur. Adımlar: (1) kayıt formunu
+            doldurup bu Koşulları kabul edersin; (2) e-posta adresine gönderilen 6 haneli kodu girersin; (3) kod doğrulanınca hesabın
+            açılır. Kodu göndermeden önce formdaki bilgileri düzeltebilir, sonrasında ad, bölüm ve diğer bilgilerini Ayarlar&apos;dan
+            değiştirebilirsin. Bu Koşulların güncel metni bu sayfada her zaman erişilebilir; kabul ettiğin tarih hesabında saklanır.
+            Kişisel verilerin KVKK Aydınlatma Metni kapsamında işlenir.
+          </p>
         </section>
 
         <section>
@@ -75,6 +83,13 @@ export default function KullanimKosullariPage() {
             <li>Paylaşılan talep içeriğinin veya mesajların doğruluğunu garanti etmez.</li>
             <li>Becayiş sürecinin resmî onay/mevzuat şartlarını sağlayıp sağlamadığından sorumlu değildir; süreç tamamen ilgili kurumların kendi prosedürlerine tabidir.</li>
           </ul>
+          <p>
+            Becayiş ilanları ve mesajları kullanıcıların kendi içeriğidir; Kamu Yolu bu içerik bakımından yer sağlayıcıdır. Hukuka
+            aykırı veya kişilik haklarını ihlal ettiğini düşündüğün bir içeriği ilan sayfasındaki &quot;Uygunsuz içeriği bildir&quot;
+            bağlantısıyla, mesajları mesaj ekranındaki şikâyet seçeneğiyle ya da {ILETISIM_EPOSTA} adresine yazarak bildirebilirsin;
+            bildirimler incelenir ve gerekirse içerik kaldırılır. 5651 sayılı Kanun gereği bu içerikleri oluşturduğunda IP adresi ve
+            zaman bilgisi 2 yıl saklanır.
+          </p>
         </section>
 
         <section>

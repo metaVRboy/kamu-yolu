@@ -43,7 +43,7 @@ export default function HaberDetay() {
         <T w="kalin" style={{ marginTop: 12, fontSize: 24, lineHeight: 30, letterSpacing: -0.5 }}>
           {h.baslik}
         </T>
-        <T style={{ marginTop: 8, color: renk.soluk }}>Kamu Yolu Haber Merkezi</T>
+        <T style={{ marginTop: 8, color: renk.soluk }}>Kamu Yolu · Yapay zekâ desteğiyle özetlenmiştir; ayrıntılar için kaynağı kontrol et.</T>
 
         <View style={s.ozet}>
           <T w="orta" style={{ color: "#64748b" }}>
@@ -138,7 +138,7 @@ export default function HaberDetay() {
       {h.benzerler.length > 0 && (
         <Kart style={{ padding: 16 }} yaricap={16}>
           <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 8 }}>
-            <T w="yariKalin">Benzer Haberler</T>
+            <T w="yariKalin">Benzer Duyurular</T>
             <T w="orta" style={{ fontSize: 12, color: renk.birincil }} onPress={() => router.navigate("/haberler")}>
               Tümünü Gör
             </T>

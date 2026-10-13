@@ -118,7 +118,7 @@ export default function Yukselt() {
                 <T w="kalin">
                   {PLAN_ADI[secilen]} · {yillik ? "yıllık" : "aylık"}
                 </T>{" "}
-                için sana e-posta ile haber vereceğiz. İstediğin zaman bu ekrandan listeden çıkabilirsin.
+                için sitede ve uygulamada bildirimle haber vereceğiz. İstediğin zaman bu ekrandan listeden çıkabilirsin.
               </T>
               <Pressable onPress={() => router.back()} style={s.tamam}>
                 <T w="yariKalin" style={{ color: "#fff" }}>
@@ -327,7 +327,7 @@ export default function Yukselt() {
                 </Pressable>
                 {/* Henuz satis yok: buton bir satin alma degil, yalnizca haber verme talebi (sitedeki metinle ayni). */}
                 <T style={{ textAlign: "center", fontSize: 11, color: renk.soluk, lineHeight: 16 }}>
-                  Şu an ödeme alınmıyor. &quot;Açılınca haber ver&quot; ile yalnızca ödeme açıldığında bu plan için sana e-posta göndermemizi istemiş olursun.
+                  Şu an ödeme alınmıyor. &quot;Açılınca haber ver&quot; ile yalnızca ödeme açıldığında sitede ve uygulamada bildirim almak istemiş olursun.
                 </T>
               </View>
             </>

@@ -13,7 +13,7 @@ const ZORUNLU: [string, string, string][] = [
   ["kamu_yolu_session", "Giriş yaptığında oturumunu açık tutar", "30 gün"],
   ["google_oauth_*", "Google ile giriş sırasında güvenlik doğrulaması", "Giriş süresince (dakikalar)"],
   ["Cloudflare Turnstile", "Kayıt/giriş formlarında robot doğrulaması", "Oturum"],
-  ["kyCerezOnay (yerel depolama)", "Çerez tercihini hatırlar", "Siz silene kadar"],
+  ["kyCerezOnay (yerel depolama)", "Çerez tercihini (reklam / ölçüm) hatırlar", "12 ay"],
   ["kyTanitimSon, kyBekleyenTalep, kyReklamUyariGecildi (yerel/oturum depolama)", "Tanıtım penceresinin sıklığı, kayıttan önce seçtiğin plan, reklam engelleyici uyarısını geçmen", "Siz silene kadar / sekme kapanana kadar"],
 ];
 
@@ -73,9 +73,10 @@ export default function CerezPolitikasiPage() {
         <section>
           <h2 className="font-sans text-base font-semibold text-primary">3. Reklam ve Ölçüm Çerezleri (yalnızca onayınla)</h2>
           <p>
-            Çerez bildirimindeki <strong>&quot;Kabul et&quot;</strong> seçeneğiyle açık rıza verirsen yüklenir.{" "}
-            <strong>&quot;Reddet&quot;</strong> dersen hiçbiri yüklenmez ve reklam gösterilmez; sitenin tüm ücretsiz özelliklerini yine
-            kullanabilirsin. &quot;Etkinse&quot; yazanlar yalnızca ilgili ölçüm aracı sitede açıkken kullanılır. Bu araçların sağlayıcıları
+            Çerez bildirimindeki <strong>&quot;Kabul et&quot;</strong> ile ya da <strong>&quot;Tercihler&quot;</strong>den reklam ve ölçüm
+            kategorilerini ayrı ayrı seçerek açık rıza verirsen yüklenir. <strong>&quot;Reddet&quot;</strong> dersen hiçbiri yüklenmez ve reklam
+            gösterilmez; sitenin tüm ücretsiz özelliklerini yine kullanabilirsin. Tercihin 12 ay geçerlidir, sonra yeniden sorulur;
+            verdiğin kararın tarihi ve içeriği, rızanın ispatı için kayıt altına alınır. &quot;Etkinse&quot; yazanlar yalnızca ilgili ölçüm aracı sitede açıkken kullanılır. Bu araçların sağlayıcıları
             (Google, Meta, TikTok) yurt dışında yerleşiktir; ayrıntılar{" "}
             <Link href="/kvkk" className="text-primary underline">
               KVKK Aydınlatma Metni
@@ -84,16 +85,42 @@ export default function CerezPolitikasiPage() {
           </p>
           <Tablo satirlar={ONAYLI} />
           <p>
-            Google&apos;ın reklam çerezlerini nasıl kullandığını{" "}
-            <a href="https://policies.google.com/technologies/ads?hl=tr" target="_blank" rel="noopener noreferrer" className="text-primary underline">
-              Google Reklam Politikası
-            </a>
-            &apos;ndan öğrenebilir, kişiselleştirilmiş reklamları{" "}
-            <a href="https://adssettings.google.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">
-              Google Reklam Ayarları
-            </a>
-            &apos;ndan kapatabilirsin.
+            Onay verdiğinde Google dahil üçüncü taraf reklam sağlayıcıları, bu siteye ve başka sitelere önceki ziyaretlerine
+            dayanarak reklam göstermek için çerez kullanabilir; ölçüm pikselleri etkinse Meta ve TikTok, reklamlarının sonucunu
+            (ör. kayıt olup olmadığını) ölçmek için bu sitedeki ziyaretine ait bilgileri alabilir. Bu bilgilerle başka sitelerde
+            sana reklam gösterilebilir (yeniden pazarlama).
           </p>
+          <ul className="list-disc pl-5">
+            <li>
+              Google&apos;ın bu verileri nasıl kullandığı:{" "}
+              <a href="https://www.google.com/policies/privacy/partners/" target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                Google iş ortaklarının sitelerini kullandığınızda Google verileri nasıl kullanır
+              </a>
+            </li>
+            <li>
+              Kişiselleştirilmiş Google reklamlarını kapatma:{" "}
+              <a href="https://adssettings.google.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                Google Reklam Ayarları
+              </a>
+            </li>
+            <li>
+              Üçüncü taraf reklam çerezlerinden toplu çıkış:{" "}
+              <a href="https://www.aboutads.info/choices" target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                aboutads.info/choices
+              </a>{" "}
+              ve{" "}
+              <a href="https://www.youronlinechoices.eu" target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                youronlinechoices.eu
+              </a>
+            </li>
+            <li>
+              Meta reklam tercihleri:{" "}
+              <a href="https://www.facebook.com/adpreferences" target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                facebook.com/adpreferences
+              </a>
+              ; TikTok: uygulamada Ayarlar &gt; Gizlilik &gt; Reklamlar
+            </li>
+          </ul>
         </section>
 
         <section>

@@ -13,6 +13,7 @@ import { passwordRequirementIssues } from "@/lib/authValidation";
 import { PasswordRequirementsHint } from "@/components/SifreSifirlaForm";
 import { TurnstileWidget } from "@/components/TurnstileWidget";
 import { kaynakBilgisi } from "@/lib/olcum";
+import { TICARI_ILETI_ACIK } from "@/lib/planlar";
 
 // Sunucudaki KOD_GECERLILIK_DAKIKA ile ayni. Mobilde mail uygulamasina gidip donmek 2 dk'ya sigmiyordu.
 const KOD_GECERLILIK_SANIYE = 600;
@@ -398,7 +399,7 @@ export function AuthForm({
             kapsamında işlenir.
           </p>
         )}
-        {mode === "kayit" && (
+        {mode === "kayit" && TICARI_ILETI_ACIK && (
           <label className="flex items-start gap-2 text-xs text-slate-600">
             <input
               type="checkbox"

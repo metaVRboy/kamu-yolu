@@ -57,7 +57,19 @@ const ISLEMELER: { veri: string; amac: string; sebep: string; sure: string }[] =
     veri: "Oturum kayıtları (tarayıcı/cihaz türü, oturumun açılış ve son görülme zamanı)",
     amac: "Hesap güvenliği, açık oturumları görüp kapatabilmeniz",
     sebep: "Meşru menfaat (m.5/2-f)",
-    sure: "Oturum kapatılana veya süresi (30 gün) dolana kadar; IP adresi saklanmaz",
+    sure: "Oturum kapatılana veya süresi (30 gün) dolana kadar",
+  },
+  {
+    veri: "Trafik kayıtları: giriş yaptığınızda ve becayiş ilanı ya da mesajı oluşturduğunuzda IP adresi, tarayıcı bilgisi ve zaman",
+    amac: "5651 sayılı Kanun'un yer sağlayıcılara yüklediği trafik bilgisi saklama yükümlülüğü; kötüye kullanımda failin tespiti",
+    sebep: "Kanunlarda öngörülme ve hukuki yükümlülük (m.5/2-a, ç)",
+    sure: "2 yıl; hesabınız silinse de bu süre boyunca saklanır, sonra otomatik silinir. Yalnızca yetkili mercilerin talebiyle paylaşılır",
+  },
+  {
+    veri: "Hesap silme işleminin kaydı (hesap kimliği ve tarih; başka kişisel veri içermez)",
+    amac: "Silme talebinin yerine getirildiğini ispat",
+    sebep: "Hukuki yükümlülük (m.5/2-ç; Kişisel Verilerin Silinmesi Yönetmeliği m.7)",
+    sure: "3 yıl",
   },
   {
     veri: "Kayıt kaynağı: siteye geldiğiniz reklam kampanyası bilgisi (utm parametreleri, tıklama kimliği), yönlendiren site ve giriş sayfası",
@@ -81,7 +93,7 @@ const ISLEMELER: { veri: string; amac: string; sebep: string; sure: string }[] =
 
 const ALICILAR: { kim: string; ne: string; ulke: string }[] = [
   { kim: "Vercel Inc.", ne: "Sitenin barındırılması ve çalıştırılması (sunucular Frankfurt'ta)", ulke: "ABD merkezli şirket" },
-  { kim: "Neon Inc.", ne: "Veritabanı (sunucular Frankfurt'ta)", ulke: "ABD merkezli şirket" },
+  { kim: "Neon, LLC (Databricks, Inc.)", ne: "Veritabanı (sunucular Frankfurt'ta)", ulke: "ABD merkezli şirket" },
   { kim: "Resend Inc.", ne: "E-posta gönderimi (doğrulama kodu, şifre sıfırlama, bildirimler)", ulke: "ABD" },
   { kim: "Google LLC", ne: "Google ile giriş, kurumsal e-posta, reklam (AdSense) ve — onay verirseniz — ziyaret ölçümü", ulke: "ABD" },
   { kim: "Cloudflare Inc.", ne: "Robot doğrulaması (Turnstile) için tarayıcı ve IP bilgisi", ulke: "ABD" },
@@ -154,16 +166,13 @@ export default function KvkkPage() {
         </section>
 
         <section>
-          <h2 className="font-sans text-base font-semibold text-primary">4. Ticari Elektronik İleti Onayı</h2>
+          <h2 className="font-sans text-base font-semibold text-primary">4. Ticari Elektronik İleti</h2>
           <p>
-            Kampanya, indirim ve duyuru içerikli SMS ve e-postalar, 6563 sayılı Elektronik Ticaretin Düzenlenmesi Hakkında
-            Kanun uyarınca yalnızca önceden onay vermeniz halinde gönderilir. Onay vermek zorunlu değildir ve üyeliği
-            etkilemez. Onayınızı{" "}
-            <Link href="/profilim/ayarlar/bildirimler" className="font-medium text-primary underline">
-              Ayarlar &gt; Bildirimler
-            </Link>{" "}
-            sayfasından istediğiniz an geri çekebilirsiniz. Hesap güvenliği e-postaları, kendi açtığınız ilan ve mesaj
-            bildirimleri ve bekleme listesine katıldığınız plan için ödeme açıldı bildirimi bu onaydan bağımsızdır.
+            Şu anda kampanya, indirim veya tanıtım içerikli SMS ya da e-posta (ticari elektronik ileti) gönderilmemektedir ve bunun
+            için onay toplanmamaktadır. İleride gönderilmesi halinde, 6563 sayılı Kanun uyarınca önceden, ayrı ve isteğe bağlı onayınız
+            alınacak ve İleti Yönetim Sistemi&apos;ne (İYS) kaydedilecektir. Hesap güvenliği e-postaları ile kendi açtığınız ilan ve mesaj
+            bildirimleri ticari ileti değildir. Bekleme listesine katıldığınız plan için ödeme açıldığında yalnızca site ve uygulama
+            içinde bildirim gösterilir.
           </p>
         </section>
 

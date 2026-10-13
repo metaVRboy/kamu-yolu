@@ -8,6 +8,7 @@ import { GoogleButonu, RobotDogrulama } from "@/bilesenler/GirisAraclari";
 import { api, SITE } from "@/lib/api";
 import { useOturum } from "@/lib/oturum";
 import { renk } from "@/lib/tema";
+import { TICARI_ILETI_ACIK } from "@/lib/planlar";
 
 // Sitedeki AuthForm ile ayni: kod 10 dk gecerli, 60 sn sonra tekrar gonderilebilir.
 const KOD_GECERLILIK_SANIYE = 600;
@@ -231,12 +232,14 @@ export function GirisFormu({ mod }: { mod: "giris" | "kayit" }) {
                     </T>{" "}
                     kapsamında işlenir.
                   </T>
-                  <Onay secili={ticariIleti} degistir={setTicariIleti}>
-                    <T style={{ fontSize: 12, color: renk.yaziIkincil, lineHeight: 18 }}>
-                      Kampanya, indirim ve duyurulardan SMS ve e-posta ile haberdar olmak için ticari elektronik ileti almayı kabul ediyorum.{" "}
-                      <T style={{ fontSize: 12, color: renk.soluk }}>(İsteğe bağlı)</T>
-                    </T>
-                  </Onay>
+                  {TICARI_ILETI_ACIK && (
+                    <Onay secili={ticariIleti} degistir={setTicariIleti}>
+                      <T style={{ fontSize: 12, color: renk.yaziIkincil, lineHeight: 18 }}>
+                        Kampanya, indirim ve duyurulardan SMS ve e-posta ile haberdar olmak için ticari elektronik ileti almayı kabul ediyorum.{" "}
+                        <T style={{ fontSize: 12, color: renk.soluk }}>(İsteğe bağlı)</T>
+                      </T>
+                    </Onay>
+                  )}
                 </>
               )}
               <RobotDogrulama key={tokenTur} dogrulandi={setToken} />

@@ -7,22 +7,40 @@ import { KAYNAK_ANAHTARLARI, KAYNAK_CEREZ, kaynakCerezCoz, kaynakTemizle, type K
  */
 const ONAY_ANAHTARI = "kyCerezOnay";
 const ONAY_OLAYI = "ky-cerez-onay";
-export type CerezOnayi = "kabul" | "red";
+// KVKK Cerez Rehberi (2025): tercih suresiz degil, makul araliklarla yeniden sorulur.
+const ONAY_GECERLILIK_MS = 365 * 86_400_000;
+export const CEREZ_METNI_SURUMU = "2026-10-13";
 
-function onayOku(): CerezOnayi | null {
+/** Kategori bazli tercih: reklam (AdSense) ve olcum (kampanya kaynagi cerezi + GA4/Meta/TikTok). */
+export type CerezTercihi = { reklam: boolean; olcum: boolean; zaman: number };
+
+// useSyncExternalStore ayni ham deger icin ayni nesneyi bekler: ham metne gore onbellek.
+let sonHam: string | null = null;
+let sonTercih: CerezTercihi | null = null;
+
+function onayOku(): CerezTercihi | null {
+  let ham: string | null = null;
   try {
-    const v = localStorage.getItem(ONAY_ANAHTARI);
-    return v === "kabul" || v === "red" ? v : null;
-  } catch {
-    return null;
-  }
+    ham = localStorage.getItem(ONAY_ANAHTARI);
+  } catch {}
+  if (ham === sonHam) return sonTercih;
+  sonHam = ham;
+  sonTercih = null;
+  try {
+    // Eski surum ("kabul"/"red") tum kategoriler icin tek karardi.
+    const t = ham === "kabul" || ham === "red" ? { reklam: ham === "kabul", olcum: ham === "kabul", zaman: 0 } : ham ? (JSON.parse(ham) as CerezTercihi) : null;
+    if (t && (t.zaman === 0 || Date.now() - t.zaman < ONAY_GECERLILIK_MS)) sonTercih = t;
+  } catch {}
+  return sonTercih;
 }
 
-export function onayYaz(v: CerezOnayi) {
+export function onayYaz(secim: { reklam: boolean; olcum: boolean }) {
   try {
-    localStorage.setItem(ONAY_ANAHTARI, v);
+    localStorage.setItem(ONAY_ANAHTARI, JSON.stringify({ ...secim, zaman: Date.now() }));
   } catch {}
   window.dispatchEvent(new Event(ONAY_OLAYI));
+  // Rizanin ispati veri sorumlusunda: karar sunucuda kayit altina alinir.
+  fetch("/api/cerez-onay", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...secim, surum: CEREZ_METNI_SURUMU }) }).catch(() => {});
 }
 
 function onayAbone(cb: () => void) {
@@ -34,8 +52,8 @@ function onayAbone(cb: () => void) {
   };
 }
 
-/** undefined: sunucu/hidrasyon (henuz bilinmiyor), null: karar verilmedi. */
-export function useCerezOnayi(): CerezOnayi | null | undefined {
+/** undefined: sunucu/hidrasyon (henuz bilinmiyor), null: karar verilmedi veya suresi doldu. */
+export function useCerezOnayi(): CerezTercihi | null | undefined {
   return useSyncExternalStore(onayAbone, onayOku, () => undefined);
 }
 
@@ -53,7 +71,7 @@ declare global {
  */
 export function olay(ad: "sign_up" | "lead", veri?: Record<string, unknown>, deneme = 0) {
   if (!window.gtag && !window.fbq && !window.ttq) {
-    if (onayOku() === "kabul" && deneme < 6) setTimeout(() => olay(ad, veri, deneme + 1), 500);
+    if (onayOku()?.olcum && deneme < 6) setTimeout(() => olay(ad, veri, deneme + 1), 500);
     return;
   }
   try {

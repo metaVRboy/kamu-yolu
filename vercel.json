@@ -14,6 +14,10 @@
       "schedule": "0 6,9,12,15 * * *"
     },
     {
+      "path": "/api/bakim",
+      "schedule": "0 1 * * *"
+    },
+    {
       "path": "/api/sms-ilan-bildirimi",
       "schedule": "30 6,9,12,15 * * *"
     }

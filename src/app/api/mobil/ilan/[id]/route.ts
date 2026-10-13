@@ -5,6 +5,7 @@ import { SITE_URL } from "@/lib/site";
 import { slugify } from "@/lib/slug";
 import { basvuruIlerlemesi, duzgunHarf, kadroAdi, kalanGunSayisi, konumMetni, kurumLogolari, nitelikMaddeleri, tekIlanKartlari } from "@/lib/ilanVitrin";
 import { ilanKarti } from "@/lib/mobil";
+import { ilanMetniGosterilebilir } from "@/lib/ilanMetni";
 
 /** Mobil ilan detayi: sitedeki /ilan/[id]/[slug] sayfasinin verisi. Uygunluk kutusu mevcut /api/ilan/[id]/uygunluk ucundan gelir. */
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -33,7 +34,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     kaynakUrl: p.sourceUrl,
     takvimUrl: p.applicationEnd ? `${SITE_URL}/api/ilan/${p.id}/takvim` : null,
     paylasimUrl: `${SITE_URL}/ilan/${p.id}/${slugify(p.title)}`,
-    maddeler: p.departmentRequirementRaw ? nitelikMaddeleri(p.departmentRequirementRaw) : [],
+    // Memurlar.net metni gosterilmez (bkz. ilanMetni.ts); uygulama bos listede kaynak linkini one cikarir.
+    maddeler: ilanMetniGosterilebilir(p) && p.departmentRequirementRaw ? nitelikMaddeleri(p.departmentRequirementRaw) : [],
     bolumler: p.departments.map((d) => ({ slug: d.department.slug, ad: d.department.name })),
     benzerler: tekIlanKartlari(benzerler).map((g) => ilanKarti(g, logolar.get(g.ilk.institutionName) ?? null)),
   });

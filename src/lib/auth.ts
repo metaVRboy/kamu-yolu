@@ -4,6 +4,7 @@ import { SignJWT, jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { clearFailures, getLockoutState, lockoutMessage, recordFailure } from "@/lib/authAbuse";
+import { yasalKayitYaz } from "@/lib/yasalKayit";
 
 const SESSION_COOKIE = "kamu_yolu_session";
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 30; // 30 gun
@@ -70,6 +71,8 @@ export async function createSession(
 }
 
 async function oturumCereziYaz(userId: string, tokenVersion: number, oturumId: string, beniHatirla: boolean) {
+  // Tum giris yollari (sifre, Google, kayit, mobil kod) buradan gecer: 5651 trafik kaydi (IP + zaman).
+  await yasalKayitYaz("giris", userId, oturumId);
   const token = await new SignJWT({ userId, tokenVersion, oturumId })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()

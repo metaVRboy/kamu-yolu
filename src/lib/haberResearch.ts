@@ -2,7 +2,6 @@ import { z } from "zod";
 import { gemini, GEMINI_MODEL } from "@/lib/gemini";
 import { toGeminiSchema, parseGeminiJson } from "@/lib/geminiSchema";
 import { resolveGroundingUrl } from "@/lib/resolveGroundingUrl";
-import { extractOgImage } from "@/lib/extractOgImage";
 import { findInstitutionImage } from "@/lib/findInstitutionImage";
 import { verifyHaberKaynak } from "@/lib/verifyHaberKaynak";
 import { haberIcinBolumEslestir } from "@/lib/haberDepartmentMatch";
@@ -160,13 +159,8 @@ export async function researchHaberler(): Promise<HaberResearchItem[]> {
           haberDetayCikar({ baslik: h.baslik, tamMetin: metin }),
         ]);
 
-        // Once haberin kendi kaynagindan gercek bir gorsel dene; yoksa
-        // kurumun Wikipedia'daki (acik lisansli) logosuna dus.
-        const ogGorsel = await extractOgImage(kaynakUrl);
-        if (ogGorsel) {
-          return { baslik: h.baslik, ozet: h.ozet, kaynakUrl, gorselUrl: ogGorsel, gorselLogoMu: false, departmentIds, detay };
-        }
-
+        // Kaynak sitenin fotografi (og:image) KULLANILMAZ: haber fotograflari FSEK kapsaminda eser,
+        // ajans fotograflari lisansli. Yalniz kurumun logosu (yoksa gorselsiz kart).
         const kurumGorseli = await findInstitutionImage(detay?.kurumAdi ?? h.kurumAdi);
         return {
           baslik: h.baslik,

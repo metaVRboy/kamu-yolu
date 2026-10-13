@@ -139,8 +139,8 @@ export type MemurlarIlanDetay = {
   kaynak: string | null;
   ilanGirisTarihi: Date | null;
   applicationEnd: Date | null;
+  // Yalniz icerde bolum eslestirmesi icin; sitede gosterilmez (bkz. src/lib/ilanMetni.ts).
   bodyText: string;
-  imageUrl: string | null;
 };
 
 export function ilanDetayUrl(id: string, slug: string): string {
@@ -165,7 +165,5 @@ export async function fetchIlanDetay(id: string, slug: string): Promise<Memurlar
   const detailOpenTag = html.indexOf('<div class="detail">');
   const bodyText = detailOpenTag === -1 ? "" : stripHtmlTags(extractBalancedDiv(html, detailOpenTag));
 
-  const imageUrl = html.match(/<meta property="og:image" content="([^"]+)"/)?.[1] ?? null;
-
-  return { title, kategori, kaynak, ilanGirisTarihi, applicationEnd, bodyText, imageUrl };
+  return { title, kategori, kaynak, ilanGirisTarihi, applicationEnd, bodyText };
 }

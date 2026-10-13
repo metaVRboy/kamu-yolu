@@ -14,7 +14,7 @@ import { GirisDaveti } from "@/bilesenler/GirisDaveti";
 import { SIFRE_KURALLARI, SifreIpucu } from "@/bilesenler/GirisFormu";
 import { api, SITE, useVeri } from "@/lib/api";
 import { useOturum } from "@/lib/oturum";
-import { PLAN_ADI } from "@/lib/planlar";
+import { PLAN_ADI, TICARI_ILETI_ACIK } from "@/lib/planlar";
 import { renk } from "@/lib/tema";
 import type { AyarlarVeri, OturumSatiri } from "@/lib/tipler";
 
@@ -465,9 +465,11 @@ function BildirimSekmesi({ v, degisti }: { v: AyarlarVeri; degisti: () => void }
   return (
     <View style={{ gap: 16 }}>
       <SmsKartlari v={v} degisti={degisti} />
-      <AyarKarti baslik="Kampanya ve duyurular" aciklama="Ticari elektronik ileti onayı; vermek zorunlu değildir.">
-        <TicariIletiTercihi ilk={v.ticariIletiOnay} />
-      </AyarKarti>
+      {TICARI_ILETI_ACIK && (
+        <AyarKarti baslik="Kampanya ve duyurular" aciklama="Ticari elektronik ileti onayı; vermek zorunlu değildir.">
+          <TicariIletiTercihi ilk={v.ticariIletiOnay} />
+        </AyarKarti>
+      )}
     </View>
   );
 }

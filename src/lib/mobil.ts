@@ -1,5 +1,6 @@
 import type { Haber, Posting } from "@/generated/prisma/client";
 import { INSTITUTION_TYPE_LABEL, LEVEL_LABEL } from "@/lib/labels";
+import { ilanMetniGosterilebilir } from "@/lib/ilanMetni";
 import { duzgunHarf, kadroAdi, konumMetni, kurumLogolari, tekIlanKartlari, type IlanVitrinGrubu } from "@/lib/ilanVitrin";
 
 /**
@@ -26,7 +27,7 @@ export function ilanKarti(grup: IlanVitrinGrubu, logoUrl: string | null) {
     sonBasvuru: ilk.applicationEnd?.toISOString() ?? null,
     kaynak: ilk.sourceName,
     // Bos metin null olsun: uygulamada bos string Text disinda render edilirse ekran coker.
-    nitelik: ilk.departmentRequirementRaw?.replace(/\s+/g, " ").trim().slice(0, 220) || null,
+    nitelik: (ilanMetniGosterilebilir(ilk) && ilk.departmentRequirementRaw?.replace(/\s+/g, " ").trim().slice(0, 220)) || null,
     logoUrl,
   };
 }
