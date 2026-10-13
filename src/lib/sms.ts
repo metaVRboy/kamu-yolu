@@ -48,8 +48,26 @@ export async function smsGonder(params: { userId: string | null; telefon: string
   }
 }
 
+/**
+ * Iletimerkezi JSON API. Mesajlarimiz BILGILENDIRME turunde (ticari degil) -> iys "0", IYS kontrolu yok.
+ * Basarida siparis no doner; 200 disi her kod (402 bakiye, 450 baslik onaysiz...) hata olarak kaydedilir.
+ */
 async function saglayiciyaGonder(telefon: string, metin: string): Promise<string> {
-  throw new Error(`SMS sağlayıcısı (${process.env.SMS_SAGLAYICI}) henüz bağlanmadı: ${telefon} / ${metin.length} karakter`);
+  const res = await fetch("https://api.iletimerkezi.com/v1/send-sms/json", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    signal: AbortSignal.timeout(10_000),
+    body: JSON.stringify({
+      request: {
+        authentication: { key: process.env.ILETIMERKEZI_KEY, hash: process.env.ILETIMERKEZI_HASH },
+        order: { sender: process.env.ILETIMERKEZI_BASLIK, iys: "0", message: { text: metin, receipents: { number: [telefon.replace(/^\+/, "")] } } },
+      },
+    }),
+  });
+  const data = await res.json().catch(() => null);
+  const durum = data?.response?.status;
+  if (String(durum?.code) !== "200" || !data.response.order?.id) throw new Error(`iletimerkezi ${durum?.code ?? res.status}: ${durum?.message ?? "yanıt okunamadı"}`);
+  return String(data.response.order.id);
 }
 
 /** Bu kullaniciya bu turde son `ms` icinde kac SMS kaydi olustu (limitler icin). */

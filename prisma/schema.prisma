@@ -201,6 +201,7 @@ model User {
   yukseltmeTalebi      YukseltmeTalebi?
   destekMesajlari      DestekMesaji[]
   soruHataBildirimleri SoruHataBildirimi[]
+  promosyonKullanimlari PromosyonKullanim[]
 }
 
 model TelefonDogrulamaKodu {
@@ -434,6 +435,34 @@ model Kampanya {
   aktif       Boolean         @default(true)
   olusturanId String?
   olusturma   DateTime        @default(now())
+}
+
+// Promosyon kodu: uye girince plani `gun` gun acar (odeme altyapisindan bagimsiz).
+// limit bos = sinirsiz; bitis bos = suresiz. Her uye bir kodu bir kez kullanir.
+model PromosyonKodu {
+  id          String              @id @default(cuid())
+  kod         String              @unique
+  plan        AbonelikPlani
+  gun         Int
+  limit       Int?
+  kullanim    Int                 @default(0)
+  bitis       DateTime?
+  aktif       Boolean             @default(true)
+  olusturanId String?
+  olusturma   DateTime            @default(now())
+  kullanimlar PromosyonKullanim[]
+}
+
+model PromosyonKullanim {
+  id     String        @id @default(cuid())
+  kodId  String
+  kod    PromosyonKodu @relation(fields: [kodId], references: [id], onDelete: Cascade)
+  userId String
+  user   User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tarih  DateTime      @default(now())
+
+  @@unique([kodId, userId])
+  @@index([userId])
 }
 
 // Kamu personel alimlariyla ilgili haberler (toplu alim duyurulari,

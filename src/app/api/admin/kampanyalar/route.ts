@@ -37,6 +37,9 @@ export async function POST(req: NextRequest) {
   const parsed = bodySchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Geçersiz bilgiler." }, { status: 400 });
   const b = parsed.data;
+  if (b.kuponKodu && (await prisma.promosyonKodu.findUnique({ where: { kod: b.kuponKodu }, select: { id: true } }))) {
+    return NextResponse.json({ error: "Bu kod bir promosyon kodunda kullanılıyor." }, { status: 409 });
+  }
 
   try {
     await prisma.kampanya.create({

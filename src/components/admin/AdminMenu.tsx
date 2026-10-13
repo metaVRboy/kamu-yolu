@@ -16,6 +16,7 @@ import {
   Newspaper,
   Radar,
   Settings,
+  Ticket,
   Users,
   Crown,
 } from "lucide-react";
@@ -25,6 +26,7 @@ const MENU = [
   { href: "/admin", ad: "Gösterge paneli", ikon: LayoutDashboard },
   { href: "/admin/bildirimler", ad: "Bildirimler", ikon: Bell },
   { href: "/admin/fiyatlar", ad: "Fiyat ve kampanyalar", ikon: BadgePercent },
+  { href: "/admin/promosyon", ad: "Promosyon kodları", ikon: Ticket },
   { href: "/admin/uyeler", ad: "Üyeler", ikon: Users },
   { href: "/admin/uyeler/pro-plus", ad: "Pro+ aboneleri", ikon: Crown },
   { href: "/admin/ilanlar", ad: "İlanlar", ikon: FileText },

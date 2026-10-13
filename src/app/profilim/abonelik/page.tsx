@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { getOkunmamisIlgilendiklerimSayisi, getOkunmamisMesajSayisi } from "@/lib/becayis";
 import { ProfilLayout } from "@/components/ProfilLayout";
 import { AbonelikPlanlari } from "@/components/AbonelikPlanlari";
+import { PromosyonKoduFormu } from "@/components/PromosyonKoduFormu";
 import { cn } from "@/lib/utils";
 import { kalanGunSayisi } from "@/lib/ilanVitrin";
 import { getFiyatlar } from "@/lib/fiyatlar";
@@ -85,6 +86,8 @@ export default async function AbonelikPage() {
           )}
         </div>
       </section>
+
+      <PromosyonKoduFormu />
 
       <div className="mt-8">
         <AbonelikPlanlari mevcutPlan={user.abonelikPlani} fiyat={fiyat} />
