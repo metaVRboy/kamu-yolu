@@ -146,4 +146,5 @@ export type AyarlarVeri = {
   oturumlar: OturumSatiri[];
   sms: { pro: boolean; hazirDegil: boolean; dogrulanmisTelefon: string | null; smsIlanBildirimi: boolean; smsBecayisBildirimi: boolean };
   kvkkOnayTarihi: string | null;
+  ticariIletiOnay: boolean;
 };

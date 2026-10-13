@@ -461,6 +461,47 @@ const SMS_SECENEKLERI = [
 type SmsAlani = (typeof SMS_SECENEKLERI)[number]["alan"];
 
 function BildirimSekmesi({ v, degisti }: { v: AyarlarVeri; degisti: () => void }) {
+  // Kampanya/duyuru onayi plan kilidinin disinda: her uyenin hakki.
+  return (
+    <View style={{ gap: 16 }}>
+      <SmsKartlari v={v} degisti={degisti} />
+      <AyarKarti baslik="Kampanya ve duyurular" aciklama="Ticari elektronik ileti onayı; vermek zorunlu değildir.">
+        <TicariIletiTercihi ilk={v.ticariIletiOnay} />
+      </AyarKarti>
+    </View>
+  );
+}
+
+function TicariIletiTercihi({ ilk }: { ilk: boolean }) {
+  const [onay, setOnay] = useState(ilk);
+  const [kaydediliyor, setKaydediliyor] = useState(false);
+
+  async function degistir(deger: boolean) {
+    setOnay(deger);
+    setKaydediliyor(true);
+    try {
+      await api("/api/profil/ticari-ileti", { method: "PATCH", govde: { onay: deger } });
+    } catch (e) {
+      setOnay(!deger);
+      Alert.alert("Tercih kaydedilemedi.", hataMetni(e));
+    } finally {
+      setKaydediliyor(false);
+    }
+  }
+
+  return (
+    <View style={s.tercih} pointerEvents={kaydediliyor ? "none" : "auto"}>
+      <Onay secili={onay} degistir={degistir}>
+        <T w="yariKalin">SMS ve e-posta ile haberdar et</T>
+        <T style={{ fontSize: 12, color: renk.soluk, lineHeight: 17 }}>
+          İndirim, kampanya ve yeni özelliklerden SMS ve e-posta ile haberdar olmak istiyorum. Onayını istediğin an buradan geri çekebilirsin. Hesap ve güvenlik e-postaları ile açtığın ilan bildirimleri bundan etkilenmez.
+        </T>
+      </Onay>
+    </View>
+  );
+}
+
+function SmsKartlari({ v, degisti }: { v: AyarlarVeri; degisti: () => void }) {
   const kartlar = (telefon: ReactNode, tercihler: ReactNode) => (
     <View style={{ gap: 16 }}>
       <AyarKarti baslik="Telefon numarası" aciklama="SMS bildirimleri yalnızca doğrulanmış numarana gönderilir.">

@@ -45,6 +45,7 @@ export function GirisFormu({ mod }: { mod: "giris" | "kayit" }) {
   const [sifre, setSifre] = useState("");
   const [sifreTekrar, setSifreTekrar] = useState("");
   const [kvkk, setKvkk] = useState(false);
+  const [ticariIleti, setTicariIleti] = useState(false);
   const [beniHatirla, setBeniHatirla] = useState(true);
   const [hata, setHata] = useState<string | null>(null);
   const [yukleniyor, setYukleniyor] = useState(false);
@@ -85,7 +86,7 @@ export function GirisFormu({ mod }: { mod: "giris" | "kayit" }) {
 
   const kodGonder = () =>
     calistir(async () => {
-      await api("/api/auth/kayit-kod-gonder", { govde: { adSoyad, email, password: sifre, kvkkOnay: kvkk, turnstileToken: token } });
+      await api("/api/auth/kayit-kod-gonder", { govde: { adSoyad, email, password: sifre, kvkkOnay: kvkk, ticariIletiOnay: ticariIleti, turnstileToken: token } });
       setKodAsamasi(true);
       setKod("");
       setKalan(KOD_GECERLILIK_SANIYE);
@@ -210,6 +211,12 @@ export function GirisFormu({ mod }: { mod: "giris" | "kayit" }) {
                         Kullanım Koşulları
                       </T>
                       &apos;nı okudum, kabul ediyorum.
+                    </T>
+                  </Onay>
+                  <Onay secili={ticariIleti} degistir={setTicariIleti}>
+                    <T style={{ fontSize: 12, color: renk.yaziIkincil, lineHeight: 18 }}>
+                      Kampanya, indirim ve duyurulardan SMS ve e-posta ile haberdar olmak için ticari elektronik ileti almayı kabul ediyorum.{" "}
+                      <T style={{ fontSize: 12, color: renk.soluk }}>(İsteğe bağlı)</T>
                     </T>
                   </Onay>
                 </>

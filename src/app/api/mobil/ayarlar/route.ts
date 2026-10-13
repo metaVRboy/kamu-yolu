@@ -48,5 +48,6 @@ export async function GET() {
       smsBecayisBildirimi: user.smsBecayisBildirimi,
     },
     kvkkOnayTarihi: user.kvkkOnayTarihi ? TARIH.format(user.kvkkOnayTarihi) : null,
+    ticariIletiOnay: user.ticariIletiOnay,
   });
 }
