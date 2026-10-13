@@ -37,6 +37,10 @@ export function AuthModalProvider({ children }: { children: React.ReactNode }) {
       {children}
       {mod && (
         <div
+          // aria-modal: erisilebilirlik + tanitim penceresi kayit/giris formunun ustune acilmasin (YukseltmeTanitimi bunu kontrol eder).
+          role="dialog"
+          aria-modal="true"
+          aria-label={mod === "giris" ? "Giriş yap" : "Kayıt ol"}
           className="fixed inset-0 z-[200] flex items-center justify-center overflow-y-auto bg-slate-950/70 p-4 backdrop-blur-sm"
           onClick={(e) => {
             // Sadece arka plana (karanlik alana) tiklandiginda kapat -

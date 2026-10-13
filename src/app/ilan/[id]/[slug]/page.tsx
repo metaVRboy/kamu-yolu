@@ -73,9 +73,9 @@ export async function generateMetadata({
   const posting = await getPostingById(id);
   if (!posting) return { title: "İlan Bulunamadı — Kamu Yolu" };
 
-  const description = posting.departmentRequirementRaw
-    ? posting.departmentRequirementRaw.slice(0, 155)
-    : `${posting.institutionName} tarafından yayımlanan "${posting.title}" ilanının detaylarını Kamu Yolu'nda incele.`;
+  // Sablon: ham ilan metninin ilk 155 karakteri ("a) Herhangi bir...\n") arama sonucunda anlamsiz gorunuyordu.
+  const sonTarih = posting.applicationEnd ? ` Son başvuru: ${TARIH.format(posting.applicationEnd)}.` : "";
+  const description = `${posting.institutionName} — ${posting.title} ilanının şartları, başvuru tarihleri ve kaynağı.${sonTarih}`;
 
   const title = baslikKurumuIceriyorMu(posting.title, posting.institutionName)
     ? `${posting.title} | Kamu Yolu`

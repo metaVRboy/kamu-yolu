@@ -113,9 +113,17 @@ export function AuthForm({
         setError(data.error ?? "Bir şeyler ters gitti.");
         return;
       }
-      onBasarili?.();
-      sayfaYuklemesiniBaslat("/profilim");
-      router.push("/profilim");
+      // Pencereden (ilan/bolum sayfasinda) giris yapan oldugu sayfada kalir; /giris sayfasindan gelen
+      // ?sonra= ile istedigi sayfaya (yalniz site ici yol), yoksa profile gider.
+      if (onBasarili) {
+        onBasarili();
+        router.refresh();
+        return;
+      }
+      const sonra = searchParams.get("sonra");
+      const hedef = sonra?.startsWith("/") && !sonra.startsWith("//") ? sonra : "/profilim";
+      sayfaYuklemesiniBaslat(hedef);
+      router.push(hedef);
       router.refresh();
     } catch {
       setError("Bağlantı hatası, tekrar deneyin.");
