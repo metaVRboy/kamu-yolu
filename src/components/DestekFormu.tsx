@@ -15,6 +15,7 @@ export function DestekFormu({ uye }: { uye: { adSoyad: string; email: string } |
   const [konu, setKonu] = useState<string>(DESTEK_KONULARI[0]);
   const [mesaj, setMesaj] = useState("");
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileTur, setTurnstileTur] = useState(0); // token tek kullanimlik: her gonderimden sonra yenilenir
   const [hata, setHata] = useState<string | null>(null);
   const [gonderiliyor, setGonderiliyor] = useState(false);
   const [gonderildi, setGonderildi] = useState(false);
@@ -48,6 +49,8 @@ export function DestekFormu({ uye }: { uye: { adSoyad: string; email: string } |
           router.refresh();
         } finally {
           setGonderiliyor(false);
+          setTurnstileToken(null);
+          setTurnstileTur((t) => t + 1);
         }
       }}
     >
@@ -73,7 +76,7 @@ export function DestekFormu({ uye }: { uye: { adSoyad: string; email: string } |
         Mesajın
         <textarea value={mesaj} onChange={(e) => setMesaj(e.target.value)} required minLength={10} maxLength={4000} rows={6} className={alan} />
       </label>
-      {!uye && <TurnstileWidget onVerify={setTurnstileToken} />}
+      {!uye && <TurnstileWidget key={turnstileTur} onVerify={setTurnstileToken} />}
       {hata && <p className="text-sm text-destructive">{hata}</p>}
       <button type="submit" disabled={gonderiliyor} className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-bold text-primary-foreground disabled:opacity-50 sm:w-auto">
         {gonderiliyor ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}

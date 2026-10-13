@@ -9,7 +9,9 @@ import { api, SITE } from "@/lib/api";
 import { useOturum } from "@/lib/oturum";
 import { renk } from "@/lib/tema";
 
-const KOD_GECERLILIK_SANIYE = 120;
+// Sitedeki AuthForm ile ayni: kod 10 dk gecerli, 60 sn sonra tekrar gonderilebilir.
+const KOD_GECERLILIK_SANIYE = 600;
+const TEKRAR_GONDERME_SANIYE = 60;
 
 // Sitedeki sifre standardi (src/lib/authValidation.ts).
 export const SIFRE_KURALLARI = [
@@ -53,6 +55,8 @@ export function GirisFormu({ mod }: { mod: "giris" | "kayit" }) {
   const [kod, setKod] = useState("");
   const [kalan, setKalan] = useState(KOD_GECERLILIK_SANIYE);
   const [token, setToken] = useState<string | null>(null);
+  // Turnstile token'i tek kullanimlik: her istekten sonra dogrulama yeniden olusturulur (key degisir).
+  const [tokenTur, setTokenTur] = useState(0);
 
   useEffect(() => {
     if (!kodAsamasi || kalan <= 0) return;
@@ -75,6 +79,8 @@ export function GirisFormu({ mod }: { mod: "giris" | "kayit" }) {
       setHata(e instanceof Error ? e.message : "Bir şeyler ters gitti.");
     } finally {
       setYukleniyor(false);
+      setToken(null);
+      setTokenTur((t) => t + 1);
     }
   }
 
@@ -106,6 +112,8 @@ export function GirisFormu({ mod }: { mod: "giris" | "kayit" }) {
       await tamam();
     });
 
+  const tekrarGonderilebilir = !yukleniyor && !!token && kalan <= KOD_GECERLILIK_SANIYE - TEKRAR_GONDERME_SANIYE;
+
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={{ padding: 16 }} keyboardShouldPersistTaps="handled">
@@ -134,11 +142,17 @@ export function GirisFormu({ mod }: { mod: "giris" | "kayit" }) {
               </View>
               {!!hata && <T style={{ color: renk.hata }}>{hata}</T>}
               <Buton etiket={yukleniyor ? "Doğrulanıyor..." : "Doğrula ve Hesabı Oluştur"} onPress={kodDogrula} devreDisi={kod.length !== 6} yukleniyor={yukleniyor} />
+              {/* Kodu tekrar gondermek yeni bir insan dogrulamasi ister. */}
+              <RobotDogrulama key={tokenTur} dogrulandi={setToken} />
               <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
                 <T w="orta" style={{ fontSize: 13, color: renk.soluk }} onPress={() => setKodAsamasi(false)}>
                   E-postayı değiştir
                 </T>
-                <T w="orta" style={{ fontSize: 13, color: renk.birincil, opacity: kalan > 0 ? 0.5 : 1 }} onPress={kalan > 0 ? undefined : kodGonder}>
+                <T
+                  w="orta"
+                  style={{ fontSize: 13, color: renk.birincil, opacity: tekrarGonderilebilir ? 1 : 0.5 }}
+                  onPress={tekrarGonderilebilir ? kodGonder : undefined}
+                >
                   Kodu Tekrar Gönder
                 </T>
               </View>
@@ -221,7 +235,7 @@ export function GirisFormu({ mod }: { mod: "giris" | "kayit" }) {
                   </Onay>
                 </>
               )}
-              <RobotDogrulama dogrulandi={setToken} />
+              <RobotDogrulama key={tokenTur} dogrulandi={setToken} />
               {!!hata && <T style={{ color: renk.hata }}>{hata}</T>}
               <Buton
                 etiket={yukleniyor ? "Bekleyin..." : mod === "kayit" ? "Devam Et" : "Giriş Yap"}

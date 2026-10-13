@@ -34,7 +34,8 @@ async function agIstegiEngellendiMi(): Promise<boolean> {
       method: "HEAD",
       mode: "no-cors",
       cache: "no-store",
-      signal: AbortSignal.timeout(2000),
+      // Yavas mobil baglantida 2 sn yanlis alarm veriyordu (engel yokken duvar cikiyordu).
+      signal: AbortSignal.timeout(5000),
     });
     return false;
   } catch {
@@ -63,18 +64,35 @@ function yemElemaniGizliMi(): Promise<boolean> {
   });
 }
 
+const GECILDI_ANAHTAR = "kyReklamUyariGecildi";
+
 export function ReklamEngelleyiciKontrol() {
   const [durum, setDurum] = useState<"kontrol" | "temiz" | "engellendi">("kontrol");
 
-  async function kontrolEt() {
-    setDurum("kontrol");
+  const tespitEt = async () => {
     const [agEngellendi, yemGizli] = await Promise.all([agIstegiEngellendiMi(), yemElemaniGizliMi()]);
-    setDurum(agEngellendi || yemGizli ? "engellendi" : "temiz");
+    return agEngellendi || yemGizli ? "engellendi" : "temiz";
+  };
+
+  function kontrolEt() {
+    setDurum("kontrol");
+    tespitEt().then(setDurum);
   }
 
   useEffect(() => {
-    kontrolEt();
+    // Uyari bu oturumda gecildiyse tekrar sorma (siteyi kilitlemez, yalniz rica eder).
+    try {
+      if (sessionStorage.getItem(GECILDI_ANAHTAR)) return; // "kontrol" durumunda zaten hicbir sey cizilmez
+    } catch {}
+    tespitEt().then(setDurum);
   }, []);
+
+  function devamEt() {
+    try {
+      sessionStorage.setItem(GECILDI_ANAHTAR, "1");
+    } catch {}
+    setDurum("temiz");
+  }
 
   if (durum !== "engellendi") return null;
 
@@ -83,12 +101,14 @@ export function ReklamEngelleyiciKontrol() {
       <div className="max-w-sm rounded-2xl bg-white p-6 text-center shadow-2xl">
         <h2 className="font-sans text-lg font-bold text-primary">Reklam Engelleyici Tespit Edildi</h2>
         <p className="mt-2 text-sm text-slate-600">
-          Kamu Yolu&apos;nu tamamen ücretsiz tutabilmemiz reklam gelirleriyle mümkün oluyor.
-          Siteyi kullanmaya devam edebilmek için lütfen reklam engelleyicini kapat ve sayfayı
-          yeniden dene.
+          Kamu Yolu&apos;nun ücretsiz özelliklerini reklam gelirleriyle sunuyoruz. Bize destek
+          olmak istersen reklam engelleyicini bu site için kapatabilirsin.
         </p>
         <button type="button" onClick={kontrolEt} className="mt-4 w-full rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90">
           Kapattım, Tekrar Dene
+        </button>
+        <button type="button" onClick={devamEt} className="mt-2 w-full rounded-xl px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100">
+          Şimdilik devam et
         </button>
       </div>
     </div>

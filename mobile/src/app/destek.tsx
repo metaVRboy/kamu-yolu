@@ -70,6 +70,7 @@ function DestekFormu({ uye, gonderildi: tazele }: { uye: { adSoyad: string; emai
   const [konu, setKonu] = useState(DESTEK_KONULARI[0]);
   const [mesaj, setMesaj] = useState("");
   const [token, setToken] = useState<string | null>(null);
+  const [tokenTur, setTokenTur] = useState(0); // token tek kullanimlik: her gonderimden sonra yenilenir
   const [hata, setHata] = useState<string | null>(null);
   const [gonderiliyor, setGonderiliyor] = useState(false);
   const [gonderildi, setGonderildi] = useState(false);
@@ -86,6 +87,8 @@ function DestekFormu({ uye, gonderildi: tazele }: { uye: { adSoyad: string; emai
       setHata(e instanceof Error ? e.message : "Gönderilemedi, lütfen tekrar dene.");
     } finally {
       setGonderiliyor(false);
+      setToken(null);
+      setTokenTur((t) => t + 1);
     }
   }
 
@@ -117,7 +120,7 @@ function DestekFormu({ uye, gonderildi: tazele }: { uye: { adSoyad: string; emai
         </T>
         <TextInput value={mesaj} onChangeText={setMesaj} multiline maxLength={4000} style={s.alan} />
       </View>
-      {!uye && <RobotDogrulama dogrulandi={setToken} />}
+      {!uye && <RobotDogrulama key={tokenTur} dogrulandi={setToken} />}
       {!!hata && <T style={{ color: renk.hata }}>{hata}</T>}
       <Buton etiket="Gönder" ikon={Send} onPress={gonder} yukleniyor={gonderiliyor} devreDisi={!ad.trim() || !email.trim() || mesaj.trim().length < 10 || (!uye && !token)} />
     </Kart>

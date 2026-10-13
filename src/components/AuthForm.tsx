@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { sayfaYuklemesiniBaslat } from "@/components/SayfaYuklemeCizgisi";
@@ -13,7 +13,12 @@ import { passwordRequirementIssues } from "@/lib/authValidation";
 import { PasswordRequirementsHint } from "@/components/SifreSifirlaForm";
 import { TurnstileWidget } from "@/components/TurnstileWidget";
 
-const KOD_GECERLILIK_SANIYE = 120;
+// Sunucudaki KOD_GECERLILIK_DAKIKA ile ayni. Mobilde mail uygulamasina gidip donmek 2 dk'ya sigmiyordu.
+const KOD_GECERLILIK_SANIYE = 600;
+const TEKRAR_GONDERME_SANIYE = 60;
+// Instagram/Facebook/TikTok vb. uygulama ici tarayicilar: Google bu WebView'larda OAuth'u
+// "disallowed_useragent" ile reddeder; reklam trafiginin cogu buradan gelir.
+const UYGULAMA_ICI_TARAYICI = /FBAN|FBAV|FB_IAB|Instagram|BytedanceWebview|musical_ly|TikTok|Twitter|LinkedInApp|Snapchat|Line\//i;
 // Site key tanimli degilse (ör. yerel gelistirme ortaminda henuz
 // ayarlanmadiysa) formu tamamen kilitlememek icin dogrulamayi atla.
 const TURNSTILE_ETKIN = !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
@@ -63,6 +68,19 @@ export function AuthForm({
   const [kod, setKod] = useState("");
   const [kalanSaniye, setKalanSaniye] = useState(KOD_GECERLILIK_SANIYE);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  // Turnstile token'i tek kullanimlik: her istekten sonra widget yeniden olusturulur (key degisir).
+  const [turnstileTur, setTurnstileTur] = useState(0);
+  // Sunucuda false (hydration uyumu), tarayicida user agent'a gore.
+  const uygulamaIci = useSyncExternalStore(
+    () => () => {},
+    () => UYGULAMA_ICI_TARAYICI.test(navigator.userAgent),
+    () => false,
+  );
+
+  function tokenKullanildi() {
+    setTurnstileToken(null);
+    setTurnstileTur((t) => t + 1);
+  }
 
   useEffect(() => {
     const hata = searchParams.get("hata");
@@ -102,6 +120,7 @@ export function AuthForm({
       setError("Bağlantı hatası, tekrar deneyin.");
     } finally {
       setLoading(false);
+      tokenKullanildi();
     }
   }
 
@@ -127,6 +146,7 @@ export function AuthForm({
       setError("Bağlantı hatası, tekrar deneyin.");
     } finally {
       setLoading(false);
+      tokenKullanildi();
     }
   }
 
@@ -208,6 +228,8 @@ export function AuthForm({
           <Button type="submit" disabled={loading || kod.length !== 6} className="w-full">
             {loading ? "Doğrulanıyor..." : "Doğrula ve Hesabı Oluştur"}
           </Button>
+          {/* Kodu tekrar gondermek yeni bir insan dogrulamasi ister. */}
+          <TurnstileWidget key={turnstileTur} onVerify={setTurnstileToken} />
           <div className="flex items-center justify-between text-xs">
             <button
               type="button"
@@ -219,7 +241,7 @@ export function AuthForm({
             <button
               type="button"
               onClick={kodGonder}
-              disabled={loading || kalanSaniye > 0}
+              disabled={loading || kalanSaniye > KOD_GECERLILIK_SANIYE - TEKRAR_GONDERME_SANIYE || (TURNSTILE_ETKIN && !turnstileToken)}
               className="font-medium text-primary hover:underline disabled:pointer-events-none disabled:opacity-50"
             >
               Kodu Tekrar Gönder
@@ -241,13 +263,20 @@ export function AuthForm({
         </p>
       </div>
 
-      <a
-        href="/api/auth/google"
-        className="flex items-center justify-center gap-2.5 rounded-xl border border-border bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 hover:shadow-sm"
-      >
-        <GoogleIcon />
-        Google
-      </a>
+      {uygulamaIci ? (
+        <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-900">
+          Google ile giriş bu uygulamanın içinden açılmıyor. Sağ üstteki <strong>⋯</strong> menüsünden{" "}
+          <strong>&quot;Tarayıcıda aç&quot;</strong> seçeneğine dokun ya da aşağıdan e-postanla devam et.
+        </p>
+      ) : (
+        <a
+          href="/api/auth/google"
+          className="flex items-center justify-center gap-2.5 rounded-xl border border-border bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 hover:shadow-sm"
+        >
+          <GoogleIcon />
+          Google
+        </a>
+      )}
       <p className="-mt-2 text-center text-xs text-muted-foreground">
         Sosyal hesapla devam ederken{" "}
         <Link href="/kullanim-kosullari" target="_blank" className="font-medium text-primary underline">
@@ -367,7 +396,7 @@ export function AuthForm({
             </span>
           </label>
         )}
-        <TurnstileWidget onVerify={setTurnstileToken} />
+        <TurnstileWidget key={turnstileTur} onVerify={setTurnstileToken} />
         {error && <p className="text-sm text-destructive">{error}</p>}
         <Button
           type="submit"

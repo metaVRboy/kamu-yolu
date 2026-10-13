@@ -17,8 +17,8 @@ const bodySchema = z.object({
   turnstileToken: z.string().nullable().optional(),
 });
 
-const KOD_GECERLILIK_DAKIKA = 2;
-const YENIDEN_GONDERIM_BEKLEME_SANIYE = 30;
+const KOD_GECERLILIK_DAKIKA = 10;
+const YENIDEN_GONDERIM_BEKLEME_SANIYE = 60;
 
 export async function POST(req: NextRequest) {
   if (!isSessionConfigured()) {
@@ -65,7 +65,8 @@ export async function POST(req: NextRequest) {
 
     await prisma.emailVerificationCode.upsert({
       where: { email },
-      update: { code, adSoyad, passwordHash, kvkkOnayTarihi: new Date(), ticariIletiOnay, expiresAt, usedAt: null },
+      // createdAt yenilenir: tekrar gonderim beklemesi (yukarida) son gonderime gore olculur.
+      update: { code, adSoyad, passwordHash, kvkkOnayTarihi: new Date(), ticariIletiOnay, expiresAt, usedAt: null, createdAt: new Date() },
       create: { email, code, adSoyad, passwordHash, kvkkOnayTarihi: new Date(), ticariIletiOnay, expiresAt },
     });
 
