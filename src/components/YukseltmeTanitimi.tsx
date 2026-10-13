@@ -65,6 +65,17 @@ const yaz = (k: string, v: string) => {
 
 const sayi = (n: number) => n.toLocaleString("tr-TR");
 
+// Sekme oturumu boyunca (sessionStorage): sekme kapaninca normal siklik geri gelir.
+const REKLAM_OTURUMU = "kyReklamOturumu";
+function reklamOturumuMu() {
+  try {
+    if (/[?&](utm_source|gclid|fbclid|ttclid)=/.test(location.search)) sessionStorage.setItem(REKLAM_OTURUMU, "1");
+    return !!sessionStorage.getItem(REKLAM_OTURUMU);
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Periyodik Pro / Pro+ tanitim penceresi (yalniz site). Misafir ve ucretsiz uye iki plani,
  * Pro uye yalniz Pro+'i gorur; Pro+ uyeye layout bu bileseni hic koymaz. Buton mevcut yukseltme
@@ -90,8 +101,10 @@ export function YukseltmeTanitimi() {
     const isaretle = () => (etkilesim = true);
     const olaylar = ["pointerdown", "keydown", "scroll", "wheel", "touchstart"] as const;
     for (const o of olaylar) window.addEventListener(o, isaretle, { passive: true, once: true });
+    // Reklamdan ilk kez gelen ziyaretci once siteyi tanisin: o sekme oturumunda pencere acilmaz.
+    const reklamOturumu = reklamOturumuMu();
     const t = setInterval(async () => {
-      if (document.hidden) return;
+      if (document.hidden || reklamOturumu) return;
       gorunurSn++;
       if (gorunurSn < GEZINME_SN || !etkilesim || acikRef.current || bekliyor) return;
       if (HARIC.some((r) => r.test(yolRef.current))) return;
@@ -105,6 +118,7 @@ export function YukseltmeTanitimi() {
         if (veri.plan === "PRO_PLUS") return;
         acikRef.current = true;
         setAcik(veri);
+        fetch("/api/yukseltme-tanitim", { method: "POST" }).catch(() => {}); // gosterim sayaci
       } catch {
         // Veri alinamadi: bu tur atlanir.
       } finally {
@@ -287,7 +301,7 @@ function slaytlar(v: Veri): Slayt[] {
 const PLAN_KART: Record<UcretliPlan, { ad: string; rozet: string; maddeler: string[]; kart: string; buton: string; vurgu: string }> = {
   PRO: {
     ad: "Pro",
-    rozet: "En popüler",
+    rozet: "Önerilen", // satis yokken "en populer" ispatlanamaz bir iddia
     maddeler: ["Bölümüne uygun yeni ilan çıkınca anında SMS", "Sana özel ilanlar tek listede", "Becayiş talebi oluştur ve mesajlaş", "Haftada 3 KPSS denemesi + ders karnesi ve çözümler"],
     kart: "border-blue-200 bg-gradient-to-b from-blue-50/80 to-white",
     buton: "from-blue-600 to-indigo-600 shadow-blue-600/30",
@@ -484,7 +498,7 @@ function Pencere({ veri, kapat, sec }: { veri: Veri; kapat: () => void; sec: (p:
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 px-5 py-4 text-xs text-slate-500 sm:px-7">
-          <p>Ödeme altyapısı çok yakında açılıyor; şimdi yerini ayır, açıldığında ilk sen haberdar ol.</p>
+          <p>Ödeme altyapısı çok yakında açılıyor; şimdi listeye katıl, açıldığında ilk sen haberdar ol.</p>
           <button type="button" onClick={kapat} className="font-semibold text-slate-600 hover:text-slate-900">
             Şimdi değil
           </button>

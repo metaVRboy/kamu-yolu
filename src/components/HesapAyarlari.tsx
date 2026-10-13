@@ -420,7 +420,7 @@ export function HesapSilForm({ sifreVar }: { sifreVar: boolean }) {
         open={onay}
         onOpenChange={setOnay}
         title="Hesabın kalıcı olarak silinsin mi?"
-        description="Bu işlem geri alınamaz. Tüm verilerin silinecek ve oturumun kapanacak."
+        description="Bu işlem geri alınamaz. Hesabın ve kişisel verilerin silinecek, oturumun kapanacak. Destek kayıtların adın ve e-postan çıkarılarak saklanır."
         onConfirm={sil}
         loading={yukleniyor}
         onayEtiketi="Hesabımı sil"

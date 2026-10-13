@@ -83,6 +83,8 @@ export async function DELETE(req: NextRequest) {
 
   await prisma.$transaction([
     prisma.emailVerificationCode.deleteMany({ where: { email: user.email } }),
+    // Destek kayitlari (yanit gecmisi) kalir ama kime ait oldugu cikarilir; userId cascade ile null olur.
+    prisma.destekMesaji.updateMany({ where: { userId: user.id }, data: { ad: "Silinmiş kullanıcı", email: "" } }),
     prisma.user.delete({ where: { id: user.id } }),
   ]);
   await destroySession();
@@ -91,7 +93,7 @@ export async function DELETE(req: NextRequest) {
     await sendEmail({
       to: user.email,
       subject: "Kamu Yolu — Hesabın silindi",
-      html: `<p>Merhaba,</p><p>Kamu Yolu hesabın ve hesabınla ilişkili kişisel verilerin talebin üzerine silindi. Bizi tercih ettiğin için teşekkür ederiz.</p>`,
+      html: `<p>Merhaba,</p><p>Kamu Yolu hesabın ve hesabınla ilişkili kişisel verilerin talebin üzerine silindi. Becayiş yazışmalarında gönderdiğin mesajlar karşı tarafın kutusunda "Silinmiş kullanıcı" adıyla, destek kayıtların ise adın ve e-posta adresin çıkarılarak saklanır. Bizi tercih ettiğin için teşekkür ederiz.</p>`,
     });
   } catch (err) {
     console.error("Hesap silme e-postası gönderilemedi:", err);

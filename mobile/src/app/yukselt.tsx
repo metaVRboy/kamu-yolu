@@ -3,13 +3,12 @@ import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { Image } from "expo-image";
-import * as WebBrowser from "expo-web-browser";
 import { router, useLocalSearchParams } from "expo-router";
-import { BellRing, Check, CheckCircle2, Crown, Flame, Minus, ShieldCheck, Sparkles, X } from "lucide-react-native";
+import { BellRing, Check, CheckCircle2, Crown, Flame, Minus, Sparkles, X } from "lucide-react-native";
 import { T, Yukleniyor } from "@/bilesenler/ui";
-import { api, SITE, useVeri } from "@/lib/api";
+import { api, useVeri } from "@/lib/api";
 import type { Plan } from "@/lib/kpss";
-import { KARSILASTIRMA, KAYNAK_METNI, PLAN_ADI, kalanSureMetni, tl, yillikBedavaAy, yillikTasarruf, type FiyatTablosu, type UcretliPlan } from "@/lib/planlar";
+import { KARSILASTIRMA, KAYNAK_METNI, PLAN_ADI, kalanSureMetni, tl, yillikTasarruf, type FiyatTablosu, type UcretliPlan } from "@/lib/planlar";
 import { renk } from "@/lib/tema";
 
 type Ozet = {
@@ -36,6 +35,7 @@ export default function Yukselt() {
   const [yillik, setYillik] = useState(false);
   const [durum, setDurum] = useState<"bos" | "gonderiliyor" | "tamam">("bos");
   const [hata, setHata] = useState<string | null>(null);
+  const [ciktim, setCiktim] = useState(false);
   const ust = useSafeAreaInsets();
 
   if (!ozet) return <Yukleniyor />;
@@ -45,7 +45,16 @@ export default function Yukselt() {
   const metin = KAYNAK_METNI[kaynak];
   const mevcut = ozet.plan;
   const zatenListede = ozet.talep?.plan === secilen && ozet.talep.yillik === yillik;
-  const bedava = yillikBedavaAy(ozet.fiyat.tablo);
+  const tasarruf = yillikTasarruf(ozet.fiyat.tablo[secilen]);
+
+  async function listedenCik() {
+    try {
+      await api("/api/yukseltme-talebi", { method: "DELETE" });
+      setCiktim(true);
+    } catch (e) {
+      setHata(e instanceof Error ? e.message : "Listeden çıkarılamadı.");
+    }
+  }
 
   async function haberVer() {
     setDurum("gonderiliyor");
@@ -89,14 +98,7 @@ export default function Yukselt() {
               </View>
             )}
           </View>
-          <View style={{ marginTop: 16, gap: 6 }}>
-            {["İstediğin an iptal et", "İptal edersen dönem sonuna kadar kullanmaya devam edersin", "Kart bilgilerin bizde saklanmaz"].map((g) => (
-              <View key={g} style={{ flexDirection: "row", gap: 8 }}>
-                <ShieldCheck size={16} color="#6ee7b7" />
-                <T style={{ flex: 1, color: "rgba(255,255,255,0.9)", fontSize: 13 }}>{g}</T>
-              </View>
-            ))}
-          </View>
+          {/* "Istedigin an iptal et / kart bilgilerin saklanmaz" vaatleri odeme acilinca eklenir (sitede SATIS_ACIK). */}
         </LinearGradient>
         <Pressable onPress={() => router.back()} style={[s.kapat, { top: ust.top + 12 }]} hitSlop={8}>
           <X size={18} color="#475569" />
@@ -109,14 +111,14 @@ export default function Yukselt() {
                 <CheckCircle2 size={36} color={tema.metin} />
               </View>
               <T w="kalin" style={{ marginTop: 16, fontSize: 20 }}>
-                Harika, yerin ayrıldı!
+                Listeye eklendin!
               </T>
               <T style={{ marginTop: 8, textAlign: "center", color: renk.yaziIkincil, lineHeight: 20 }}>
                 Ödeme altyapımız açıldığında{" "}
                 <T w="kalin">
                   {PLAN_ADI[secilen]} · {yillik ? "yıllık" : "aylık"}
                 </T>{" "}
-                için ilk sana e-posta göndereceğiz.
+                için sana e-posta ile haber vereceğiz. İstediğin zaman bu ekrandan listeden çıkabilirsin.
               </T>
               <Pressable onPress={() => router.back()} style={s.tamam}>
                 <T w="yariKalin" style={{ color: "#fff" }}>
@@ -144,7 +146,7 @@ export default function Yukselt() {
               <View style={s.bilgi}>
                 <Sparkles size={16} color="#92400e" />
                 <T w="orta" style={{ flex: 1, fontSize: 12, color: "#92400e" }}>
-                  Ödeme altyapımız çok yakında açılıyor. Şimdi yerini ayır, açıldığında ilk sen haberdar ol.
+                  Ödeme altyapımız çok yakında açılıyor. Listeye katıl, açıldığında ilk sen haberdar ol.
                 </T>
               </View>
 
@@ -155,10 +157,11 @@ export default function Yukselt() {
                       <T w="yariKalin" style={{ color: yillik === y ? renk.yazi : "#64748b" }}>
                         {y ? "Yıllık" : "Aylık"}
                       </T>
-                      {y && bedava > 0 && (
+                      {/* "X ay bedava" degil: hicbir sey ucretsiz verilmiyor, yalnizca yillik daha ucuz. */}
+                      {y && tasarruf > 0 && (
                         <View style={s.bedava}>
                           <T w="kalin" style={{ fontSize: 10, color: "#fff" }}>
-                            {bedava} ay bedava
+                            %{tasarruf} tasarruf
                           </T>
                         </View>
                       )}
@@ -219,7 +222,7 @@ export default function Yukselt() {
                     <LinearGradient key={pl} colors={["#8b5cf6", "#d946ef", "#fbbf24"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={s.cerceve}>
                       <View style={s.enCok}>
                         <T w="kalin" style={{ fontSize: 10, color: "#fff" }}>
-                          En çok değer
+                          En kapsamlı
                         </T>
                       </View>
                       {kart}
@@ -294,11 +297,16 @@ export default function Yukselt() {
                       </T>
                     </LinearGradient>
                   </Pressable>
-                ) : zatenListede ? (
-                  <View style={[s.not, { backgroundColor: tema.acik }]}>
-                    <CheckCircle2 size={20} color={tema.metin} />
-                    <T w="yariKalin" style={{ flex: 1, color: tema.metin }}>
-                      Bu seçim için zaten listedesin; ödeme açılınca haber vereceğiz.
+                ) : zatenListede && !ciktim ? (
+                  <View style={[s.not, { backgroundColor: tema.acik, flexDirection: "column" }]}>
+                    <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
+                      <CheckCircle2 size={20} color={tema.metin} />
+                      <T w="yariKalin" style={{ flex: 1, color: tema.metin }}>
+                        Bu seçim için zaten listedesin; ödeme açılınca haber vereceğiz.
+                      </T>
+                    </View>
+                    <T w="orta" style={{ fontSize: 12, color: "#64748b", textDecorationLine: "underline" }} onPress={listedenCik}>
+                      Listeden çık
                     </T>
                   </View>
                 ) : (
@@ -317,16 +325,9 @@ export default function Yukselt() {
                     Şimdi değil
                   </T>
                 </Pressable>
+                {/* Henuz satis yok: buton bir satin alma degil, yalnizca haber verme talebi (sitedeki metinle ayni). */}
                 <T style={{ textAlign: "center", fontSize: 11, color: renk.soluk, lineHeight: 16 }}>
-                  Ödeme açıldığında{" "}
-                  <T style={{ fontSize: 11, color: renk.soluk, textDecorationLine: "underline" }} onPress={() => WebBrowser.openBrowserAsync(`${SITE}/on-bilgilendirme-formu`)}>
-                    Ön Bilgilendirme Formu
-                  </T>{" "}
-                  ve{" "}
-                  <T style={{ fontSize: 11, color: renk.soluk, textDecorationLine: "underline" }} onPress={() => WebBrowser.openBrowserAsync(`${SITE}/mesafeli-satis-sozlesmesi`)}>
-                    Mesafeli Satış Sözleşmesi
-                  </T>{" "}
-                  onayın ayrıca alınır. Fiyatlar KDV dahildir.
+                  Şu an ödeme alınmıyor. &quot;Açılınca haber ver&quot; ile yalnızca ödeme açıldığında bu plan için sana e-posta göndermemizi istemiş olursun.
                 </T>
               </View>
             </>

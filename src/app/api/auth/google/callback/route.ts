@@ -4,6 +4,8 @@ import { guvenlikEpostasi } from "@/lib/email";
 import { createSession, googleBaglaJetonuCoz, uygulamaGirisKoduOlustur } from "@/lib/auth";
 import { UYGULAMA_DONUS, UYGULAMA_GOOGLE_BAGLA } from "@/lib/uygulama";
 import { SITE_URL } from "@/lib/site";
+import { KAYNAK_CEREZ, kaynakCerezCoz } from "@/lib/kaynak";
+import { Prisma } from "@/generated/prisma/client";
 import { GOOGLE_CALLBACK_PATH } from "../route";
 
 type GoogleProfil = {
@@ -77,6 +79,7 @@ export async function GET(req: NextRequest) {
     const email = profil.email.toLowerCase();
 
     let user = await prisma.user.findUnique({ where: { googleId: profil.sub } });
+    let yeniKayit = false;
     if (!user) {
       // Ayni e-postayla sifreli bir hesap zaten varsa, mukerrer hesap
       // olusturmak yerine mevcut hesabi Google'a baglar.
@@ -95,8 +98,11 @@ export async function GET(req: NextRequest) {
               // Kosullari'nin gecerli oldugu acikca belirtilir - bu an
               // onay anidir.
               kvkkOnayTarihi: new Date(),
+              // Cerez yalnizca cerez onayi verildiyse yazilmistir (CerezOnayi).
+              kaynak: kaynakCerezCoz(req.cookies.get(KAYNAK_CEREZ)?.value) ?? Prisma.DbNull,
             },
           });
+      yeniKayit = !mevcut;
     }
 
     if (user.askiyaAlindi) return hataYonlendir("askida");
@@ -106,7 +112,8 @@ export async function GET(req: NextRequest) {
       res.cookies.delete("google_oauth_uygulama");
     } else {
       await createSession(user.id, user.tokenVersion);
-      res = NextResponse.redirect(`${SITE_URL}/profilim`);
+      // ?yeni=1: profil sayfasi kayit donusumunu olcer ve bolum secimini ister.
+      res = NextResponse.redirect(`${SITE_URL}/profilim${yeniKayit ? "?yeni=1" : ""}`);
     }
     res.cookies.delete("google_oauth_state");
     return res;

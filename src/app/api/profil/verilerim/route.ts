@@ -11,7 +11,7 @@ export async function GET() {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Giriş yapmalısınız." }, { status: 401 });
 
-  const [bolum, becayisTalepleri, gonderilenMesajlar, denemeler, bildirimler, oturumlar, fotograf] = await Promise.all([
+  const [bolum, becayisTalepleri, gonderilenMesajlar, denemeler, bildirimler, oturumlar, fotograf, beklemeListesi, destekMesajlari, smsGonderimleri, soruBildirimleri] = await Promise.all([
     user.departmentId ? prisma.department.findUnique({ where: { id: user.departmentId }, select: { name: true } }) : null,
     prisma.becayisTalep.findMany({ where: { userId: user.id }, omit: { userId: true } }),
     prisma.becayisMesaj.findMany({ where: { gonderenId: user.id }, select: { talepId: true, mesaj: true, createdAt: true } }),
@@ -31,6 +31,10 @@ export async function GET() {
     // Acik alan listesi: oturum tablosuna sonradan eklenen guvenlik alanlari (admin kod ozeti vb.) disari cikmasin.
     prisma.oturum.findMany({ where: { userId: user.id }, select: { id: true, cihaz: true, olusturma: true, sonGorulme: true, kapatildi: true } }),
     prisma.profilFotografi.findUnique({ where: { userId: user.id }, select: { guncellenme: true } }),
+    prisma.yukseltmeTalebi.findUnique({ where: { userId: user.id }, select: { plan: true, yillik: true, kaynak: true, olusturma: true, guncelleme: true } }),
+    prisma.destekMesaji.findMany({ where: { userId: user.id }, select: { konu: true, mesaj: true, yanit: true, createdAt: true, yanitlandi: true } }),
+    prisma.smsGonderim.findMany({ where: { userId: user.id }, select: { telefon: true, metin: true, tur: true, durum: true, olusturma: true } }),
+    prisma.soruHataBildirimi.findMany({ where: { userId: user.id }, select: { aciklama: true, createdAt: true } }),
   ]);
 
   const veri = {
@@ -55,6 +59,7 @@ export async function GET() {
       ticariIletiOnay: user.ticariIletiOnay,
       ticariIletiOnayTarihi: user.ticariIletiOnayTarihi,
       ticariIletiRetTarihi: user.ticariIletiRetTarihi,
+      kayitKaynagi: user.kaynak,
       kayitTarihi: user.createdAt,
       profilFotografiYuklenme: fotograf?.guncellenme ?? null,
     },
@@ -63,6 +68,10 @@ export async function GET() {
     kpssDenemeleri: denemeler,
     bildirimler,
     oturumlar,
+    beklemeListesi,
+    destekMesajlari,
+    smsGonderimleri,
+    soruHataBildirimleri: soruBildirimleri,
   };
 
   return new NextResponse(JSON.stringify(veri, null, 2), {

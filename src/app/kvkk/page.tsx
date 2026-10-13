@@ -5,122 +5,220 @@ import { ILETISIM_EPOSTA } from "@/lib/site";
 
 export const metadata = {
   title: "KVKK Aydınlatma Metni ve Gizlilik Politikası — Kamu Yolu",
+  description: "Kamu Yolu'nda hangi kişisel verilerin, hangi amaç ve hukuki sebeple işlendiği, kimlere aktarıldığı, ne kadar saklandığı ve KVKK kapsamındaki hakların.",
 };
+
+// Her satir: veri kategorisi -> amac -> hukuki sebep (KVKK m.5) -> saklama suresi. Metin koddaki
+// gercek davranisla birebir olmali; davranis degisirse burasi da guncellenir.
+const ISLEMELER: { veri: string; amac: string; sebep: string; sure: string }[] = [
+  {
+    veri: "Ad soyad, e-posta, şifre özeti (şifrenin kendisi saklanmaz), Google hesabıyla girişte Google hesap kimliği",
+    amac: "Üyelik oluşturma, giriş, hesap güvenliği ve hesapla ilgili bildirimler",
+    sebep: "Sözleşmenin kurulması ve ifası (m.5/2-c)",
+    sure: "Hesap açık kaldığı sürece; hesap silinince derhal",
+  },
+  {
+    veri: "Mezun olunan bölüm, öğrenim düzeyi, meslek/unvan, kurum türü, profil fotoğrafı (isteğe bağlı)",
+    amac: "Bölüme uygun ilanları eşleştirme, kişisel bildirimler, becayiş talepleri",
+    sebep: "Sözleşmenin ifası (m.5/2-c)",
+    sure: "Hesap açık kaldığı sürece",
+  },
+  {
+    veri: "Telefon numarası ve gönderilen SMS kayıtları (yalnızca SMS bildirimini açanlarda)",
+    amac: "Numara doğrulama ve açtığınız ilan / becayiş mesajı bildirimlerini SMS ile iletme",
+    sebep: "Sözleşmenin ifası (m.5/2-c)",
+    sure: "Hesap açık kaldığı sürece; numara değişince doğrulama sıfırlanır",
+  },
+  {
+    veri: "Becayiş talebi (meslek, mevcut il/ilçe, istenen iller, açıklama) ve becayiş mesajları",
+    amac: "Talebin yayımlanması, kullanıcılar arası site içi mesajlaşma",
+    sebep: "Sözleşmenin ifası (m.5/2-c)",
+    sure: "Talep yayında kaldığı / hesap açık kaldığı sürece. Gönderdiğiniz mesajlar, karşı tarafın yazışma geçmişi olduğu için hesabınız silinse de onun kutusunda \"Silinmiş kullanıcı\" adıyla kalır",
+  },
+  {
+    veri: "KPSS deneme cevapları, puan ve sonuçları; soru hata bildirimleri",
+    amac: "Deneme sınavı, ders karnesi ve gelişim takibi",
+    sebep: "Sözleşmenin ifası (m.5/2-c)",
+    sure: "Hesap açık kaldığı sürece",
+  },
+  {
+    veri: "Ücretli plan bekleme listesi (seçilen plan, dönem, talebin geldiği buton)",
+    amac: "Ödeme altyapısı açıldığında talep ettiğiniz plan için size haber verme, talebi ölçme",
+    sebep: "Sözleşmenin kurulmasından önce talebiniz üzerine yapılan işlem (m.5/2-c)",
+    sure: "Listeden çıkana, plan satın alınana ya da hesap silinene kadar",
+  },
+  {
+    veri: "Destek mesajları (ad, e-posta, konu, mesaj ve yanıtlar)",
+    amac: "Destek taleplerinizi yanıtlama",
+    sebep: "Sözleşmenin ifası (m.5/2-c) ve meşru menfaat (m.5/2-f)",
+    sure: "Yanıt geçmişi olarak saklanır; hesap silinince ad ve e-posta çıkarılır",
+  },
+  {
+    veri: "Oturum kayıtları (tarayıcı/cihaz türü, oturumun açılış ve son görülme zamanı)",
+    amac: "Hesap güvenliği, açık oturumları görüp kapatabilmeniz",
+    sebep: "Meşru menfaat (m.5/2-f)",
+    sure: "Oturum kapatılana veya süresi (30 gün) dolana kadar; IP adresi saklanmaz",
+  },
+  {
+    veri: "Kayıt kaynağı: siteye geldiğiniz reklam kampanyası bilgisi (utm parametreleri, tıklama kimliği), yönlendiren site ve giriş sayfası",
+    amac: "Reklam kampanyalarının etkisini ölçme",
+    sebep: "Meşru menfaat (m.5/2-f); tarayıcıda çerezle saklanması çerez onayınıza bağlıdır",
+    sure: "Hesap açık kaldığı sürece",
+  },
+  {
+    veri: "Bildirim ve ileti tercihleri, verdiğiniz/geri çektiğiniz onayların tarihleri",
+    amac: "Tercihlerinizi uygulama ve onay kaydını tutma",
+    sebep: "Hukuki yükümlülük (m.5/2-ç; 6563 sayılı Kanun) ve sözleşmenin ifası",
+    sure: "Hesap açık kaldığı sürece",
+  },
+  {
+    veri: "Reklam ve ziyaret ölçümü çerezleri (Google AdSense; varsa Google Analytics, Meta ve TikTok pikselleri)",
+    amac: "Ücretsiz özellikleri finanse eden reklamların gösterimi, ziyaret ve dönüşüm ölçümü",
+    sebep: "Açık rıza (m.5/1) — çerez bildirimindeki \"Kabul et\" ile",
+    sure: "Çerez Politikası'nda belirtilen sürelerce; onayınızı istediğiniz an geri alabilirsiniz",
+  },
+];
+
+const ALICILAR: { kim: string; ne: string; ulke: string }[] = [
+  { kim: "Vercel Inc.", ne: "Sitenin barındırılması ve çalıştırılması (sunucular Frankfurt'ta)", ulke: "ABD merkezli şirket" },
+  { kim: "Neon Inc.", ne: "Veritabanı (sunucular Frankfurt'ta)", ulke: "ABD merkezli şirket" },
+  { kim: "Resend Inc.", ne: "E-posta gönderimi (doğrulama kodu, şifre sıfırlama, bildirimler)", ulke: "ABD" },
+  { kim: "Google LLC", ne: "Google ile giriş, kurumsal e-posta, reklam (AdSense) ve — onay verirseniz — ziyaret ölçümü", ulke: "ABD" },
+  { kim: "Cloudflare Inc.", ne: "Robot doğrulaması (Turnstile) için tarayıcı ve IP bilgisi", ulke: "ABD" },
+  { kim: "Meta Platforms / TikTok", ne: "Yalnızca çerez onayı verirseniz ve ilgili piksel etkinse reklam ölçümü", ulke: "ABD / İrlanda" },
+  { kim: "SMS hizmet sağlayıcısı", ne: "SMS bildirimini açtıysanız telefon numaranız ve ileti metni (sağlayıcı bağlandığında)", ulke: "Türkiye" },
+];
 
 export default function KvkkPage() {
   return (
-    <div className="mx-auto max-w-2xl px-4 py-14 sm:px-6 sm:py-20">
-      <SayfaBasligi
-        kompakt
-        ikon={ShieldCheck}
-        baslik="KVKK Aydınlatma Metni ve Gizlilik Politikası"
-      />
+    <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6 sm:py-20">
+      <SayfaBasligi kompakt ikon={ShieldCheck} baslik="KVKK Aydınlatma Metni ve Gizlilik Politikası" />
 
-      <div className="prose prose-slate mt-6 max-w-none space-y-5 rounded-2xl border border-primary/10 bg-white p-6 shadow-sm sm:p-8 text-sm leading-relaxed text-slate-700">
+      <div className="prose prose-slate mt-6 max-w-none space-y-6 rounded-2xl border border-primary/10 bg-white p-6 text-sm leading-relaxed text-slate-700 shadow-sm sm:p-8">
         <section>
           <h2 className="font-sans text-base font-semibold text-primary">1. Veri Sorumlusu</h2>
           <p>
-            Kamu Yolu (&quot;Site&quot;), 6698 sayılı Kişisel Verilerin Korunması Kanunu
-            (&quot;KVKK&quot;) kapsamında, üyelik sırasında ve site kullanımı süresince elde
-            edilen kişisel verilerinizi işbu metinde açıklanan amaç ve kapsamda işler.
+            6698 sayılı Kişisel Verilerin Korunması Kanunu (&quot;KVKK&quot;) kapsamında veri sorumlusu, kamuyolu.com sitesini ve
+            Kamu Yolu mobil uygulamasını (&quot;Kamu Yolu&quot;) işleten gerçek kişi <strong>Emirhan Koç</strong>&apos;tur. İletişim:{" "}
+            <a href={`mailto:${ILETISIM_EPOSTA}`} className="text-primary underline">
+              {ILETISIM_EPOSTA}
+            </a>
+            .
+          </p>
+          <p>
+            Kişisel verileriniz; üye olurken ve siteyi kullanırken formlar, hesap ayarları ve mesajlaşma aracılığıyla sizden,
+            Google ile girişte Google&apos;dan (ad, e-posta, hesap kimliği) ve tarayıcınızdan (çerezler, oturum bilgisi) otomatik
+            yollarla toplanır.
           </p>
         </section>
 
         <section>
-          <h2 className="font-sans text-base font-semibold text-primary">2. İşlenen Kişisel Veriler</h2>
-          <ul className="list-disc pl-5">
-            <li>Kimlik ve iletişim bilgileri: ad soyad, e-posta, (varsa) telefon numarası</li>
-            <li>Mesleki bilgiler: meslek/unvan, çalışılan kurum türü, mezun olunan bölüm ve öğrenim düzeyi</li>
-            <li>Becayiş modülü kapsamında oluşturduğunuz talep içeriği ve gönderdiğiniz/aldığınız mesajlar</li>
-            <li>Bildirim tercihleriniz, gönderilen SMS kayıtları ve verdiğiniz/geri çektiğiniz onayların tarihleri</li>
-            <li>Şifreniz geri döndürülemeyecek şekilde (hash&apos;lenerek) saklanır; site yöneticileri dahil kimse şifrenizi görüntüleyemez</li>
-          </ul>
-        </section>
-
-        <section>
-          <h2 className="font-sans text-base font-semibold text-primary">3. İşleme Amaçları</h2>
-          <ul className="list-disc pl-5">
-            <li>Üyelik oluşturma, oturum açma ve hesabınızı güvenli şekilde yönetme</li>
-            <li>Becayiş taleplerinin yayınlanması ve kullanıcılar arası mesajlaşmanın sağlanması</li>
-            <li>Mezun olduğunuz bölüme/öğrenim düzeyinize uygun yeni ilan çıktığında size bildirim gönderme</li>
-            <li>
-              Ayarlardan açtıysanız, doğrulanmış telefon numaranıza ilan ve becayiş mesajı bildirimlerini SMS ile iletme
-              (abone olduğunuz hizmetin parçasıdır; dilediğiniz an kapatabilirsiniz)
-            </li>
-            <li>
-              Yalnızca ayrıca onay verdiyseniz, kampanya, indirim ve duyurularımızı SMS ve e-posta ile iletme (ticari
-              elektronik ileti)
-            </li>
-            <li>Sitenin hatalarını tespit etme, kötüye kullanımı önleme</li>
-          </ul>
-        </section>
-
-        <section>
-          <h2 className="font-sans text-base font-semibold text-primary">4. Verilerin Paylaşımı</h2>
+          <h2 className="font-sans text-base font-semibold text-primary">2. Hangi Verileri, Neden ve Ne Kadar Süre İşliyoruz?</h2>
+          <div className="not-prose space-y-3">
+            {ISLEMELER.map((i) => (
+              <div key={i.veri} className="rounded-xl border border-slate-200 p-3">
+                <p className="font-semibold text-slate-900">{i.veri}</p>
+                <dl className="mt-1.5 grid gap-1 text-xs sm:grid-cols-[7rem_1fr]">
+                  <dt className="font-semibold text-slate-500">Amaç</dt>
+                  <dd>{i.amac}</dd>
+                  <dt className="font-semibold text-slate-500">Hukuki sebep</dt>
+                  <dd>{i.sebep}</dd>
+                  <dt className="font-semibold text-slate-500">Saklama</dt>
+                  <dd>{i.sure}</dd>
+                </dl>
+              </div>
+            ))}
+          </div>
           <p>
-            Becayiş modülünde iletişim bilgileriniz (e-posta, telefon) diğer kullanıcılara
-            <strong> hiçbir zaman doğrudan gösterilmez</strong>; ilgilenen kullanıcılar size yalnızca
-            site içi mesaj kutusu üzerinden ulaşabilir. Kişisel verileriniz satılmaz; yasal zorunluluklar
-            dışında yalnızca hizmeti sunabilmek için gereken ölçüde şu hizmet sağlayıcılarla paylaşılır:
-            barındırma ve veritabanı (bulut sunucu sağlayıcısı), e-posta gönderim hizmeti (doğrulama kodları
-            ve bildirimler için e-posta adresiniz) ve SMS gönderim hizmeti (SMS bildirimleri için telefon
-            numaranız ve ileti metni). Bu sağlayıcıların bir kısmının sunucuları yurt dışında bulunabilir.
+            Özel nitelikli kişisel veri (sağlık, din, siyasi görüş vb.) istemiyoruz; becayiş açıklamalarına bu tür bilgiler
+            yazmamanızı rica ederiz. Hesabınızı silerseniz yukarıda aksi belirtilmeyen tüm verileriniz derhal silinir.
           </p>
         </section>
 
         <section>
-          <h2 className="font-sans text-base font-semibold text-primary">5. Ticari Elektronik İleti Onayı</h2>
+          <h2 className="font-sans text-base font-semibold text-primary">3. Kimlerle Paylaşıyoruz?</h2>
           <p>
-            Kampanya, indirim ve duyuru içerikli SMS ve e-postalar, 6563 sayılı Elektronik Ticaretin
-            Düzenlenmesi Hakkında Kanun uyarınca yalnızca önceden onay vermeniz halinde gönderilir. Onay
-            vermek zorunlu değildir ve üyeliği etkilemez. Onayınızı{" "}
+            Kişisel verileriniz satılmaz. Becayiş talebiniz herkese açık listelenir, ancak adınız kısaltılarak gösterilir (ör.
+            &quot;Ayşe K.&quot;) ve iletişim bilgileriniz (e-posta, telefon) diğer kullanıcılara hiçbir zaman gösterilmez. Verileriniz
+            yalnızca hizmeti sunabilmek için gereken ölçüde aşağıdaki hizmet sağlayıcılara ve kanunen yetkili kamu
+            kurumlarına (talep halinde) aktarılır:
+          </p>
+          <ul className="list-disc pl-5">
+            {ALICILAR.map((a) => (
+              <li key={a.kim}>
+                <strong>{a.kim}</strong> — {a.ne} ({a.ulke})
+              </li>
+            ))}
+          </ul>
+          <p>Bu sağlayıcıların bir kısmı yurt dışında yerleşik olduğundan, söz konusu paylaşım verilerin yurt dışına aktarılması niteliğindedir.</p>
+        </section>
+
+        <section>
+          <h2 className="font-sans text-base font-semibold text-primary">4. Ticari Elektronik İleti Onayı</h2>
+          <p>
+            Kampanya, indirim ve duyuru içerikli SMS ve e-postalar, 6563 sayılı Elektronik Ticaretin Düzenlenmesi Hakkında
+            Kanun uyarınca yalnızca önceden onay vermeniz halinde gönderilir. Onay vermek zorunlu değildir ve üyeliği
+            etkilemez. Onayınızı{" "}
             <Link href="/profilim/ayarlar/bildirimler" className="font-medium text-primary underline">
               Ayarlar &gt; Bildirimler
             </Link>{" "}
-            sayfasından istediğiniz an geri çekebilirsiniz. Hesap güvenliği (doğrulama kodu, şifre
-            sıfırlama) e-postaları ile kendi açtığınız ilan ve mesaj bildirimleri bu onaydan bağımsızdır.
+            sayfasından istediğiniz an geri çekebilirsiniz. Hesap güvenliği e-postaları, kendi açtığınız ilan ve mesaj
+            bildirimleri ve bekleme listesine katıldığınız plan için ödeme açıldı bildirimi bu onaydan bağımsızdır.
           </p>
         </section>
 
         <section>
-          <h2 className="font-sans text-base font-semibold text-primary">6. Haklarınız</h2>
+          <h2 className="font-sans text-base font-semibold text-primary">5. Haklarınız (KVKK m.11)</h2>
+          <p>Veri sorumlusuna başvurarak:</p>
+          <ul className="list-disc pl-5">
+            <li>kişisel verilerinizin işlenip işlenmediğini öğrenme, işlenmişse buna ilişkin bilgi talep etme,</li>
+            <li>işlenme amacını ve amacına uygun kullanılıp kullanılmadığını öğrenme,</li>
+            <li>yurt içinde veya yurt dışında aktarıldığı üçüncü kişileri bilme,</li>
+            <li>eksik veya yanlış işlenmişse düzeltilmesini isteme,</li>
+            <li>KVKK m.7&apos;deki şartlar çerçevesinde silinmesini veya yok edilmesini isteme,</li>
+            <li>düzeltme ve silme işlemlerinin, verilerin aktarıldığı üçüncü kişilere bildirilmesini isteme,</li>
+            <li>münhasıran otomatik sistemlerle analiz edilmesi sonucu aleyhinize bir sonuç çıkmasına itiraz etme,</li>
+            <li>kanuna aykırı işleme nedeniyle zarara uğramanız halinde zararın giderilmesini talep etme</li>
+          </ul>
           <p>
-            KVKK&apos;nın 11. maddesi uyarınca; verilerinizin işlenip işlenmediğini öğrenme, işlenmişse
-            buna ilişkin bilgi talep etme, işlenme amacını öğrenme, yurt içinde/dışında aktarıldığı
-            üçüncü kişileri bilme, eksik/yanlış işlenmişse düzeltilmesini isteme, silinmesini/yok
-            edilmesini talep etme haklarına sahipsiniz. Bu haklarınızı kullanmak için {ILETISIM_EPOSTA}{" "}
-            adresine e-posta gönderebilir ya da site üzerindeki iletişim imkanlarından bize ulaşabilirsiniz.
+            haklarına sahipsiniz. Taleplerinizi, sistemimizde kayıtlı e-posta adresinizden{" "}
+            <a href={`mailto:${ILETISIM_EPOSTA}`} className="text-primary underline">
+              {ILETISIM_EPOSTA}
+            </a>{" "}
+            adresine göndererek iletebilirsiniz. Başvurunuz en geç 30 gün içinde ücretsiz olarak sonuçlandırılır. Verilerinizin
+            bir kopyasını{" "}
+            <Link href="/profilim/ayarlar/gizlilik" className="text-primary underline">
+              Ayarlar &gt; Gizlilik ve KVKK
+            </Link>{" "}
+            sayfasından indirebilir, hesabınızı aynı sayfadan silebilirsiniz.
           </p>
         </section>
 
         <section>
-          <h2 className="font-sans text-base font-semibold text-primary">7. Veri Güvenliği</h2>
+          <h2 className="font-sans text-base font-semibold text-primary">6. Veri Güvenliği</h2>
           <p>
-            Kişisel verileriniz, yetkisiz erişime, kayba veya kötüye kullanıma karşı makul teknik
-            ve idari tedbirlerle korunur: şifreniz tersine çevrilemeyecek şekilde (hash&apos;lenerek)
-            saklanır, veritabanı bağlantıları şifrelenir (SSL/TLS) ve sadece işin gerektirdiği
-            kişilerin erişebileceği şekilde yetkilendirme uygulanır.
+            Şifreler tersine çevrilemeyecek şekilde (hash&apos;lenerek) saklanır; site yöneticileri dahil kimse şifrenizi
+            göremez. Tüm bağlantılar şifrelidir (TLS), yönetici paneline iki aşamalı doğrulamayla girilir ve verilere yalnızca
+            işin gerektirdiği ölçüde erişilir.
           </p>
         </section>
 
         <section>
-          <h2 className="font-sans text-base font-semibold text-primary">8. Çerezler</h2>
+          <h2 className="font-sans text-base font-semibold text-primary">7. Çerezler</h2>
           <p>
-            Sitenin çalışması için gerekli çerezler ve kullanım tercihleri hakkında ayrıntılı bilgiyi{" "}
+            Hangi çerezleri kullandığımız ve onay tercihinizi nasıl değiştirebileceğiniz{" "}
             <Link href="/cerez-politikasi" className="text-primary underline">
               Çerez Politikası
-            </Link>{" "}
-            sayfasında bulabilirsiniz. Sitenin genel kullanım kuralları ve sorumluluk sınırlamaları için{" "}
+            </Link>
+            &apos;nda yer alır. Sitenin kullanım kuralları için{" "}
             <Link href="/kullanim-kosullari" className="text-primary underline">
               Kullanım Koşulları
-            </Link>{" "}
-            sayfasına bakınız.
+            </Link>
+            &apos;na bakınız.
           </p>
         </section>
 
-        <p className="text-xs text-muted-foreground">
-          Son güncelleme: bu metin genel bilgilendirme amaçlıdır ve site geliştikçe güncellenebilir.
-        </p>
+        <p className="text-xs text-muted-foreground">Son güncelleme: 13 Ekim 2026.</p>
       </div>
     </div>
   );

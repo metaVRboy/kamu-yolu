@@ -20,6 +20,7 @@ export const UYE_FILTRELERI = [
   ["pro", "Aktif Pro"],
   ["proplus", "Aktif Pro+"],
   ["ucretsiz", "Ücretsiz"],
+  ["talep", "Bekleme listesi"],
   ["askida", "Askıda"],
   ["admin", "Adminler"],
 ] as const;
@@ -38,7 +39,9 @@ export function uyeKosulu(filtre: UyeFiltresi, q: string): Prisma.UserWhereInput
           ? { ...aktifProKosulu(), abonelikPlani: "PRO_PLUS" }
           : filtre === "ucretsiz"
             ? { NOT: aktifProKosulu() }
-            : filtre === "askida"
+            : filtre === "talep"
+              ? { yukseltmeTalebi: { isNot: null } }
+              : filtre === "askida"
               ? { askiyaAlindi: { not: null } }
               : filtre === "admin"
                 ? { isAdmin: true }

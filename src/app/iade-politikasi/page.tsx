@@ -1,6 +1,8 @@
 import { RotateCcw } from "lucide-react";
 import { SayfaBasligi } from "@/components/SayfaBasligi";
+import { notFound } from "next/navigation";
 import { ILETISIM_EPOSTA } from "@/lib/site";
+import { SATIS_ACIK } from "@/lib/planlar";
 export const metadata = {
   title: "İade Politikası — Kamu Yolu",
 };
@@ -14,6 +16,8 @@ function YerTutucu({ children }: { children: React.ReactNode }) {
 }
 
 export default function IadePolitikasiPage() {
+  // Satis yokken taslak sozlesme yayinda olmaz (satici/odeme kurulusu belli degil).
+  if (!SATIS_ACIK) notFound();
   return (
     <div className="mx-auto max-w-2xl px-4 py-14 sm:px-6 sm:py-20">
       <SayfaBasligi

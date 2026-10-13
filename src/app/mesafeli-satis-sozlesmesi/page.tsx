@@ -1,7 +1,8 @@
 import { FileSignature } from "lucide-react";
 import { SayfaBasligi } from "@/components/SayfaBasligi";
 import { getFiyatlar } from "@/lib/fiyatlar";
-import { tl } from "@/lib/planlar";
+import { notFound } from "next/navigation";
+import { SATIS_ACIK, tl } from "@/lib/planlar";
 import { ILETISIM_EPOSTA } from "@/lib/site";
 export const metadata = {
   title: "Mesafeli Satış Sözleşmesi — Kamu Yolu",
@@ -16,6 +17,8 @@ function YerTutucu({ children }: { children: React.ReactNode }) {
 }
 
 export default async function MesafeliSatisSozlesmesiPage() {
+  // Satis yokken taslak sozlesme yayinda olmaz (satici/odeme kurulusu belli degil).
+  if (!SATIS_ACIK) notFound();
   // Sozlesmede liste fiyati yazar (kampanya indirimi odeme adiminda ayrica gosterilir).
   const { tablo } = await getFiyatlar();
   return (

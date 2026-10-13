@@ -7,6 +7,9 @@ import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { MessageWidget } from "@/components/MessageWidget";
 
+// Kisiye ait talep: arama motorlarinda listelenmesin (ad kisaltilsa da meslek + il tanimlayici).
+export const metadata = { title: "Becayiş Talebi — Kamu Yolu", robots: { index: false } };
+
 export default async function BecayisDetayPage({
   params,
 }: {

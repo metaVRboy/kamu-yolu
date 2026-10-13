@@ -697,26 +697,20 @@ function GizlilikSekmesi({ v }: { v: AyarlarVeri }) {
 
   return (
     <>
-      <AyarKarti baslik="KVKK onayın">
+      <AyarKarti baslik="Kişisel verilerin">
         <T style={{ color: "#334155", lineHeight: 20 }}>
+          Kişisel verilerin{" "}
+          <T w="yariKalin" style={{ color: renk.birincil }} onPress={kvkk}>
+            KVKK Aydınlatma Metni
+          </T>{" "}
+          kapsamında işlenir.
           {v.kvkkOnayTarihi ? (
             <>
-              <T w="yariKalin" style={{ color: renk.birincil }} onPress={kvkk}>
-                KVKK Aydınlatma Metni ve Gizlilik Politikası
-              </T>
-              &apos;nı <T w="kalin">{v.kvkkOnayTarihi}</T> tarihinde onayladın.
+              {" "}Kullanım Koşulları&apos;nı <T w="kalin">{v.kvkkOnayTarihi}</T> tarihinde kabul ettin.
             </>
-          ) : (
-            <>
-              Hesabın onay tarihinin kaydedilmeye başlandığı tarihten önce açıldığı için onay tarihi kayıtlı değil. Metne{" "}
-              <T w="yariKalin" style={{ color: renk.birincil }} onPress={kvkk}>
-                buradan
-              </T>{" "}
-              ulaşabilirsin.
-            </>
-          )}
+          ) : null}
         </T>
-        <T style={{ fontSize: 13, color: renk.soluk, lineHeight: 19 }}>Onayını geri çekmek istersen aşağıdan hesabını silebilirsin; kişisel verilerinin işlenmesine son verilir.</T>
+        <T style={{ fontSize: 13, color: renk.soluk, lineHeight: 19 }}>Verilerinin bir kopyasını aşağıdan indirebilir, işlenmesine son verilmesini istersen hesabını silebilirsin.</T>
       </AyarKarti>
       <AyarKarti
         baslik="Verilerimi indir"

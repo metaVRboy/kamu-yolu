@@ -13,27 +13,22 @@ export default async function GizlilikAyarlariPage() {
 
   return (
     <AyarlarSayfasi userId={user.id}>
-      <AyarKarti baslik="KVKK onayın">
+      <AyarKarti baslik="Kişisel verilerin">
         <p className="text-sm text-slate-700">
-          {user.kvkkOnayTarihi ? (
+          Kişisel verilerin{" "}
+          <Link href="/kvkk" className="font-semibold text-primary hover:underline">
+            KVKK Aydınlatma Metni
+          </Link>{" "}
+          kapsamında işlenir.
+          {user.kvkkOnayTarihi && (
             <>
-              <Link href="/kvkk" className="font-semibold text-primary hover:underline">
-                KVKK Aydınlatma Metni ve Gizlilik Politikası
-              </Link>
-              &apos;nı <strong>{tarihMetni(user.kvkkOnayTarihi)}</strong> tarihinde onayladın.
-            </>
-          ) : (
-            <>
-              Hesabın onay tarihinin kaydedilmeye başlandığı tarihten önce açıldığı için onay tarihi kayıtlı değil. Metne{" "}
-              <Link href="/kvkk" className="font-semibold text-primary hover:underline">
-                buradan
-              </Link>{" "}
-              ulaşabilirsin.
+              {" "}
+              Kullanım Koşulları&apos;nı <strong>{tarihMetni(user.kvkkOnayTarihi)}</strong> tarihinde kabul ettin.
             </>
           )}
         </p>
         <p className="mt-2 text-sm text-muted-foreground">
-          Onayını geri çekmek istersen aşağıdan hesabını silebilirsin; kişisel verilerinin işlenmesine son verilir.
+          Verilerinin bir kopyasını aşağıdan indirebilir, işlenmesine son verilmesini istersen hesabını silebilirsin.
         </p>
       </AyarKarti>
 

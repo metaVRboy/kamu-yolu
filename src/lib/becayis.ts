@@ -27,8 +27,18 @@ export async function createTalep(
   });
 }
 
+/**
+ * Herkese acik becayis sayfalarinda ad kisaltilir ("Emirhan K."): ad + meslek + il bir kamu
+ * calisanini tanimlar ve sayfa arama motorlarinda acik (KVKK m.4 veri minimizasyonu).
+ */
+export const kisaAd = (adSoyad: string) => {
+  const [ad, ...digerleri] = adSoyad.trim().split(/\s+/);
+  const soyad = digerleri.at(-1);
+  return soyad ? `${ad} ${soyad.charAt(0).toLocaleUpperCase("tr-TR")}.` : ad;
+};
+
 export async function getAktifTalepler(filters?: { il?: string; meslek?: string }) {
-  return prisma.becayisTalep.findMany({
+  const talepler = await prisma.becayisTalep.findMany({
     where: {
       isActive: true,
       ...(filters?.il ? { mevcutIl: filters.il } : {}),
@@ -39,13 +49,15 @@ export async function getAktifTalepler(filters?: { il?: string; meslek?: string 
     // ponytail: ust sinir; ilan sayisi buna yaklasirsa sayfalama eklenir.
     take: 300,
   });
+  return talepler.map((t) => ({ ...t, user: { adSoyad: kisaAd(t.user.adSoyad) } }));
 }
 
 export async function getTalepDetay(id: string) {
-  return prisma.becayisTalep.findUnique({
+  const talep = await prisma.becayisTalep.findUnique({
     where: { id },
     include: { user: { select: { id: true, adSoyad: true } } },
   });
+  return talep && { ...talep, user: { ...talep.user, adSoyad: kisaAd(talep.user.adSoyad) } };
 }
 
 export async function getTaleplerim(userId: string) {

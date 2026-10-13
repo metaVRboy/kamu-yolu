@@ -11,6 +11,7 @@ export const metadata = { title: "Pro+ aboneleri — Admin" };
 
 const SAYFA_BOYU = 30;
 const TARIH = new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "short", year: "numeric", timeZone: "Europe/Istanbul" });
+const yediGunSonra = () => new Date(Date.now() + 7 * 86_400_000);
 
 /** Aktif Pro+ aboneleri: bitisi en yakin olan ustte (suresizler en sonda). */
 export default async function AdminProPlusPage({ searchParams }: { searchParams: Promise<{ q?: string; sayfa?: string }> }) {
@@ -19,7 +20,7 @@ export default async function AdminProPlusPage({ searchParams }: { searchParams:
   const q = p.q?.trim() ?? "";
   const sayfa = Math.max(1, Number(p.sayfa) || 1);
   const where = uyeKosulu("proplus", q);
-  const yediGun = new Date(Date.now() + 7 * 86_400_000);
+  const yediGun = yediGunSonra();
 
   const [toplam, yakindaBitecek, suresiz, uyeler] = await Promise.all([
     prisma.user.count({ where }),

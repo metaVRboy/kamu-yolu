@@ -5,13 +5,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { BellRing, Check, CheckCircle2, Crown, Flame, Loader2, Minus, ShieldCheck, Sparkles, X } from "lucide-react";
 import { useAuthModal } from "@/components/AuthModal";
+import { toast } from "@/components/ui/toast";
+import { olay } from "@/lib/olcum";
 import {
   KAYNAK_METNI,
   KARSILASTIRMA,
   PLAN_ADI,
+  SATIS_ACIK,
   kalanSureMetni,
   tl,
-  yillikBedavaAy,
   yillikTasarruf,
   type FiyatTablosu,
   type KampanyaOzeti,
@@ -52,6 +54,38 @@ export function YukseltButonu({
 }
 
 const EK = { PRO: "'ya", PRO_PLUS: "'ya" } as const; // "Pro'ya", "Pro+'ya"
+
+type Talep = { plan: UcretliPlan; yillik: boolean; kaynak: YukseltmeKaynagi };
+
+async function talepGonder(t: Talep) {
+  const res = await fetch("/api/yukseltme-talebi", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(t) });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error ?? "Kaydedilemedi.");
+  olay("lead", { plan: t.plan });
+}
+
+// Misafir "Pro'ya gec" deyip kayda gidince secimi kaybolmasin: sekme oturumunda tutulur,
+// giris/kayit bitince BekleyenTalepGonder listeye yazar. Kullanicinin istedigi islemi
+// tamamlamak icin oldugundan zorunlu depolama sayilir.
+const BEKLEYEN_TALEP = "kyBekleyenTalep";
+function bekleyenTalepKaydet(t: Talep) {
+  try {
+    sessionStorage.setItem(BEKLEYEN_TALEP, JSON.stringify(t));
+  } catch {}
+}
+
+/** Giris yapmis kullanicida (layout) bir kez calisir: misafirken secilen plani bekleme listesine yazar. */
+export function BekleyenTalepGonder() {
+  useEffect(() => {
+    let t: Talep | null = null;
+    try {
+      t = JSON.parse(sessionStorage.getItem(BEKLEYEN_TALEP) ?? "null");
+      sessionStorage.removeItem(BEKLEYEN_TALEP);
+    } catch {}
+    if (t) talepGonder(t).then(() => toast.success(`${PLAN_ADI[t.plan]} bekleme listesine eklendin.`, "Ödeme açıldığında sana e-posta ile haber vereceğiz."), () => {});
+  }, []);
+  return null;
+}
 
 // Secili plana gore sol panel ve buton renkleri.
 const TEMA: Record<UcretliPlan, { zemin: string; buton: string; halka: string; metin: string; acik: string }> = {
@@ -135,18 +169,20 @@ function Pencere({ baslangicPlani, kaynak, kapat }: { baslangicPlani?: UcretliPl
     setDurum("gonderiliyor");
     setHata(null);
     try {
-      const res = await fetch("/api/yukseltme-talebi", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: secilen, yillik, kaynak }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Kaydedilemedi.");
+      await talepGonder({ plan: secilen, yillik, kaynak });
       setDurum("tamam");
     } catch (e) {
       setHata(e instanceof Error ? e.message : "Bir hata oluştu.");
       setDurum("bos");
     }
+  }
+
+  async function listedenCik() {
+    setDurum("gonderiliyor");
+    const res = await fetch("/api/yukseltme-talebi", { method: "DELETE" }).catch(() => null);
+    if (res?.ok) setOzet((o) => o && { ...o, talep: null });
+    else setHata("Listeden çıkarılamadı, tekrar dene.");
+    setDurum("bos");
   }
 
   return (
@@ -211,14 +247,17 @@ function Pencere({ baslangicPlani, kaynak, kapat }: { baslangicPlani?: UcretliPl
               )}
             </div>
 
-            <ul className="mt-6 hidden space-y-2 text-sm text-white/90 md:block">
-              {["İstediğin an iptal et", "İptal edersen dönem sonuna kadar kullanmaya devam edersin", "Kart bilgilerin bizde saklanmaz"].map((g) => (
-                <li key={g} className="flex items-start gap-2">
-                  <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />
-                  {g}
-                </li>
-              ))}
-            </ul>
+            {/* Odeme sistemi yokken bu vaatler verilmez. */}
+            {SATIS_ACIK && (
+              <ul className="mt-6 hidden space-y-2 text-sm text-white/90 md:block">
+                {["İstediğin an iptal et", "İptal edersen dönem sonuna kadar kullanmaya devam edersin", "Kart bilgilerin bizde saklanmaz"].map((g) => (
+                  <li key={g} className="flex items-start gap-2">
+                    <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />
+                    {g}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
 
@@ -229,10 +268,10 @@ function Pencere({ baslangicPlani, kaynak, kapat }: { baslangicPlani?: UcretliPl
               <span className={cn("flex h-16 w-16 items-center justify-center rounded-full", tema.acik)}>
                 <CheckCircle2 className={cn("h-9 w-9", tema.metin)} />
               </span>
-              <p className="mt-4 font-sans text-xl font-bold text-slate-900">Harika, yerin ayrıldı!</p>
+              <p className="mt-4 font-sans text-xl font-bold text-slate-900">Listeye eklendin!</p>
               <p className="mt-2 max-w-sm text-sm text-slate-600">
-                Ödeme altyapımız açıldığında <strong>{PLAN_ADI[secilen]} · {yillik ? "yıllık" : "aylık"}</strong> için ilk sana e-posta
-                göndereceğiz.
+                Ödeme altyapımız açıldığında <strong>{PLAN_ADI[secilen]} · {yillik ? "yıllık" : "aylık"}</strong> için sana e-posta ile
+                haber vereceğiz. İstediğin zaman bu pencereden listeden çıkabilirsin.
               </p>
               <button type="button" onClick={kapat} className="mt-6 rounded-full bg-slate-900 px-6 py-2.5 text-sm font-semibold text-white hover:bg-slate-800">
                 Tamam
@@ -251,7 +290,7 @@ function Pencere({ baslangicPlani, kaynak, kapat }: { baslangicPlani?: UcretliPl
               )}
               <p className="flex items-center gap-2 rounded-2xl bg-amber-50 px-3.5 py-2.5 text-xs font-medium text-amber-800">
                 <Sparkles className="h-4 w-4 shrink-0" />
-                Ödeme altyapımız çok yakında açılıyor. Şimdi yerini ayır, açıldığında ilk sen haberdar ol.
+                Ödeme altyapımız çok yakında açılıyor. Listeye katıl, açıldığında ilk sen haberdar ol.
               </p>
 
               {/* Aylik / Yillik */}
@@ -265,9 +304,10 @@ function Pencere({ baslangicPlani, kaynak, kapat }: { baslangicPlani?: UcretliPl
                       className={cn("relative rounded-full px-5 py-1.5 transition-all", yillik === y ? "bg-white text-slate-900 shadow" : "text-slate-500")}
                     >
                       {y ? "Yıllık" : "Aylık"}
-                      {y && ozet && yillikBedavaAy(ozet.fiyat.tablo) > 0 && (
+                      {/* "X ay bedava" degil: hicbir sey ucretsiz verilmiyor, yalnizca yillik daha ucuz. */}
+                      {y && ozet && yillikTasarruf(ozet.fiyat.tablo[secilen]) > 0 && (
                         <span className="absolute -top-2.5 -right-3 rounded-full bg-emerald-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
-                          {yillikBedavaAy(ozet.fiyat.tablo)} ay bedava
+                          %{yillikTasarruf(ozet.fiyat.tablo[secilen])} tasarruf
                         </span>
                       )}
                     </button>
@@ -330,7 +370,7 @@ function Pencere({ baslangicPlani, kaynak, kapat }: { baslangicPlani?: UcretliPl
                   return p === "PRO_PLUS" ? (
                     <div key={p} className="relative rounded-[1.25rem] bg-gradient-to-r from-violet-500 via-fuchsia-500 to-amber-400 p-[2px] animate-cerceve-akis">
                       <span className="absolute -top-2.5 left-1/2 z-10 -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 px-2.5 py-0.5 text-[10px] font-bold whitespace-nowrap text-white shadow">
-                        En çok değer
+                        En kapsamlı
                       </span>
                       {kart}
                     </div>
@@ -396,6 +436,8 @@ function Pencere({ baslangicPlani, kaynak, kapat }: { baslangicPlani?: UcretliPl
                   <button
                     type="button"
                     onClick={() => {
+                      // Misafirin secimi kayit/giristen sonra otomatik listeye yazilir (BekleyenTalepGonder).
+                      bekleyenTalepKaydet({ plan: secilen, yillik, kaynak });
                       kapat();
                       authAc("kayit");
                     }}
@@ -404,10 +446,15 @@ function Pencere({ baslangicPlani, kaynak, kapat }: { baslangicPlani?: UcretliPl
                     Önce ücretsiz hesabını oluştur
                   </button>
                 ) : zatenListede ? (
-                  <p className={cn("flex items-center justify-center gap-2 rounded-2xl px-5 py-3.5 text-sm font-semibold", tema.acik, tema.metin)}>
-                    <CheckCircle2 className="h-5 w-5" />
-                    Bu seçim için zaten listedesin; ödeme açılınca haber vereceğiz.
-                  </p>
+                  <div className={cn("rounded-2xl px-5 py-3.5 text-center text-sm font-semibold", tema.acik, tema.metin)}>
+                    <p className="flex items-center justify-center gap-2">
+                      <CheckCircle2 className="h-5 w-5" />
+                      Bu seçim için zaten listedesin; ödeme açılınca haber vereceğiz.
+                    </p>
+                    <button type="button" onClick={listedenCik} disabled={durum === "gonderiliyor"} className="mt-1.5 text-xs font-medium text-slate-500 underline hover:text-slate-800">
+                      Listeden çık
+                    </button>
+                  </div>
                 ) : (
                   <button
                     type="button"
@@ -428,15 +475,22 @@ function Pencere({ baslangicPlani, kaynak, kapat }: { baslangicPlani?: UcretliPl
                   Şimdi değil
                 </button>
                 <p className="mt-2 text-center text-[11px] text-muted-foreground">
-                  Ödeme açıldığında{" "}
-                  <Link href="/on-bilgilendirme-formu" onClick={kapat} className="underline">
-                    Ön Bilgilendirme Formu
-                  </Link>{" "}
-                  ve{" "}
-                  <Link href="/mesafeli-satis-sozlesmesi" onClick={kapat} className="underline">
-                    Mesafeli Satış Sözleşmesi
-                  </Link>{" "}
-                  onayın ayrıca alınır. Fiyatlar KDV dahildir.
+                  {SATIS_ACIK ? (
+                    <>
+                      Ödemeden önce{" "}
+                      <Link href="/on-bilgilendirme-formu" onClick={kapat} className="underline">
+                        Ön Bilgilendirme Formu
+                      </Link>{" "}
+                      ve{" "}
+                      <Link href="/mesafeli-satis-sozlesmesi" onClick={kapat} className="underline">
+                        Mesafeli Satış Sözleşmesi
+                      </Link>{" "}
+                      onayın alınır. Fiyatlar KDV dahildir.
+                    </>
+                  ) : (
+                    // Henuz satis yok: buton bir satin alma degil, yalnizca haber verme talebi.
+                    "Şu an ödeme alınmıyor. \"Açılınca haber ver\" ile yalnızca ödeme açıldığında bu plan için sana e-posta göndermemizi istemiş olursun."
+                  )}
                 </p>
               </div>
             </>

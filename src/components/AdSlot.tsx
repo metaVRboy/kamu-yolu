@@ -6,7 +6,8 @@ const ADSENSE_CLIENT_ID = "ca-pub-2932226916873749";
 
 declare global {
   interface Window {
-    adsbygoogle?: unknown[];
+    // pauseAdRequests: cerez onayi gelene kadar 1 (layout + CerezOnayi).
+    adsbygoogle?: unknown[] & { pauseAdRequests?: number };
   }
 }
 

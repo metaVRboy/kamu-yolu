@@ -8,7 +8,7 @@ import { getLastSuccessfulScrapeAt } from "@/lib/matching";
 import { cn } from "@/lib/utils";
 import { getCurrentUser } from "@/lib/auth";
 import { profilFotografiUrl } from "@/lib/profil";
-import { SITE_URL } from "@/lib/site";
+import { ILETISIM_EPOSTA, SITE_URL } from "@/lib/site";
 import { SiteMenu } from "@/components/SiteMenu";
 import { HeaderNav } from "@/components/HeaderNav";
 import { AdSlot } from "@/components/AdSlot";
@@ -16,10 +16,10 @@ import { NotificationBell } from "@/components/NotificationBell";
 import { ProfileMenu } from "@/components/ProfileMenu";
 import { PageTransition } from "@/components/PageTransition";
 import { Toaster } from "@/components/ui/toast";
-import { CerezBildirimi } from "@/components/CerezBildirimi";
-import { ReklamEngelleyiciKontrol } from "@/components/ReklamEngelleyiciKontrol";
+import { CerezOnayi } from "@/components/CerezOnayi";
 import { YukseltmeTanitimi } from "@/components/YukseltmeTanitimi";
-import { YukseltmeProvider } from "@/components/YukseltmePenceresi";
+import { BekleyenTalepGonder, YukseltmeProvider } from "@/components/YukseltmePenceresi";
+import { SATIS_ACIK } from "@/lib/planlar";
 import { SayfaYuklemeCizgisi } from "@/components/SayfaYuklemeCizgisi";
 import { AuthModalProvider } from "@/components/AuthModal";
 import { HeaderAuthButton } from "@/components/HeaderAuthButton";
@@ -39,11 +39,11 @@ export const revalidate = 300;
 
 // Mobil tarayicilarda (ozellikle iOS Safari) initial-scale belirtilmezse
 // sayfa gecisleri arasinda yakinlastirma orani tutarsizlasip elemanlar
-// oldugundan buyuk/kucuk gorunebiliyor - sabit bir olcek zorunlu kilinir.
+// oldugundan buyuk/kucuk gorunebiliyor - baslangic olcegi sabitlenir.
+// maximumScale verilmez: parmakla yakinlastirmayi kapatmak erisilebilirlik ihlali.
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
 };
 
 export const metadata: Metadata = {
@@ -76,11 +76,16 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             istedigi kod olarak tanimayabiliyor. Bu yuzden burada bilerek
             duz/native bir <script> etiketi kullaniliyor (next/script degil). */}
         {!reklamsiz && (
-          <script
-            async
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`}
-            crossOrigin="anonymous"
-          />
+          <>
+            {/* Cerez onayi gelene kadar reklam istegi yapilmaz (Google'in ozel onay yontemi);
+                "Kabul et" ile CerezOnayi pauseAdRequests=0 yapar. */}
+            <script dangerouslySetInnerHTML={{ __html: "(window.adsbygoogle=window.adsbygoogle||[]).pauseAdRequests=1;" }} />
+            <script
+              async
+              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`}
+              crossOrigin="anonymous"
+            />
+          </>
         )}
         {ayar.seritMetni && <DuyuruSeridi metin={ayar.seritMetni} link={ayar.seritLink} tur={ayar.seritTur} />}
         {ayar.bakimModu && user?.isAdmin && (
@@ -208,9 +213,14 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                 <li><Link href="/kvkk" className="transition-colors hover:text-white">KVKK &amp; Gizlilik</Link></li>
                 <li><Link href="/kullanim-kosullari" className="transition-colors hover:text-white">Kullanım Koşulları</Link></li>
                 <li><Link href="/cerez-politikasi" className="transition-colors hover:text-white">Çerez Politikası</Link></li>
-                <li><Link href="/iade-politikasi" className="transition-colors hover:text-white">İade Politikası</Link></li>
-                <li><Link href="/mesafeli-satis-sozlesmesi" className="transition-colors hover:text-white">Mesafeli Satış Sözleşmesi</Link></li>
-                <li><Link href="/on-bilgilendirme-formu" className="transition-colors hover:text-white">Ön Bilgilendirme Formu</Link></li>
+                {/* Satis sozlesmeleri odeme acilinca yayina girer (SATIS_ACIK). */}
+                {SATIS_ACIK && (
+                  <>
+                    <li><Link href="/iade-politikasi" className="transition-colors hover:text-white">İade Politikası</Link></li>
+                    <li><Link href="/mesafeli-satis-sozlesmesi" className="transition-colors hover:text-white">Mesafeli Satış Sözleşmesi</Link></li>
+                    <li><Link href="/on-bilgilendirme-formu" className="transition-colors hover:text-white">Ön Bilgilendirme Formu</Link></li>
+                  </>
+                )}
               </ul>
             </div>
 
@@ -229,9 +239,20 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           </div>
 
           <div className="relative mx-auto mt-10 max-w-[1600px] border-t border-white/10 px-6 pt-6 text-xs text-slate-500 sm:px-10">
-            <p>
+            <p className="text-slate-400">
+              Kamu Yolu bağımsız bir platformdur; hiçbir kamu kurumu, ÖSYM veya Kariyer Kapısı ile bağlantılı değildir.
+              Başvurular yalnızca ilgili kurumun resmi kanallarından yapılır.
+            </p>
+            <p className="mt-1">
               Veriler otomatik ve periyodik olarak güncellenir. İlan
               detayları için lütfen kaynak kurumun ilan sayfasını esas alın.
+            </p>
+            {/* Kunye (5651 s. Kanun m.3, KVKK veri sorumlusu): sirket kurulana kadar gercek kisi. */}
+            <p className="mt-1">
+              Site sahibi ve veri sorumlusu: Emirhan Koç · İletişim:{" "}
+              <a href={`mailto:${ILETISIM_EPOSTA}`} className="underline hover:text-white">
+                {ILETISIM_EPOSTA}
+              </a>
             </p>
             <p className="mt-1">
               {lastScrapeAt
@@ -241,8 +262,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           </div>
         </footer>
         <Toaster />
-        <CerezBildirimi />
-        {!reklamsiz && <ReklamEngelleyiciKontrol />}
+        <CerezOnayi reklamsiz={reklamsiz} />
+        {user && <BekleyenTalepGonder />}
         {/* Periyodik Pro/Pro+ tanitimi: Pro+ uyeye ve bakim ekranina hic konmaz. */}
         {!bakimda && user?.abonelikPlani !== "PRO_PLUS" && <YukseltmeTanitimi />}
        </YukseltmeProvider>

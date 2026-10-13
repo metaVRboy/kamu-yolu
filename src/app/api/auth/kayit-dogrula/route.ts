@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { createSession } from "@/lib/auth";
+import { Prisma } from "@/generated/prisma/client";
 import { clearFailures, getLockoutState, lockoutMessage, recordFailure } from "@/lib/authAbuse";
 
 const bodySchema = z.object({
@@ -53,6 +54,7 @@ export async function POST(req: NextRequest) {
           passwordHash: pending.passwordHash,
           kvkkOnayTarihi: pending.kvkkOnayTarihi,
           ...(pending.ticariIletiOnay ? { ticariIletiOnay: true, ticariIletiOnayTarihi: pending.kvkkOnayTarihi } : {}),
+          kaynak: pending.kaynak ?? Prisma.DbNull,
         },
       });
       await tx.emailVerificationCode.delete({ where: { email } });

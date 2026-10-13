@@ -74,7 +74,8 @@ export default async function KpssDenemesiHubPage() {
         {user?.abonelikPlani !== "PRO_PLUS" && (
           <YukseltButonu
             plan={user?.abonelikPlani === "PRO" ? "PRO_PLUS" : undefined}
-            kaynak="deneme-hakki"
+            // "Hakkin doldu" basligi yalniz hakki gercekten bitene; misafire/hakki olana genel baslik.
+            kaynak={hak?.doldu ? "deneme-hakki" : "genel"}
             className="shrink-0 text-sm font-semibold text-primary hover:underline"
           >
             Planları gör →

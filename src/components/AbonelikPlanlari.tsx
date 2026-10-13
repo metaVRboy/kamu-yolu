@@ -102,7 +102,7 @@ export function AbonelikPlanlari({ mevcutPlan, fiyat }: { mevcutPlan: PlanKey; f
             <div key={plan.key} className="relative">
               {plan.populer && (
                 <Badge className="absolute -top-3 left-1/2 z-10 -translate-x-1/2 border-transparent bg-primary text-primary-foreground">
-                  En Popüler
+                  Önerilen
                 </Badge>
               )}
               <Card
@@ -174,7 +174,7 @@ export function AbonelikPlanlari({ mevcutPlan, fiyat }: { mevcutPlan: PlanKey; f
       </div>
 
       <p className="mt-6 text-center text-xs text-muted-foreground">
-        Ödeme altyapısı çok yakında açılıyor; şimdi yerini ayırırsan açıldığında ilk sen haberdar olursun.
+        Ödeme altyapısı çok yakında açılıyor; şimdi listeye katılırsan açıldığında ilk sen haberdar olursun.
       </p>
     </div>
   );

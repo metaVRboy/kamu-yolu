@@ -192,7 +192,7 @@ export default function Abonelik() {
             {p.populer && (
               <View style={s.populer}>
                 <T w="yariKalin" style={{ fontSize: 12, color: "#fff" }}>
-                  En Popüler
+                  Önerilen
                 </T>
               </View>
             )}
@@ -200,7 +200,7 @@ export default function Abonelik() {
         );
       })}
 
-      <T style={{ textAlign: "center", fontSize: 12, color: renk.soluk, lineHeight: 17 }}>Ödeme altyapısı çok yakında açılıyor; şimdi yerini ayırırsan açıldığında ilk sen haberdar olursun.</T>
+      <T style={{ textAlign: "center", fontSize: 12, color: renk.soluk, lineHeight: 17 }}>Ödeme altyapısı çok yakında açılıyor; şimdi listeye katılırsan açıldığında ilk sen haberdar olursun.</T>
     </ScrollView>
   );
 }

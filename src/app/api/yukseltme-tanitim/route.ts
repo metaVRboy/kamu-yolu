@@ -6,6 +6,18 @@ import { getFiyatlar } from "@/lib/fiyatlar";
 import { getPostingsForDepartment } from "@/lib/matching";
 
 const GUN_MS = 86_400_000;
+const ISTANBUL_GUNU = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Istanbul" }); // YYYY-MM-DD
+
+/** Pencere gosterildi: gunluk sayac (kisisel veri yok). "Haber ver" talebi / gosterim = donusum orani. */
+export async function POST() {
+  const gun = new Date(ISTANBUL_GUNU.format(new Date()));
+  await prisma.gunlukSayac.upsert({
+    where: { anahtar_gun: { anahtar: "tanitim-gosterim", gun } },
+    create: { anahtar: "tanitim-gosterim", gun, adet: 1 },
+    update: { adet: { increment: 1 } },
+  });
+  return NextResponse.json({ ok: true });
+}
 
 /**
  * Periyodik tanitim penceresinin verisi. Tum sayilar gercek: kullanicinin bolumune uygun aktif

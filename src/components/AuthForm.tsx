@@ -12,6 +12,7 @@ import { toast } from "@/components/ui/toast";
 import { passwordRequirementIssues } from "@/lib/authValidation";
 import { PasswordRequirementsHint } from "@/components/SifreSifirlaForm";
 import { TurnstileWidget } from "@/components/TurnstileWidget";
+import { kaynakBilgisi } from "@/lib/olcum";
 
 // Sunucudaki KOD_GECERLILIK_DAKIKA ile ayni. Mobilde mail uygulamasina gidip donmek 2 dk'ya sigmiyordu.
 const KOD_GECERLILIK_SANIYE = 600;
@@ -131,7 +132,7 @@ export function AuthForm({
       const res = await fetch("/api/auth/kayit-kod-gonder", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ adSoyad, email, password, kvkkOnay, ticariIletiOnay, turnstileToken }),
+        body: JSON.stringify({ adSoyad, email, password, kvkkOnay, ticariIletiOnay, kaynak: kaynakBilgisi(), turnstileToken }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -163,7 +164,7 @@ export function AuthForm({
       return;
     }
     if (!kvkkOnay) {
-      setError("Devam etmek için KVKK Aydınlatma Metni ve Kullanım Koşulları'nı onaylamalısın.");
+      setError("Devam etmek için Kullanım Koşulları'nı kabul etmeli ve 18 yaşından büyük olmalısın.");
       return;
     }
 
@@ -188,7 +189,8 @@ export function AuthForm({
       toast.success("Hesabın oluşturuldu.");
       onBasarili?.();
       sayfaYuklemesiniBaslat("/profilim");
-      router.push("/profilim");
+      // ?yeni=1: profil sayfasi bolum secimini ister.
+      router.push("/profilim?yeni=1");
       router.refresh();
     } catch {
       setError("Bağlantı hatası, tekrar deneyin.");
@@ -278,15 +280,15 @@ export function AuthForm({
         </a>
       )}
       <p className="-mt-2 text-center text-xs text-muted-foreground">
-        Sosyal hesapla devam ederken{" "}
+        Google ile devam ederek{" "}
         <Link href="/kullanim-kosullari" target="_blank" className="font-medium text-primary underline">
           Kullanım Koşulları
-        </Link>{" "}
-        ve{" "}
+        </Link>
+        &apos;nı kabul etmiş ve 18 yaşından büyük olduğunu beyan etmiş olursun. Kişisel verilerin{" "}
         <Link href="/kvkk" target="_blank" className="font-medium text-primary underline">
-          Gizlilik Politikası
+          KVKK Aydınlatma Metni
         </Link>{" "}
-        hükümleri geçerlidir.
+        kapsamında işlenir.
       </p>
 
       <div className="flex items-center gap-3">
@@ -370,17 +372,23 @@ export function AuthForm({
               onChange={(e) => setKvkkOnay(e.target.checked)}
               className="mt-0.5 h-3.5 w-3.5 accent-primary"
             />
+            {/* Aydinlatma "kabul edilen" bir sey degil (Aydinlatma Teblig m.5): kutu yalniz Kosullar + yas icin. */}
             <span>
-              <Link href="/kvkk" target="_blank" className="font-medium text-primary hover:underline">
-                KVKK Aydınlatma Metni
-              </Link>
-              {" "}ve{" "}
               <Link href="/kullanim-kosullari" target="_blank" className="font-medium text-primary hover:underline">
                 Kullanım Koşulları
               </Link>
-              &apos;nı okudum, kabul ediyorum.
+              &apos;nı okudum, kabul ediyorum; 18 yaşından büyüğüm.
             </span>
           </label>
+        )}
+        {mode === "kayit" && (
+          <p className="-mt-2 pl-5.5 text-xs text-muted-foreground">
+            Kişisel verilerin{" "}
+            <Link href="/kvkk" target="_blank" className="font-medium text-primary hover:underline">
+              KVKK Aydınlatma Metni
+            </Link>{" "}
+            kapsamında işlenir.
+          </p>
         )}
         {mode === "kayit" && (
           <label className="flex items-start gap-2 text-xs text-slate-600">

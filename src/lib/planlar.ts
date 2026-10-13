@@ -6,6 +6,13 @@ export type Plan = "UCRETSIZ" | UcretliPlan;
 export const PLAN_ADI: Record<Plan, string> = { UCRETSIZ: "Standart", PRO: "Pro", PRO_PLUS: "Pro+" };
 
 export const UCRETLI_PLANLAR: UcretliPlan[] = ["PRO", "PRO_PLUS"];
+
+/**
+ * Sirket kurulup odeme altyapisi baglanana kadar false. Kapaliyken: kampanya/indirim ve ustu cizili
+ * fiyat gosterilmez (hic satis yokken "eski fiyat" iddiasi yanilticidir), satis sozlesmesi sayfalari
+ * yayinda olmaz, odeme vaatleri ("iptal et", "KDV dahil") gizlenir. Bkz. denetim 2026-10-13.
+ */
+export const SATIS_ACIK = false;
 export type Donem = "aylik" | "yillik";
 
 /** Bir plan+donem fiyati (TL, KDV dahil): liste fiyati, kampanyali odenecek tutar ve kampanya etiketi. */

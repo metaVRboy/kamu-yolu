@@ -28,7 +28,7 @@ export default async function BecayisTalepOlusturPage() {
         kompakt
         ikon={FilePlus2}
         baslik="Becayiş Talebi Oluştur"
-        aciklama="Talebin herkese açık olarak listelenir; iletişim bilgilerin gizli kalır, ilgilenenler sana site üzerinden mesaj gönderir."
+        aciklama="Talebin herkese açık listelenir (adın kısaltılarak, ör. &quot;Ayşe K.&quot;); iletişim bilgilerin gizli kalır, ilgilenenler sana site üzerinden mesaj gönderir. Açıklamaya sağlık, din, aile durumu gibi özel bilgiler yazma."
       />
       <div className="mt-6">
         {proAktifMi(user) ? (

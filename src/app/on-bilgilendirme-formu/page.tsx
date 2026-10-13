@@ -1,7 +1,8 @@
 import { FileText } from "lucide-react";
 import { SayfaBasligi } from "@/components/SayfaBasligi";
 import { getFiyatlar } from "@/lib/fiyatlar";
-import { tl } from "@/lib/planlar";
+import { notFound } from "next/navigation";
+import { SATIS_ACIK, tl } from "@/lib/planlar";
 import { ILETISIM_EPOSTA } from "@/lib/site";
 export const metadata = {
   title: "Ön Bilgilendirme Formu — Kamu Yolu",
@@ -16,6 +17,8 @@ function YerTutucu({ children }: { children: React.ReactNode }) {
 }
 
 export default async function OnBilgilendirmeFormuPage() {
+  // Satis yokken taslak sozlesme yayinda olmaz (satici/odeme kurulusu belli degil).
+  if (!SATIS_ACIK) notFound();
   const { tablo } = await getFiyatlar();
   return (
     <div className="mx-auto max-w-2xl px-4 py-14 sm:px-6 sm:py-20">

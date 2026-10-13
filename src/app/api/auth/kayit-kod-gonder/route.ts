@@ -6,14 +6,19 @@ import { hashPassword, isSessionConfigured } from "@/lib/auth";
 import { kacis, sendEmail } from "@/lib/email";
 import { passwordSchema } from "@/lib/authValidation";
 import { verifyTurnstileToken } from "@/lib/turnstile";
+import { kaynakTemizle } from "@/lib/kaynak";
+import { Prisma } from "@/generated/prisma/client";
 
 const bodySchema = z.object({
   adSoyad: z.string().trim().min(2).max(100),
   email: z.string().trim().toLowerCase().email(),
   password: passwordSchema,
-  kvkkOnay: z.literal(true, { message: "KVKK aydınlatma metnini onaylamalısınız." }),
+  // Alan adi geriye uyumluluk icin kvkkOnay; anlami: Kullanim Kosullari kabulu + 18 yas beyani.
+  kvkkOnay: z.literal(true, { message: "Kullanım Koşulları'nı kabul etmeli ve 18 yaşından büyük olmalısın." }),
   // Istege bagli; isaretlenmezse kampanya/duyuru iletisi gonderilmez.
   ticariIletiOnay: z.boolean().optional().default(false),
+  // Kampanya kaynagi (utm vb.): izinli anahtarlarla kaynakTemizle suzer.
+  kaynak: z.unknown().optional(),
   turnstileToken: z.string().nullable().optional(),
 });
 
@@ -37,6 +42,7 @@ export async function POST(req: NextRequest) {
     );
   }
   const { adSoyad, email, password, ticariIletiOnay, turnstileToken } = parsed.data;
+  const kaynak = kaynakTemizle(parsed.data.kaynak) ?? Prisma.DbNull;
 
   if (!(await verifyTurnstileToken(turnstileToken))) {
     return NextResponse.json({ error: "İnsan doğrulaması başarısız. Lütfen tekrar deneyin." }, { status: 400 });
@@ -66,8 +72,8 @@ export async function POST(req: NextRequest) {
     await prisma.emailVerificationCode.upsert({
       where: { email },
       // createdAt yenilenir: tekrar gonderim beklemesi (yukarida) son gonderime gore olculur.
-      update: { code, adSoyad, passwordHash, kvkkOnayTarihi: new Date(), ticariIletiOnay, expiresAt, usedAt: null, createdAt: new Date() },
-      create: { email, code, adSoyad, passwordHash, kvkkOnayTarihi: new Date(), ticariIletiOnay, expiresAt },
+      update: { code, adSoyad, passwordHash, kvkkOnayTarihi: new Date(), ticariIletiOnay, kaynak, expiresAt, usedAt: null, createdAt: new Date() },
+      create: { email, code, adSoyad, passwordHash, kvkkOnayTarihi: new Date(), ticariIletiOnay, kaynak, expiresAt },
     });
 
     await sendEmail({

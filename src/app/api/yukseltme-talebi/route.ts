@@ -44,3 +44,11 @@ export async function POST(req: NextRequest) {
   });
   return NextResponse.json({ ok: true });
 }
+
+/** Bekleme listesinden cikma: kullanici artik haber almak istemiyor. */
+export async function DELETE() {
+  const user = await getCurrentUser();
+  if (!user) return NextResponse.json({ error: "Giriş yapmalısınız." }, { status: 401 });
+  await prisma.yukseltmeTalebi.deleteMany({ where: { userId: user.id } });
+  return NextResponse.json({ ok: true });
+}

@@ -1,42 +1,25 @@
 import { ScrollText } from "lucide-react";
 import { SayfaBasligi } from "@/components/SayfaBasligi";
-import Link from "next/link";
+import { ILETISIM_EPOSTA } from "@/lib/site";
 
 export const metadata = {
   title: "Kullanım Koşulları — Kamu Yolu",
+  description: "kamuyolu.com ve Kamu Yolu mobil uygulamasının kullanım kuralları, sorumluluk sınırları ve üyelik koşulları.",
 };
-
-function YerTutucu({ children }: { children: React.ReactNode }) {
-  return (
-    <mark className="rounded bg-amber-100 px-1.5 py-0.5 font-medium text-amber-800">
-      {children}
-    </mark>
-  );
-}
 
 export default function KullanimKosullariPage() {
   return (
     <div className="mx-auto max-w-2xl px-4 py-14 sm:px-6 sm:py-20">
-      <SayfaBasligi
-        kompakt
-        ikon={ScrollText}
-        baslik="Kullanım Koşulları"
-        aciklama={
-          <>
-            Bu sayfa taslak niteliğindedir; <YerTutucu>sarı vurgulu</YerTutucu> alanlar şirket kuruluşu ve fiyatlandırma netleştikçe doldurulmalıdır.
-          </>
-        }
-      />
+      <SayfaBasligi kompakt ikon={ScrollText} baslik="Kullanım Koşulları" />
 
       <div className="prose prose-slate mt-6 max-w-none space-y-5 rounded-2xl border border-primary/10 bg-white p-6 shadow-sm sm:p-8 text-sm leading-relaxed text-slate-700">
         <section>
           <h2 className="font-sans text-base font-semibold text-primary">1. Taraflar ve Kapsam</h2>
           <p>
-            Bu Kullanım Koşulları (&quot;Koşullar&quot;), <YerTutucu>[ŞİRKET UNVANI]</YerTutucu>{" "}
-            (&quot;Kamu Yolu&quot; veya &quot;Site&quot;) tarafından işletilen
-            kamuyolu.com internet sitesinin kullanımına ilişkin kuralları düzenler. Siteyi
-            ziyaret eden, üye olan veya ücretli bir plana abone olan herkes
-            (&quot;Kullanıcı&quot;) bu Koşulları kabul etmiş sayılır.
+            Bu Kullanım Koşulları (&quot;Koşullar&quot;), Emirhan Koç (&quot;Kamu Yolu&quot;) tarafından işletilen
+            kamuyolu.com internet sitesinin ve Kamu Yolu mobil uygulamasının (&quot;Site&quot;) kullanımına ilişkin
+            kuralları düzenler. Siteye üye olan herkes (&quot;Kullanıcı&quot;) bu Koşulları kabul etmiş olur. İletişim:{" "}
+            {ILETISIM_EPOSTA}.
           </p>
         </section>
 
@@ -53,20 +36,21 @@ export default function KullanimKosullariPage() {
               becayiş ilanlarını görüntüleme hizmeti sunar.
             </li>
             <li>
-              <strong>Pro ve Pro+</strong> gibi ücretli planlarla; SMS ile anlık ilan bildirimi,
-              bölüme özel öncelikli bildirim, becayiş modülünde site içi mesajlaşma ve reklamsız
-              kullanım gibi ek özellikler sunabilir. Ücretli planların kapsamı ve fiyatları{" "}
-              <Link href="/profilim/abonelik" className="text-primary underline">
-                Aboneliğim
-              </Link>{" "}
-              sayfasında güncel olarak yayınlanır.
+              <strong>Pro ve Pro+</strong> ücretli planlarıyla SMS ile ilan bildirimi, bölüme özel ilan
+              listesi, becayiş talebi ve mesajlaşma, sınırsız deneme ve reklamsız kullanım gibi ek
+              özellikler sunması planlanmaktadır. <strong>Ücretli planlar henüz satışta değildir</strong>;
+              &quot;Açılınca haber ver&quot; seçeneği bir satın alma veya ön sipariş değil, yalnızca bilgilendirme
+              talebidir. Satış başladığında ödeme, cayma ve iade koşulları ayrıca mesafeli satış
+              sözleşmesiyle düzenlenecektir.
             </li>
           </ul>
           <p>
-            Kamu Yolu, ilan verilerini kamuya açık resmi kaynaklardan (kurum/bakanlık siteleri,
-            Resmî Gazete, Kariyer Kapısı vb.) otomatik olarak derler; ilanların doğruluğu,
-            güncelliği veya başvuru sonuçlarından kaynak kurum sorumludur. Kullanıcılar başvuru
-            öncesinde ilgili kurumun resmî ilan sayfasını kontrol etmekle yükümlüdür.
+            Kamu Yolu bağımsız bir platformdur; hiçbir kamu kurumu, ÖSYM veya Kariyer Kapısı ile
+            bağlantılı değildir. İlan verilerini kamu kurumlarının yayımladığı duyurulardan ve bu
+            duyuruları yayımlayan sitelerden (ör. Kariyer Kapısı, Memurlar.net) otomatik olarak derler
+            ve her ilanda kaynağını gösterir. Haber özetleri yapay zekâ desteğiyle hazırlanır.
+            İlanların doğruluğu, güncelliği ve başvuru sonuçlarından ilgili kurum sorumludur;
+            Kullanıcılar başvuru öncesinde kurumun resmî ilan metnini kontrol etmekle yükümlüdür.
           </p>
         </section>
 
@@ -149,16 +133,13 @@ export default function KullanimKosullariPage() {
         <section>
           <h2 className="font-sans text-base font-semibold text-primary">10. Uyuşmazlıkların Çözümü</h2>
           <p>
-            Bu Koşullardan doğabilecek uyuşmazlıklarda <YerTutucu>[ŞİRKET ADRESİNİN BULUNDUĞU İL]</YerTutucu>{" "}
-            Mahkemeleri ve İcra Daireleri ile tüketici işlemleri bakımından ilgili Tüketici
-            Hakem Heyetleri/Tüketici Mahkemeleri yetkilidir.
+            Bu Koşullara Türkiye Cumhuriyeti hukuku uygulanır. Tüketici işlemlerinden doğan
+            uyuşmazlıklarda, parasal sınırlar dahilinde Kullanıcının yerleşim yerindeki Tüketici
+            Hakem Heyetleri ve Tüketici Mahkemeleri yetkilidir.
           </p>
         </section>
 
-        <p className="text-xs text-muted-foreground">
-          Son güncelleme: bu metin genel bilgilendirme amaçlıdır; ücretli abonelik satışı
-          başlamadan önce bir hukuk danışmanı tarafından gözden geçirilmesi önerilir.
-        </p>
+        <p className="text-xs text-muted-foreground">Son güncelleme: 13 Ekim 2026.</p>
       </div>
     </div>
   );

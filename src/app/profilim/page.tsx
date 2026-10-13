@@ -1,5 +1,8 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
+import { YeniKayitOlayi } from "@/components/YeniKayitOlayi";
 import { Briefcase, Inbox, MessageCircle, Repeat, UserRound } from "lucide-react";
 import { KilitliOzellik } from "@/components/KilitliOzellik";
 import { SayfaBasligi } from "@/components/SayfaBasligi";
@@ -49,7 +52,10 @@ export default async function ProfilimPage() {
       ? await getPostingsForLevel(user.educationLevel)
       : [];
   const gosterilenIlanlar = kisiselIlanlar.slice(0, 4);
-  const logolar = await kurumLogolari(gosterilenIlanlar);
+  const [logolar, bolum] = await Promise.all([
+    kurumLogolari(gosterilenIlanlar),
+    user.departmentId ? prisma.department.findUnique({ where: { id: user.departmentId }, select: { slug: true, name: true } }) : null,
+  ]);
 
   return (
     <ProfilLayout
@@ -63,6 +69,22 @@ export default async function ProfilimPage() {
         aciklama={`${user.adSoyad} — ${user.email}`}
         aksiyonlar={<LogoutButton />}
       />
+      <Suspense fallback={null}>
+        <YeniKayitOlayi />
+      </Suspense>
+
+      {/* Bolumu olmayan uye sitenin ana degerini goremez: ilk is bolum secimi. */}
+      {!user.departmentId && (
+        <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-primary/30 bg-primary/5 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-sans font-semibold text-slate-900">Mezun olduğun bölümü seç</p>
+            <p className="mt-0.5 text-sm text-slate-600">Bölümüne uygun kamu ilanlarını ve yeni ilan bildirimlerini buna göre hazırlıyoruz.</p>
+          </div>
+          <Link href="/profilim/ayarlar" className={cn(buttonVariants(), "shrink-0")}>
+            Bölümümü seç
+          </Link>
+        </div>
+      )}
 
       <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
         <Card className="gap-3 border-primary/20 bg-white p-5 shadow-sm">
@@ -192,6 +214,16 @@ export default async function ProfilimPage() {
                 </KilitliOzellik>
               );
             })()}
+            {/* Kayit "bolumune uygun ilanlari takip et" vaat ediyor: bolum sayfasi herkese ucretsiz. */}
+            {!isPremium && bolum && (
+              <p className="mt-3 text-sm text-slate-600">
+                {bolum.name} için tüm ilanları{" "}
+                <Link href={`/bolum/${bolum.slug}`} className="font-medium text-primary hover:underline">
+                  bölüm sayfasında ücretsiz görebilirsin
+                </Link>
+                ; Pro ile bölümüne ve öğrenim düzeyine göre süzülmüş listeyi ve yeni ilan bildirimlerini alırsın.
+              </p>
+            )}
           </div>
         )}
       </div>

@@ -9,6 +9,34 @@ import { cn } from "@/lib/utils";
 export const metadata = { title: "Üyeler — Admin" };
 
 const SAYFA_BOYU = 30;
+const OLCUM_GUN = 14;
+
+/**
+ * Reklam kampanyasi olcumu: gun gun yeni uye, tanitim penceresi gosterimi ve yeni bekleme listesi
+ * talebi (Istanbul gunu); kayit kaynagina (utm_source, yoksa dis referrer) gore uye ve talep sayisi.
+ */
+async function kampanyaOlcumu() {
+  const baslangic = new Date(Date.now() - OLCUM_GUN * 86_400_000);
+  const [gunluk, gosterimler, kaynaklar] = await Promise.all([
+    prisma.$queryRaw<{ gun: string; uye: bigint; talep: bigint }[]>`
+      select to_char(g.gun, 'YYYY-MM-DD') as gun,
+        (select count(*) from "User" u where (u."createdAt" at time zone 'UTC' at time zone 'Europe/Istanbul')::date = g.gun) as uye,
+        (select count(*) from "YukseltmeTalebi" t where (t.olusturma at time zone 'UTC' at time zone 'Europe/Istanbul')::date = g.gun) as talep
+      from generate_series((now() at time zone 'Europe/Istanbul')::date - ${OLCUM_GUN - 1}::int, (now() at time zone 'Europe/Istanbul')::date, interval '1 day') as g(gun)
+      order by g.gun desc`,
+    prisma.gunlukSayac.findMany({ where: { anahtar: "tanitim-gosterim", gun: { gte: baslangic } }, select: { gun: true, adet: true } }),
+    prisma.$queryRaw<{ kaynak: string; uye: bigint; talep: bigint }[]>`
+      select coalesce(u.kaynak->>'utm_source', u.kaynak->>'ref') as kaynak, count(*) as uye, count(t.id) as talep
+      from "User" u left join "YukseltmeTalebi" t on t."userId" = u.id
+      where u.kaynak is not null and u."createdAt" >= ${baslangic}
+      group by 1 order by 2 desc limit 15`,
+  ]);
+  const gosterim = new Map(gosterimler.map((g) => [g.gun.toISOString().slice(0, 10), g.adet]));
+  return {
+    gunler: gunluk.map((g) => ({ gun: g.gun, uye: Number(g.uye), talep: Number(g.talep), gosterim: gosterim.get(g.gun) ?? 0 })),
+    kaynaklar: kaynaklar.map((k) => ({ kaynak: k.kaynak ?? "(bilinmiyor)", uye: Number(k.uye), talep: Number(k.talep) })),
+  };
+}
 const TARIH = new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "short", year: "numeric", timeZone: "Europe/Istanbul" });
 
 export default async function AdminUyelerPage({ searchParams }: { searchParams: Promise<{ q?: string; filtre?: string; sayfa?: string }> }) {
@@ -33,6 +61,7 @@ export default async function AdminUyelerPage({ searchParams }: { searchParams: 
     prisma.yukseltmeTalebi.groupBy({ by: ["kaynak"], _count: { _all: true }, orderBy: { _count: { kaynak: "desc" } } }),
   ]);
   const toplamTalep = talepDagilimi.reduce((t, d) => t + d._count._all, 0);
+  const olcum = await kampanyaOlcumu();
   const sayfaSayisi = Math.max(1, Math.ceil(toplam / SAYFA_BOYU));
   const url = (ek: Record<string, string | number>) => {
     const s = new URLSearchParams({ ...(q && { q }), filtre, sayfa: "1", ...Object.fromEntries(Object.entries(ek).map(([k, v]) => [k, String(v)])) });
@@ -55,6 +84,44 @@ export default async function AdminUyelerPage({ searchParams }: { searchParams: 
         {kaynakDagilimi.length > 0 && (
           <p className="mt-2 text-xs text-muted-foreground">Geldiği yer: {kaynakDagilimi.map((k) => `${k.kaynak} (${k._count._all})`).join(", ")}</p>
         )}
+        <div className="mt-3 flex flex-wrap gap-3 text-xs font-semibold">
+          <Link href={url({ filtre: "talep" })} className="text-primary hover:underline">
+            Listedekileri gör
+          </Link>
+          {/* Duz <a>: dosya indirme (Link istemci gezinmesi yapmasin). */}
+          <a href="/api/admin/bekleme-listesi" className="text-primary hover:underline">
+            CSV indir
+          </a>
+        </div>
+      </AdminKart>
+
+      <AdminKart baslik="Kampanya ölçümü · son 14 gün">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs tabular-nums">
+            <thead className="text-muted-foreground">
+              <tr>
+                <th className="py-1 pr-3 font-semibold">Gün</th>
+                <th className="py-1 pr-3 font-semibold">Yeni üye</th>
+                <th className="py-1 pr-3 font-semibold">Tanıtım gösterimi</th>
+                <th className="py-1 pr-3 font-semibold">Yeni talep</th>
+              </tr>
+            </thead>
+            <tbody>
+              {olcum.gunler.map((g) => (
+                <tr key={g.gun} className="border-t border-slate-100">
+                  <td className="py-1 pr-3">{g.gun}</td>
+                  <td className="py-1 pr-3">{g.uye}</td>
+                  <td className="py-1 pr-3">{g.gosterim}</td>
+                  <td className="py-1 pr-3">{g.talep}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="mt-3 text-xs text-muted-foreground">
+          Üyelerin kaynağı (utm_source / dış site, son 14 gün):{" "}
+          {olcum.kaynaklar.length ? olcum.kaynaklar.map((k) => `${k.kaynak} (${k.uye} üye, ${k.talep} talep)`).join(", ") : "henüz kaynaklı kayıt yok"}
+        </p>
       </AdminKart>
 
       <AdminKart>

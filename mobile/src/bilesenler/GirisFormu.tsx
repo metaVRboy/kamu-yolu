@@ -102,7 +102,7 @@ export function GirisFormu({ mod }: { mod: "giris" | "kayit" }) {
     setHata(null);
     if (SIFRE_KURALLARI.some((k) => !k.test(sifre))) return setHata("Şifre gereksinimleri karşılanmıyor.");
     if (sifre !== sifreTekrar) return setHata("Şifreler eşleşmiyor.");
-    if (!kvkk) return setHata("Devam etmek için KVKK Aydınlatma Metni ve Kullanım Koşulları'nı onaylamalısın.");
+    if (!kvkk) return setHata("Devam etmek için Kullanım Koşulları'nı kabul etmeli ve 18 yaşından büyük olmalısın.");
     kodGonder();
   }
 
@@ -167,15 +167,15 @@ export function GirisFormu({ mod }: { mod: "giris" | "kayit" }) {
               </View>
               <GoogleButonu basarili={tamam} />
               <T style={{ marginTop: -8, textAlign: "center", fontSize: 12, color: renk.soluk, lineHeight: 18 }}>
-                Sosyal hesapla devam ederken{" "}
+                Google ile devam ederek{" "}
                 <T w="orta" style={{ fontSize: 12, color: renk.birincil, textDecorationLine: "underline" }} onPress={() => sayfaAc("/kullanim-kosullari")}>
                   Kullanım Koşulları
-                </T>{" "}
-                ve{" "}
+                </T>
+                &apos;nı kabul etmiş ve 18 yaşından büyük olduğunu beyan etmiş olursun. Kişisel verilerin{" "}
                 <T w="orta" style={{ fontSize: 12, color: renk.birincil, textDecorationLine: "underline" }} onPress={() => sayfaAc("/kvkk")}>
-                  Gizlilik Politikası
+                  KVKK Aydınlatma Metni
                 </T>{" "}
-                hükümleri geçerlidir.
+                kapsamında işlenir.
               </T>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
                 <View style={{ flex: 1, height: 1, backgroundColor: renk.kenar }} />
@@ -216,17 +216,21 @@ export function GirisFormu({ mod }: { mod: "giris" | "kayit" }) {
                     {sifreTekrar.length > 0 && sifreTekrar !== sifre && <T style={{ marginTop: 4, fontSize: 12, color: renk.hata }}>Şifreler eşleşmiyor.</T>}
                   </View>
                   <Onay secili={kvkk} degistir={setKvkk}>
+                    {/* Aydinlatma "kabul edilen" bir sey degil: kutu yalniz Kosullar + yas icin (sitedeki AuthForm ile ayni). */}
                     <T style={{ fontSize: 12, color: renk.yaziIkincil, lineHeight: 18 }}>
-                      <T w="orta" style={{ fontSize: 12, color: renk.birincil }} onPress={() => sayfaAc("/kvkk")}>
-                        KVKK Aydınlatma Metni
-                      </T>{" "}
-                      ve{" "}
                       <T w="orta" style={{ fontSize: 12, color: renk.birincil }} onPress={() => sayfaAc("/kullanim-kosullari")}>
                         Kullanım Koşulları
                       </T>
-                      &apos;nı okudum, kabul ediyorum.
+                      &apos;nı okudum, kabul ediyorum; 18 yaşından büyüğüm.
                     </T>
                   </Onay>
+                  <T style={{ marginTop: -8, fontSize: 12, color: renk.soluk, lineHeight: 18 }}>
+                    Kişisel verilerin{" "}
+                    <T w="orta" style={{ fontSize: 12, color: renk.birincil }} onPress={() => sayfaAc("/kvkk")}>
+                      KVKK Aydınlatma Metni
+                    </T>{" "}
+                    kapsamında işlenir.
+                  </T>
                   <Onay secili={ticariIleti} degistir={setTicariIleti}>
                     <T style={{ fontSize: 12, color: renk.yaziIkincil, lineHeight: 18 }}>
                       Kampanya, indirim ve duyurulardan SMS ve e-posta ile haberdar olmak için ticari elektronik ileti almayı kabul ediyorum.{" "}

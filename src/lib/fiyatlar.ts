@@ -1,6 +1,7 @@
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import {
+  SATIS_ACIK,
   UCRETLI_PLANLAR,
   VARSAYILAN_FIYAT,
   indirimEtiketi,
@@ -35,8 +36,8 @@ const hamVeri = unstable_cache(
 export async function getFiyatlar(): Promise<{ tablo: FiyatTablosu; kampanya: KampanyaOzeti }> {
   const { fiyatlar, kampanyalar } = await hamVeri();
   const simdi = Date.now();
-  // unstable_cache JSON'a cevirir: tarihler metin olarak gelir.
-  const aktifler = kampanyalar.filter((k) => new Date(k.baslangic).getTime() <= simdi && new Date(k.bitis).getTime() > simdi);
+  // unstable_cache JSON'a cevirir: tarihler metin olarak gelir. Satis yokken kampanya uygulanmaz (SATIS_ACIK).
+  const aktifler = SATIS_ACIK ? kampanyalar.filter((k) => new Date(k.baslangic).getTime() <= simdi && new Date(k.bitis).getTime() > simdi) : [];
 
   const tablo = {} as FiyatTablosu;
   let enIyi: { ad: string; bitis: number } | null = null;
