@@ -12,6 +12,8 @@ const bodySchema = z.object({
   email: z.string().trim().toLowerCase().email(),
   password: passwordSchema,
   kvkkOnay: z.literal(true, { message: "KVKK aydınlatma metnini onaylamalısınız." }),
+  // Istege bagli; isaretlenmezse kampanya/duyuru iletisi gonderilmez.
+  ticariIletiOnay: z.boolean().optional().default(false),
   turnstileToken: z.string().nullable().optional(),
 });
 
@@ -34,7 +36,7 @@ export async function POST(req: NextRequest) {
       { status: 400 },
     );
   }
-  const { adSoyad, email, password, turnstileToken } = parsed.data;
+  const { adSoyad, email, password, ticariIletiOnay, turnstileToken } = parsed.data;
 
   if (!(await verifyTurnstileToken(turnstileToken))) {
     return NextResponse.json({ error: "İnsan doğrulaması başarısız. Lütfen tekrar deneyin." }, { status: 400 });
@@ -63,8 +65,8 @@ export async function POST(req: NextRequest) {
 
     await prisma.emailVerificationCode.upsert({
       where: { email },
-      update: { code, adSoyad, passwordHash, kvkkOnayTarihi: new Date(), expiresAt, usedAt: null },
-      create: { email, code, adSoyad, passwordHash, kvkkOnayTarihi: new Date(), expiresAt },
+      update: { code, adSoyad, passwordHash, kvkkOnayTarihi: new Date(), ticariIletiOnay, expiresAt, usedAt: null },
+      create: { email, code, adSoyad, passwordHash, kvkkOnayTarihi: new Date(), ticariIletiOnay, expiresAt },
     });
 
     await sendEmail({

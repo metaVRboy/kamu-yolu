@@ -538,6 +538,49 @@ export function TelefonDogrulama({ dogrulanmisTelefon }: { dogrulanmisTelefon: s
   );
 }
 
+/** Her plan: kampanya/duyuru SMS ve e-postasi (ticari elektronik ileti) onayi. */
+export function TicariIletiTercihi({ ilk }: { ilk: boolean }) {
+  const [onay, setOnay] = useState(ilk);
+  const [kaydediliyor, setKaydediliyor] = useState(false);
+
+  async function degistir(deger: boolean) {
+    setOnay(deger);
+    setKaydediliyor(true);
+    try {
+      const res = await fetch("/api/profil/ticari-ileti", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ onay: deger }),
+      });
+      if (!res.ok) {
+        setOnay(!deger);
+        toast.error("Tercih kaydedilemedi.", await hataMetni(res));
+      }
+    } finally {
+      setKaydediliyor(false);
+    }
+  }
+
+  return (
+    <label className="flex items-start gap-3 rounded-xl border border-primary/15 p-4">
+      <input
+        type="checkbox"
+        checked={onay}
+        disabled={kaydediliyor}
+        onChange={(e) => degistir(e.target.checked)}
+        className="mt-0.5 h-4 w-4 rounded border-primary/30 accent-primary"
+      />
+      <span>
+        <span className="block text-sm font-semibold text-slate-800">SMS ve e-posta ile haberdar et</span>
+        <span className="block text-xs text-muted-foreground">
+          İndirim, kampanya ve yeni özelliklerden SMS ve e-posta ile haberdar olmak istiyorum. Onayını istediğin an buradan geri
+          çekebilirsin. Hesap ve güvenlik e-postaları ile açtığın ilan bildirimleri bundan etkilenmez.
+        </span>
+      </span>
+    </label>
+  );
+}
+
 const SMS_SECENEKLERI = [
   { alan: "smsIlanBildirimi", baslik: "Bölümüne uygun yeni ilanlar", aciklama: "Taramalardan sonra yeni ilanlar tek SMS'te toplanır; günde en fazla 3 SMS." },
   { alan: "smsBecayisBildirimi", baslik: "Becayiş mesajları", aciklama: "Becayiş ilanlarında sana yeni bir mesaj geldiğinde (30 dakikada en fazla 1 SMS)." },

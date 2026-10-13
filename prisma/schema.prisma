@@ -189,6 +189,11 @@ model User {
   smsBecayisBildirimi  Boolean               @default(false)
   // Ilk kez SMS iznini verdigi an (onay kaydi).
   smsIzinTarihi        DateTime?
+  // Ticari elektronik ileti (kampanya/duyuru SMS + e-posta) onayi - 6563 s. Kanun. Varsayilan yok;
+  // tarihler onay kaydi olarak geri cekilse de saklanir.
+  ticariIletiOnay       Boolean              @default(false)
+  ticariIletiOnayTarihi DateTime?
+  ticariIletiRetTarihi  DateTime?
   telefonDogrulama     TelefonDogrulamaKodu?
   smsGonderimleri      SmsGonderim[]
   yukseltmeTalebi      YukseltmeTalebi?
@@ -308,6 +313,7 @@ model EmailVerificationCode {
   adSoyad        String
   passwordHash   String
   kvkkOnayTarihi DateTime
+  ticariIletiOnay Boolean  @default(false)
   expiresAt      DateTime
   usedAt         DateTime?
   createdAt      DateTime  @default(now())

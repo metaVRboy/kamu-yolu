@@ -55,6 +55,7 @@ export function AuthForm({
   const [password, setPassword] = useState("");
   const [passwordTekrar, setPasswordTekrar] = useState("");
   const [kvkkOnay, setKvkkOnay] = useState(false);
+  const [ticariIletiOnay, setTicariIletiOnay] = useState(false);
   const [beniHatirla, setBeniHatirla] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -111,7 +112,7 @@ export function AuthForm({
       const res = await fetch("/api/auth/kayit-kod-gonder", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ adSoyad, email, password, kvkkOnay, turnstileToken }),
+        body: JSON.stringify({ adSoyad, email, password, kvkkOnay, ticariIletiOnay, turnstileToken }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -349,6 +350,20 @@ export function AuthForm({
                 Kullanım Koşulları
               </Link>
               &apos;nı okudum, kabul ediyorum.
+            </span>
+          </label>
+        )}
+        {mode === "kayit" && (
+          <label className="flex items-start gap-2 text-xs text-slate-600">
+            <input
+              type="checkbox"
+              checked={ticariIletiOnay}
+              onChange={(e) => setTicariIletiOnay(e.target.checked)}
+              className="mt-0.5 h-3.5 w-3.5 accent-primary"
+            />
+            <span>
+              Kampanya, indirim ve duyurulardan SMS ve e-posta ile haberdar olmak için ticari elektronik ileti almayı kabul
+              ediyorum. <span className="text-muted-foreground">(İsteğe bağlı)</span>
             </span>
           </label>
         )}

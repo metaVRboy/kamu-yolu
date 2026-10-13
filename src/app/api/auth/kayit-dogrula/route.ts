@@ -52,6 +52,7 @@ export async function POST(req: NextRequest) {
           email: pending.email,
           passwordHash: pending.passwordHash,
           kvkkOnayTarihi: pending.kvkkOnayTarihi,
+          ...(pending.ticariIletiOnay ? { ticariIletiOnay: true, ticariIletiOnayTarihi: pending.kvkkOnayTarihi } : {}),
         },
       });
       await tx.emailVerificationCode.delete({ where: { email } });
