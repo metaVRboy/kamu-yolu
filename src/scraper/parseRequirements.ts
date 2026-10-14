@@ -45,6 +45,9 @@ export function detectEducationLevels(rawText: string): EducationLevel[] {
   if (/ilk[öo]ğretim|ilkokul|ortaokul/.test(text)) {
     levels.push(EducationLevel.ILKOGRETIM);
   }
+  // Duzey yazilmamis ama KPSS puan turu var: P93 onlisans, P94 ortaogretim KPSS'sidir.
+  if (!levels.length && /\bp\s?93\b/.test(text)) levels.push(EducationLevel.ONLISANS);
+  if (!levels.length && /\bp\s?94\b/.test(text)) levels.push(EducationLevel.LISE);
 
   return levels;
 }
@@ -82,8 +85,18 @@ export function detectInstitutionType(kurumAdi: string): InstitutionType {
  */
 export function isGenericNoRestriction(text: string): boolean {
   const normalized = text.trim().toLocaleLowerCase("tr-TR");
-  if (/herhangi\s+bir[^.]{0,60}(b[öo]l[üu]m|program|fak[üu]lte)/.test(normalized)) {
+  if (/herhangi\s+bir[^.]{0,60}(b[öo]l[üu]m|program|fak[üu]lte|alan)/.test(normalized)) {
     return true;
+  }
+  for (const cumle of normalized.split(/[.;\n]/)) {
+    // "Lise veya dengi okul mezunu olmak", "En az ortaöğretim (lise) ve dengi okul mezunu" - alan/bolum adi gecmiyorsa.
+    if (/(lise|orta\s*[öo]ğretim)[^.]{0,40}\b(ve|veya)\s+dengi\b[^.]{0,30}mezun/.test(cumle) && !/alan[ıi]n|b[öo]l[üu]m|dal[ıi]n|program/.test(cumle)) {
+      return true;
+    }
+    // "Fakülte veya en az dört yıllık yüksekokul mezunu olmak"
+    if (/fak[üu]lte\s+(veya|ya da)\s+(en az\s+)?(d[öo]rt|4)\s+y[ıi]ll[ıi]k\s+y[üu]ksekokul\s+mezun/.test(cumle)) {
+      return true;
+    }
   }
   if (/(d[öo]rt|4)\s*y[ıi]ll[ıi]k\s*fak[üu]ltelerin?\s*(herhangi|t[üu]m[üu]nde|hepsinde)/.test(normalized)) {
     return true;
@@ -105,13 +118,29 @@ export function isGenericNoRestriction(text: string): boolean {
  * gercekci varsayilanlar kullanilir. Kariyer Kapisi ve Memurlar.Net
  * scraper'lari tarafindan ortak kullanilir.
  */
-export async function classifyRequirementText(requirementText: string, isciIlaniMi: boolean) {
+export async function classifyRequirementText(
+  requirementText: string,
+  isciIlaniMi: boolean,
+  // Metinde bolum yoksa ve genel ilan da degilse cagrilir: ana ilan metni + ek PDF/gorsel tablolar.
+  ekMetinGetir?: () => Promise<string>,
+) {
   const levels = detectEducationLevels(requirementText);
   const educationLevels = levels.length > 0 ? levels : [isciIlaniMi ? EducationLevel.LISE : EducationLevel.LISANS];
 
-  const matches = await matchDepartmentsForText(requirementText);
-  const isDepartmentRestricted =
-    matches.length > 0 || (!isciIlaniMi && !isGenericNoRestriction(requirementText));
+  // Isci ilanlarinda OSYM listesi aranmaz (metin genelde belge/kosul listesi, bolum sarti yok).
+  const secenek = { seviyeler: educationLevels, osym: !isciIlaniMi };
+  let matches = await matchDepartmentsForText(requirementText, secenek);
+  if (matches.length > 0 || isciIlaniMi || isGenericNoRestriction(requirementText)) {
+    return { educationLevels, isDepartmentRestricted: matches.length > 0, matches, ekMetin: undefined };
+  }
 
-  return { educationLevels, isDepartmentRestricted, matches };
+  // undefined = bakilamadi (hata): kayittaki ekMetin degismez, sonraki taramada yeniden denenir.
+  let ekMetin: string | undefined;
+  try {
+    ekMetin = await ekMetinGetir?.();
+  } catch (err) {
+    console.error("İlan eki okunamadı:", err);
+  }
+  if (ekMetin) matches = await matchDepartmentsForText(requirementText, { ...secenek, ekMetin });
+  return { educationLevels, isDepartmentRestricted: true, matches, ekMetin };
 }

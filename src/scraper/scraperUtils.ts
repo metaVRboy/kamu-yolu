@@ -46,14 +46,14 @@ export function decodeHtmlEntities(text: string): string {
  * 23:59:59 olarak donuliyor (ör. son basvuru tarihi gibi kullanimlar icin).
  */
 export function parseTurkceTarih(text: string, endOfDay = false): Date | null {
-  const match = text
-    .trim()
-    .toLocaleLowerCase("tr-TR")
-    .match(/(\d{1,2})\s+([a-zçğıöşü]+)\s+(\d{4})/);
-  if (!match) return null;
-  const gun = Number(match[1]);
-  const ay = AY_ISIMLERI[match[2]];
-  const yil = Number(match[3]);
-  if (!ay) return null;
+  const kucuk = text.trim().toLocaleLowerCase("tr-TR");
+  const match = kucuk.match(/(\d{1,2})\s+([a-zçğıöşü]+)\s+(\d{4})/);
+  // "26.10.2026" / "26/10/2026" bicimi
+  const sayisal = match ? null : kucuk.match(/^(\d{1,2})[./](\d{1,2})[./](\d{4})/);
+  if (!match && !sayisal) return null;
+  const gun = Number((match ?? sayisal)![1]);
+  const ay = match ? AY_ISIMLERI[match[2]] : Number(sayisal![2]);
+  const yil = Number((match ?? sayisal)![3]);
+  if (!ay || ay > 12 || gun < 1 || gun > 31) return null;
   return endOfDay ? new Date(Date.UTC(yil, ay - 1, gun, 23, 59, 59)) : new Date(Date.UTC(yil, ay - 1, gun));
 }

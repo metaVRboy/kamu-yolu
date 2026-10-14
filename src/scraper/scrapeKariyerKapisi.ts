@@ -8,6 +8,7 @@ import {
   type SearchIlan,
 } from "./kariyerKapisiClient";
 import { classifyRequirementText, detectInstitutionType, stripBbCode } from "./parseRequirements";
+import { kkEkMetni } from "./ilanEkleri";
 import { notifyUsersForMatchedPosting } from "@/lib/notifications";
 import {
   buildCrossSourceDuplicateIndex,
@@ -45,11 +46,16 @@ async function upsertPosting(
     sourceUrl: string;
     requirementText: string;
     iller: string[];
+    ekMetinGetir: () => Promise<string>;
   },
   unmatchedTexts: string[],
   dupIndex: CrossSourceDuplicateIndex,
 ): Promise<void> {
   const { externalId, title, ilan, institutionType, sourceUrl, requirementText, iller } = params;
+  const existing = await prisma.posting.findUnique({
+    where: { externalId },
+    select: { id: true, adminGizli: true, adminDuzenledi: true, ekMetin: true },
+  });
 
   // "Isci Ilanlari" turundeki ilanlarin Kariyer Kapisi'ndaki metni genelde
   // sadece Iskur uzerinden nasil basvurulacagini anlatir - egitim
@@ -59,9 +65,12 @@ async function upsertPosting(
   // genelde ortaogretimdir - metin bosken LISANS/kisitli varsaymak yerine
   // bu daha gercekci varsayilanlar kullanilir.
   const isciIlaniMi = ilan.ilanTuru === "İşçi İlanları";
-  const { educationLevels, isDepartmentRestricted, matches } = await classifyRequirementText(
+  // Ek (ana metin + PDF tablolar) bir kez okunur; kayitliysa yeniden indirilmez.
+  // ponytail: kurum eki sonradan duzeltirse eski okuma kalir; ekMetin null'lanirsa yeniden okunur.
+  const { educationLevels, isDepartmentRestricted, matches, ekMetin } = await classifyRequirementText(
     requirementText,
     isciIlaniMi,
+    async () => existing?.ekMetin ?? params.ekMetinGetir(),
   );
   if (matches.length === 0) {
     unmatchedTexts.push(requirementText.slice(0, 200));
@@ -72,10 +81,6 @@ async function upsertPosting(
   // kaydin durmasini sagla.
   await removeCrossSourceDuplicate(dupIndex, { institutionName: ilan.kurumAdi, title });
 
-  const existing = await prisma.posting.findUnique({
-    where: { externalId },
-    select: { id: true, adminGizli: true, adminDuzenledi: true },
-  });
   // Admin duzeltmeleri korunur: gizlenen ilan aktiflesmez, duzenlenen alanlar ezilmez.
   const adminKoru = existing?.adminDuzenledi ?? false;
 
@@ -95,6 +100,7 @@ async function upsertPosting(
       iller,
       sourceUrl,
       departmentRequirementRaw: requirementText,
+      ...(ekMetin !== undefined && { ekMetin }),
       isActive: !existing?.adminGizli,
       scrapedAt: new Date(),
     },
@@ -109,6 +115,7 @@ async function upsertPosting(
       sourceUrl,
       educationLevels,
       departmentRequirementRaw: requirementText,
+      ekMetin,
       isDepartmentRestricted,
       applicationStart: ilan.basTarih ? new Date(ilan.basTarih) : null,
       applicationEnd: ilan.bitTarih ? new Date(ilan.bitTarih) : null,
@@ -187,6 +194,10 @@ export async function scrapeKariyerKapisi(
 
       const institutionType = detectInstitutionType(ilan.kurumAdi);
       const sourceUrl = ilanDetayUrl(ilan.guid);
+      // Pozisyonlarin ek metni icin: ana ilan metni ve PDF'ler ilan basina bir kez indirilir.
+      const pdfOnbellek = new Map<string, Promise<string>>();
+      let anaMetin: Promise<string> | undefined;
+      const anaMetniGetir = () => (anaMetin ??= fetchIlanPreview(ilan.guid).then((p) => p.ilanMetni ?? ""));
 
       // Bazi ilan turleri (ozellikle "Isci Ilanlari") unvan/pozisyon
       // kirilimi (alt ilan) kullanmiyor - bunlar icin alt ilan listesi
@@ -216,6 +227,8 @@ export async function scrapeKariyerKapisi(
             sourceUrl,
             requirementText: stripBbCode(preview.ilanMetni ?? ""),
             iller: [],
+            // Ana metin zaten ilan metni: ek olarak yalniz PDF tablolar.
+            ekMetinGetir: () => kkEkMetni(preview.ilanMetni ?? "", preview.ilanMetni ?? "", pdfOnbellek, false),
           },
           unmatchedTexts,
           dupIndex,
@@ -244,6 +257,7 @@ export async function scrapeKariyerKapisi(
             sourceUrl,
             requirementText: stripBbCode(alt.ilanMetni ?? ""),
             iller,
+            ekMetinGetir: async () => kkEkMetni(alt.ilanMetni ?? "", await anaMetniGetir(), pdfOnbellek),
           },
           unmatchedTexts,
           dupIndex,

@@ -39,6 +39,9 @@ model Department {
   name      String              @unique
   slug      String              @unique
   level     EducationLevel // bu bolumun hangi ogrenim derecesine ait oldugu (onlisans/lisans vb.)
+  // Ilan eslestirmesinde OSYM listesinden otomatik eklendi: her zaman OSYM kurallariyla aranir
+  // (bolum cumlesi + sayim), metnin her yerinde degil (bkz. matchDepartmentsForText).
+  osym      Boolean             @default(false)
   aliases   DepartmentAlias[]
   postings  PostingDepartment[]
   haberler  HaberDepartment[]
@@ -69,6 +72,9 @@ model Posting {
   sourceUrl                String
   educationLevels          EducationLevel[] @default([])
   departmentRequirementRaw String? // ilanın ham "aranan nitelikler" metni
+  // Yalniz bolum eslestirmesi icin, gosterilmez: ana ilan metni + ek PDF tablolari + gorsel tablolarin
+  // okunmus metni (src/scraper/ilanEkleri.ts). "" = bakildi, ek yok; null = henuz bakilmadi/okunamadi.
+  ekMetin                  String?
   isDepartmentRestricted   Boolean          @default(false)
   applicationStart         DateTime?
   applicationEnd           DateTime?

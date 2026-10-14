@@ -141,7 +141,11 @@ export type MemurlarIlanDetay = {
   applicationEnd: Date | null;
   // Yalniz icerde bolum eslestirmesi icin; sitede gosterilmez (bkz. src/lib/ilanMetni.ts).
   bodyText: string;
+  // Kadro tablolari cogu ilanda resim ya da PDF olarak konuyor; metinden okunamaz (bkz. ilanEkleri.ts).
+  ekler: { gorseller: string[]; pdfler: string[] };
 };
+
+const mutlakUrl = (src: string) => (src.startsWith("//") ? `https:${src}` : src.startsWith("/") ? `${BASE_URL}${src}` : src);
 
 export function ilanDetayUrl(id: string, slug: string): string {
   return `${BASE_URL}/ilan/${id}/${slug}.html`;
@@ -160,10 +164,22 @@ export async function fetchIlanDetay(id: string, slug: string): Promise<Memurlar
 
   const description = html.match(/<meta property="og:description" content="([^"]*)"/)?.[1] ?? "";
   const sonBasvuruMatch = description.match(/[Ss]on\s+ba[sş]vuru\s+tarihi\s+([^.]+)/);
-  const applicationEnd = sonBasvuruMatch ? parseTurkceTarih(sonBasvuruMatch[1], true) : null;
 
   const detailOpenTag = html.indexOf('<div class="detail">');
-  const bodyText = detailOpenTag === -1 ? "" : stripHtmlTags(extractBalancedDiv(html, detailOpenTag));
+  const detailHtml = detailOpenTag === -1 ? "" : extractBalancedDiv(html, detailOpenTag);
+  const bodyText = stripHtmlTags(detailHtml);
+  const ekler = {
+    gorseller: [...detailHtml.matchAll(/<img[^>]+src="([^"]*\/common\/job\/advert\/documents\/[^"]+\.(?:jpe?g|png|webp))"/gi)].map((m) => mutlakUrl(m[1])),
+    pdfler: [...detailHtml.matchAll(/<a[^>]+href="([^"]*\/common\/job\/advert\/documents\/[^"]+\.pdf)"/gi)].map((m) => mutlakUrl(m[1])),
+  };
 
-  return { title, kategori, kaynak, ilanGirisTarihi, applicationEnd, bodyText };
+  // Ozette tarih yoksa metindeki "Son Başvuru Tarihi : 26 Ekim 2018" (yoksa 2018 ilani aktif kaliyordu).
+  const metindekiSonBasvuru = bodyText.match(/son\s+ba[sş]vuru\s+tarihi\s*:?\s*([^\n]{6,40})/i)?.[1];
+  const applicationEnd = sonBasvuruMatch
+    ? parseTurkceTarih(sonBasvuruMatch[1], true)
+    : metindekiSonBasvuru
+      ? parseTurkceTarih(metindekiSonBasvuru, true)
+      : null;
+
+  return { title, kategori, kaynak, ilanGirisTarihi, applicationEnd, bodyText, ekler };
 }

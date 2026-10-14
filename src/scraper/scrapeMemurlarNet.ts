@@ -6,6 +6,7 @@ import {
   ilanDetayUrl,
 } from "./memurlarNetClient";
 import { classifyRequirementText, detectInstitutionType } from "./parseRequirements";
+import { memurlarEkMetni } from "./ilanEkleri";
 import { notifyUsersForMatchedPosting } from "@/lib/notifications";
 import { buildCrossSourceDuplicateIndex, removeCrossSourceDuplicate, expireOverduePostings } from "@/lib/postingDedupe";
 
@@ -88,10 +89,22 @@ export async function scrapeMemurlarNet(prisma: PrismaClient): Promise<ScrapeSum
         // icermez - bu tur toplu iscii kadrolari pratikte neredeyse hicbir
         // zaman bolume ozel degildir ve taban seviyesi genelde
         // ortaogretimdir (bkz. scrapeKariyerKapisi.ts'teki ayni mantik).
-        const isciIlaniMi = kategori === "daimi-isci-ilanlari" || kategori === "gecici-isci-ilanlari";
-        const { educationLevels, isDepartmentRestricted, matches } = await classifyRequirementText(
+        // Ilan birden fazla kategoride listelenebilir (ilk gorulen kategoriyle islenir): ilanin kendi
+        // kategorisine ve basligina da bakilir ("SYDV Geçici 1 İşçi Alacak", "İşçi İlanları").
+        const isciIlaniMi =
+          kategori === "daimi-isci-ilanlari" ||
+          kategori === "gecici-isci-ilanlari" ||
+          /işçi/.test(`${detay.kategori ?? ""} ${title}`.toLocaleLowerCase("tr-TR"));
+
+        const existing = await prisma.posting.findUnique({
+          where: { externalId },
+          select: { id: true, adminGizli: true, adminDuzenledi: true, ekMetin: true },
+        });
+        // Tablo gorselleri bir kez okunur (Gemini); kayitliysa yeniden okunmaz.
+        const { educationLevels, isDepartmentRestricted, matches, ekMetin } = await classifyRequirementText(
           detay.bodyText,
           isciIlaniMi,
+          async () => existing?.ekMetin ?? memurlarEkMetni(detay.ekler),
         );
         if (matches.length === 0) {
           unmatchedTexts.push(detay.bodyText.slice(0, 200));
@@ -102,10 +115,6 @@ export async function scrapeMemurlarNet(prisma: PrismaClient): Promise<ScrapeSum
         // durmasini sagla.
         await removeCrossSourceDuplicate(dupIndex, { institutionName: kurumAdi, title });
 
-        const existing = await prisma.posting.findUnique({
-          where: { externalId },
-          select: { id: true, adminGizli: true, adminDuzenledi: true },
-        });
         // Admin duzeltmeleri korunur: gizlenen ilan aktiflesmez, duzenlenen alanlar ezilmez.
         const adminKoru = existing?.adminDuzenledi ?? false;
 
@@ -123,6 +132,7 @@ export async function scrapeMemurlarNet(prisma: PrismaClient): Promise<ScrapeSum
             ilanTuru: detay.kategori,
             sourceUrl: ilanDetayUrl(ozet.id, ozet.slug),
             departmentRequirementRaw: detay.bodyText,
+            ...(ekMetin !== undefined && { ekMetin }),
             isActive: !existing?.adminGizli,
             scrapedAt: new Date(),
           },
@@ -136,6 +146,7 @@ export async function scrapeMemurlarNet(prisma: PrismaClient): Promise<ScrapeSum
             sourceUrl: ilanDetayUrl(ozet.id, ozet.slug),
             educationLevels,
             departmentRequirementRaw: detay.bodyText,
+            ekMetin,
             isDepartmentRestricted,
             applicationEnd: detay.applicationEnd,
             publishedAt: detay.ilanGirisTarihi ?? new Date(),
