@@ -8,7 +8,7 @@ import { getLastSuccessfulScrapeAt } from "@/lib/matching";
 import { cn } from "@/lib/utils";
 import { getCurrentUser } from "@/lib/auth";
 import { profilFotografiUrl } from "@/lib/profil";
-import { ILETISIM_EPOSTA, SITE_URL } from "@/lib/site";
+import { ILETISIM_ADRES, ILETISIM_EPOSTA, ILETISIM_TELEFON, SITE_URL } from "@/lib/site";
 import { SiteMenu } from "@/components/SiteMenu";
 import { HeaderNav } from "@/components/HeaderNav";
 import { AdSlot } from "@/components/AdSlot";
@@ -262,7 +262,11 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             </p>
             {/* Kunye (5651 s. Kanun m.3, KVKK veri sorumlusu): sirket kurulana kadar gercek kisi. */}
             <p className="mt-1">
-              Site sahibi ve veri sorumlusu: Emirhan Koç · İletişim:{" "}
+              Site sahibi ve veri sorumlusu: Emirhan Koç · {ILETISIM_ADRES} · Tel:{" "}
+              <a href={`tel:${ILETISIM_TELEFON.tel}`} className="underline hover:text-white">
+                {ILETISIM_TELEFON.goster}
+              </a>{" "}
+              · E-posta:{" "}
               <a href={`mailto:${ILETISIM_EPOSTA}`} className="underline hover:text-white">
                 {ILETISIM_EPOSTA}
               </a>

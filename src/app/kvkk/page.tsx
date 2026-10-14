@@ -1,7 +1,7 @@
 import { ShieldCheck } from "lucide-react";
 import { SayfaBasligi } from "@/components/SayfaBasligi";
 import Link from "next/link";
-import { ILETISIM_EPOSTA } from "@/lib/site";
+import { ILETISIM_ADRES, ILETISIM_EPOSTA, ILETISIM_TELEFON } from "@/lib/site";
 
 export const metadata = {
   title: "KVKK Aydınlatma Metni ve Gizlilik Politikası — Kamu Yolu",
@@ -111,7 +111,12 @@ export default function KvkkPage() {
           <h2 className="font-sans text-base font-semibold text-primary">1. Veri Sorumlusu</h2>
           <p>
             6698 sayılı Kişisel Verilerin Korunması Kanunu (&quot;KVKK&quot;) kapsamında veri sorumlusu, kamuyolu.com sitesini ve
-            Kamu Yolu mobil uygulamasını (&quot;Kamu Yolu&quot;) işleten gerçek kişi <strong>Emirhan Koç</strong>&apos;tur. İletişim:{" "}
+            Kamu Yolu mobil uygulamasını (&quot;Kamu Yolu&quot;) işleten gerçek kişi <strong>Emirhan Koç</strong>&apos;tur. Adres:{" "}
+            {ILETISIM_ADRES} · Telefon:{" "}
+            <a href={`tel:${ILETISIM_TELEFON.tel}`} className="text-primary underline">
+              {ILETISIM_TELEFON.goster}
+            </a>{" "}
+            · E-posta:{" "}
             <a href={`mailto:${ILETISIM_EPOSTA}`} className="text-primary underline">
               {ILETISIM_EPOSTA}
             </a>
@@ -194,7 +199,7 @@ export default function KvkkPage() {
             <a href={`mailto:${ILETISIM_EPOSTA}`} className="text-primary underline">
               {ILETISIM_EPOSTA}
             </a>{" "}
-            adresine göndererek iletebilirsiniz. Başvurunuz en geç 30 gün içinde ücretsiz olarak sonuçlandırılır. Verilerinizin
+            adresine göndererek ya da ıslak imzalı dilekçeyle {ILETISIM_ADRES} adresine posta yoluyla iletebilirsiniz. Başvurunuz en geç 30 gün içinde ücretsiz olarak sonuçlandırılır. Verilerinizin
             bir kopyasını{" "}
             <Link href="/profilim/ayarlar/gizlilik" className="text-primary underline">
               Ayarlar &gt; Gizlilik ve KVKK

@@ -25,9 +25,8 @@ Google/Meta/TikTok politika sayfaları.
 
 ## 2. Senin yapman gerekenler (koddan yapılamaz)
 
-1. **Adres ve telefon (5651 Yön. m.5 + KVKK yazılı başvuru)** — reklam geliri olan sitenin sahibi gerçek kişi için
-   ad soyad, yerleşim yeri adresi, e-posta ve telefon sitede yayımlanmalı. Şu an yalnız ad + e-posta var.
-   Karar verince footer'daki künye satırına ve KVKK §1/§5'e eklenir. (Ceza: 5651 m.3/2.)
+1. ~~**Adres ve telefon (5651 Yön. m.5 + KVKK yazılı başvuru)**~~ — 14.10.2026'da footer künyesine ve KVKK §1/§5'e
+   eklendi (`src/lib/site.ts`: ILETISIM_ADRES, ILETISIM_TELEFON). Adres değişirse yalnız oradan güncellenir.
 2. **Yer sağlayıcılık bildirimi** — becayiş ilanları/mesajları nedeniyle yer sağlayıcısın. e-Devlet üzerinden
    (yersaglayici.btk.gov.tr; 7590 sayılı Kanunla yetki Siber Güvenlik Başkanlığı'na geçti, başvuru anında güncel
    formu kontrol et) "kendi bünyesinde / gerçek kişi" bildirimi. Ceza: 5651 m.5/6.
@@ -90,7 +89,6 @@ Cloudflare (privacyquestions@cloudflare.com).
 
 ## 5. Kalan riskler (dürüst özet)
 
-- Adres/telefon yayımlanmadığı sürece 5651 m.3 tanıtıcı bilgi eksik.
 - Google dışındaki vendor'lar için KVKK m.9 güvencesi yok; tam çözüm tüm yığını Türkiye'de barındırmak.
 - Yer sağlayıcılık bildirimi yapılana kadar 5651 m.5/6 riski.
 - Vercel istemci kaynak portunu vermiyor; trafik kaydında port yok (yönetmeliğin aradığı alanlardan biri).
