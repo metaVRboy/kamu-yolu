@@ -4,9 +4,10 @@
  */
 import type { SeedSoru } from "../kpssDenemeOrtak";
 import { LISANS_2 } from "./lisans-2";
+import { ONLISANS_2 } from "./onlisans-2";
 
 export const EK_PARTILER: Record<"LISANS" | "ONLISANS" | "LISE", SeedSoru[][]> = {
   LISANS: [LISANS_2],
-  ONLISANS: [],
+  ONLISANS: [ONLISANS_2],
   LISE: [],
 };
