@@ -1,11 +1,11 @@
 /**
- * KPSS deneme havuzlarinin ders ici konu dagilimi (son yillarin ÖSYM
- * dagilimlarina gore). Dizi sirasi = sinavdaki konu sirasi; seed, sorulari
- * bu siraya dizer ve sayilar tutmazsa yazmayi reddeder.
+ * KPSS denemesinin ders ici konu dagilimi (son yillarin ÖSYM dagilimlarina gore).
+ * Dizi sirasi = sinavdaki konu sirasi. Seed her partiyi (120 soruluk tam deneme) bu
+ * dagilima gore dogrular; gunluk deneme de konu konu bu sayilarla secilir.
  */
-import type { SeedSoru } from "./kpssDenemeOrtak";
+import type { DenemeDers } from "@/generated/prisma/enums";
 
-type Dagilim = Record<SeedSoru["ders"], [konu: string, adet: number][]>;
+type Dagilim = Record<DenemeDers, [konu: string, adet: number][]>;
 
 const GUNCEL: [string, number][] = [["Güncel Bilgiler", 6]];
 

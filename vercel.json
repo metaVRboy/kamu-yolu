@@ -18,6 +18,10 @@
       "schedule": "0 1 * * *"
     },
     {
+      "path": "/api/kpss-soru-uret",
+      "schedule": "0 20 * * *"
+    },
+    {
       "path": "/api/sms-ilan-bildirimi",
       "schedule": "30 6,9,12,15 * * *"
     }

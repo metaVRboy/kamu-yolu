@@ -686,6 +686,9 @@ model DenemeSoru {
   // Gunluk deneme secimi "en az kullanilani oncelikle sec" stratejisiyle
   // calisiyor - tekrar sikligini dusurmek icin.
   kullanimSayisi   Int                 @default(0)
+  // "elle": scripts/ altindaki veri dosyalarindan (seed yonetir, dosyada yoksa siler);
+  // "gemini": gece otomatik uretilip dogrulanan (src/lib/kpssSoruUretimi.ts), seed dokunmaz.
+  uretim           String              @default("elle")
   hataBildirimleri SoruHataBildirimi[]
 
   @@index([duzey, ders, kullanimSayisi])

@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import type { DenemeDers, EducationLevel } from "@/generated/prisma/client";
 import { dersKarnesi, konuAnalizi, type KonuDurumu } from "@/lib/kpssDenemeAnaliz";
 import { DERS_SIRASI, DERS_DAGILIMI, DERS_LABEL, DUZEY_LABEL, SINAV_SURESI_DK, type ExamSoru } from "@/lib/kpssDenemeSabitler";
+import { KONU_DAGILIMI } from "@/lib/kpssDenemeKonular";
 
 /** Turkiye takvim gunu (sunucu hangi saat diliminde calisirsa calissin). */
 function bugununTarihi(): Date {
@@ -12,11 +13,43 @@ function bugununTarihi(): Date {
   return new Date(`${y}-${m}-${d}T00:00:00.000Z`);
 }
 
+type Aday = { id: string; sira: number; grupId: string | null; konu: string | null; kullanimSayisi: number };
+
 /**
- * Bugunun (Turkiye gunu) sinavini dondurur; yoksa havuzdan orneklenerek
- * olusturulur. Ayni ders+duzey icin en az kullanilan sorular once secilir
- * (tekrar sikligini dusurmek icin), secilenlerin kullanimSayisi artirilir.
- * Sonuc TUM kullanicilar icin ayni (sabit) soru seti olur.
+ * Adaylardan tam `adet` soru secer: ortak metinli gruplar bolunmez, en az kullanilan once,
+ * esit kullanimlilar arasinda rastgele (havuz buyudukce her gun farkli kombinasyon).
+ * Grup boyutlari (ör. 4'lu sozel mantik + tekil soru) tam sayiyi tutturmayabilir: oncelik
+ * sirasini koruyan geri izlemeli arama tam toplami bulur; bulamazsa sigan kadarini dondurur.
+ */
+function enAzKullanilanlar(adaylar: Aday[], adet: number): Aday[] {
+  const birimMap = new Map<string, Aday[]>();
+  for (const a of adaylar) birimMap.set(a.grupId ?? a.id, [...(birimMap.get(a.grupId ?? a.id) ?? []), a]);
+  const birimler = [...birimMap.values()]
+    .map((b) => ({ b, kullanim: Math.max(...b.map((x) => x.kullanimSayisi)), r: Math.random() }))
+    .sort((x, y) => x.kullanim - y.kullanim || x.r - y.r)
+    .map((x) => x.b);
+  const secim: Aday[][] = [];
+  let adim = 0;
+  const ara = (i: number, kalan: number): boolean => {
+    if (kalan === 0) return true;
+    for (let j = i; j < birimler.length && adim++ < 20_000; j++) {
+      if (birimler[j].length > kalan) continue;
+      secim.push(birimler[j]);
+      if (ara(j + 1, kalan - birimler[j].length)) return true;
+      secim.pop();
+    }
+    return false;
+  };
+  if (ara(0, adet)) return secim.flat();
+  const secilen: Aday[] = [];
+  for (const b of birimler) if (secilen.length + b.length <= adet) secilen.push(...b);
+  return secilen;
+}
+
+/**
+ * Bugunun (Turkiye gunu) sinavini dondurur; yoksa havuzdan olusturulur: her ders icin
+ * KONU_DAGILIMI'ndaki sayilarla konu konu en az kullanilan sorular secilir, secilenlerin
+ * kullanimSayisi artirilir. Sonuc TUM kullanicilar icin ayni (sabit) soru seti olur.
  */
 export async function getBugununDenemesi(duzey: EducationLevel) {
   const tarih = bugununTarihi();
@@ -24,27 +57,34 @@ export async function getBugununDenemesi(duzey: EducationLevel) {
   const mevcut = await prisma.gunlukDeneme.findUnique({ where: { duzey_tarih: { duzey, tarih } } });
   if (mevcut) return mevcut;
 
+  const dagilim = KONU_DAGILIMI[duzey as keyof typeof KONU_DAGILIMI];
+  if (!dagilim) throw new Error(`${DUZEY_LABEL[duzey]} icin deneme yok.`);
   const soruIdler: string[] = [];
   for (const ders of DERS_SIRASI) {
-    const adet = DERS_DAGILIMI[ders];
-    // Gercek KPSS kitapciklarinda konu sirasi sabittir (ör. geometri her
-    // zaman Matematik'in son sorulari) - bu yuzden havuzdan secilenler
-    // RASTGELE degil, yazim sirasina (sira alanina) gore diziliyor. "En az
-    // kullanilani sec" stratejisi yine kullanimSayisi'na gore calisir, o
-    // sadece HANGI sorularin secilecegini belirler; sira'yi etkilemez.
-    const havuz = await prisma.denemeSoru.findMany({
+    const adaylar = await prisma.denemeSoru.findMany({
       where: { duzey, ders },
-      orderBy: { kullanimSayisi: "asc" },
-      take: adet,
-      select: { id: true, sira: true },
+      select: { id: true, sira: true, grupId: true, konu: true, kullanimSayisi: true },
     });
-    if (havuz.length < adet) {
-      throw new Error(
-        `${DUZEY_LABEL[duzey]} / ${DERS_LABEL[ders]} icin havuzda yeterli soru yok (${havuz.length}/${adet}).`,
-      );
+    const secilen = dagilim[ders].flatMap(([konu, adet]) => enAzKullanilanlar(adaylar.filter((a) => a.konu === konu), adet));
+    // Bir konunun havuzu eksikse ders yine tam sayida olsun: dersin kalan en az kullanilanlariyla tamamlanir.
+    const eksik = DERS_DAGILIMI[ders] - secilen.length;
+    if (eksik > 0) {
+      const secilmis = new Set(secilen.map((s) => s.id));
+      secilen.push(...enAzKullanilanlar(adaylar.filter((a) => !secilmis.has(a.id)), eksik));
     }
-    const siraliIdler = [...havuz].sort((a, b) => a.sira - b.sira).map((s) => s.id);
-    soruIdler.push(...siraliIdler);
+    if (secilen.length < DERS_DAGILIMI[ders]) {
+      throw new Error(`${DUZEY_LABEL[duzey]} / ${DERS_LABEL[ders]} icin havuzda yeterli soru yok (${secilen.length}/${DERS_DAGILIMI[ders]}).`);
+    }
+    // Gercek kitapciktaki gibi: konu sirasi (ör. geometri en sonda), ortak metinli sorular bir arada, sonra yazim sirasi.
+    const konuSirasi = (k: string | null) => {
+      const i = dagilim[ders].findIndex(([x]) => x === k);
+      return i < 0 ? dagilim[ders].length : i;
+    };
+    const grupSirasi = new Map<string, number>();
+    for (const s of secilen) if (s.grupId) grupSirasi.set(s.grupId, Math.min(grupSirasi.get(s.grupId) ?? Infinity, s.sira));
+    const birimSirasi = (s: Aday) => (s.grupId ? grupSirasi.get(s.grupId)! : s.sira);
+    secilen.sort((a, b) => konuSirasi(a.konu) - konuSirasi(b.konu) || birimSirasi(a) - birimSirasi(b) || a.sira - b.sira);
+    soruIdler.push(...secilen.map((s) => s.id));
   }
 
   await prisma.denemeSoru.updateMany({

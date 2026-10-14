@@ -1,8 +1,9 @@
 /**
  * KPSS deneme soru havuzlarini (Lisans, Onlisans, Ortaogretim) veritabanina
- * yazar. Havuz = veri dosyasi: ayni metinli soru varsa id'si (ve
- * kullanimSayisi) korunup icerigi esitlenir, veri dosyasinda olmayanlar
- * silinir. Script birden fazla kez guvenle calistirilabilir.
+ * yazar. Havuz = veri dosyalari (partiler): ayni metinli soru varsa id'si (ve
+ * kullanimSayisi) korunup icerigi esitlenir; elle yazilmis olup dosyalarda
+ * olmayanlar silinir. Gece Gemini'nin urettigi sorulara (uretim "gemini") dokunulmaz.
+ * Script birden fazla kez guvenle calistirilabilir.
  *
  * Calistirma: npx tsx scripts/kpssDenemeSoruSeed.ts
  */
@@ -11,12 +12,14 @@ import { prisma } from "../src/lib/prisma";
 import { LISANS_SORULARI, type SeedSoru } from "./kpssDenemeSoruVerisi";
 import { ONLISANS_SORULARI } from "./kpssDenemeSoruVerisiOnlisans";
 import { ORTAOGRETIM_SORULARI } from "./kpssDenemeSoruVerisiOrtaogretim";
-import { KONU_DAGILIMI } from "./kpssDenemeKonular";
+import { EK_PARTILER } from "./kpssDenemeSorular";
+import { KONU_DAGILIMI } from "../src/lib/kpssDenemeKonular";
 
-const HAVUZLAR: [keyof typeof KONU_DAGILIMI, SeedSoru[]][] = [
-  ["LISANS", LISANS_SORULARI],
-  ["ONLISANS", ONLISANS_SORULARI],
-  ["LISE", ORTAOGRETIM_SORULARI],
+// Her parti 120 soruluk tam bir deneme.
+const HAVUZLAR: [keyof typeof KONU_DAGILIMI, SeedSoru[][]][] = [
+  ["LISANS", [LISANS_SORULARI, ...EK_PARTILER.LISANS]],
+  ["ONLISANS", [ONLISANS_SORULARI, ...EK_PARTILER.ONLISANS]],
+  ["LISE", [ORTAOGRETIM_SORULARI, ...EK_PARTILER.LISE]],
 ];
 
 /** Havuz konu dagilimina birebir uymali; sorular ders ici konu sirasina dizilir (stabil). */
@@ -38,16 +41,24 @@ function konuSirasinaDiz(duzey: keyof typeof KONU_DAGILIMI, sorular: SeedSoru[])
   return [...sorular].sort((a, b) => sira(a) - sira(b));
 }
 
-async function havuzuYaz(duzey: keyof typeof KONU_DAGILIMI, hamSorular: SeedSoru[]) {
-  const sorular = konuSirasinaDiz(duzey, hamSorular);
+async function havuzuYaz(duzey: keyof typeof KONU_DAGILIMI, partiler: SeedSoru[][]) {
+  // Her parti ayri ayri tam dagilima uymali; sira parti icinde konu sirasi (parti * 1000 ofsetiyle).
+  const sorular = partiler.flatMap((parti, p) => {
+    const dersSirasi: Record<string, number> = {};
+    return konuSirasinaDiz(duzey, parti).map((soru) => {
+      const sira = dersSirasi[soru.ders] ?? 0;
+      dersSirasi[soru.ders] = sira + 1;
+      return { soru, sira: p * 1000 + sira };
+    });
+  });
+  const metinler = new Set<string>();
+  for (const { soru } of sorular) {
+    if (metinler.has(soru.soruMetni)) throw new Error(`${duzey} ayni soru iki kez: ${soru.soruMetni.slice(0, 60)}`);
+    metinler.add(soru.soruMetni);
+  }
   let eklenen = 0;
   let guncellenen = 0;
-  // Her ders icin ayri sayac - konu sirasi gercek sinavdaki sirayi (ör.
-  // geometri en sonda) yansitir.
-  const dersSirasi: Record<string, number> = {};
-  for (const soru of sorular) {
-    const sira = dersSirasi[soru.ders] ?? 0;
-    dersSirasi[soru.ders] = sira + 1;
+  for (const { soru, sira } of sorular) {
     const veri = {
       ders: soru.ders,
       grupId: soru.grupId ?? null,
@@ -69,9 +80,9 @@ async function havuzuYaz(duzey: keyof typeof KONU_DAGILIMI, hamSorular: SeedSoru
     }
   }
   const silinen = await prisma.denemeSoru.deleteMany({
-    where: { duzey, soruMetni: { notIn: sorular.map((s) => s.soruMetni) } },
+    where: { duzey, uretim: "elle", soruMetni: { notIn: [...metinler] } },
   });
-  console.log(`${duzey}: ${eklenen} eklendi, ${guncellenen} guncellendi, ${silinen.count} eski soru silindi.`);
+  console.log(`${duzey}: ${partiler.length} parti, ${eklenen} eklendi, ${guncellenen} guncellendi, ${silinen.count} eski soru silindi.`);
 }
 
 async function main() {
