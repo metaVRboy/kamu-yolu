@@ -63,9 +63,35 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   // Footer'daki tarama saati yan bilgi: alinamazsa sayfa yine acilsin.
   const [lastScrapeAt, user, ayar] = await Promise.all([getLastSuccessfulScrapeAt().catch(() => null), getCurrentUser(), getSiteAyarlari()]);
-  // Bakim modunda ziyaretciler sayfa yerine bakim mesajini gorur; admin siteyi normal kullanir
-  // (header acik kalir: admin giris yapabilsin). API'ler ve taramalar calismaya devam eder.
-  const bakimda = ayar.bakimModu && !user?.isAdmin;
+  // Bakim modunda ziyaretciler her adreste yalniz bakim mesajini gorur (header, footer, reklam yok);
+  // admin siteyi normal kullanir, /giris yalniz giris formuyla acik kalir. API'ler ve taramalar calisir.
+  if (ayar.bakimModu && !user?.isAdmin) {
+    const girisSayfasi = (await headers()).get("x-giris-sayfasi") === "1";
+    return (
+      <html lang="tr" className={cn("h-full antialiased", inter.variable, "font-sans")}>
+        <body className="flex min-h-full flex-col items-center justify-center px-4 py-10 text-foreground">
+          {girisSayfasi ? (
+            <AuthModalProvider>
+              <YukseltmeProvider>
+                <main className="w-full">{children}</main>
+                <Toaster />
+              </YukseltmeProvider>
+            </AuthModalProvider>
+          ) : (
+            <main className="w-full max-w-lg rounded-3xl border border-primary/10 bg-white p-8 text-center shadow-sm">
+              <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <Wrench className="h-7 w-7" />
+              </span>
+              <h1 className="mt-4 text-2xl font-bold tracking-tight text-slate-900">Kısa bir bakımdayız</h1>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                {ayar.bakimMesaji || "Kamu Yolu'nu daha iyi hale getirmek için kısa bir çalışma yapıyoruz. Lütfen biraz sonra tekrar dene."}
+              </p>
+            </main>
+          )}
+        </body>
+      </html>
+    );
+  }
   const fotografUrl = user ? await profilFotografiUrl(user.id) : null;
   // Pro+ "reklamsiz deneyim": reklam kodu, reklam alanlari ve engelleyici uyarisi hic yuklenmez.
   // (getCurrentUser suresi dolan plani zaten UCRETSIZ dondurur.)
@@ -147,19 +173,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             <Suspense fallback={null}>
               <GezinmeKaydi />
             </Suspense>
-            {bakimda ? (
-              <div className="mx-auto my-16 max-w-lg rounded-3xl border border-primary/10 bg-white p-8 text-center shadow-sm">
-                <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                  <Wrench className="h-7 w-7" />
-                </span>
-                <h1 className="mt-4 text-2xl font-bold tracking-tight text-slate-900">Kısa bir bakımdayız</h1>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                  {ayar.bakimMesaji || "Kamu Yolu'nu daha iyi hale getirmek için kısa bir çalışma yapıyoruz. Lütfen biraz sonra tekrar dene."}
-                </p>
-              </div>
-            ) : (
-              <PageTransition>{children}</PageTransition>
-            )}
+            <PageTransition>{children}</PageTransition>
           </main>
           {!reklamsiz && <AdSlot side="right" slotId="3758342177" />}
         </div>
@@ -286,8 +300,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <Toaster />
         <CerezOnayi reklamsiz={reklamsiz} />
         {user && <BekleyenTalepGonder />}
-        {/* Periyodik Pro/Pro+ tanitimi: Pro+ uyeye ve bakim ekranina hic konmaz. */}
-        {!bakimda && user?.abonelikPlani !== "PRO_PLUS" && <YukseltmeTanitimi />}
+        {/* Periyodik Pro/Pro+ tanitimi: Pro+ uyeye hic konmaz. */}
+        {user?.abonelikPlani !== "PRO_PLUS" && <YukseltmeTanitimi />}
        </YukseltmeProvider>
        </AuthModalProvider>
       </body>

@@ -15,6 +15,12 @@ function gorevMi(req: NextRequest): boolean {
 }
 
 export function proxy(req: NextRequest) {
+  // Bakim modunda tum sayfalar yalniz bakim mesajini gosterir; /giris acik kalir (admin girebilsin).
+  if (req.nextUrl.pathname === "/giris") {
+    const h = new Headers(req.headers);
+    h.set("x-giris-sayfasi", "1");
+    return NextResponse.next({ request: { headers: h } });
+  }
   // Sifre sifirlama sayfasinin adresi gizli token tasir: layout bu isaretle reklam kodunu yuklemez.
   if (req.nextUrl.pathname.startsWith("/sifre-sifirla/")) {
     const h = new Headers(req.headers);
@@ -32,4 +38,4 @@ export function proxy(req: NextRequest) {
   return NextResponse.json({ error: "Çok fazla istek gönderdin. Biraz bekleyip tekrar dene." }, { status: 429, headers: { "Retry-After": String(kalanSn) } });
 }
 
-export const config = { matcher: ["/api/:path*", "/sifre-sifirla/:path*"] };
+export const config = { matcher: ["/api/:path*", "/sifre-sifirla/:path*", "/giris"] };
