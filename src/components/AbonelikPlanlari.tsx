@@ -49,7 +49,6 @@ const PLANLAR: {
     ozellikler: [
       "Pro'daki her şey",
       "Sınırsız KPSS denemesi, konu bazlı değerlendirme ve gelişim takibi",
-      "Reklamsız deneyim",
       "Öncelikli destek",
     ],
   },

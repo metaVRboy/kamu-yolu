@@ -306,7 +306,7 @@ export default async function AmacimizPage() {
             {
               ad: PLAN_ADI.PRO_PLUS,
               fiyat: `${tl(fiyatlar.PRO_PLUS.aylik.odenecek)} / ay`,
-              maddeler: ["Sınırsız deneme, konu bazlı değerlendirme ve gelişim takibi", "Reklamsız deneyim", "Öncelikli destek"],
+              maddeler: ["Sınırsız deneme, konu bazlı değerlendirme ve gelişim takibi", "Öncelikli destek"],
               vurgu: true,
             },
           ].map((p) => (

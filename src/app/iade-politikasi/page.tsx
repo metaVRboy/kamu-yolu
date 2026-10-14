@@ -67,7 +67,7 @@ export default function IadePolitikasiPage() {
             </li>
             <li>
               <strong>Hizmeti kullanmaya başladıysanız</strong> (SMS bildirimi aldıysanız,
-              reklamsız deneyimden faydalandıysanız vb.), yukarıdaki yasal istisna gereği iade
+              ücretli KPSS denemesi çözdüyseniz vb.), yukarıdaki yasal istisna gereği iade
               talebiniz değerlendirmeye tabi olup otomatik olarak kabul edilmeyebilir.
             </li>
             <li>

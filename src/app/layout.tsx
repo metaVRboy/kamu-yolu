@@ -11,7 +11,6 @@ import { profilFotografiUrl } from "@/lib/profil";
 import { ILETISIM_ADRES, ILETISIM_EPOSTA, ILETISIM_TELEFON, SITE_URL } from "@/lib/site";
 import { SiteMenu } from "@/components/SiteMenu";
 import { HeaderNav } from "@/components/HeaderNav";
-import { AdSlot } from "@/components/AdSlot";
 import { NotificationBell } from "@/components/NotificationBell";
 import { ProfileMenu } from "@/components/ProfileMenu";
 import { PageTransition } from "@/components/PageTransition";
@@ -32,12 +31,6 @@ import "./globals.css";
 // Site genelinde tek font: Inter. Baslik/govde ayrimi icin ayri bir serif
 // kullanilmiyor - modern/duz gorunum icin her yerde ayni sans-serif.
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
-
-const ADSENSE_CLIENT_ID = "ca-pub-2932226916873749";
-// Google AB Kullanici Onayi Politikasi kapsami: AEA (AB 27 + IS, LI, NO) + Ingiltere + Isvicre.
-const CMP_ZORUNLU_ULKELER = new Set(
-  "AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE IS LI NO GB CH".split(" "),
-);
 
 export const revalidate = 300;
 
@@ -93,38 +86,12 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     );
   }
   const fotografUrl = user ? await profilFotografiUrl(user.id) : null;
-  // Pro+ "reklamsiz deneyim": reklam kodu, reklam alanlari ve engelleyici uyarisi hic yuklenmez.
-  // (getCurrentUser suresi dolan plani zaten UCRETSIZ dondurur.)
-  // x-reklamsiz: proxy sifre sifirlama sayfasinda koyar; adres cubugundaki gizli token reklam sunucularina gitmesin.
-  // AEA/Ingiltere/Isvicre ziyaretcisine reklam istenmez: oradaki trafik icin Google sertifikali bir onay
-  // araci (TCF CMP) zorunlu tutuyor; Turkiye icin kendi onay bandimiz yeterli (KVKK).
-  const basliklar = await headers();
-  const reklamsiz =
-    user?.abonelikPlani === "PRO_PLUS" || basliklar.get("x-reklamsiz") === "1" || CMP_ZORUNLU_ULKELER.has(basliklar.get("x-vercel-ip-country") ?? "");
 
   return (
     <html lang="tr" className={cn("h-full antialiased", inter.variable, "font-sans")}>
       <body className="flex min-h-full flex-col text-foreground">
        <AuthModalProvider>
        <YukseltmeProvider>
-        {/* next/script (afterInteractive/beforeInteractive fark etmeksizin)
-            src'yi ham HTML'de duz bir <script src=...> etiketi olarak degil,
-            istemci tarafi bir yukleyici cagrisi icinde gomuyor - AdSense'in
-            JS calistirmayan basit dogrulama/tarama araclari bunu Google'in
-            istedigi kod olarak tanimayabiliyor. Bu yuzden burada bilerek
-            duz/native bir <script> etiketi kullaniliyor (next/script degil). */}
-        {!reklamsiz && (
-          <>
-            {/* Cerez onayi gelene kadar reklam istegi yapilmaz (Google'in ozel onay yontemi);
-                "Kabul et" ile CerezOnayi pauseAdRequests=0 yapar. */}
-            <script dangerouslySetInnerHTML={{ __html: "(window.adsbygoogle=window.adsbygoogle||[]).pauseAdRequests=1;" }} />
-            <script
-              async
-              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`}
-              crossOrigin="anonymous"
-            />
-          </>
-        )}
         {ayar.seritMetni && <DuyuruSeridi metin={ayar.seritMetni} link={ayar.seritLink} tur={ayar.seritTur} />}
         {ayar.bakimModu && user?.isAdmin && (
           <p className="bg-amber-100 px-4 py-1.5 text-center text-xs font-semibold text-amber-900">
@@ -168,14 +135,12 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         </header>
 
         <div className="mx-auto flex w-full max-w-[1600px] flex-1 items-start justify-center gap-4 px-2">
-          {!reklamsiz && <AdSlot side="left" slotId="7192164037" />}
           <main className="min-w-0 flex-1">
             <Suspense fallback={null}>
               <GezinmeKaydi />
             </Suspense>
             <PageTransition>{children}</PageTransition>
           </main>
-          {!reklamsiz && <AdSlot side="right" slotId="3758342177" />}
         </div>
 
         <footer className="relative overflow-hidden border-t border-primary/40 bg-slate-900 pt-14 pb-8 text-slate-300">
@@ -298,7 +263,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           </div>
         </footer>
         <Toaster />
-        <CerezOnayi reklamsiz={reklamsiz} />
+        <CerezOnayi />
         {user && <BekleyenTalepGonder />}
         {/* Periyodik Pro/Pro+ tanitimi: Pro+ uyeye hic konmaz. */}
         {user?.abonelikPlani !== "PRO_PLUS" && <YukseltmeTanitimi />}

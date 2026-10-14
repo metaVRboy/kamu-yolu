@@ -14,7 +14,7 @@ import { renk } from "@/lib/tema";
 
 type Veri = { plan: Plan; bitis: string | null; kalanGun: number | null; otomatikYenileme: boolean; fiyat: { tablo: FiyatTablosu; kampanya: { ad: string; kalanMs: number } | null } };
 
-// Sitedeki AbonelikPlanlari (uygulamada reklam olmadigi icin "Reklamsiz deneyim" maddesi yok).
+// Sitedeki AbonelikPlanlari.
 const PLANLAR: { key: Plan; aciklama: string; populer?: boolean; ozellikler: string[] }[] = [
   {
     key: "UCRETSIZ",

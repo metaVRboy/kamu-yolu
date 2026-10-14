@@ -56,7 +56,7 @@ export default async function OnBilgilendirmeFormuPage() {
           <p>
             Satın aldığınız plan (Pro veya Pro+), kamuyolu.com üzerinde dijital bir abonelik
             hizmetidir ve fiziksel teslimat içermez. Her planın kapsadığı özellikler (SMS
-            bildirimi, bölüme özel bildirim, becayiş mesajlaşması, reklamsız kullanım vb.) satın
+            bildirimi, bölüme özel bildirim, becayiş mesajlaşması, sınırsız KPSS denemesi vb.) satın
             alma ekranında ve{" "}
             <a href="/profilim/abonelik" className="text-primary underline">
               Aboneliğim

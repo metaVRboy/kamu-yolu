@@ -18,7 +18,6 @@ import {
   Headset,
   Infinity as Sonsuz,
   MessageSquareText,
-  ShieldCheck,
   Smartphone,
   Sparkles,
   Target,
@@ -179,15 +178,15 @@ function slaytlar(v: Veri): Slayt[] {
       { ikon: TrendingUp, metin: "Deneme deneme gelişim takibi" },
     ],
   };
-  const reklamsiz: Slayt = {
+  const destek: Slayt = {
     kaynak: "tanitim-proplus",
-    ikon: ShieldCheck,
-    ust: "Pro+ · Odaklı deneyim",
-    baslik: <>{vurgu("Reklamsız")} çalış, öncelikli destek al</>,
-    alt: "Hiç reklam görmeden ilanlara ve denemelere odaklan; destek talebin sıranın önüne geçer.",
+    ikon: Headset,
+    ust: "Pro+ · Öncelikli destek",
+    baslik: <>Sorun olursa {vurgu("önce sen")} yanıt al</>,
+    alt: "Destek talebin sıranın önüne geçer; sınırsız deneme ve konu analiziyle hazırlığın hiç yarıda kalmaz.",
     cipler: [
-      { ikon: ShieldCheck, metin: "Sitede hiç reklam yok" },
       { ikon: Headset, metin: "Öncelikli destek" },
+      { ikon: Sonsuz, metin: "Sınırsız KPSS denemesi" },
     ],
   };
   const kpssGorsel = (
@@ -217,7 +216,7 @@ function slaytlar(v: Veri): Slayt[] {
         gorsel: kpssGorsel,
       },
       konu,
-      reklamsiz,
+      destek,
     ];
   }
 
@@ -294,7 +293,7 @@ function slaytlar(v: Veri): Slayt[] {
       ],
     },
     konu,
-    reklamsiz,
+    destek,
   ];
 }
 
@@ -310,7 +309,7 @@ const PLAN_KART: Record<UcretliPlan, { ad: string; rozet: string; maddeler: stri
   PRO_PLUS: {
     ad: "Pro+",
     rozet: "En kapsamlı",
-    maddeler: ["Pro'daki her şey", "Sınırsız KPSS denemesi", "Konu bazlı değerlendirme ve gelişim takibi", "Reklamsız deneyim ve öncelikli destek"],
+    maddeler: ["Pro'daki her şey", "Sınırsız KPSS denemesi", "Konu bazlı değerlendirme ve gelişim takibi", "Öncelikli destek"],
     kart: "border-violet-300 bg-gradient-to-b from-violet-50 to-white ring-2 ring-violet-200/60",
     buton: "from-violet-600 to-fuchsia-600 shadow-violet-600/30",
     vurgu: "text-violet-700",

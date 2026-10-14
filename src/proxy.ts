@@ -21,12 +21,6 @@ export function proxy(req: NextRequest) {
     h.set("x-giris-sayfasi", "1");
     return NextResponse.next({ request: { headers: h } });
   }
-  // Sifre sifirlama sayfasinin adresi gizli token tasir: layout bu isaretle reklam kodunu yuklemez.
-  if (req.nextUrl.pathname.startsWith("/sifre-sifirla/")) {
-    const h = new Headers(req.headers);
-    h.set("x-reklamsiz", "1");
-    return NextResponse.next({ request: { headers: h } });
-  }
   if (gorevMi(req)) return NextResponse.next();
   // Vercel istemcinin gercek IP'sini x-real-ip'e yazar (istemci bu basligi degistiremez).
   const ip = req.headers.get("x-real-ip") ?? req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "bilinmiyor";
@@ -38,4 +32,4 @@ export function proxy(req: NextRequest) {
   return NextResponse.json({ error: "Çok fazla istek gönderdin. Biraz bekleyip tekrar dene." }, { status: 429, headers: { "Retry-After": String(kalanSn) } });
 }
 
-export const config = { matcher: ["/api/:path*", "/sifre-sifirla/:path*", "/giris"] };
+export const config = { matcher: ["/api/:path*", "/giris"] };

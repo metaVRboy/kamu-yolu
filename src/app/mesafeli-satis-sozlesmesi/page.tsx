@@ -87,7 +87,7 @@ export default async function MesafeliSatisSozlesmesiPage() {
                 <td className="border border-border p-2">Pro+</td>
                 <td className="border border-border p-2">
                   Pro&apos;daki tüm özellikler, sınırsız KPSS deneme sınavı, konu bazlı değerlendirme ve gelişim
-                  takibi, reklamsız kullanım, öncelikli destek
+                  takibi, öncelikli destek
                 </td>
                 <td className="border border-border p-2">{tl(tablo.PRO_PLUS.aylik.liste)} / ay · {tl(tablo.PRO_PLUS.yillik.liste)} / yıl</td>
               </tr>

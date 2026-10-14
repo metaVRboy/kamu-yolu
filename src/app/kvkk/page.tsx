@@ -84,8 +84,8 @@ const ISLEMELER: { veri: string; amac: string; sebep: string; sure: string }[] =
     sure: "Hesap açık kaldığı sürece",
   },
   {
-    veri: "Reklam ve ziyaret ölçümü çerezleri (Google AdSense; varsa Google Analytics, Meta ve TikTok pikselleri)",
-    amac: "Ücretsiz özellikleri finanse eden reklamların gösterimi, ziyaret ve dönüşüm ölçümü",
+    veri: "Ziyaret ölçümü çerezleri (kampanya kaynağı; etkinse Google Analytics, Meta ve TikTok pikselleri)",
+    amac: "Ziyaret ve dönüşüm ölçümü",
     sebep: "Açık rıza (m.5/1) — çerez bildirimindeki \"Kabul et\" ile",
     sure: "Çerez Politikası'nda belirtilen sürelerce; onayınızı istediğiniz an geri alabilirsiniz",
   },
@@ -95,7 +95,7 @@ const ALICILAR: { kim: string; ne: string; ulke: string }[] = [
   { kim: "Vercel Inc.", ne: "Sitenin barındırılması ve çalıştırılması (sunucular Frankfurt'ta)", ulke: "ABD merkezli şirket" },
   { kim: "Neon, LLC (Databricks, Inc.)", ne: "Veritabanı (sunucular Frankfurt'ta)", ulke: "ABD merkezli şirket" },
   { kim: "Resend Inc.", ne: "E-posta gönderimi (doğrulama kodu, şifre sıfırlama, bildirimler)", ulke: "ABD" },
-  { kim: "Google LLC", ne: "Google ile giriş, kurumsal e-posta, reklam (AdSense) ve — onay verirseniz — ziyaret ölçümü", ulke: "ABD" },
+  { kim: "Google LLC", ne: "Google ile giriş, kurumsal e-posta ve — onay verirseniz ve etkinse — ziyaret ölçümü", ulke: "ABD" },
   { kim: "Cloudflare Inc.", ne: "Robot doğrulaması (Turnstile) için tarayıcı ve IP bilgisi", ulke: "ABD" },
   { kim: "Meta Platforms / TikTok", ne: "Yalnızca çerez onayı verirseniz ve ilgili piksel etkinse reklam ölçümü", ulke: "ABD / İrlanda" },
   { kim: "SMS hizmet sağlayıcısı", ne: "SMS bildirimini açtıysanız telefon numaranız ve ileti metni (sağlayıcı bağlandığında)", ulke: "Türkiye" },
@@ -232,7 +232,7 @@ export default function KvkkPage() {
           </p>
         </section>
 
-        <p className="text-xs text-muted-foreground">Son güncelleme: 13 Ekim 2026.</p>
+        <p className="text-xs text-muted-foreground">Son güncelleme: 14 Ekim 2026.</p>
       </div>
     </div>
   );

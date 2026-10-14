@@ -10,12 +10,11 @@ Google/Meta/TikTok politika sayfaları.
 | Konu | Yapılan |
 |---|---|
 | KVKK aydınlatma | Veri sorumlusu (gerçek kişi), veri kategorisi → amaç → hukuki sebep → süre, alıcılar ve ülkeleri, m.11 hakları, başvuru yolu. Aydınlatma ile Koşullar onayı ayrı. |
-| Çerezler (KVKK Çerez Rehberi 2025) | Reddet / Tercihler / Kabul et eşit; reklam ve ölçüm ayrı seçilir; rızasız hiçbir reklam/ölçüm kodu çalışmaz (AdSense `pauseAdRequests`); tercih 12 ayda bir yeniden sorulur; rıza kaydı sunucuda (YasalKayit, 2 yıl). |
-| AB/İngiltere/İsviçre ziyaretçisi | Reklam istenmez (Google bu bölgeler için sertifikalı CMP istiyor). |
-| AdSense politikaları | Giriş/kayıt/hesap/admin ve yapay zekâ duyuru sayfalarında reklam yok; tam ekran reklam engelleyici katmanı kaldırıldı (küçük şerit); gizlilik/çerez politikasında Google partners, Reklam Ayarları, aboutads, youronlinechoices bağlantıları. |
+| Çerezler (KVKK Çerez Rehberi 2025) | Reddet / Kabul et eşit; tek rızalı kategori ölçüm; rızasız hiçbir ölçüm kodu çalışmaz; tercih 12 ayda bir yeniden sorulur; rıza kaydı sunucuda (YasalKayit, 2 yıl). |
+| Reklam | 14.10.2026'dan itibaren sitede reklam yok (AdSense, ads.txt ve reklam çerezleri kaldırıldı). |
 | Memurlar.net (FSEK Ek m.8, TTK m.55) | İlan metni sitede, mobilde ve arama motoru verisinde gösterilmez; yalnızca içeride bölüm eşleştirmesi için kullanılır. Kullanıcı kaynağa yönlendirilir. |
 | Haber fotoğrafları (FSEK) | Kaynak sitelerin fotoğrafları kullanılmıyor; 100 eski kayıt temizlendi (27'si kurum logosu, 73'ü görselsiz). |
-| Basın Kanunu (5187) | "Haberler" → "Kamu Alım Duyuruları" olarak konumlandı; her özet kaynağa bağlantılı, "yapay zekâ ile özetlenmiştir" notu; detay sayfaları noindex ve reklamsız. Beyanname verilmedi (internet haber sitesi statüsü istenmiyor). |
+| Basın Kanunu (5187) | "Haberler" → "Kamu Alım Duyuruları" olarak konumlandı; her özet kaynağa bağlantılı, "yapay zekâ ile özetlenmiştir" notu; detay sayfaları noindex. Beyanname verilmedi (internet haber sitesi statüsü istenmiyor). |
 | 5651 yer sağlayıcı | Becayiş ilanı/mesajı ve girişte IP + zaman kaydı, satır başına HMAC (bütünlük), 2 yıl sonra otomatik silme (`/api/bakim` cron). İlanlarda "Uygunsuz içeriği bildir", mesajlarda şikâyet. Footer'da yer sağlayıcı unvan/adresi. |
 | Ticari ileti (6563, İYS) | İYS kaydı olmadığı için kampanya onayı toplanmıyor (`TICARI_ILETI_ACIK=false`); bekleme listesine e-posta değil yalnız site/uygulama içi bildirim; ilan SMS'leri saf bilgilendirme. |
 | Satış (6502, Ticari Reklam Yön.) | `SATIS_ACIK=false`: kampanya/geri sayım/üstü çizili fiyat yok, satış sözleşmeleri yayında değil, "En Popüler" yok. |
@@ -92,4 +91,3 @@ Cloudflare (privacyquestions@cloudflare.com).
 - Google dışındaki vendor'lar için KVKK m.9 güvencesi yok; tam çözüm tüm yığını Türkiye'de barındırmak.
 - Yer sağlayıcılık bildirimi yapılana kadar 5651 m.5/6 riski.
 - Vercel istemci kaynak portunu vermiyor; trafik kaydında port yok (yönetmeliğin aradığı alanlardan biri).
-- AdSense kişiselleştirilmiş reklam da ABD'ye aktarım; çerez onayı bunu m.9 açısından çözmez.

@@ -2,17 +2,17 @@ import { useSyncExternalStore } from "react";
 import { KAYNAK_ANAHTARLARI, KAYNAK_CEREZ, kaynakCerezCoz, kaynakTemizle, type Kaynak } from "@/lib/kaynak";
 
 /**
- * Tarayici tarafi olcum: cerez onayi, reklam/analitik olaylari ve kampanya kaynagi.
- * Reklam (AdSense) ve analitik (GA4, Meta, TikTok) yalnizca "kabul" sonrasi calisir (KVKK cerez rehberi).
+ * Tarayici tarafi olcum: cerez onayi, analitik olaylari ve kampanya kaynagi.
+ * Sitede reklam yok; olcum (kampanya kaynagi cerezi + etkinse GA4/Meta/TikTok) yalnizca "kabul" sonrasi calisir.
  */
 const ONAY_ANAHTARI = "kyCerezOnay";
 const ONAY_OLAYI = "ky-cerez-onay";
 // KVKK Cerez Rehberi (2025): tercih suresiz degil, makul araliklarla yeniden sorulur.
 const ONAY_GECERLILIK_MS = 365 * 86_400_000;
-export const CEREZ_METNI_SURUMU = "2026-10-13";
+export const CEREZ_METNI_SURUMU = "2026-10-14";
 
-/** Kategori bazli tercih: reklam (AdSense) ve olcum (kampanya kaynagi cerezi + GA4/Meta/TikTok). */
-export type CerezTercihi = { reklam: boolean; olcum: boolean; zaman: number };
+/** Rizaya bagli tek kategori: olcum. (Eski kayitlarda kalan "reklam" alani yok sayilir.) */
+export type CerezTercihi = { olcum: boolean; zaman: number };
 
 // useSyncExternalStore ayni ham deger icin ayni nesneyi bekler: ham metne gore onbellek.
 let sonHam: string | null = null;
@@ -28,13 +28,13 @@ function onayOku(): CerezTercihi | null {
   sonTercih = null;
   try {
     // Eski surum ("kabul"/"red") tum kategoriler icin tek karardi.
-    const t = ham === "kabul" || ham === "red" ? { reklam: ham === "kabul", olcum: ham === "kabul", zaman: 0 } : ham ? (JSON.parse(ham) as CerezTercihi) : null;
+    const t = ham === "kabul" || ham === "red" ? { olcum: ham === "kabul", zaman: 0 } : ham ? (JSON.parse(ham) as CerezTercihi) : null;
     if (t && (t.zaman === 0 || Date.now() - t.zaman < ONAY_GECERLILIK_MS)) sonTercih = t;
   } catch {}
   return sonTercih;
 }
 
-export function onayYaz(secim: { reklam: boolean; olcum: boolean }) {
+export function onayYaz(secim: { olcum: boolean }) {
   try {
     localStorage.setItem(ONAY_ANAHTARI, JSON.stringify({ ...secim, zaman: Date.now() }));
   } catch {}

@@ -71,7 +71,6 @@ export type YukseltmeKaynagi =
   | "becayis-mesaj"
   | "becayis-talep"
   | "ozel-ilanlar"
-  | "reklamsiz"
   // Periyodik tanitim penceresinin donusumlu mesajlari (hangisi daha cok "haber ver" aliyor olculur).
   | "tanitim-ilan"
   | "tanitim-kpss"
@@ -88,11 +87,10 @@ export const KAYNAK_METNI: Record<YukseltmeKaynagi, { baslik: string; alt: strin
   "becayis-mesaj": { baslik: "Becayiş eşini bul, hemen yaz", alt: "Talep sahipleriyle site içinden doğrudan mesajlaş." },
   "becayis-talep": { baslik: "Becayiş talebini yayımla", alt: "Talebin herkese açık listelensin, yer değiştirmek isteyenler sana ulaşsın." },
   "ozel-ilanlar": { baslik: "Sana özel ilanları gör", alt: "Bölümüne ve öğrenim düzeyine uygun ilanlar tek listede." },
-  reklamsiz: { baslik: "Reklamsız, odaklı bir deneyim", alt: "Hiç reklam görmeden ilanlara ve denemelere odaklan." },
   "tanitim-ilan": { baslik: "Yeni ilanı herkesten önce öğren", alt: "Bölümüne uygun ilan çıktığı an SMS ve bildirimle haberin olsun." },
   "tanitim-kpss": { baslik: "KPSS'ye her gün daha güçlü hazırlan", alt: "Ders karnen, soru çözümlerin ve gelişimin tek ekranda." },
   "tanitim-becayis": { baslik: "Becayiş eşini bul, hemen yaz", alt: "Talebini yayımla, ilgilenenlerle site içinden mesajlaş." },
-  "tanitim-proplus": { baslik: "Sınırsız hazırlığa geç", alt: "Sınırsız deneme, konu bazlı değerlendirme ve reklamsız deneyim." },
+  "tanitim-proplus": { baslik: "Sınırsız hazırlığa geç", alt: "Sınırsız deneme, konu bazlı değerlendirme ve öncelikli destek." },
 };
 
 /** Karsilastirma satirlari: true = var, false = yok, metin = plana gore deger. */
@@ -106,7 +104,6 @@ export const KARSILASTIRMA: { ozellik: string; kaynak?: YukseltmeKaynagi; degerl
   { ozellik: "Becayiş talebi oluşturma", kaynak: "becayis-talep", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
   { ozellik: "Becayiş mesajlaşması", kaynak: "becayis-mesaj", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
   { ozellik: "Bana özel ilanlar", kaynak: "ozel-ilanlar", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
-  { ozellik: "Reklamsız deneyim", kaynak: "reklamsiz", degerler: { UCRETSIZ: false, PRO: false, PRO_PLUS: true } },
   { ozellik: "Öncelikli destek", degerler: { UCRETSIZ: false, PRO: false, PRO_PLUS: true } },
 ];
 

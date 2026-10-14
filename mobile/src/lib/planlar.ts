@@ -29,7 +29,6 @@ export const KAYNAK_METNI: Record<string, { baslik: string; alt: string }> = {
   "ozel-ilanlar": { baslik: "Sana özel ilanları gör", alt: "Bölümüne ve öğrenim düzeyine uygun ilanlar tek listede." },
 };
 
-// Uygulamada hic reklam yok; sitedeki "Reklamsiz deneyim" satiri burada gosterilmez.
 export const KARSILASTIRMA: { ozellik: string; kaynak?: string; degerler: Record<Plan, boolean | string> }[] = [
   { ozellik: "Tüm ilanlar ve bölüme göre arama", degerler: { UCRETSIZ: true, PRO: true, PRO_PLUS: true } },
   { ozellik: "Haftalık KPSS denemesi", kaynak: "deneme-hakki", degerler: { UCRETSIZ: "1", PRO: "3", PRO_PLUS: "Sınırsız" } },
