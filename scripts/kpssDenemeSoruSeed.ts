@@ -35,7 +35,11 @@ function konuSirasinaDiz(duzey: keyof typeof KONU_DAGILIMI, sorular: SeedSoru[])
     if (!dagilim[s.ders].some(([k]) => k === s.konu)) throw new Error(`${duzey} dagilimda olmayan konu: ${s.ders} / ${s.konu}`);
   }
   for (const grupId of new Set(sorular.map((s) => s.grupId).filter(Boolean))) {
-    if (new Set(sorular.filter((s) => s.grupId === grupId).map((s) => s.konu)).size > 1) throw new Error(`${duzey} grup konulari farkli: ${grupId}`);
+    const grup = sorular.filter((s) => s.grupId === grupId);
+    if (new Set(grup.map((s) => s.konu)).size > 1) throw new Error(`${duzey} grup konulari farkli: ${grupId}`);
+    // Ortak parca/bilgi her sorunun metninde tekrarlanir (ekran soruyu tek basina gosterir).
+    const parca = grup[0].soruMetni.split("\n\n").slice(0, -1).join("\n\n");
+    if (!parca || grup.some((s) => !s.soruMetni.startsWith(parca))) throw new Error(`${duzey} grup sorusunda ortak parca eksik: ${grupId}`);
   }
   const sira = (s: SeedSoru) => dagilim[s.ders].findIndex(([k]) => k === s.konu);
   return [...sorular].sort((a, b) => sira(a) - sira(b));

@@ -3,9 +3,10 @@
  * Ilk partiler kpssDenemeSoruVerisi*.ts dosyalarinda; yenisi eklenince buraya da eklenir.
  */
 import type { SeedSoru } from "../kpssDenemeOrtak";
+import { LISANS_2 } from "./lisans-2";
 
 export const EK_PARTILER: Record<"LISANS" | "ONLISANS" | "LISE", SeedSoru[][]> = {
-  LISANS: [],
+  LISANS: [LISANS_2],
   ONLISANS: [],
   LISE: [],
 };
