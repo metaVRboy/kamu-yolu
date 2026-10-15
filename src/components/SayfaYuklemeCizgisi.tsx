@@ -53,7 +53,8 @@ export function SayfaYuklemeCizgisi() {
       }, 200);
     }
     function tiklama(e: MouseEvent) {
-      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      // defaultPrevented: link giris/kayit penceresini actiysa (AuthModal) sayfa degismez.
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       const a = (e.target as Element | null)?.closest?.("a");
       if (!a || !a.href || a.hasAttribute("download") || (a.target && a.target !== "_self")) return;
       baslat(new URL(a.href));

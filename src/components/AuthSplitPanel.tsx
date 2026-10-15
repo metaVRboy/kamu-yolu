@@ -84,6 +84,11 @@ export function AuthSplitPanel({
 
         <div className="relative">
           {ucretsizler && (
+            <p className="mb-4 font-sans text-2xl font-bold leading-tight tracking-tight">
+              <GirisBasligi />
+            </p>
+          )}
+          {ucretsizler && (
             <div className="mb-8 rounded-2xl border border-white/10 bg-white/5 p-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: LOGO_ALTIN_ACIK }}>
                 Ücretsiz hesabınla

@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { sayfaYuklemesiniBaslat } from "@/components/SayfaYuklemeCizgisi";
+import { useAuthModal } from "@/components/AuthModal";
 import { MessageCircle, Send, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -15,7 +14,7 @@ export function MessageWidget({
   talepBaslik: string;
   isLoggedIn: boolean;
 }) {
-  const router = useRouter();
+  const authAc = useAuthModal();
   const [open, setOpen] = useState(false);
   const [mesaj, setMesaj] = useState("");
   const [sent, setSent] = useState(false);
@@ -24,8 +23,8 @@ export function MessageWidget({
 
   function handleTriggerClick() {
     if (!isLoggedIn) {
-      sayfaYuklemesiniBaslat(`/giris?sonra=/becayis/${talepId}`);
-      router.push(`/giris?sonra=/becayis/${talepId}`);
+      // Girissiz: ayni sayfada giris penceresi; giristen sonra sayfa yenilenir, widget kullanilir.
+      authAc("giris");
       return;
     }
     setOpen((v) => !v);

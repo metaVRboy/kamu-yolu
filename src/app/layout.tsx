@@ -90,7 +90,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="tr" className={cn("h-full antialiased", inter.variable, "font-sans")}>
       <body className="flex min-h-full flex-col text-foreground">
-       <AuthModalProvider>
+       <AuthModalProvider linkleriYakala girisli={!!user}>
        <YukseltmeProvider>
         {ayar.seritMetni && <DuyuruSeridi metin={ayar.seritMetni} link={ayar.seritLink} tur={ayar.seritTur} />}
         {ayar.bakimModu && user?.isAdmin && (
