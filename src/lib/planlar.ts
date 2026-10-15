@@ -7,6 +7,14 @@ export const PLAN_ADI: Record<Plan, string> = { UCRETSIZ: "Standart", PRO: "Pro"
 
 export const UCRETLI_PLANLAR: UcretliPlan[] = ["PRO", "PRO_PLUS"];
 
+/** Ucretsiz (Standart) planin maddeleri: Aboneliğim karti ve kayit paneli ortak kaynak. */
+export const STANDART_OZELLIKLERI = [
+  "Tüm ilanları görüntüleme",
+  "Bölüm/seviyeye göre arama",
+  "Becayiş ilanlarını görüntüleme",
+  "Haftada toplam 1 KPSS denemesi (puan sonucu)",
+];
+
 /**
  * Sirket kurulup odeme altyapisi baglanana kadar false. Kapaliyken: kampanya/indirim ve ustu cizili
  * fiyat gosterilmez (hic satis yokken "eski fiyat" iddiasi yanilticidir), satis sozlesmesi sayfalari

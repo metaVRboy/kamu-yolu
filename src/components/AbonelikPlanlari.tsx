@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { YukseltButonu } from "@/components/YukseltmePenceresi";
-import { PLAN_ADI, kalanSureMetni, tl, type FiyatTablosu, type KampanyaOzeti, type Plan as PlanKey } from "@/lib/planlar";
+import { PLAN_ADI, STANDART_OZELLIKLERI, kalanSureMetni, tl, type FiyatTablosu, type KampanyaOzeti, type Plan as PlanKey } from "@/lib/planlar";
 
 // Fiyatlar admin panelden yonetilir (PlanFiyat + Kampanya); sayfa getFiyatlar() ile prop verir.
 const PLANLAR: {
@@ -20,12 +20,7 @@ const PLANLAR: {
     key: "UCRETSIZ",
     ad: "Standart",
     aciklama: "Temel kullanım için.",
-    ozellikler: [
-      "Tüm ilanları görüntüleme",
-      "Bölüm/seviyeye göre arama",
-      "Becayiş ilanlarını görüntüleme",
-      "Haftada toplam 1 KPSS denemesi (puan sonucu)",
-    ],
+    ozellikler: STANDART_OZELLIKLERI,
   },
   {
     key: "PRO",

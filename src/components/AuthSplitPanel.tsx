@@ -1,5 +1,6 @@
 import Image from "next/image";
-import { ShieldCheck, FileCheck2 } from "lucide-react";
+import { Check, ShieldCheck, FileCheck2 } from "lucide-react";
+import { STANDART_OZELLIKLERI } from "@/lib/planlar";
 
 // Logodaki gercek altin rengi (kamu-yolu-logo-orijinal.png'den piksel
 // ornegiyle bulundu: #C0A050) - UI'da baska bir sari/amber uydurmak
@@ -31,10 +32,13 @@ export function GirisBasligi() {
 export function AuthSplitPanel({
   baslik,
   aciklama,
+  ucretsizler = false,
   children,
 }: {
   baslik: React.ReactNode;
   aciklama: string;
+  /** Kayit modu: form uzun oldugu icin sol panelde ucretsiz hesabin sagladiklari da gosterilir. */
+  ucretsizler?: boolean;
   children: React.ReactNode;
 }) {
   // Yuvarlatma/kirpma (rounded-3xl + overflow-hidden) kasitli olarak
@@ -48,7 +52,8 @@ export function AuthSplitPanel({
   // gorunuyordu. Her yarim artik SADECE kendi arka planini tasiyor.
   return (
     <div className="mx-auto grid w-full max-w-4xl md:grid-cols-2">
-      <div className="relative hidden flex-col justify-end bg-slate-900 p-8 text-white md:flex">
+      {/* pt-44: icerik uzasa da sol-ustteki mutlak konumlu logonun altinda kalir. */}
+      <div className="relative hidden flex-col justify-end bg-slate-900 p-8 pt-44 text-white md:flex">
         <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
           {/* Logo kendi orijinal (koyu lacivert/altin) renkleriyle
               kullanildigi icin koyu panel uzerinde kaybolmamasi adina
@@ -78,6 +83,23 @@ export function AuthSplitPanel({
         />
 
         <div className="relative">
+          {ucretsizler && (
+            <div className="mb-8 rounded-2xl border border-white/10 bg-white/5 p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: LOGO_ALTIN_ACIK }}>
+                Ücretsiz hesabınla
+              </p>
+              <ul className="mt-3 space-y-2.5">
+                {STANDART_OZELLIKLERI.map((o) => (
+                  <li key={o} className="flex items-start gap-2.5 text-sm text-slate-200">
+                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full" style={{ background: LOGO_ALTIN }}>
+                      <Check className="h-3 w-3 text-slate-900" strokeWidth={3} />
+                    </span>
+                    {o}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <h2 className="font-sans text-2xl font-bold leading-tight tracking-tight">{baslik}</h2>
           <p className="mt-2 text-sm text-slate-300">{aciklama}</p>
 

@@ -12,6 +12,7 @@ export default function KayitOlPage() {
         <AuthSplitPanel
           baslik="Bölümüne uygun ilanları kaçırma."
           aciklama="Ücretsiz hesap oluştur; bölümüne göre eşleşen ilanları ve haberleri tek yerden takip et."
+          ucretsizler
         >
           <Suspense fallback={null}>
             <AuthForm mode="kayit" />

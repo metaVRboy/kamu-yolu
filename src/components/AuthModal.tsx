@@ -59,7 +59,7 @@ export function AuthModalProvider({ children }: { children: React.ReactNode }) {
               <X className="h-4 w-4" />
             </button>
             <div className="overflow-hidden rounded-3xl shadow-2xl">
-              <AuthSplitPanel baslik={PANEL_METNI[mod].baslik} aciklama={PANEL_METNI[mod].aciklama}>
+              <AuthSplitPanel baslik={PANEL_METNI[mod].baslik} aciklama={PANEL_METNI[mod].aciklama} ucretsizler={mod === "kayit"}>
                 <Suspense fallback={null}>
                   <AuthForm mode={mod} onBasarili={kapat} />
                 </Suspense>
