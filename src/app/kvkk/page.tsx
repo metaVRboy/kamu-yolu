@@ -1,7 +1,8 @@
 import { ShieldCheck } from "lucide-react";
 import { SayfaBasligi } from "@/components/SayfaBasligi";
 import Link from "next/link";
-import { ILETISIM_ADRES, ILETISIM_EPOSTA, ILETISIM_TELEFON } from "@/lib/site";
+import { ILETISIM_ADRES, ILETISIM_EPOSTA, ILETISIM_TELEFON, ODEME_KURULUSU } from "@/lib/site";
+import { SATIS_ACIK } from "@/lib/planlar";
 
 export const metadata = {
   title: "KVKK Aydınlatma Metni ve Gizlilik Politikası — Kamu Yolu",
@@ -11,6 +12,17 @@ export const metadata = {
 // Her satir: veri kategorisi -> amac -> hukuki sebep (KVKK m.5) -> saklama suresi. Metin koddaki
 // gercek davranisla birebir olmali; davranis degisirse burasi da guncellenir.
 const ISLEMELER: { veri: string; amac: string; sebep: string; sure: string }[] = [
+  // Odeme/fatura verisi yalniz satis acikken islenir; metin gercek davranisla ayni kalsin diye kosullu.
+  ...(SATIS_ACIK
+    ? [
+        {
+          veri: "Ödeme ve fatura bilgileri: ad soyad, e-posta, fatura adresi, satın alınan plan, tutar, ödeme tarihi ve ödeme kuruluşunun işlem numarası (kart numarası Kamu Yolu'na hiç ulaşmaz)",
+          amac: "Ödemenin alınması, aboneliğin başlatılması ve yenilenmesi, fatura düzenlenmesi, iade işlemleri",
+          sebep: "Sözleşmenin ifası (m.5/2-c) ve hukuki yükümlülük (m.5/2-ç; Vergi Usul Kanunu, Türk Ticaret Kanunu)",
+          sure: "Vergi ve ticaret mevzuatı gereği 10 yıl; hesap silinse de bu süre boyunca saklanır",
+        },
+      ]
+    : []),
   {
     veri: "Ad soyad, e-posta, şifre özeti (şifrenin kendisi saklanmaz), Google hesabıyla girişte Google hesap kimliği",
     amac: "Üyelik oluşturma, giriş, hesap güvenliği ve hesapla ilgili bildirimler",
@@ -99,6 +111,12 @@ const ALICILAR: { kim: string; ne: string; ulke: string }[] = [
   { kim: "Cloudflare Inc.", ne: "Robot doğrulaması (Turnstile) için tarayıcı ve IP bilgisi", ulke: "ABD" },
   { kim: "Meta Platforms / TikTok", ne: "Yalnızca çerez onayı verirseniz ve ilgili piksel etkinse reklam ölçümü", ulke: "ABD / İrlanda" },
   { kim: "SMS hizmet sağlayıcısı", ne: "SMS bildirimini açtıysanız telefon numaranız ve ileti metni (sağlayıcı bağlandığında)", ulke: "Türkiye" },
+  ...(SATIS_ACIK
+    ? [
+        { kim: ODEME_KURULUSU ?? "Ödeme kuruluşu", ne: "Ücretli abonelik ödemesi; kart bilgilerinizi doğrudan ödeme kuruluşu işler", ulke: "Türkiye" },
+        { kim: "e-Arşiv fatura hizmet sağlayıcısı ve Gelir İdaresi Başkanlığı", ne: "Fatura düzenlenmesi ve vergi bildirimi", ulke: "Türkiye" },
+      ]
+    : []),
 ];
 
 export default function KvkkPage() {

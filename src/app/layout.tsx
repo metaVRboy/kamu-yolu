@@ -8,7 +8,7 @@ import { getLastSuccessfulScrapeAt } from "@/lib/matching";
 import { cn } from "@/lib/utils";
 import { getCurrentUser } from "@/lib/auth";
 import { profilFotografiUrl } from "@/lib/profil";
-import { ILETISIM_ADRES, ILETISIM_EPOSTA, ILETISIM_TELEFON, SITE_URL } from "@/lib/site";
+import { ILETISIM_ADRES, ILETISIM_EPOSTA, ILETISIM_TELEFON, SATICI, SATICI_BILGILERI_TAMAM, SITE_URL } from "@/lib/site";
 import { SiteMenu } from "@/components/SiteMenu";
 import { HeaderNav } from "@/components/HeaderNav";
 import { NotificationBell } from "@/components/NotificationBell";
@@ -208,10 +208,10 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                 <li><Link href="/kvkk" className="transition-colors hover:text-white">KVKK &amp; Gizlilik</Link></li>
                 <li><Link href="/kullanim-kosullari" className="transition-colors hover:text-white">Kullanım Koşulları</Link></li>
                 <li><Link href="/cerez-politikasi" className="transition-colors hover:text-white">Çerez Tercihleri</Link></li>
-                {/* Satis sozlesmeleri odeme acilinca yayina girer (SATIS_ACIK). */}
-                {SATIS_ACIK && (
+                {/* Satis sozlesmeleri satici bilgileri dolunca (sanal POS incelemesi) ya da satis acilinca yayina girer. */}
+                {(SATIS_ACIK || SATICI_BILGILERI_TAMAM) && (
                   <>
-                    <li><Link href="/iade-politikasi" className="transition-colors hover:text-white">İade Politikası</Link></li>
+                    <li><Link href="/iade-politikasi" className="transition-colors hover:text-white">İptal, İade ve Teslimat</Link></li>
                     <li><Link href="/mesafeli-satis-sozlesmesi" className="transition-colors hover:text-white">Mesafeli Satış Sözleşmesi</Link></li>
                     <li><Link href="/on-bilgilendirme-formu" className="transition-colors hover:text-white">Ön Bilgilendirme Formu</Link></li>
                   </>
@@ -253,6 +253,14 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                 {ILETISIM_EPOSTA}
               </a>
             </p>
+            {/* E-ticaret kunyesi (6563 s. Kanun m.3): satici bilgileri dolunca gorunur. */}
+            {SATICI_BILGILERI_TAMAM && (
+              <p className="mt-1">
+                Satıcı: {SATICI.unvan} · {SATICI.vergiDairesi} V.D. {SATICI.vergiNo}
+                {SATICI.mersisNo && <> · MERSİS: {SATICI.mersisNo}</>}
+                {SATICI.odaKaydi && <> · {SATICI.odaKaydi}</>}
+              </p>
+            )}
             {/* 5651 Yonetmeligi m.5/2: yer saglayicinin unvan ve adresi. */}
             <p className="mt-1">
               Yer sağlayıcı: Vercel Inc., 440 N Barranca Avenue #4133, Covina, CA 91723, ABD · Veritabanı: Neon, LLC (Databricks, Inc.),

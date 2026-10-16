@@ -1,164 +1,165 @@
+import Link from "next/link";
 import { FileSignature } from "lucide-react";
 import { SayfaBasligi } from "@/components/SayfaBasligi";
+import { OnizlemeNotu, SaticiBilgileri, YasalBolum, odemeKurulusu, sozlesmeErisimi } from "@/components/YasalMetin";
 import { getFiyatlar } from "@/lib/fiyatlar";
-import { notFound } from "next/navigation";
-import { SATIS_ACIK, tl } from "@/lib/planlar";
+import { KARSILASTIRMA, PLAN_ADI, UCRETLI_PLANLAR, tl } from "@/lib/planlar";
 import { ILETISIM_EPOSTA } from "@/lib/site";
+
 export const metadata = {
   title: "Mesafeli Satış Sözleşmesi — Kamu Yolu",
 };
 
-function YerTutucu({ children }: { children: React.ReactNode }) {
-  return (
-    <mark className="rounded bg-amber-100 px-1.5 py-0.5 font-medium text-amber-800">
-      {children}
-    </mark>
-  );
-}
+/** Planin ozellikleri karsilastirma tablosundan (Aboneliğim sayfasiyla ayni kaynak). */
+const planOzellikleri = (plan: (typeof UCRETLI_PLANLAR)[number]) =>
+  KARSILASTIRMA.filter((s) => s.degerler[plan]).map((s) => (typeof s.degerler[plan] === "string" ? `${s.ozellik}: ${s.degerler[plan]}` : s.ozellik));
 
 export default async function MesafeliSatisSozlesmesiPage() {
-  // Satis yokken taslak sozlesme yayinda olmaz (satici/odeme kurulusu belli degil).
-  if (!SATIS_ACIK) notFound();
+  const { onizleme } = await sozlesmeErisimi();
   // Sozlesmede liste fiyati yazar (kampanya indirimi odeme adiminda ayrica gosterilir).
   const { tablo } = await getFiyatlar();
   return (
     <div className="mx-auto max-w-2xl px-4 py-14 sm:px-6 sm:py-20">
-      <SayfaBasligi
-        kompakt
-        ikon={FileSignature}
-        baslik="Mesafeli Satış Sözleşmesi"
-        aciklama={
-          <>
-            Bu sayfa taslak niteliğindedir; <YerTutucu>sarı vurgulu</YerTutucu> alanlar şirket kuruluşu ve fiyatlandırma netleştikçe doldurulmalı, yayına alınmadan önce bir hukuk danışmanınca onaylanmalıdır.
-          </>
-        }
-      />
+      <SayfaBasligi kompakt ikon={FileSignature} baslik="Mesafeli Satış Sözleşmesi" />
+      {onizleme && <OnizlemeNotu />}
 
-      <div className="prose prose-slate mt-6 max-w-none space-y-5 rounded-2xl border border-primary/10 bg-white p-6 shadow-sm sm:p-8 text-sm leading-relaxed text-slate-700">
-        <section>
-          <h2 className="font-sans text-base font-semibold text-primary">1. Taraflar</h2>
+      <div className="prose prose-slate mt-6 max-w-none space-y-5 rounded-2xl border border-primary/10 bg-white p-6 text-sm leading-relaxed text-slate-700 shadow-sm sm:p-8">
+        <YasalBolum baslik="1. Taraflar">
           <p>
             <strong>SATICI</strong>
           </p>
+          <SaticiBilgileri />
+          <p>
+            <strong>ALICI</strong>: kamuyolu.com üzerinden üye olup ücretli abonelik satın alan gerçek kişi. ALICI&apos;nın ad soyad, e-posta ve
+            fatura bilgileri sipariş anında üyelik hesabındaki ve ödeme adımında girdiği bilgilerdir.
+          </p>
+        </YasalBolum>
+
+        <YasalBolum baslik="2. Sözleşmenin Konusu">
+          <p>
+            İşbu sözleşmenin konusu, ALICI&apos;nın kamuyolu.com sitesi üzerinden elektronik ortamda satın aldığı, nitelikleri ve satış fiyatı aşağıda
+            belirtilen dijital abonelik hizmetinin satışı ve ifasına ilişkin olarak 6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli
+            Sözleşmeler Yönetmeliği hükümleri gereğince tarafların hak ve yükümlülüklerinin belirlenmesidir.
+          </p>
+        </YasalBolum>
+
+        <YasalBolum baslik="3. Hizmetin Temel Nitelikleri ve Fiyatı">
+          <div className="not-prose space-y-3">
+            {UCRETLI_PLANLAR.map((plan) => (
+              <div key={plan} className="rounded-xl border border-slate-200 p-3">
+                <p className="font-semibold text-slate-900">
+                  {PLAN_ADI[plan]} — {tl(tablo[plan].aylik.liste)} / ay · {tl(tablo[plan].yillik.liste)} / yıl (KDV dahil)
+                </p>
+                <ul className="mt-1.5 list-disc pl-5 text-xs text-slate-600">
+                  {planOzellikleri(plan).map((o) => (
+                    <li key={o}>{o}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+          <p>
+            Fiyatlara KDV dahildir; teslimat veya ek masraf yoktur. Kampanya varsa indirimli tutar ödeme adımında ayrıca gösterilir. Satın alma
+            anında ödeme ekranında gösterilen plan, dönem ve toplam tutar esastır.
+          </p>
+        </YasalBolum>
+
+        <YasalBolum baslik="4. Ödeme">
+          <p>
+            Ödeme, {odemeKurulusu()} altyapısıyla kredi kartı veya banka kartıyla, 3D Secure doğrulamalı olarak tek çekimde alınır. Kart
+            bilgileri Kamu Yolu sunucularına ulaşmaz ve saklanmaz; ödeme kuruluşu tarafından işlenir. Ödemenin ardından ALICI&apos;nın e-posta
+            adresine elektronik (e-Arşiv) fatura gönderilir.
+          </p>
+        </YasalBolum>
+
+        <YasalBolum baslik="5. Abonelik Süresi, Yenileme ve İptal">
           <ul className="list-disc pl-5">
-            <li>Unvan: <YerTutucu>[ŞİRKET UNVANI]</YerTutucu></li>
-            <li>Adres: <YerTutucu>[AÇIK ADRES]</YerTutucu></li>
-            <li>Vergi Dairesi / No: <YerTutucu>[VERGİ DAİRESİ VE NUMARASI]</YerTutucu></li>
-            <li>MERSİS No: <YerTutucu>[MERSİS NUMARASI]</YerTutucu></li>
-            <li>E-posta: {ILETISIM_EPOSTA}</li>
+            <li>Aylık plan bir aylık, yıllık plan on iki aylık dönemler halinde sunulur; dönem, ödemenin onaylandığı an başlar.</li>
+            <li>
+              Abonelik, ALICI iptal etmedikçe dönem sonunda aynı süre ve o anki fiyatla otomatik yenilenir ve ödeme kuruluşunda kayıtlı karttan
+              tahsil edilir. Yıllık planda yenilemeden en az 7 gün önce e-posta ile hatırlatma yapılır.
+            </li>
+            <li>
+              ALICI aboneliğini dilediği an, ek ücret ödemeden{" "}
+              <Link href="/profilim/abonelik" className="text-primary underline">
+                Aboneliğim
+              </Link>{" "}
+              sayfasından iptal edebilir. İptal, içinde bulunulan dönemi sonlandırmaz: ALICI ödediği dönemin sonuna kadar hizmetten yararlanır,
+              sonraki dönem için ücret alınmaz.
+            </li>
+            <li>
+              Fiyat değişikliği, yürürlüğe girmeden en az 30 gün önce e-posta ile bildirilir ve yalnızca sonraki yenilemelere uygulanır; ALICI
+              kabul etmezse yenilemeden önce iptal edebilir.
+            </li>
           </ul>
+        </YasalBolum>
+
+        <YasalBolum baslik="6. Hizmetin İfası (Teslimi)">
           <p>
-            <strong>ALICI</strong>: kamuyolu.com üzerinden üye olup ücretli abonelik satın alan
-            gerçek kişi (&quot;Tüketici/Kullanıcı&quot;).
+            Hizmet dijitaldir, fiziksel teslimat yoktur. Ödeme onaylandığı anda abonelik ALICI&apos;nın hesabında etkinleşir ve ALICI&apos;ya
+            e-posta ile bildirilir. Hizmete güncel bir web tarayıcısı ve internet bağlantısıyla kamuyolu.com üzerinden erişilir.
           </p>
-        </section>
+        </YasalBolum>
 
-        <section>
-          <h2 className="font-sans text-base font-semibold text-primary">2. Sözleşmenin Konusu</h2>
+        <YasalBolum baslik="7. Cayma Hakkı">
           <p>
-            İşbu sözleşmenin konusu, ALICI&apos;nın SATICI&apos;ya ait kamuyolu.com internet
-            sitesi üzerinden elektronik ortamda siparişini verdiği aşağıda nitelikleri ve satış
-            fiyatı belirtilen dijital abonelik hizmetinin satışı ve ifasına ilişkin olarak 6502
-            sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmeler Yönetmeliği
-            hükümleri gereğince tarafların hak ve yükümlülüklerinin belirlenmesidir.
+            Mesafeli Sözleşmeler Yönetmeliği&apos;nin 15. maddesi uyarınca, elektronik ortamda anında ifa edilen hizmetlerde ve tüketicinin onayıyla
+            cayma süresi içinde ifasına başlanan hizmetlerde cayma hakkı kullanılamaz. ALICI, satın alma adımında hizmetin hemen başlamasına onay
+            verdiğini ve bu nedenle cayma hakkının bulunmadığını bildiğini ayrıca onaylar.
           </p>
-        </section>
-
-        <section>
-          <h2 className="font-sans text-base font-semibold text-primary">3. Hizmetin Temel Nitelikleri ve Fiyatı</h2>
-          <table className="w-full border-collapse text-sm">
-            <thead>
-              <tr>
-                <th className="border border-border bg-slate-50 p-2 text-left">Plan</th>
-                <th className="border border-border bg-slate-50 p-2 text-left">Temel Özellikler</th>
-                <th className="border border-border bg-slate-50 p-2 text-left">Fiyat (KDV Dahil)</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="border border-border p-2">Pro</td>
-                <td className="border border-border p-2">
-                  SMS ile anlık ilan bildirimi, kişisel bildirimler, becayiş talebi oluşturma ve
-                  site içi mesajlaşma, haftada toplam 3 KPSS deneme sınavı, ders karnesi ve soru çözümleri
-                </td>
-                <td className="border border-border p-2">{tl(tablo.PRO.aylik.liste)} / ay · {tl(tablo.PRO.yillik.liste)} / yıl</td>
-              </tr>
-              <tr>
-                <td className="border border-border p-2">Pro+</td>
-                <td className="border border-border p-2">
-                  Pro&apos;daki tüm özellikler, sınırsız KPSS deneme sınavı, konu bazlı değerlendirme ve gelişim
-                  takibi, öncelikli destek
-                </td>
-                <td className="border border-border p-2">{tl(tablo.PRO_PLUS.aylik.liste)} / ay · {tl(tablo.PRO_PLUS.yillik.liste)} / yıl</td>
-              </tr>
-            </tbody>
-          </table>
-          <p className="mt-2">
-            Güncel fiyatlar ve kapsam her zaman{" "}
-            <a href="/profilim/abonelik" className="text-primary underline">
-              Aboneliğim
-            </a>{" "}
-            sayfasında yayınlanır; satın alma anındaki fiyat ve içerik esastır.
-          </p>
-        </section>
-
-        <section>
-          <h2 className="font-sans text-base font-semibold text-primary">4. Ödeme Şekli</h2>
           <p>
-            Ödeme, <YerTutucu>[ÖDEME KURULUŞU ADI]</YerTutucu> aracılığıyla kredi kartı/banka
-            kartı ile gerçekleştirilir. Abonelik, ALICI iptal etmediği sürece seçilen dönem
-            (aylık/yıllık) sonunda otomatik olarak yenilenir ve kayıtlı ödeme yöntemine
-            yansıtılır.
+            Buna rağmen SATICI, ücretli özelliklerin hiç kullanılmadığı durumlarda satın alma tarihinden itibaren 14 gün içinde yapılan taleplerde
+            ücretin tamamını iade etmeyi taahhüt eder. Koşullar{" "}
+            <Link href="/iade-politikasi" className="text-primary underline">
+              İptal, İade ve Teslimat Koşulları
+            </Link>{" "}
+            sayfasındadır.
           </p>
-        </section>
+        </YasalBolum>
 
-        <section>
-          <h2 className="font-sans text-base font-semibold text-primary">5. Hizmetin İfası</h2>
-          <p>
-            Ödemenin onaylanmasının ardından abonelik, ALICI&apos;nın hesabında anında aktif
-            hale gelir ve elektronik ortamda ifa edilmiş sayılır. Hizmet, fiziksel bir teslimat
-            gerektirmez.
-          </p>
-        </section>
-
-        <section>
-          <h2 className="font-sans text-base font-semibold text-primary">6. Cayma Hakkı</h2>
-          <p>
-            Mesafeli Sözleşmeler Yönetmeliği&apos;nin 15/1-ğ maddesi uyarınca, ALICI&apos;nın
-            onayı ile elektronik ortamda anında ifa edilen hizmetlerde (işbu dijital abonelik
-            gibi) ALICI, hizmeti kullanmaya başladıktan sonra cayma hakkını kullanamaz. Hizmeti
-            henüz kullanmaya başlamadıysanız, satın alma tarihinden itibaren 14 gün içinde cayma
-            hakkınızı kullanabilirsiniz. Ayrıntılar için{" "}
-            <a href="/iade-politikasi" className="text-primary underline">
-              İade Politikası
-            </a>{" "}
-            sayfasına bakınız.
-          </p>
-        </section>
-
-        <section>
-          <h2 className="font-sans text-base font-semibold text-primary">7. Genel Hükümler</h2>
+        <YasalBolum baslik="8. Tarafların Yükümlülükleri">
           <ul className="list-disc pl-5">
-            <li>ALICI, sipariş vermeden önce bu sözleşmeyi ve Ön Bilgilendirme Formunu okuyup onayladığını kabul eder.</li>
-            <li>SATICI, haklı bir nedenle hizmeti sunamayacak duruma gelirse ALICI&apos;yı bilgilendirip tahsil edilen bedeli iade eder.</li>
-            <li>İşbu sözleşme, ALICI&apos;nın elektronik ortamda onay vermesiyle yürürlüğe girer.</li>
+            <li>ALICI, hesabını ve aboneliğini üçüncü kişilerle paylaşmaz; hizmeti Kullanım Koşulları&apos;na uygun kullanır.</li>
+            <li>
+              SATICI, hizmeti kesintisiz sunmaya özen gösterir; planlı bakımlar ve SATICI&apos;nın kontrolü dışındaki kesintiler (internet altyapısı,
+              barındırma sağlayıcısı arızaları, mücbir sebepler) bu yükümlülüğün ihlali sayılmaz.
+            </li>
+            <li>
+              SATICI, haklı bir nedenle hizmeti sunamayacak duruma gelirse ALICI&apos;ya bildirir ve kullanılmayan döneme ait bedeli en geç 14 gün
+              içinde iade eder.
+            </li>
+            <li>
+              İlan bilgileri kamu kurumlarının resmi kaynaklarından derlenir; başvurularda ilgili kurumun resmi ilanı esastır. Kamu Yolu bir kamu
+              kurumu değildir.
+            </li>
           </ul>
-        </section>
+        </YasalBolum>
 
-        <section>
-          <h2 className="font-sans text-base font-semibold text-primary">8. Uyuşmazlıkların Çözümü</h2>
+        <YasalBolum baslik="9. Kişisel Veriler">
           <p>
-            İşbu sözleşmeden doğan uyuşmazlıklarda, Ticaret Bakanlığınca her yıl ilan edilen
-            parasal sınırlar dahilinde ALICI&apos;nın yerleşim yerindeki veya SATICI&apos;nın
-            işlem yaptığı Tüketici Hakem Heyetleri, bu sınırları aşan uyuşmazlıklarda ise
-            Tüketici Mahkemeleri yetkilidir.
+            ALICI&apos;nın kişisel verileri{" "}
+            <Link href="/kvkk" className="text-primary underline">
+              KVKK Aydınlatma Metni
+            </Link>{" "}
+            kapsamında işlenir.
           </p>
-        </section>
+        </YasalBolum>
 
-        <p className="text-xs text-muted-foreground">
-          Son güncelleme: bu metin genel bilgilendirme amaçlıdır; ücretli abonelik satışı
-          başlamadan önce bir hukuk danışmanı tarafından gözden geçirilmesi önerilir.
-        </p>
+        <YasalBolum baslik="10. Uyuşmazlıkların Çözümü">
+          <p>
+            Şikâyetler için öncelikle {ILETISIM_EPOSTA} adresine başvurulabilir. Uyuşmazlıklarda, Ticaret Bakanlığınca her yıl ilan edilen parasal
+            sınırlar dahilinde ALICI&apos;nın yerleşim yerindeki veya işlemin yapıldığı yerdeki Tüketici Hakem Heyetleri, bu sınırları aşan
+            uyuşmazlıklarda Tüketici Mahkemeleri yetkilidir.
+          </p>
+        </YasalBolum>
+
+        <YasalBolum baslik="11. Yürürlük">
+          <p>
+            ALICI, ödeme adımında Ön Bilgilendirme Formu&apos;nu ve işbu sözleşmeyi okuyup onayladığını elektronik ortamda beyan eder; sözleşme bu
+            onay ve ödemenin tamamlanmasıyla kurulur. Sözleşme metni ALICI&apos;nın e-posta adresine gönderilir ve hesabından erişilebilir halde
+            saklanır.
+          </p>
+        </YasalBolum>
       </div>
     </div>
   );

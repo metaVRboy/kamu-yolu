@@ -1,132 +1,118 @@
+import Link from "next/link";
 import { FileText } from "lucide-react";
 import { SayfaBasligi } from "@/components/SayfaBasligi";
+import { OnizlemeNotu, SaticiBilgileri, YasalBolum, odemeKurulusu, sozlesmeErisimi } from "@/components/YasalMetin";
 import { getFiyatlar } from "@/lib/fiyatlar";
-import { notFound } from "next/navigation";
-import { SATIS_ACIK, tl } from "@/lib/planlar";
+import { PLAN_ADI, UCRETLI_PLANLAR, tl } from "@/lib/planlar";
 import { ILETISIM_EPOSTA } from "@/lib/site";
+
 export const metadata = {
   title: "Ön Bilgilendirme Formu — Kamu Yolu",
 };
 
-function YerTutucu({ children }: { children: React.ReactNode }) {
-  return (
-    <mark className="rounded bg-amber-100 px-1.5 py-0.5 font-medium text-amber-800">
-      {children}
-    </mark>
-  );
-}
-
+// Mesafeli Sozlesmeler Yonetmeligi m.5'in saydigi bilgiler; satin alma adiminda sozlesmeden once onaylatilir.
 export default async function OnBilgilendirmeFormuPage() {
-  // Satis yokken taslak sozlesme yayinda olmaz (satici/odeme kurulusu belli degil).
-  if (!SATIS_ACIK) notFound();
+  const { onizleme } = await sozlesmeErisimi();
   const { tablo } = await getFiyatlar();
   return (
     <div className="mx-auto max-w-2xl px-4 py-14 sm:px-6 sm:py-20">
-      <SayfaBasligi
-        kompakt
-        ikon={FileText}
-        baslik="Ön Bilgilendirme Formu"
-        aciklama={
-          <>
-            Bu sayfa taslak niteliğindedir; <YerTutucu>sarı vurgulu</YerTutucu> alanlar şirket kuruluşu ve fiyatlandırma netleştikçe doldurulmalı, yayına alınmadan önce bir hukuk danışmanınca onaylanmalıdır.
-          </>
-        }
-      />
+      <SayfaBasligi kompakt ikon={FileText} baslik="Ön Bilgilendirme Formu" />
+      {onizleme && <OnizlemeNotu />}
 
-      <div className="prose prose-slate mt-6 max-w-none space-y-5 rounded-2xl border border-primary/10 bg-white p-6 shadow-sm sm:p-8 text-sm leading-relaxed text-slate-700">
+      <div className="prose prose-slate mt-6 max-w-none space-y-5 rounded-2xl border border-primary/10 bg-white p-6 text-sm leading-relaxed text-slate-700 shadow-sm sm:p-8">
         <p>
-          6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmeler
-          Yönetmeliği uyarınca, bir abonelik satın almadan önce aşağıdaki bilgiler size
-          açıkça sunulur.
+          6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmeler Yönetmeliği uyarınca, abonelik satın almadan önce aşağıdaki
+          bilgiler size sunulur.
         </p>
 
-        <section>
-          <h2 className="font-sans text-base font-semibold text-primary">1. Satıcı Bilgileri</h2>
+        <YasalBolum baslik="1. Satıcı">
+          <SaticiBilgileri />
+        </YasalBolum>
+
+        <YasalBolum baslik="2. Hizmetin Temel Nitelikleri">
+          <p>
+            Pro ve Pro+ planları kamuyolu.com üzerinde sunulan dijital abonelik hizmetleridir; fiziksel ürün veya teslimat içermez. Her planın
+            özellikleri ödeme ekranında, Aboneliğim sayfasında ve{" "}
+            <Link href="/mesafeli-satis-sozlesmesi" className="text-primary underline">
+              Mesafeli Satış Sözleşmesi
+            </Link>
+            &apos;nin 3. maddesinde listelenir.
+          </p>
+        </YasalBolum>
+
+        <YasalBolum baslik="3. Toplam Fiyat">
           <ul className="list-disc pl-5">
-            <li>Unvan: <YerTutucu>[ŞİRKET UNVANI]</YerTutucu></li>
-            <li>Adres: <YerTutucu>[AÇIK ADRES]</YerTutucu></li>
-            <li>Telefon: <YerTutucu>[TELEFON]</YerTutucu></li>
-            <li>E-posta: {ILETISIM_EPOSTA}</li>
-            <li>MERSİS No: <YerTutucu>[MERSİS NUMARASI]</YerTutucu></li>
+            {UCRETLI_PLANLAR.map((plan) => (
+              <li key={plan}>
+                {PLAN_ADI[plan]}: {tl(tablo[plan].aylik.liste)} / ay veya {tl(tablo[plan].yillik.liste)} / yıl
+              </li>
+            ))}
           </ul>
-        </section>
-
-        <section>
-          <h2 className="font-sans text-base font-semibold text-primary">2. Hizmetin Temel Özellikleri</h2>
           <p>
-            Satın aldığınız plan (Pro veya Pro+), kamuyolu.com üzerinde dijital bir abonelik
-            hizmetidir ve fiziksel teslimat içermez. Her planın kapsadığı özellikler (SMS
-            bildirimi, bölüme özel bildirim, becayiş mesajlaşması, sınırsız KPSS denemesi vb.) satın
-            alma ekranında ve{" "}
-            <a href="/profilim/abonelik" className="text-primary underline">
-              Aboneliğim
-            </a>{" "}
-            sayfasında ayrıntılı olarak listelenir.
+            Fiyatlara KDV dahildir; teslimat veya ek masraf yoktur. Kampanya varsa ödeyeceğiniz toplam tutar ödeme ekranında açıkça gösterilir.
           </p>
-        </section>
+        </YasalBolum>
 
-        <section>
-          <h2 className="font-sans text-base font-semibold text-primary">3. Toplam Fiyat (Vergiler Dahil)</h2>
+        <YasalBolum baslik="4. Ödeme">
           <p>
-            Seçtiğiniz plan ve dönem (aylık/yıllık) için ödeyeceğiniz toplam tutar, ödeme
-            adımında KDV dahil olarak açıkça gösterilir. Güncel fiyatlar: Pro {tl(tablo.PRO.aylik.liste)}/ay ({tl(tablo.PRO.yillik.liste)}/yıl), Pro+{" "}
-            {tl(tablo.PRO_PLUS.aylik.liste)}/ay ({tl(tablo.PRO_PLUS.yillik.liste)}/yıl).
+            Ödeme, {odemeKurulusu()} güvenli ödeme sayfasında kredi/banka kartıyla, 3D Secure doğrulamalı olarak tek çekimde alınır. Kart
+            bilgileriniz Kamu Yolu&apos;na ulaşmaz. Faturanız e-Arşiv fatura olarak e-posta adresinize gönderilir.
           </p>
-        </section>
+        </YasalBolum>
 
-        <section>
-          <h2 className="font-sans text-base font-semibold text-primary">4. Ödeme Şekli ve Yenileme</h2>
+        <YasalBolum baslik="5. Hizmetin İfası">
+          <p>Ödeme onaylandığı anda abonelik hesabınızda etkinleşir ve size e-posta ile bildirilir. Teslimat süresi yoktur.</p>
+        </YasalBolum>
+
+        <YasalBolum baslik="6. Sözleşmenin Süresi, Yenileme ve Fesih">
           <p>
-            Ödeme, <YerTutucu>[ÖDEME KURULUŞU ADI]</YerTutucu> güvenli ödeme sayfası üzerinden
-            kredi/banka kartı ile tek seferde tahsil edilir. Abonelik, siz iptal etmediğiniz
-            sürece dönem sonunda otomatik olarak yenilenir ve aynı tutar yeniden tahsil edilir.
-            İstediğiniz zaman{" "}
-            <a href="/profilim/abonelik" className="text-primary underline">
-              Aboneliğim
-            </a>{" "}
-            sayfasından iptal edebilirsiniz.
+            Abonelik seçtiğiniz döneme (bir ay veya on iki ay) göre kurulur ve iptal etmediğiniz sürece dönem sonunda aynı süreyle otomatik
+            yenilenir; yenileme bedeli kayıtlı kartınızdan tahsil edilir. Yıllık planda yenilemeden en az 7 gün önce e-posta ile hatırlatılırsınız.
+            Aboneliğinizi istediğiniz an, ek ücret ödemeden Aboneliğim sayfasından iptal edebilirsiniz; ödediğiniz dönemin sonuna kadar hizmeti
+            kullanmaya devam edersiniz. Asgari taahhüt süresi ve depozito yoktur.
           </p>
-        </section>
+        </YasalBolum>
 
-        <section>
-          <h2 className="font-sans text-base font-semibold text-primary">5. Cayma Hakkı</h2>
+        <YasalBolum baslik="7. Cayma Hakkı">
           <p>
-            Hizmeti kullanmaya başlamadan önce (onay anından itibaren) 14 gün içinde cayma
-            hakkınızı kullanabilirsiniz. Hizmeti onaylayıp kullanmaya başladığınızda (ör. SMS
-            bildirimi almaya başladığınızda), Mesafeli Sözleşmeler Yönetmeliği&apos;nin 15/1-ğ
-            maddesi gereği cayma hakkınız sona erer. Ayrıntılar için{" "}
-            <a href="/iade-politikasi" className="text-primary underline">
-              İade Politikası
-            </a>{" "}
-            sayfasına bakınız.
+            Bu hizmet elektronik ortamda anında ifa edildiğinden ve ifasına onayınızla hemen başlandığından, Mesafeli Sözleşmeler
+            Yönetmeliği&apos;nin 15. maddesi uyarınca <strong>cayma hakkınız bulunmamaktadır</strong>. Ödeme adımında bunu ayrıca onaylamanız
+            istenir.
           </p>
-        </section>
-
-        <section>
-          <h2 className="font-sans text-base font-semibold text-primary">6. Şikayet ve Başvuru Yolları</h2>
           <p>
-            Şikayetleriniz için öncelikle {ILETISIM_EPOSTA} adresinden
-            bizimle iletişime geçebilirsiniz. Çözülemeyen uyuşmazlıklarda, Ticaret Bakanlığınca
-            ilan edilen parasal sınırlar dahilinde yerleşim yerinizdeki Tüketici Hakem Heyeti
-            veya Tüketici Mahkemesine başvurabilirsiniz.
+            Bununla birlikte, ücretli özelliklerin hiçbirini kullanmadıysanız satın alma tarihinden itibaren 14 gün içinde iade talep edebilirsiniz;
+            ücretin tamamı iade edilir. Ayrıntılar:{" "}
+            <Link href="/iade-politikasi" className="text-primary underline">
+              İptal, İade ve Teslimat Koşulları
+            </Link>
+            .
           </p>
-        </section>
+        </YasalBolum>
 
-        <section>
-          <h2 className="font-sans text-base font-semibold text-primary">7. Onay</h2>
+        <YasalBolum baslik="8. Dijital Hizmetin İşlevselliği ve Uyumluluk">
           <p>
-            Ödeme adımında bu formu ve{" "}
-            <a href="/mesafeli-satis-sozlesmesi" className="text-primary underline">
-              Mesafeli Satış Sözleşmesi&apos;ni
-            </a>{" "}
-            okuyup onayladığınızı beyan edersiniz. Onayınız olmadan ödeme işlemi tamamlanmaz.
+            Hizmete güncel bir web tarayıcısı (Chrome, Safari, Edge, Firefox) ve internet bağlantısıyla erişilir; ek yazılım veya donanım gerekmez.
+            Hesabınız kişiseldir, başkalarıyla paylaşılamaz.
           </p>
-        </section>
+        </YasalBolum>
 
-        <p className="text-xs text-muted-foreground">
-          Son güncelleme: bu metin genel bilgilendirme amaçlıdır; ücretli abonelik satışı
-          başlamadan önce bir hukuk danışmanı tarafından gözden geçirilmesi önerilir.
-        </p>
+        <YasalBolum baslik="9. Şikâyet ve Başvuru Yolları">
+          <p>
+            Şikâyetleriniz için {ILETISIM_EPOSTA} adresine veya{" "}
+            <Link href="/destek" className="text-primary underline">
+              destek formuna
+            </Link>{" "}
+            yazabilirsiniz. Çözülemeyen uyuşmazlıklarda Ticaret Bakanlığınca ilan edilen parasal sınırlar dahilinde yerleşim yerinizdeki Tüketici
+            Hakem Heyeti&apos;ne, sınırları aşan durumlarda Tüketici Mahkemesi&apos;ne başvurabilirsiniz.
+          </p>
+        </YasalBolum>
+
+        <YasalBolum baslik="10. Onay">
+          <p>
+            Ödeme adımında bu formu ve Mesafeli Satış Sözleşmesi&apos;ni okuyup onayladığınızı beyan edersiniz; onayınız olmadan ödeme işlemi
+            başlamaz. Onayladığınız metinler e-posta adresinize de gönderilir.
+          </p>
+        </YasalBolum>
       </div>
     </div>
   );

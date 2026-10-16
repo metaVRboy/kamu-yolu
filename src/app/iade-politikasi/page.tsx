@@ -1,121 +1,100 @@
+import Link from "next/link";
 import { RotateCcw } from "lucide-react";
 import { SayfaBasligi } from "@/components/SayfaBasligi";
-import { notFound } from "next/navigation";
+import { OnizlemeNotu, YasalBolum, odemeKurulusu, sozlesmeErisimi } from "@/components/YasalMetin";
 import { ILETISIM_EPOSTA } from "@/lib/site";
-import { SATIS_ACIK } from "@/lib/planlar";
+
 export const metadata = {
-  title: "İade Politikası — Kamu Yolu",
+  title: "İptal, İade ve Teslimat Koşulları — Kamu Yolu",
 };
 
-function YerTutucu({ children }: { children: React.ReactNode }) {
-  return (
-    <mark className="rounded bg-amber-100 px-1.5 py-0.5 font-medium text-amber-800">
-      {children}
-    </mark>
-  );
-}
-
-export default function IadePolitikasiPage() {
-  // Satis yokken taslak sozlesme yayinda olmaz (satici/odeme kurulusu belli degil).
-  if (!SATIS_ACIK) notFound();
+export default async function IadePolitikasiPage() {
+  const { onizleme } = await sozlesmeErisimi();
   return (
     <div className="mx-auto max-w-2xl px-4 py-14 sm:px-6 sm:py-20">
-      <SayfaBasligi
-        kompakt
-        ikon={RotateCcw}
-        baslik="İade Politikası"
-        aciklama={
-          <>
-            Bu sayfa taslak niteliğindedir; <YerTutucu>sarı vurgulu</YerTutucu> alanlar şirket kuruluşu ve fiyatlandırma netleştikçe doldurulmalıdır.
-          </>
-        }
-      />
+      <SayfaBasligi kompakt ikon={RotateCcw} baslik="İptal, İade ve Teslimat Koşulları" />
+      {onizleme && <OnizlemeNotu />}
 
-      <div className="prose prose-slate mt-6 max-w-none space-y-5 rounded-2xl border border-primary/10 bg-white p-6 shadow-sm sm:p-8 text-sm leading-relaxed text-slate-700">
-        <section>
-          <h2 className="font-sans text-base font-semibold text-primary">1. Kapsam</h2>
+      <div className="prose prose-slate mt-6 max-w-none space-y-5 rounded-2xl border border-primary/10 bg-white p-6 text-sm leading-relaxed text-slate-700 shadow-sm sm:p-8">
+        <YasalBolum baslik="1. Kapsam">
           <p>
-            Bu politika, kamuyolu.com üzerinden satın alınan Pro ve Pro+ abonelik paketlerinin
-            (&quot;Hizmet&quot;) iptal ve iade koşullarını düzenler. Standart (ücretsiz) plan
-            kapsamında herhangi bir ücret alınmadığından bu politika Standart plan için
-            uygulanmaz.
+            Bu koşullar kamuyolu.com üzerinden satın alınan Pro ve Pro+ aboneliklerinin teslimatını, iptalini ve iadesini düzenler. Standart plan
+            ücretsiz olduğundan bu koşullar Standart plana uygulanmaz.
           </p>
-        </section>
+        </YasalBolum>
 
-        <section>
-          <h2 className="font-sans text-base font-semibold text-primary">2. Dijital Hizmetlerde Cayma Hakkı İstisnası</h2>
-          <p>
-            6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmeler
-            Yönetmeliği&apos;nin 15. maddesi uyarınca; <strong>elektronik ortamda anında ifa
-            edilen hizmetler ve anında teslim edilen gayrimaddi mallara</strong> (ör. dijital
-            abonelik erişimi) ilişkin sözleşmelerde, tüketici hizmetin ifasına onay verip
-            kullanmaya başladıktan sonra <strong>cayma hakkını kullanamaz</strong>.
-          </p>
-          <p>
-            Abonelik satın alma adımında bu husus açıkça onayınıza sunulur. Onay vermeden önce
-            hizmet başlatılmaz ve cayma hakkınız 14 gün süreyle saklı kalır.
-          </p>
-        </section>
-
-        <section>
-          <h2 className="font-sans text-base font-semibold text-primary">3. İptal ve İade Şartları</h2>
+        <YasalBolum baslik="2. Teslimat">
           <ul className="list-disc pl-5">
+            <li>Satılan hizmet dijital bir aboneliktir; kargo, fiziksel ürün veya teslimat ücreti yoktur.</li>
             <li>
-              <strong>Hizmeti hiç kullanmadıysanız</strong> (Pro/Pro+&apos;a özel hiçbir özelliğe
-              erişmediyseniz), satın alma tarihinden itibaren 14 gün içinde talep etmeniz
-              halinde ücretiniz tam olarak iade edilir.
+              Ödeme onaylandığı anda abonelik hesabınızda etkinleşir; Pro/Pro+ özellikleri hemen kullanılabilir. Hesabınızdaki plan rozeti ve size
+              gönderilen onay e-postası teslimin kanıtıdır.
             </li>
             <li>
-              <strong>Hizmeti kullanmaya başladıysanız</strong> (SMS bildirimi aldıysanız,
-              ücretli KPSS denemesi çözdüyseniz vb.), yukarıdaki yasal istisna gereği iade
-              talebiniz değerlendirmeye tabi olup otomatik olarak kabul edilmeyebilir.
-            </li>
-            <li>
-              <strong>Teknik arıza</strong> nedeniyle satın aldığınız hizmeti hiç
-              kullanamadıysanız, arızanın ispatı halinde ilgili dönem için ücret iadesi veya
-              sonraki döneme mahsup yapılır.
-            </li>
-            <li>
-              Yıllık planlarda, kullanılmayan ay sayısı oranında kısmi iade talebi ayrıca
-              değerlendirilir.
+              Ödeme alındığı halde aboneliğiniz 1 saat içinde etkinleşmediyse {ILETISIM_EPOSTA} adresine yazın; sorun giderilir ya da ücretiniz iade
+              edilir.
             </li>
           </ul>
-        </section>
+        </YasalBolum>
 
-        <section>
-          <h2 className="font-sans text-base font-semibold text-primary">4. Aboneliğin İptali (Yenilenmemesi)</h2>
+        <YasalBolum baslik="3. Cayma Hakkı">
           <p>
-            Otomatik yenilenen abonelikler, bir sonraki fatura döneminden en az 24 saat önce{" "}
-            <YerTutucu>Aboneliğim</YerTutucu> sayfasından iptal edilerek durdurulabilir. İptal
-            işlemi mevcut dönemi hemen sonlandırmaz; ödenen dönem sonuna kadar hizmetten
-            faydalanmaya devam edersiniz, bir sonraki dönem için ücret tahsil edilmez.
+            Mesafeli Sözleşmeler Yönetmeliği&apos;nin 15. maddesi uyarınca, elektronik ortamda anında ifa edilen ve onayınızla hemen başlatılan
+            dijital hizmetlerde cayma hakkı bulunmaz. Ödeme adımında bu husus ayrıca onayınıza sunulur.
           </p>
-        </section>
+        </YasalBolum>
 
-        <section>
-          <h2 className="font-sans text-base font-semibold text-primary">5. İade Süreci</h2>
+        <YasalBolum baslik="4. İade Taahhüdümüz">
+          <p>Yasal zorunluluk olmasa da aşağıdaki durumlarda ücretinizi iade ederiz:</p>
+          <ul className="list-disc pl-5">
+            <li>
+              <strong>Hiç kullanılmayan abonelik:</strong> Satın alma tarihinden itibaren 14 gün içinde talep eder ve bu sürede Pro/Pro+&apos;a özel
+              hiçbir özelliği kullanmamış olursanız (ör. ücretli KPSS denemesi çözmediyseniz, ders karnesi açmadıysanız, becayiş mesajı
+              göndermediyseniz, SMS bildirimi almadıysanız) ücretin tamamı iade edilir.
+            </li>
+            <li>
+              <strong>Mükerrer veya hatalı tahsilat:</strong> Aynı abonelik için birden fazla ya da yanlış tutarda çekim yapıldıysa fazla tutar
+              eksiksiz iade edilir.
+            </li>
+            <li>
+              <strong>Hizmetin sunulamaması:</strong> Teknik bir sorun nedeniyle satın aldığınız hizmeti kullanamadıysanız, etkilenen süreye ait
+              bedel iade edilir ya da aboneliğiniz o süre kadar uzatılır (tercih sizindir).
+            </li>
+          </ul>
           <p>
-            Onaylanan iadeler, ödemenin yapıldığı yönteme (kredi/banka kartı vb.) iş bankaları
-            ve ödeme kuruluşunun işlem sürelerine bağlı olarak genellikle{" "}
-            <YerTutucu>[X] iş günü</YerTutucu> içinde yansıtılır. İade talepleriniz için{" "}
-            {ILETISIM_EPOSTA} adresinden bizimle iletişime
-            geçebilirsiniz.
+            Bu durumlar dışında, başlamış bir abonelik döneminin bedeli iade edilmez; aboneliğinizi iptal ederek sonraki dönemin ücretlendirilmesini
+            durdurabilirsiniz.
           </p>
-        </section>
+        </YasalBolum>
 
-        <section>
-          <h2 className="font-sans text-base font-semibold text-primary">6. Ödeme Kuruluşu</h2>
+        <YasalBolum baslik="5. Aboneliğin İptali">
           <p>
-            Ödemeleriniz <YerTutucu>[ÖDEME KURULUŞU ADI, ör. iyzico/PayTR]</YerTutucu> güvenli
-            ödeme altyapısı üzerinden işlenir; kart bilgileriniz Kamu Yolu sunucularında
-            saklanmaz.
+            Aboneliğinizi istediğiniz an, ek ücret ödemeden{" "}
+            <Link href="/profilim/abonelik" className="text-primary underline">
+              Aboneliğim
+            </Link>{" "}
+            sayfasından iptal edebilirsiniz. İptal, içinde bulunduğunuz dönemi sonlandırmaz: ödediğiniz dönemin sonuna kadar hizmetten yararlanırsınız
+            ve sonraki dönem için kartınızdan ücret alınmaz. Yenilemenin durması için iptalin yenileme tarihinden önce yapılması yeterlidir.
           </p>
-        </section>
+        </YasalBolum>
 
-        <p className="text-xs text-muted-foreground">
-          Son güncelleme: bu metin genel bilgilendirme amaçlıdır; ücretli abonelik satışı
-          başlamadan önce bir hukuk danışmanı tarafından gözden geçirilmesi önerilir.
-        </p>
+        <YasalBolum baslik="6. İade Süreci">
+          <ul className="list-disc pl-5">
+            <li>
+              İade talebinizi {ILETISIM_EPOSTA} adresine ya da{" "}
+              <Link href="/destek" className="text-primary underline">
+                destek formuna
+              </Link>{" "}
+              hesabınızın e-posta adresiyle yazın.
+            </li>
+            <li>Talebiniz en geç 3 iş günü içinde sonuçlandırılır ve size e-posta ile bildirilir.</li>
+            <li>
+              Onaylanan iade, {odemeKurulusu()} üzerinden ödemeyi yaptığınız karta yapılır. Tutarın hesabınıza yansıması bankanıza bağlı olarak
+              genellikle 2–10 iş günü sürer.
+            </li>
+            <li>İade edilen abonelik iade anında sona erer.</li>
+          </ul>
+        </YasalBolum>
       </div>
     </div>
   );
