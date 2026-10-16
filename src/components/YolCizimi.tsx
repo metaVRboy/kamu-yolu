@@ -29,11 +29,12 @@ export function YolCizimi() {
       const sol = bosluk / 2;
       const sag = k.width - bosluk / 2;
       let x = sag;
-      // Sag ust koseden kivrilarak girer.
-      let d = `M ${k.width + 60} 40 C ${sag} 40, ${sag} 120, ${sag} 260`;
-      for (const g of gecisler) {
-        const y1 = g.top - k.top + g.height * 0.2;
-        const y2 = g.bottom - k.top - g.height * 0.2;
+      const araliklar = gecisler.map((g) => [g.top - k.top + g.height * 0.2, g.bottom - k.top - g.height * 0.2]);
+      // Sag ust koseden kivrilarak girer; ilk gecis (orn. sayfa basligi karti) cok yukaridaysa
+      // kivrimin yeri yok -> dogrudan ustten iner (yoksa yol geri yukari donup catallanir).
+      const girisSonu = Math.min(260, araliklar[0]?.[0] ?? 260);
+      let d = girisSonu < 180 ? `M ${sag} -40` : `M ${k.width + 60} 40 C ${sag} 40, ${sag} 120, ${sag} ${girisSonu}`;
+      for (const [y1, y2] of araliklar) {
         const ortaY = (y1 + y2) / 2;
         const yeniX = x === sag ? sol : sag;
         d += ` L ${x} ${y1} C ${x} ${ortaY}, ${yeniX} ${ortaY}, ${yeniX} ${y2}`;
