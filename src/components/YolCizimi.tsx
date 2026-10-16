@@ -3,11 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 
 const YOL_GENISLIK = 46;
+// max-w-6xl (72rem); sayfa kapsayicilarinin ic dolgusu (px-6) yolun icerige yaklasmasini zaten engeller.
+const ICERIK_GENISLIGI = 1152;
 
 /**
- * Ana sayfanin altin yolu: sayfadaki gercek konumlardan cizilir. Yol hep kenar boslugundan iner,
- * karsi kenara yalniz [data-yol-gecis] bloklarinin (opak kart izgaralari, lacivert bant) arkasindan
- * gecer; boylece hicbir yazinin ustune gelmez. Kenar boslugu yola yetmeyen ekranlarda cizilmez.
+ * Sitenin altin yolu: sayfadaki gercek konumlardan cizilir. Yol hep icerigin disindaki kenar boslugundan
+ * iner, karsi kenara yalniz [data-yol-gecis] bloklarinin (sayfa basligi karti, opak kart izgaralari,
+ * lacivert bant) arkasindan gecer; boylece hicbir yazinin ustune gelmez. Icerik genisligi: [data-yol-icerik]
+ * (admin, max-w-7xl) yoksa sitenin standart max-w-6xl'i. Kenar boslugu yola yetmeyen ekranlarda cizilmez.
  */
 export function YolCizimi() {
   const ref = useRef<SVGSVGElement>(null);
@@ -19,10 +22,12 @@ export function YolCizimi() {
     const hesapla = () => {
       const k = kok.getBoundingClientRect();
       const gecisler = [...kok.querySelectorAll<HTMLElement>("[data-yol-gecis]")].map((e) => e.getBoundingClientRect());
-      const izgara = kok.querySelector<HTMLElement>("[data-yol-gecis]:not(section)")?.getBoundingClientRect();
-      if (!izgara || izgara.left - k.left < YOL_GENISLIK * 2) return setCizim(null);
-      const sol = (izgara.left - k.left) / 2;
-      const sag = izgara.right - k.left + (k.right - izgara.right) / 2;
+      const icerik = kok.querySelector<HTMLElement>("[data-yol-icerik]")?.getBoundingClientRect();
+      const genislik = icerik?.width ?? Math.min(k.width, ICERIK_GENISLIGI);
+      const bosluk = (k.width - genislik) / 2;
+      if (bosluk < YOL_GENISLIK * 2) return setCizim(null);
+      const sol = bosluk / 2;
+      const sag = k.width - bosluk / 2;
       let x = sag;
       // Sag ust koseden kivrilarak girer.
       let d = `M ${k.width + 60} 40 C ${sag} 40, ${sag} 120, ${sag} 260`;

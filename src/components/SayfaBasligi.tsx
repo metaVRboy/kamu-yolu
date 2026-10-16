@@ -44,7 +44,9 @@ export function SayfaBasligi({
   kompakt?: boolean;
 }) {
   return (
+    // data-yol-gecis: sitenin altin yolu (YolCizimi) karsi kenara bu opak kartin arkasindan gecer.
     <header
+      data-yol-gecis
       className={cn(
         // overflow-hidden yalniz dekor katmaninda: basliktaki acilir paneller (bolum secici) kirpilmasin.
         "relative border border-primary/10 bg-white shadow-sm",

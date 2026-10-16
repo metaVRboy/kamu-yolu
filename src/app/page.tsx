@@ -8,7 +8,6 @@ import { DepartmentSearch } from "@/components/DepartmentSearch";
 import { HaberlerSection } from "@/components/HaberlerSection";
 import { HeroHaberCarousel } from "@/components/HeroHaberCarousel";
 import { BizeUlasin } from "@/components/BizeUlasin";
-import { AnaSayfaZemini } from "@/components/AnaSayfaZemini";
 import { KpssBandi } from "@/components/KpssBandi";
 import { SayacArtis } from "@/components/SayacArtis";
 
@@ -42,10 +41,8 @@ export default async function Home() {
   const haberlerMapped = haberler.slice(0, 5).map((h) => ({ ...h, yayinTarihi: h.yayinTarihi.toISOString() }));
 
   return (
-    // Tam genislik kok: hareketli zemin (lekeler, altin yol, imlec isigi) ve lacivert KPSS bandi kenardan kenara;
-    // icerik bloklari max-w-6xl. overflow-x-clip: lekeler yatay kaydirma yaratmasin (sticky'yi bozmaz).
-    <div data-yol-kok className="relative isolate overflow-x-clip">
-      <AnaSayfaZemini />
+    // Tam genislik kok: lacivert KPSS bandi kenardan kenara; icerik bloklari max-w-6xl. Hareketli zemin layout'ta (SiteZemini).
+    <div className="relative">
       <div className="relative mx-auto max-w-6xl px-4 pt-14 sm:px-6 sm:pt-20">
         <section className="relative z-20 grid gap-6 lg:grid-cols-[minmax(0,400px)_1fr] lg:items-stretch">
           {/* Isik yansimasi (box-shadow) bu disaridaki elemanda animasyonlu -

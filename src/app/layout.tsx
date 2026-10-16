@@ -21,6 +21,7 @@ import { BekleyenTalepGonder, YukseltmeProvider } from "@/components/YukseltmePe
 import { SATIS_ACIK } from "@/lib/planlar";
 import { SayfaYuklemeCizgisi } from "@/components/SayfaYuklemeCizgisi";
 import { AuthModalProvider } from "@/components/AuthModal";
+import { SiteZemini } from "@/components/SiteZemini";
 import { HeaderAuthButton } from "@/components/HeaderAuthButton";
 import { GezinmeKaydi } from "@/components/GeriDonLinki";
 import { DuyuruSeridi } from "@/components/DuyuruSeridi";
@@ -134,7 +135,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           </Suspense>
         </header>
 
-        <div className="flex w-full flex-1 items-start justify-center">
+        {/* Hareketli zemin (lekeler, altin yol, imlec isigi) tum sayfalarda icerigin arkasinda; overflow-x-clip: lekeler yatay kaydirma yaratmasin. */}
+        <div data-yol-kok className="relative flex w-full flex-1 items-start justify-center overflow-x-clip">
+          <SiteZemini />
           <main className="min-w-0 flex-1">
             <Suspense fallback={null}>
               <GezinmeKaydi />
