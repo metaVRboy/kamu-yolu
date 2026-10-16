@@ -38,7 +38,7 @@ export function BolumBasligi({
   sayac?: number;
 }) {
   return (
-    <div className="relative pb-5">
+    <div className="gorununce-belir relative pb-5">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex items-stretch">
           {/* Amblem site mavisinde tek renk, soldan saga kaybolur; tam kayboldugu yerde dik cizgi yaziyi ayirir.

@@ -134,7 +134,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           </Suspense>
         </header>
 
-        <div className="mx-auto flex w-full max-w-[1600px] flex-1 items-start justify-center gap-4 px-2">
+        <div className="flex w-full flex-1 items-start justify-center">
           <main className="min-w-0 flex-1">
             <Suspense fallback={null}>
               <GezinmeKaydi />

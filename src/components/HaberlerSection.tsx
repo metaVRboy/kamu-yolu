@@ -57,7 +57,7 @@ export function HaberlerSection({
         />
       )}
 
-      <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div data-yol-gecis className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {haberler.length === 0 && (
           <p className="text-sm text-muted-foreground">Henüz haber eklenmedi.</p>
         )}
