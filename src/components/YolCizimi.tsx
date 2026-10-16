@@ -21,24 +21,38 @@ export function YolCizimi() {
     if (!kok) return;
     const hesapla = () => {
       const k = kok.getBoundingClientRect();
-      const gecisler = [...kok.querySelectorAll<HTMLElement>("[data-yol-gecis]")].map((e) => e.getBoundingClientRect());
+      // Kart izgaralarinda yol ilk kartin ortasindan gecer (iki satirin ortasi satir boslugunda kalirdi).
+      const gecisY = [...kok.querySelectorAll<HTMLElement>("[data-yol-gecis]")].map((e) => {
+        const r = (e.tagName === "SECTION" || e.tagName === "HEADER" ? e : (e.firstElementChild ?? e)).getBoundingClientRect();
+        return (r.top + r.bottom) / 2 - k.top;
+      });
       const icerik = kok.querySelector<HTMLElement>("[data-yol-icerik]")?.getBoundingClientRect();
       const genislik = icerik?.width ?? Math.min(k.width, ICERIK_GENISLIGI);
       const bosluk = (k.width - genislik) / 2;
       if (bosluk < YOL_GENISLIK * 2) return setCizim(null);
       const sol = bosluk / 2;
       const sag = k.width - bosluk / 2;
+      // Donusler ceyrek daire: yaricap = yolun ortasindan icerik kenarina uzaklik (yay tamamen kenar boslugunda).
+      const R = bosluk / 2;
+      const GIRIS_Y = 70;
       let x = sag;
-      const araliklar = gecisler.map((g) => [g.top - k.top + g.height * 0.2, g.bottom - k.top - g.height * 0.2]);
-      // Sag ust koseden kivrilarak girer; ilk gecis (orn. sayfa basligi karti) cok yukaridaysa
-      // kivrimin yeri yok -> dogrudan ustten iner (yoksa yol geri yukari donup catallanir).
-      const girisSonu = Math.min(260, araliklar[0]?.[0] ?? 260);
-      let d = girisSonu < 180 ? `M ${sag} -40` : `M ${k.width + 60} 40 C ${sag} 40, ${sag} 120, ${sag} ${girisSonu}`;
-      for (const [y1, y2] of araliklar) {
-        const ortaY = (y1 + y2) / 2;
+      let y = -40;
+      let d = `M ${sag} -40`;
+      // Yer varsa sag kenardan yatay girip yayla asagi doner; ilk gecis cok yukaridaysa dogrudan ustten iner.
+      if (!gecisY.length || gecisY[0] - R >= GIRIS_Y + R + 20) {
+        d = `M ${k.width + 40} ${GIRIS_Y} L ${k.width} ${GIRIS_Y} A ${R} ${R} 0 0 0 ${sag} ${GIRIS_Y + R}`;
+        y = GIRIS_Y + R;
+      }
+      for (const yc of gecisY) {
+        const r = Math.min(R, yc - y);
+        if (r < 12) continue;
         const yeniX = x === sag ? sol : sag;
-        d += ` L ${x} ${y1} C ${x} ${ortaY}, ${yeniX} ${ortaY}, ${yeniX} ${y2}`;
+        const yon = Math.sign(yeniX - x);
+        // asagi -> yatay (yay), kartin arkasindan yatay, yatay -> asagi (yay)
+        d += ` L ${x} ${yc - r} A ${r} ${r} 0 0 ${yon < 0 ? 1 : 0} ${x + yon * r} ${yc}`;
+        d += ` L ${yeniX - yon * r} ${yc} A ${r} ${r} 0 0 ${yon < 0 ? 0 : 1} ${yeniX} ${yc + r}`;
         x = yeniX;
+        y = yc + r;
       }
       d += ` L ${x} ${k.height + 40}`;
       setCizim({ w: k.width, h: k.height, d });
