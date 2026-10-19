@@ -42,10 +42,43 @@ function blokSinirlari(metin: string, acilis: number) {
   return null;
 }
 
+/** `^{...}` / `√{...}` blogunun kapanis parantezi (ic ice bloklar atlanir); yoksa -1. */
+function kapanisBul(metin: string, acilis: number) {
+  let derinlik = 0;
+  for (let i = acilis; i < metin.length; i++) {
+    if (metin[i] === "{") derinlik++;
+    else if (metin[i] === "}" && --derinlik === 0) return i;
+  }
+  return -1;
+}
+
 function parcala(metin: string, stil: Stil, renk: string): ReactNode {
   const parcalar: ReactNode[] = [];
   let duz = "";
   for (let i = 0; i < metin.length; i++) {
+    // Sitedeki gibi: ust 2^{x+1}, ustu cizgili kok √{x − 8}.
+    const ozel = (metin[i] === "^" || metin[i] === "√") && metin[i + 1] === "{" ? kapanisBul(metin, i + 1) : -1;
+    if (ozel > 0) {
+      parcalar.push(...basitKesirler(duz, stil, renk));
+      duz = "";
+      const ic = parcala(metin.slice(i + 2, ozel), stil, renk);
+      parcalar.push(
+        metin[i] === "^" ? (
+          <View style={{ transform: [{ translateY: -6 }] }}>
+            <T style={[stil, { fontSize: 11, lineHeight: 13 }]}>{ic}</T>
+          </View>
+        ) : (
+          <View style={{ flexDirection: "row", alignItems: "flex-start", transform: [{ translateY: 3 }] }}>
+            <T style={stil}>√</T>
+            <View style={{ borderTopWidth: 1.5, borderColor: renk, marginTop: 2 }}>
+              <T style={stil}>{ic}</T>
+            </View>
+          </View>
+        ),
+      );
+      i = ozel;
+      continue;
+    }
     const blok = metin[i] === "{" ? blokSinirlari(metin, i) : null;
     if (!blok) {
       duz += metin[i];

@@ -27,7 +27,8 @@ const r = (a: number, b: number) => a + Math.floor(Math.random() * (b - a + 1));
 const sec = <T,>(d: readonly T[]) => d[Math.floor(Math.random() * d.length)];
 const ebob = (a: number, b: number): number => (b ? ebob(b, a % b) : Math.abs(a));
 const ekok = (a: number, b: number) => (a / ebob(a, b)) * b;
-const ust = (s: string) => [...s].map((c) => ({ "+": "⁺", "-": "⁻", x: "ˣ" })[c] ?? "⁰¹²³⁴⁵⁶⁷⁸⁹"[Number(c)] ?? c).join("");
+// Us: KesirliMetin `^{...}` blogunu gercek ust simge olarak basar.
+const ust = (s: string) => `^{${s.replace("-", "−")}}`;
 const isaretli = (n: number) => (n > 0 ? ` + ${n}` : n < 0 ? ` − ${-n}` : "");
 const us = (q: number) => ust(`x${q > 0 ? `+${q}` : q < 0 ? `-${-q}` : ""}`);
 // Ondalik virgul ve gercek eksi isareti (−).
@@ -43,15 +44,15 @@ const sonKelime = (n: number) => {
   if (n % 100) return ONLAR[(n % 100) / 10];
   return n % 1000 ? "yüz" : n % 1e6 ? "bin" : "milyon";
 };
-/** Sayiya kesme isaretiyle ek: ek(175, "dir") = "175'tir", ek(6, "in") = "6'nın", ek(30, "de") = "30'da", ek(2, "er") = "2'şer". */
-export function ek(n: number, tur: "dir" | "in" | "de" | "er") {
+/** Sayiya kesme isaretiyle ek: ek(175, "dir") = "175'tir", ek(6, "in") = "6'nın", ek(30, "de") = "30'da", ek(2, "er") = "2'şer", ek(30, "si") = "30'u", ek(60, "lik") = "60'lık". */
+export function ek(n: number, tur: "dir" | "in" | "de" | "er" | "si" | "lik") {
   const k = sonKelime(n);
   const unlu = [...k].reverse().find((c) => "aeıioöuü".includes(c))!;
   const dort = "aı".includes(unlu) ? "ı" : "ei".includes(unlu) ? "i" : "ou".includes(unlu) ? "u" : "ü";
   const iki = "eiöü".includes(unlu) ? "e" : "a";
   const unluyleBiter = "aeıioöuü".includes(k.at(-1)!);
   const sert = "fstkçşhp".includes(k.at(-1)!);
-  const ekMetni = { dir: `${sert ? "t" : "d"}${dort}r`, in: unluyleBiter ? `n${dort}n` : `${dort}n`, de: `${sert ? "t" : "d"}${iki}`, er: unluyleBiter ? `ş${iki}r` : `${iki}r` }[tur];
+  const ekMetni = { dir: `${sert ? "t" : "d"}${dort}r`, in: unluyleBiter ? `n${dort}n` : `${dort}n`, de: `${sert ? "t" : "d"}${iki}`, er: unluyleBiter ? `ş${iki}r` : `${iki}r`, si: unluyleBiter ? `s${dort}` : dort, lik: `l${dort}k` }[tur];
   return `${String(n).replace(".", ",")}'${ekMetni}`;
 }
 

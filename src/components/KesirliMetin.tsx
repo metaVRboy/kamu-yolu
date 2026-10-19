@@ -40,10 +40,39 @@ function blokSinirlari(metin: string, acilis: number) {
   return null;
 }
 
+/** `^{...}` / `√{...}` blogunun kapanis parantezi (ic ice bloklar atlanir); yoksa -1. */
+function kapanisBul(metin: string, acilis: number) {
+  let derinlik = 0;
+  for (let i = acilis; i < metin.length; i++) {
+    if (metin[i] === "{") derinlik++;
+    else if (metin[i] === "}" && --derinlik === 0) return i;
+  }
+  return -1;
+}
+
 function parcala(metin: string): ReactNode {
   const parcalar: ReactNode[] = [];
   let duz = "";
   for (let i = 0; i < metin.length; i++) {
+    // Ust: 2^{x+1}; kok: √{x − 8} (ustu cizgili kok).
+    const ozel = (metin[i] === "^" || metin[i] === "√") && metin[i + 1] === "{" ? kapanisBul(metin, i + 1) : -1;
+    if (ozel > 0) {
+      parcalar.push(...basitKesirler(duz));
+      duz = "";
+      const ic = parcala(metin.slice(i + 2, ozel));
+      parcalar.push(
+        metin[i] === "^" ? (
+          <sup className="text-[0.7em]">{ic}</sup>
+        ) : (
+          <span className="inline-flex items-start">
+            <span>√</span>
+            <span className="mt-[0.15em] border-t-[1.5px] border-current pt-px leading-tight">{ic}</span>
+          </span>
+        ),
+      );
+      i = ozel;
+      continue;
+    }
     const blok = metin[i] === "{" ? blokSinirlari(metin, i) : null;
     if (!blok) {
       duz += metin[i];
@@ -61,7 +90,7 @@ function parcala(metin: string): ReactNode {
 /**
  * Deneme soru/şık/açıklama metinlerini kesirler dikey (pay üstte, payda altta)
  * gösterilecek biçimde basar. Bileşik kesir veride `{pay|payda}` ile yazılır;
- * iç içe olabilir: `{1|2 + 3/4}`.
+ * iç içe olabilir: `{1|2 + 3/4}`. Üs `2^{x+1}`, üstü çizgili kök `√{x − 8}`.
  */
 export function KesirliMetin({ metin }: { metin: string }) {
   return <>{parcala(metin)}</>;

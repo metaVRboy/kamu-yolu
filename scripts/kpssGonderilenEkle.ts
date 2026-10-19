@@ -23,7 +23,7 @@ async function main() {
         continue;
       }
       if (!yaz) continue;
-      const veri = { ders: s.ders, konu: s.konu, secenekler: s.secenekler, dogruCevap: s.dogruCevap, aciklama: s.aciklama, gorselSvg: s.gorselSvg ?? null, geometri: !!s.geometri, grupId: s.grupId ? `gonderilen-${s.grupId}` : null };
+      const veri = { ders: s.ders, konu: s.konu, secenekler: s.secenekler, dogruCevap: s.dogruCevap, aciklama: s.aciklama, gorselSvg: s.gorselSvg ?? null, geometri: !!s.geometri, sablon: s.sablon ?? null, grupId: s.grupId ? `gonderilen-${s.grupId}` : null };
       const g = await prisma.denemeSoru.updateMany({ where: { duzey, soruMetni: s.soruMetni, uretim: "gonderilen" }, data: veri });
       if (!g.count) await prisma.denemeSoru.create({ data: { ...veri, duzey, soruMetni: s.soruMetni, uretim: "gonderilen", sira: 50_000 + i } });
       eklenen++;

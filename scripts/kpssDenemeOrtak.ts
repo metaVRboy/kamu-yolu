@@ -13,6 +13,8 @@ export type SeedSoru = {
   geometri?: boolean;
   // Ders ici konu; sinav sonu konu analizinde kullanilir (ör. "Kesirler ve Ondalık Sayılar").
   konu?: string;
+  // Ayni kaliptan (yalniz sayilari farkli) sorular: ayni denemeye ikisi girmez (DenemeSoru.sablon).
+  sablon?: string;
   gorselSvg?: string;
   secenekler: [string, string, string, string, string];
   dogruCevap: number;
