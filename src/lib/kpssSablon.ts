@@ -5,7 +5,7 @@
  * Kontrol: npx tsx scripts/kpssSablonKontrol.ts
  */
 import { prisma } from "@/lib/prisma";
-import { geometriSekli, geometriSorunu, iklimGrafigi, IKLIM_ISTASYONLARI, IL_ADLARI, ilKoordinati, turkiyeHaritasi, type GeometriSekli } from "@/lib/kpssGorsel";
+import { geometriSekli, geometriSorunu, iklimGrafigi, sutunGrafigi, sutunVerisiTutarli, IKLIM_ISTASYONLARI, IL_ADLARI, ilKoordinati, turkiyeHaritasi, type GeometriSekli } from "@/lib/kpssGorsel";
 
 type Uretilen = {
   metin: string;
@@ -132,11 +132,13 @@ export const SABLONLAR: Sablon[] = [
     duzey: "LISANS",
     konu: "Temel Kavramlar",
     uret: () => {
-      const a = r(4, 30);
-      const b = r(4, 30);
+      // a = g·m, b = g·n (m, n aralarinda asal): EKOK = g·m·n, fayans sayisi m·n.
+      const g = r(2, 6);
+      const [m, n] = [r(2, 9), r(2, 9)];
+      const [a, b] = [g * m, g * n];
       const L = ekok(a, b);
       const adet = (L / a) * (L / b);
-      if (a === b || ebob(a, b) === 1 || adet < 6 || adet > 120) return null;
+      if (m === n || ebob(m, n) !== 1 || b > 40 || a > 40 || adet > 120) return null;
       return {
         metin: `Kısa kenarı ${Math.min(a, b)} cm, uzun kenarı ${Math.max(a, b)} cm olan dikdörtgen biçimindeki özdeş fayanslar aynı yönde, aralarında boşluk kalmayacak şekilde yan yana dizilerek kare biçiminde bir alan oluşturulacaktır.\n\nBuna göre en az kaç fayans gerekir?`,
         dogru: adet,
@@ -609,6 +611,9 @@ export const SABLONLAR: Sablon[] = [
 
 // ---- Cografya: il koordinatlarindan konum, MGM istasyonlarindan iklim ----
 
+// Sablon kimligi on eki (LISANS ve LISE ikisi de L ile basladigi icin harf degil).
+const ONEK: Record<Sablon["duzey"], string> = { LISANS: "L", ONLISANS: "O", LISE: "M" };
+
 const ROMA = ["I", "II", "III", "IV", "V"];
 const romaGoster = (v: number) => ROMA[v - 1] ?? "";
 
@@ -638,7 +643,7 @@ const ENLEM_SORULARI: KonumSorusu[] = [
 ];
 
 const konumSablonu = (duzey: Sablon["duzey"], tur: "boylam" | "enlem"): Sablon => ({
-  id: `${duzey[0]}-cg-konum-${tur}`,
+  id: `${ONEK[duzey]}-cg-konum-${tur}`,
   duzey,
   ders: "COGRAFYA",
   konu: "Coğrafi Konum",
@@ -670,7 +675,7 @@ const konumSablonu = (duzey: Sablon["duzey"], tur: "boylam" | "enlem"): Sablon =
 const IKLIM_BOLGELERI = [["Antalya", "İzmir", "Adana"], ["Rize"], ["Konya", "Ankara", "Erzurum", "Van"], ["Diyarbakır"], ["İstanbul"]];
 
 const iklimSablonu = (duzey: Sablon["duzey"]): Sablon => ({
-  id: `${duzey[0]}-cg-iklim-merkez`,
+  id: `${ONEK[duzey]}-cg-iklim-merkez`,
   duzey,
   ders: "COGRAFYA",
   konu: "İklim ve Bitki Örtüsü",
@@ -694,6 +699,226 @@ const iklimSablonu = (duzey: Sablon["duzey"]): Sablon => ({
 const AYLAR = ["ocak", "şubat", "mart", "nisan", "mayıs", "haziran", "temmuz", "ağustos", "eylül", "ekim", "kasım", "aralık"];
 
 SABLONLAR.push(...(["LISANS", "ONLISANS", "LISE"] as const).flatMap((d) => [konumSablonu(d, "boylam"), konumSablonu(d, "enlem"), iklimSablonu(d)]));
+
+// ---- Onlisans / Ortaogretim matematik: uygun Lisans sablonlari o duzeyin konusuna uyarlanir + duzeye ozgu sablonlar ----
+
+/** Lisans sablonu -> diger duzeylerdeki konu (konusu o duzeyde olmayanlar uyarlanmaz). */
+export const LISANS_UYARLAMA: Record<string, Partial<Record<Sablon["duzey"], string>>> = {
+  "L-tk-ardisik-tek": { ONLISANS: "Temel Kavramlar", LISE: "Temel Kavramlar" },
+  "L-tk-bolme-kalan": { ONLISANS: "Sayılar ve EBOB-EKOK", LISE: "Temel Kavramlar" },
+  "L-tk-ekok-karo": { ONLISANS: "Sayılar ve EBOB-EKOK", LISE: "Problemler" },
+  "L-rs-kesirli-denklem": { ONLISANS: "Rasyonel ve Ondalık Sayılar", LISE: "Rasyonel Sayılar" },
+  "L-rs-ondalik-bolme": { ONLISANS: "Rasyonel ve Ondalık Sayılar", LISE: "Rasyonel Sayılar" },
+  "L-be-aralik": { LISE: "Matematiksel İlişkilerden Yararlanma" },
+  "L-md-esitsizlik-toplam": { ONLISANS: "Mutlak Değer", LISE: "Matematiksel İlişkilerden Yararlanma" },
+  "L-us-ortak-carpan": { ONLISANS: "Üslü Sayılar", LISE: "Üslü Sayılar" },
+  "L-us-taban-esitleme": { ONLISANS: "Üslü Sayılar", LISE: "Üslü Sayılar" },
+  "L-kok-toplama": { LISE: "Köklü Sayılar" },
+  "L-ca-kareler-toplami": { ONLISANS: "Denklem Çözme", LISE: "Matematiksel İlişkilerden Yararlanma" },
+  "L-dc-oranti": { ONLISANS: "Oran-Orantı", LISE: "Matematiksel İlişkilerden Yararlanma" },
+  "L-sp-kat-fark": { ONLISANS: "Sayı Problemleri", LISE: "Problemler" },
+  "L-yas-kat": { ONLISANS: "Yaş Problemleri", LISE: "Problemler" },
+  "L-hp-orta-nokta": { ONLISANS: "Hareket Problemleri", LISE: "Problemler" },
+  "L-yz-zam-indirim": { LISE: "Problemler" },
+  "L-km-iki-dil": { ONLISANS: "Kümeler", LISE: "Matematiksel İlişkilerden Yararlanma" },
+  "L-fn-ters": { ONLISANS: "Fonksiyonlar", LISE: "Matematiksel İlişkilerden Yararlanma" },
+  "L-is-tanimli-islem": { LISE: "Matematiksel İlişkilerden Yararlanma" },
+  "L-ol-iki-renk": { ONLISANS: "Olasılık", LISE: "Problemler" },
+  "L-sm-dizi-dogrusal": { ONLISANS: "Sayısal Mantık", LISE: "Sayısal Mantık" },
+  "L-sm-dizi-ikinci-fark": { ONLISANS: "Sayısal Mantık", LISE: "Sayısal Mantık" },
+  "L-geo-dik-ucgen-yukseklik": { ONLISANS: "Geometri", LISE: "Temel Geometri" },
+  "L-geo-ikizkenar-yamuk": { ONLISANS: "Geometri", LISE: "Temel Geometri" },
+  "L-ag-ucgen-alan": { ONLISANS: "Geometri", LISE: "Temel Geometri" },
+};
+for (const s of SABLONLAR.filter((x) => x.duzey === "LISANS" && !x.ders)) {
+  for (const [duzey, konu] of Object.entries(LISANS_UYARLAMA[s.id] ?? {}) as [Sablon["duzey"], string][]) {
+    SABLONLAR.push({ ...s, id: s.id.replace(/^L-/, `${ONEK[duzey]}-`), duzey, konu });
+  }
+}
+
+const PAYDA_EKI: Record<number, string> = { 2: "ikide", 3: "üçte", 4: "dörtte", 5: "beşte", 6: "altıda" };
+const PAY_EKI: Record<number, string> = { 1: "birini", 2: "ikisini", 3: "üçünü", 4: "dördünü", 5: "beşini" };
+/** 3/4 -> "dörtte üçünü" */
+const kesirOku = (p: number, q: number) => `${PAYDA_EKI[q]} ${PAY_EKI[p]}`;
+
+const faktoriyelSadelestirme = (duzey: Sablon["duzey"], konu: string): Sablon => ({
+  id: `${ONEK[duzey]}-fk-sadelestirme`,
+  duzey,
+  konu,
+  uret: () => {
+    const n = r(3, 9);
+    const fark = Math.random() < 0.5;
+    const dogru = fark ? n * n : n * (n + 2);
+    return {
+      metin: `{${n + 1}! ${fark ? "−" : "+"} ${n}!|${n - 1}!}\n\nişleminin sonucu kaçtır?`,
+      dogru,
+      yanlislar: [n * (n + 1), (n + 1) * (n + 1), fark ? n * (n + 2) : n * n, n * n - 1],
+      adim: n,
+      min: 1,
+      aciklama: `${n + 1}! = ${n + 1}·${n}·${n - 1}! ve ${n}! = ${n}·${n - 1}!. Pay ${n - 1}!·${n}·(${n + 1} ${fark ? "−" : "+"} 1) olur; ${n - 1}! sadeleşince ${n}·${fark ? n : n + 2} = ${dogru}.`,
+    };
+  },
+});
+
+const faktoriyelSifir: Sablon = {
+  id: "O-fk-sondaki-sifir",
+  duzey: "ONLISANS",
+  konu: "Faktöriyel",
+  uret: () => {
+    const N = r(20, 130);
+    const kuvvetler = [5, 25, 125].filter((k) => k <= N);
+    const z = kuvvetler.reduce((t, k) => t + Math.floor(N / k), 0);
+    return {
+      metin: `${N}! sayısının sonunda kaç tane sıfır vardır?`,
+      dogru: z,
+      yanlislar: [Math.floor(N / 5), Math.floor(N / 10), z + 1, z - 1],
+      min: 1,
+      aciklama: `Sondaki her sıfır bir 2·5 çarpanından gelir; 5 çarpanları sayılır: ${kuvvetler.map((k) => `⌊${N}/${k}⌋`).join(" + ")} = ${kuvvetler.map((k) => Math.floor(N / k)).join(" + ")} = ${z}.`,
+    };
+  },
+};
+
+const kesirHarcama = (duzey: Sablon["duzey"], konu: string): Sablon => ({
+  id: `${ONEK[duzey]}-kp-harcama`,
+  duzey,
+  konu,
+  uret: () => {
+    const [a, c] = [r(3, 5), r(3, 6)];
+    const b = r(1, c - 1);
+    if (ebob(b, c) !== 1) return null;
+    const T = a * c * 10 * r(1, 8);
+    const kalan1 = (T * (a - 1)) / a;
+    const X = (kalan1 * (c - b)) / c;
+    const [ad, adin] = sec([["Ali", "Ali'nin"], ["Elif", "Elif'in"], ["Mert", "Mert'in"], ["Zeynep", "Zeynep'in"]] as const);
+    return {
+      metin: `${ad}, harçlığının ${kesirOku(1, a)} kitaba, kalan paranın ${kesirOku(b, c)} yemeğe harcadığında geriye ${X} TL kalıyor.\n\nBuna göre ${adin} harçlığı kaç TL'dir?`,
+      dogru: T,
+      yanlislar: [kalan1, X * a, X * c, T + 10 * a * c].filter(Number.isInteger),
+      adim: 10 * a * c,
+      min: 1,
+      aciklama: `Harçlık x olsun. Kitaptan sonra x·${kesirGoster(a - 1, a)} kalır; yemekten sonra x·${kesirGoster(a - 1, a)}·${kesirGoster(c - b, c)} = x·${kesirGoster((a - 1) * (c - b), a * c)} = ${X} ⇒ x = ${T} TL.`,
+    };
+  },
+});
+
+const havuz = (duzey: Sablon["duzey"], konu: string): Sablon => ({
+  id: `${ONEK[duzey]}-hv-doldur-bosalt`,
+  duzey,
+  konu,
+  uret: () => {
+    const a = r(2, 12);
+    const b = a + r(1, 12);
+    const t = (a * b) / (b - a);
+    if (!Number.isInteger(t) || t > 60) return null;
+    return {
+      metin: `Boş bir havuzu A musluğu tek başına ${a} saatte doldurmakta, B musluğu ise dolu havuzu ${b} saatte boşaltmaktadır.\n\nHavuz boşken iki musluk birlikte açılırsa havuz kaç saatte dolar?`,
+      dogru: t,
+      yanlislar: [a + b, b - a, (a * b) / (a + b), t + a, t - a].filter((v) => Number.isInteger(v) && v > 0),
+      min: 1,
+      aciklama: `A 1 saatte havuzun 1/${a} kadarını doldurur, B 1/${b} kadarını boşaltır. Birlikte 1/${a} − 1/${b} = 1/${t} ⇒ havuz ${t} saatte dolar.`,
+    };
+  },
+});
+
+// Sutun grafigi sorulari: degerler adimin kati (izgaradan tam okunur), sayilar grafikte, metinde yok.
+const GRAFIK_ORNEKLERI = [
+  { baslik: "Bir kırtasiyenin aylara göre defter satışı (adet)", etiketler: ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs"], cumle: "bir kırtasiyenin aylara göre defter satış sayıları" },
+  { baslik: "Bir fırının günlere göre ekmek satışı (adet)", etiketler: ["Pzt", "Salı", "Çrş", "Prş", "Cuma"], cumle: "bir fırının günlere göre ekmek satış sayıları" },
+  { baslik: "Bir kütüphaneden aylara göre ödünç alınan kitap", etiketler: ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs"], cumle: "bir kütüphaneden aylara göre ödünç alınan kitap sayıları" },
+];
+const grafikVerisi = () => {
+  const g = sec(GRAFIK_ORNEKLERI);
+  const adim = sec([10, 20, 25, 50]);
+  const degerler = g.etiketler.map(() => adim * r(1, 8));
+  const max = adim * Math.min(10, Math.max(...degerler) / adim + r(1, 2));
+  const veri = { ...g, adim, degerler, max };
+  return sutunVerisiTutarli(veri) ? veri : null;
+};
+const ciz = (v: NonNullable<ReturnType<typeof grafikVerisi>>) => sutunGrafigi(v.etiketler, v.degerler, v.max, v.adim, v.baslik);
+
+const grafikSablonlari = (duzey: Sablon["duzey"], konu: string): Sablon[] => [
+  {
+    id: `${ONEK[duzey]}-gr-ortalama`,
+    duzey,
+    konu,
+    uret: () => {
+      const v = grafikVerisi();
+      if (!v) return null;
+      const top = v.degerler.reduce((t, x) => t + x, 0);
+      if (top % v.degerler.length) return null;
+      const ort = top / v.degerler.length;
+      return {
+        metin: `Aşağıdaki grafikte ${v.cumle} verilmiştir.\n\nBuna göre bu beş dönemdeki değerlerin ortalaması kaçtır?`,
+        dogru: ort,
+        yanlislar: [top, Math.max(...v.degerler) - Math.min(...v.degerler), ort + v.adim, ort - v.adim / 2],
+        adim: v.adim,
+        min: 1,
+        aciklama: `Toplam ${v.degerler.join(" + ")} = ${top}; ortalama ${top}/${v.degerler.length} = ${ort}.`,
+        svg: ciz(v),
+      };
+    },
+  },
+  {
+    id: `${ONEK[duzey]}-gr-yuzde`,
+    duzey,
+    konu,
+    uret: () => {
+      const v = grafikVerisi();
+      if (!v) return null;
+      const top = v.degerler.reduce((t, x) => t + x, 0);
+      // Yuzdesi tam sayi cikan donemlerden biri sorulur.
+      const uygun = v.degerler.flatMap((d, j) => (Number.isInteger((100 * d) / top) ? [j] : []));
+      if (!uygun.length) return null;
+      const i = sec(uygun);
+      const y = (100 * v.degerler[i]) / top;
+      return {
+        metin: `Aşağıdaki grafikte ${v.cumle} verilmiştir.\n\nBuna göre ${v.etiketler[i]} dönemindeki değer, beş dönemin toplamının yüzde kaçıdır?`,
+        dogru: y,
+        yanlislar: [v.degerler[i], y * 2, y + 5, y - 5].filter((x) => x > 0 && x < 100),
+        adim: 5,
+        min: 1,
+        max: 99,
+        aciklama: `Toplam ${top}; ${v.etiketler[i]} ${v.degerler[i]}. Oran ${v.degerler[i]}/${top} = %${y}.`,
+        svg: ciz(v),
+      };
+    },
+  },
+  {
+    id: `${ONEK[duzey]}-gr-artis`,
+    duzey,
+    konu,
+    uret: () => {
+      const v = grafikVerisi();
+      if (!v) return null;
+      const i = r(0, v.degerler.length - 2);
+      const [a, b] = [v.degerler[i], v.degerler[i + 1]];
+      const y = ((b - a) * 100) / a;
+      if (b <= a || !Number.isInteger(y)) return null;
+      return {
+        metin: `Aşağıdaki grafikte ${v.cumle} verilmiştir.\n\nBuna göre ${v.etiketler[i]} döneminden ${v.etiketler[i + 1]} dönemine değer yüzde kaç artmıştır?`,
+        dogru: y,
+        yanlislar: [((b - a) * 100) / b, b - a, y + 10, y - 10].filter((x) => Number.isInteger(x) && x > 0),
+        adim: 5,
+        min: 1,
+        aciklama: `Artış ${b} − ${a} = ${b - a}; ilk değere oranı ${b - a}/${a} = %${y}.`,
+        svg: ciz(v),
+      };
+    },
+  },
+];
+
+SABLONLAR.push(
+  faktoriyelSadelestirme("ONLISANS", "Faktöriyel"),
+  faktoriyelSadelestirme("LISE", "Temel Kavramlar"),
+  faktoriyelSifir,
+  kesirHarcama("ONLISANS", "Kesir Problemleri"),
+  kesirHarcama("LISE", "Problemler"),
+  havuz("ONLISANS", "İşçi ve Havuz Problemleri"),
+  havuz("LISE", "Problemler"),
+  ...grafikSablonlari("ONLISANS", "Grafik Problemleri"),
+  ...grafikSablonlari("LISE", "Tablo ve Grafik"),
+);
+
 
 /** Sablondan bir soru: secenekler, dogru indeks, gorsel. 20 denemede kurulamazsa null. */
 export function sablondanSoru(s: Sablon, hedef = r(0, 4)) {

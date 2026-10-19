@@ -4,9 +4,13 @@
  * Calistirma: npx tsx scripts/kpssSablonKontrol.ts
  */
 import assert from "node:assert/strict";
-import { SABLONLAR, sablondanSoru, sikKur } from "../src/lib/kpssSablon";
+import { LISANS_UYARLAMA, SABLONLAR, sablondanSoru, sikKur } from "../src/lib/kpssSablon";
 import { geometriSorunu } from "../src/lib/kpssGorsel";
 import { KONU_DAGILIMI } from "../src/lib/kpssDenemeKonular";
+
+// Uyarlama tablosundaki her kimlik gercek bir Lisans sablonu olmali; kimlikler benzersiz.
+for (const id of Object.keys(LISANS_UYARLAMA)) assert.ok(SABLONLAR.some((s) => s.id === id), `uyarlama: ${id} yok`);
+assert.equal(new Set(SABLONLAR.map((s) => s.id)).size, SABLONLAR.length, "tekrarli sablon kimligi");
 
 const harfler = [0, 0, 0, 0, 0];
 for (const s of SABLONLAR) {

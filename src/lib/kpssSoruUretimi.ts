@@ -6,6 +6,7 @@ import { parseGeminiJson, toGeminiResponseSchema } from "@/lib/geminiSchema";
 import { KONU_DAGILIMI } from "@/lib/kpssDenemeKonular";
 import { DERS_LABEL, DUZEY_LABEL } from "@/lib/kpssDenemeSabitler";
 import { geometriSekli, geometriSorunu, iklimGrafigi, IKLIM_ISTASYONLARI, IL_ADLARI, sutunGrafigi, sutunVerisiTutarli, turkiyeHaritasi, type GeometriSekli } from "@/lib/kpssGorsel";
+import { SABLONLAR } from "@/lib/kpssSablon";
 import type { DenemeDers, EducationLevel, Prisma } from "@/generated/prisma/client";
 
 /**
@@ -16,6 +17,9 @@ import type { DenemeDers, EducationLevel, Prisma } from "@/generated/prisma/clie
  * cizicileriyle cizilir ve dogrulayiciya gorselin metin tarifi verilir. Guncel Bilgiler uretilmez (eskiyen bilgi).
  */
 export const GECE_ADET = 10;
+// Konu basina havuz tavani: soru sayisi / denemedeki adet >= bu deger olan konuya uretilmez (sablonlar
+// ve gonderilen sorularla dolan konular Gemini maliyetini sifira indirir).
+const TAVAN_GUN = 30;
 // Uretim ucuz Flash ile; dogrulama daha guclu Pro ile (Flash kendi hatalarini yakalayamadi:
 // iki dogru sikli "hangisi yoktur" sorusu ve uydurma alinti testte gecmisti).
 const DOGRULAMA_MODEL = "gemini-pro-latest";
@@ -74,7 +78,9 @@ export async function hedefKonular(duzey: Duzey): Promise<Hedef[]> {
   const adaylar = Object.entries(KONU_DAGILIMI[duzey]).flatMap(([ders, konular]) =>
     konular
       .filter(() => ders !== "GUNCEL")
-      .map(([konu, adet]) => ({ ders: ders as DenemeDers, konu, adet, sayi: sorular.filter((s) => s.ders === ders && s.konu === konu).length })),
+      .map(([konu, adet]) => ({ ders: ders as DenemeDers, konu, adet, sayi: sorular.filter((s) => s.ders === ders && s.konu === konu).length }))
+      // Sablonu olan konuyu kod bedava doldurur; tavandaki konu (sorulari ortalama TAVAN_GUN'de bir cikiyor) da uretilmez.
+      .filter((a) => !SABLONLAR.some((s) => s.duzey === duzey && (s.ders ?? "MATEMATIK") === a.ders && s.konu === a.konu) && a.sayi / a.adet < TAVAN_GUN),
   );
   const secim = new Map<string, Hedef>();
   for (let i = 0; i < GECE_ADET && adaylar.length; i++) {
@@ -342,9 +348,12 @@ export async function topluDongu() {
       let harf = await prisma.denemeSoru.count({ where: { duzey, uretim: "gemini" } });
       for (const h of await hedefKonular(duzey)) hedefler.push({ ...h, duzey, harfler: Array.from({ length: h.adet }, () => harf++ % 5) });
     }
-    const u = await gemini.batches.create({ model: GEMINI_MODEL, src: await Promise.all(hedefler.map(uretimIstegi)), config: { displayName: "kpss-uretim" } });
-    await prisma.kpssTopluIs.create({ data: { ad: u.name!, tur: "uretim", veri: hedefler as unknown as Prisma.InputJsonValue } });
-    ozet.gonderilen = hedefler.reduce((t, h) => t + h.adet, 0);
+    // Butun konular tavandaysa is gonderilmez (bos batch API'de hata verir).
+    if (hedefler.length) {
+      const u = await gemini.batches.create({ model: GEMINI_MODEL, src: await Promise.all(hedefler.map(uretimIstegi)), config: { displayName: "kpss-uretim" } });
+      await prisma.kpssTopluIs.create({ data: { ad: u.name!, tur: "uretim", veri: hedefler as unknown as Prisma.InputJsonValue } });
+      ozet.gonderilen = hedefler.reduce((t, h) => t + h.adet, 0);
+    }
   }
   return ozet;
 }
