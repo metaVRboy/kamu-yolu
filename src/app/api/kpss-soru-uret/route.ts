@@ -1,36 +1,39 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { duzeyIcinUret } from "@/lib/kpssSoruUretimi";
+import { topluDongu } from "@/lib/kpssSoruUretimi";
 
 export const maxDuration = 300;
 
 const KAYNAK = "KPSS soru üretimi";
 
 /**
- * Gece KPSS soru uretimi (Vercel Cron): her duzeyde GECE_ADET soru uretip dogrular.
- * Taramalar sayfasinda gorunsun diye ScrapeRun kaydi tutar (postingsFound = uretilen,
- * positionsProcessed = eklenen); hicbir soru eklenemediyse ve hata varsa FAILED.
+ * KPSS soru uretimi (Vercel Cron, 2 saatte bir): Gemini Batch islerini ilerletir (bkz. topluDongu).
+ * Bir sey olduysa (is gonderildi/bitti ya da hata) Taramalar sayfasinda gorunsun diye ScrapeRun
+ * kaydi tutar: postingsFound = dogrulamaya giden aday, positionsProcessed = eklenen. Bos calisma kaydedilmez.
  */
 export async function GET(req: NextRequest) {
   const sir = process.env.CRON_SECRET;
   if (!sir || req.headers.get("authorization") !== `Bearer ${sir}`) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
-  const run = await prisma.scrapeRun.create({ data: { sourceName: KAYNAK, status: "RUNNING" } });
-  const sonuclar = await Promise.allSettled((["LISANS", "ONLISANS", "LISE"] as const).map(duzeyIcinUret));
-  const ozet = sonuclar.map((s) => (s.status === "fulfilled" ? s.value : { hata: String(s.reason).slice(0, 300) }));
-  const uretilen = ozet.reduce((t, o) => t + ("uretilen" in o ? o.uretilen : 0), 0);
-  const eklenen = ozet.reduce((t, o) => t + ("eklenen" in o ? o.eklenen : 0), 0);
-  const hatalar = ozet.flatMap((o) => ("hata" in o ? [o.hata] : o.hatalar));
-  const basarisiz = eklenen === 0 && hatalar.length > 0;
-  await prisma.scrapeRun.update({
-    where: { id: run.id },
+  const baslangic = new Date();
+  let ozet;
+  try {
+    ozet = await topluDongu();
+  } catch (e) {
+    ozet = { uretilen: 0, eklenen: 0, gonderilen: 0, hatalar: [String(e).slice(0, 300)], tokenlar: [] };
+  }
+  const { uretilen, eklenen, gonderilen, hatalar, tokenlar } = ozet;
+  if (!uretilen && !eklenen && !gonderilen && !hatalar.length && !tokenlar.length) return NextResponse.json({ ok: true, bos: true });
+  const basarisiz = hatalar.length > 0 && !eklenen && !uretilen && !gonderilen;
+  await prisma.scrapeRun.create({
     data: {
+      sourceName: KAYNAK,
       status: basarisiz ? "FAILED" : "SUCCESS",
+      startedAt: baslangic,
       finishedAt: new Date(),
       postingsFound: uretilen,
       positionsProcessed: eklenen,
-      unmatchedCount: uretilen - eklenen,
       errorMessage: hatalar.length ? hatalar.slice(0, 5).join(" | ").slice(0, 1000) : null,
     },
   });

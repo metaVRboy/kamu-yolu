@@ -19,7 +19,7 @@
     },
     {
       "path": "/api/kpss-soru-uret",
-      "schedule": "0 20 * * *"
+      "schedule": "0 */2 * * *"
     },
     {
       "path": "/api/sms-ilan-bildirimi",

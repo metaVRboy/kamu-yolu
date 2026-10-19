@@ -104,6 +104,25 @@ enum ScrapeStatus {
   FAILED
 }
 
+// Gece KPSS soru uretiminin Gemini Batch isleri (yari fiyat, cagri suresi siniri yok). Uretim isi bitince
+// adaylar dogrulama isine gonderilir; dogrulama bitince gecenler DenemeSoru'ya eklenir (src/lib/kpssSoruUretimi.ts).
+model KpssTopluIs {
+  id        String    @id @default(cuid())
+  // Gemini batch adi (batches/...)
+  ad        String    @unique
+  // "uretim" | "dogrulama"
+  tur       String
+  // Isteklerle ayni sirada: uretimde hedefler, dogrulamada aday sorular
+  veri      Json
+  // BEKLIYOR | BITTI | HATA
+  durum     String    @default("BEKLIYOR")
+  sonuc     Json?
+  olusturma DateTime  @default(now())
+  bitis     DateTime?
+
+  @@index([durum])
+}
+
 model ScrapeRun {
   id                 String       @id @default(cuid())
   sourceName         String
