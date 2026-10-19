@@ -40,7 +40,7 @@ export async function taramaKaynaklari(simdi = Date.now()) {
     const son = basarili.find((b) => b.sourceName === sourceName);
     const sonBasari = son?.finishedAt ?? null;
     // Haber arastirmalarinda postingsFound = eklenen haber sayisi.
-    const birim = sourceName.includes("Haber") ? "yeni haber" : "ilan";
+    const birim = sourceName.includes("Haber") ? "yeni haber" : sourceName.includes("yedeği") ? "tablo" : "ilan";
     return { sourceName, sonBasari, ilanSayisi: son?.postingsFound ?? null, birim, gecikti: !sonBasari || simdi - sonBasari.getTime() > GUN_MS };
   });
 }
