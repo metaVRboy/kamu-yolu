@@ -244,9 +244,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               Veriler otomatik ve periyodik olarak güncellenir. İlan
               detayları için lütfen kaynak kurumun ilan sayfasını esas alın.
             </p>
-            {/* Kunye (5651 s. Kanun m.3, KVKK veri sorumlusu): sirket kurulana kadar gercek kisi. */}
+            {/* Kunye (5651 s. Kanun m.3, KVKK veri sorumlusu): sahis isletmesinde isletme sahibi. */}
             <p className="mt-1">
-              Site sahibi ve veri sorumlusu: Emirhan Koç · {ILETISIM_ADRES} · Tel:{" "}
+              Site sahibi ve veri sorumlusu: {SATICI.unvan} (şahıs işletmesi) · {ILETISIM_ADRES} · Tel:{" "}
               <a href={`tel:${ILETISIM_TELEFON.tel}`} className="underline hover:text-white">
                 {ILETISIM_TELEFON.goster}
               </a>{" "}

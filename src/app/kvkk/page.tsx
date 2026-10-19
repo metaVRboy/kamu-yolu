@@ -1,7 +1,7 @@
 import { ShieldCheck } from "lucide-react";
 import { SayfaBasligi } from "@/components/SayfaBasligi";
 import Link from "next/link";
-import { ILETISIM_ADRES, ILETISIM_EPOSTA, ILETISIM_TELEFON, ODEME_KURULUSU } from "@/lib/site";
+import { ILETISIM_ADRES, ILETISIM_EPOSTA, ILETISIM_TELEFON, ODEME_KURULUSU, SATICI } from "@/lib/site";
 import { SATIS_ACIK } from "@/lib/planlar";
 
 export const metadata = {
@@ -129,7 +129,8 @@ export default function KvkkPage() {
           <h2 className="font-sans text-base font-semibold text-primary">1. Veri Sorumlusu</h2>
           <p>
             6698 sayılı Kişisel Verilerin Korunması Kanunu (&quot;KVKK&quot;) kapsamında veri sorumlusu, kamuyolu.com sitesini ve
-            Kamu Yolu mobil uygulamasını (&quot;Kamu Yolu&quot;) işleten gerçek kişi <strong>Emirhan Koç</strong>&apos;tur. Adres:{" "}
+            Kamu Yolu mobil uygulamasını (&quot;Kamu Yolu&quot;) şahıs işletmesi olarak işleten <strong>{SATICI.unvan}</strong>&apos;tur
+            ({SATICI.vergiDairesi} V.D. {SATICI.vergiNo}). Adres:{" "}
             {ILETISIM_ADRES} · Telefon:{" "}
             <a href={`tel:${ILETISIM_TELEFON.tel}`} className="text-primary underline">
               {ILETISIM_TELEFON.goster}
@@ -250,7 +251,7 @@ export default function KvkkPage() {
           </p>
         </section>
 
-        <p className="text-xs text-muted-foreground">Son güncelleme: 14 Ekim 2026.</p>
+        <p className="text-xs text-muted-foreground">Son güncelleme: 19 Ekim 2026.</p>
       </div>
     </div>
   );

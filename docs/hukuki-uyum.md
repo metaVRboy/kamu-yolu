@@ -37,8 +37,9 @@ Google/Meta/TikTok politika sayfaları.
      standartsozlesme.kvkk.gov.tr (e-Devlet ile giriş) üzerinden bildir. Bildirmemenin cezası 2026'da 90.308–1.806.377 TL.
    - Vercel, Neon (Databricks), Resend, Cloudflare: KVKK sözleşmesi sunmuyorlar. Aşağıdaki e-postayı gönder,
      cevaplarını sakla (iyi niyet kanıtı). Kabul eden olursa aynı 5 iş günü bildirimi.
-5. **Satıştan veya kampanya iletisinden önce (sırayla)** — vergi kaydı ya da şirket → KEP adresi → İYS kaydı →
-   ETBİS kaydı → SMS başlığı (marka tescili/şirket unvanı). Sonra `SATIS_ACIK` / `TICARI_ILETI_ACIK` açılır,
+5. **Satıştan veya kampanya iletisinden önce (sırayla)** — ~~vergi kaydı ya da şirket~~ (19.10.2026: şahıs işletmesi,
+   gerçek usul, Ankara Cumhuriyet V.D. 5671298061; künye, satış sözleşmeleri, KVKK ve Koşullar güncellendi, adres
+   faaliyet adresi oldu) → KEP adresi → İYS kaydı → ETBİS kaydı → SMS başlığı (marka tescili/şirket unvanı). Sonra `SATIS_ACIK` / `TICARI_ILETI_ACIK` açılır,
    satış sözleşmeleri doldurulur ve onaylar **yeniden** toplanır (şahıs adına toplanan onay şirkete devredilemez).
 6. **Reklam hesapları**
    - Meta: Türkiye için "Özel Reklam Kategorisi" zorunlu değil (NONE seçilebilir); arayüz isterse İstihdam seç, ülke Türkiye.

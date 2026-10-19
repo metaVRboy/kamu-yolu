@@ -1,6 +1,6 @@
 import { ScrollText } from "lucide-react";
 import { SayfaBasligi } from "@/components/SayfaBasligi";
-import { ILETISIM_EPOSTA } from "@/lib/site";
+import { ILETISIM_EPOSTA, SATICI } from "@/lib/site";
 
 export const metadata = {
   title: "Kullanım Koşulları — Kamu Yolu",
@@ -16,7 +16,8 @@ export default function KullanimKosullariPage() {
         <section>
           <h2 className="font-sans text-base font-semibold text-primary">1. Taraflar ve Kapsam</h2>
           <p>
-            Bu Kullanım Koşulları (&quot;Koşullar&quot;), Emirhan Koç (&quot;Kamu Yolu&quot;) tarafından işletilen
+            Bu Kullanım Koşulları (&quot;Koşullar&quot;), {SATICI.unvan} (şahıs işletmesi, {SATICI.vergiDairesi} V.D.{" "}
+            {SATICI.vergiNo}; &quot;Kamu Yolu&quot;) tarafından işletilen
             kamuyolu.com internet sitesinin ve Kamu Yolu mobil uygulamasının (&quot;Site&quot;) kullanımına ilişkin
             kuralları düzenler. Siteye üye olan herkes (&quot;Kullanıcı&quot;) bu Koşulları kabul etmiş olur. İletişim:{" "}
             {ILETISIM_EPOSTA}.
