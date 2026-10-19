@@ -29,7 +29,11 @@ export async function api<T>(yol: string, secenek: { method?: string; govde?: un
     throw new ApiHatasi("İnternet bağlantısı yok gibi görünüyor. Bağlantını kontrol edip tekrar dene.", 0);
   }
   const veri = await res.json().catch(() => ({}));
-  if (!res.ok) throw new ApiHatasi(veri.error ?? "Bir şeyler ters gitti, lütfen tekrar dene.", res.status);
+  // Vercel Firewall'un 429'unda error nesnedir ("[object Object]" gosterilmesin).
+  if (!res.ok) {
+    const metin = typeof veri.error === "string" ? veri.error : res.status === 429 ? "Çok fazla deneme yapıldı. Bir dakika bekleyip tekrar dene." : "Bir şeyler ters gitti, lütfen tekrar dene.";
+    throw new ApiHatasi(metin, res.status);
+  }
   return veri as T;
 }
 

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { PasswordInput } from "@/components/ui/password-input";
 import { passwordRequirementIssues } from "@/lib/authValidation";
-import { cn } from "@/lib/utils";
+import { apiHatasi, cn } from "@/lib/utils";
 
 const REQUIREMENTS = [
   { key: "En az 8 karakter", test: (p: string) => p.length >= 8 },
@@ -56,9 +56,9 @@ export function SifreSifirlaForm({ token }: { token: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, password }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
       if (!res.ok) {
-        setError(data.error ?? "Bir şeyler ters gitti.");
+        setError(apiHatasi(data, res.status));
         return;
       }
       sayfaYuklemesiniBaslat("/profilim");

@@ -15,6 +15,7 @@ import { TurnstileWidget } from "@/components/TurnstileWidget";
 import { kaynakBilgisi } from "@/lib/olcum";
 import { TICARI_ILETI_ACIK } from "@/lib/planlar";
 import { siteIciYol } from "@/lib/site";
+import { apiHatasi } from "@/lib/utils";
 
 // Sunucudaki KOD_GECERLILIK_DAKIKA ile ayni. Mobilde mail uygulamasina gidip donmek 2 dk'ya sigmiyordu.
 const KOD_GECERLILIK_SANIYE = 600;
@@ -110,9 +111,9 @@ export function AuthForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, turnstileToken, beniHatirla }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
       if (!res.ok) {
-        setError(data.error ?? "Bir şeyler ters gitti.");
+        setError(apiHatasi(data, res.status));
         return;
       }
       // Pencereden (ilan/bolum sayfasinda) giris yapan oldugu sayfada kalir; /giris sayfasindan gelen
@@ -143,9 +144,9 @@ export function AuthForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ adSoyad, email, password, kvkkOnay, ticariIletiOnay, kaynak: kaynakBilgisi(), turnstileToken }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
       if (!res.ok) {
-        setError(data.error ?? "Bir şeyler ters gitti.");
+        setError(apiHatasi(data, res.status));
         return;
       }
       setKodAsamasi(true);
@@ -190,9 +191,9 @@ export function AuthForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, code: kod }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
       if (!res.ok) {
-        setError(data.error ?? "Bir şeyler ters gitti.");
+        setError(apiHatasi(data, res.status));
         return;
       }
       toast.success("Hesabın oluşturuldu.");

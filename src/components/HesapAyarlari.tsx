@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { toast } from "@/components/ui/toast";
 import { SILME_ONAY_METNI } from "@/lib/authValidation";
-import { cn } from "@/lib/utils";
+import { apiHatasi, cn } from "@/lib/utils";
 
 const SEKMELER = [
   { href: "/profilim/ayarlar", label: "Hesap" },
@@ -44,7 +44,7 @@ export function AyarlarSekmeleri() {
 
 /** JSON hata metnini ya da varsayilani dondurur. */
 async function hataMetni(res: Response) {
-  return (await res.json().catch(() => null))?.error ?? "Bir şeyler ters gitti.";
+  return apiHatasi(await res.json().catch(() => null), res.status);
 }
 
 const FOTO_BOYUT = 256;
