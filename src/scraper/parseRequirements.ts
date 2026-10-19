@@ -48,6 +48,11 @@ export function detectEducationLevels(rawText: string): EducationLevel[] {
   // Duzey yazilmamis ama KPSS puan turu var: P93 onlisans, P94 ortaogretim KPSS'sidir.
   if (!levels.length && /\bp\s?93\b/.test(text)) levels.push(EducationLevel.ONLISANS);
   if (!levels.length && /\bp\s?94\b/.test(text)) levels.push(EducationLevel.LISE);
+  // "En az 4 (dört) yıl süreli eğitim veren ... fakültelerinin", "dört yıllık", "Fakültelerinin X bölümlerinden":
+  // duzey kelimesi yok ama lisans. (Yoksa varsayilan duzeyle onlisans bolumleri de eslesiyordu.)
+  if (!levels.length && /(4|d[öo]rt)\s*(\(\s*d[öo]rt\s*\)\s*)?y[ıi]ll[ıi]k|(4|d[öo]rt)\s*(\(\s*d[öo]rt\s*\)\s*)?y[ıi]l\s*s[üu]reli|fak[üu]ltelerin/.test(text)) {
+    levels.push(EducationLevel.LISANS);
+  }
 
   return levels;
 }
@@ -85,7 +90,13 @@ export function detectInstitutionType(kurumAdi: string): InstitutionType {
  */
 export function isGenericNoRestriction(text: string): boolean {
   const normalized = text.trim().toLocaleLowerCase("tr-TR");
-  if (/herhangi\s+bir[^.]{0,60}(b[öo]l[üu]m|program|fak[üu]lte|alan)/.test(normalized)) {
+  // "herhangi bir bölümünden mezun olmak" genel; "...herhangi bir programından mezun olmamak" (lise ilaninda
+  // yuksekogretim mezunu olmama sarti) degil - bu cumle bolum sartini kaldirmaz (2026-10-19 Duzce Teknisyen).
+  if (/herhangi\s+bir[^.]{0,60}(b[öo]l[üu]m|program|fak[üu]lte|alan)(?![^.]{0,40}olmamak)/.test(normalized)) {
+    return true;
+  }
+  // "Herhangi bir ortaöğretim (kurumundan) mezunu olmak"
+  if (/herhangi\s+bir\s+(orta\s*[öo]ğretim|lise|[öo]n\s*lisans|lisans)[^.,]{0,30}mezun(?![^.]{0,40}olmamak)/.test(normalized)) {
     return true;
   }
   for (const cumle of normalized.split(/[.;\n]/)) {
@@ -128,7 +139,7 @@ export async function classifyRequirementText(
   const educationLevels = levels.length > 0 ? levels : [isciIlaniMi ? EducationLevel.LISE : EducationLevel.LISANS];
 
   // Isci ilanlarinda OSYM listesi aranmaz (metin genelde belge/kosul listesi, bolum sarti yok).
-  const secenek = { seviyeler: educationLevels, osym: !isciIlaniMi };
+  const secenek = { seviyeler: educationLevels, seviyeKesin: levels.length > 0, osym: !isciIlaniMi };
   let matches = await matchDepartmentsForText(requirementText, secenek);
   if (matches.length > 0 || isciIlaniMi || isGenericNoRestriction(requirementText)) {
     return { educationLevels, isDepartmentRestricted: matches.length > 0, matches, ekMetin: undefined };
@@ -141,6 +152,15 @@ export async function classifyRequirementText(
   } catch (err) {
     console.error("İlan eki okunamadı:", err);
   }
-  if (ekMetin) matches = await matchDepartmentsForText(requirementText, { ...secenek, ekMetin });
-  return { educationLevels, isDepartmentRestricted: true, matches, ekMetin };
+  // Duzey ana metinde yazmiyorsa (belediye toplu ilanlari: unvan tablosu ekte) ekten okunur.
+  const ekDuzeyleri = !levels.length && ekMetin ? detectEducationLevels(ekMetin) : [];
+  const sonDuzeyler = ekDuzeyleri.length ? ekDuzeyleri : educationLevels;
+  if (ekMetin) {
+    matches = await matchDepartmentsForText(requirementText, {
+      ...secenek,
+      ...(ekDuzeyleri.length && { seviyeler: ekDuzeyleri, seviyeKesin: true }),
+      ekMetin,
+    });
+  }
+  return { educationLevels: sonDuzeyler, isDepartmentRestricted: true, matches, ekMetin };
 }

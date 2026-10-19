@@ -4,6 +4,7 @@ import type { EducationLevel } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/slug";
 import { ilanIlleri } from "@/lib/iller";
+import { LEVEL_LABEL } from "@/lib/labels";
 
 export type PostingWithDepartments = Awaited<
   ReturnType<typeof getPostingsForDepartment>
@@ -240,6 +241,9 @@ const YANLIS_POZITIF_KALIPLARI = [
   /\btarih\s+ve\s+(saat|yer|sayı|\d)\p{L}*/gu,
   /\btarih\s+imza/gu,
   /\bdil ve tarih-cografya/gu,
+  // "belge kontrolünün tarih aralığı"; "Makine Öğrenimi, Derin Öğrenme" (yapay zeka deneyimi, Makine bolumu degil)
+  /\btarih\s+aralı\p{L}*/gu,
+  /\bmakine\s+ogren\p{L}*/gu,
 ];
 
 function maskFalsePositiveIdioms(normalized: string): string {
@@ -251,7 +255,8 @@ function maskFalsePositiveIdioms(normalized: string): string {
 }
 
 // seviye dolu = OSYM kurallariyla aranir (OSYM listesindeki ad ya da OSYM'den eklenmis bolum).
-type Terim = { norm: string; etiket: string; departmentId?: string; seviye?: EducationLevel; osym?: { ad: string; aliases: string[] } };
+// duzey: bolumun ogrenim duzeyi (sitedeki tum bolumlerde dolu); ilanin kesin duzeyi disindakiler eslesmez.
+type Terim = { norm: string; etiket: string; departmentId?: string; seviye?: EducationLevel; duzey?: EducationLevel; osym?: { ad: string; aliases: string[] } };
 
 // OSYM listesindeki bolum adi olmayan kayitlar ve ilan metinlerinde bolum disi anlamla sik gecen tek kelimeler
 // ("İngilizce dilinden YDS", "vesikalık fotoğraf", "muhasebe, finans" deneyimi).
@@ -268,9 +273,30 @@ const SAYIM_DEVAMI = String.raw`(?=\s?(,|;|/|\)|\||-|$)|\s(ve|veya|ya da|ile|bol
 // Ana ilan metninde sitedeki bolumler mezuniyet cumlelerinde, OSYM adlari yalniz bolum/program cumlelerinde
 // aranir ("alan" yok: "siber guvenlik alaninda 7 yil deneyim" bolum sayilmasin).
 const GENIS_BAGLAM = /bolum|program|mezun|fakulte|yuksekokul|brans/;
-const DAR_BAGLAM = /bolum|program|dal(ı|lar)/; // lise: "Hasta ve Yaşlı Hizmetleri alanı ve dallarından"
+// Lise: "Hasta ve Yaşlı Hizmetleri alanı ve dallarından", "Ortaöğretim kurumlarının İnşaat Teknolojisi alanından".
+// "alan" yalniz ortaogretim/lise cumlesinde ("siber guvenlik alaninda deneyim" bolum sayilmaz).
+const DAR_BAGLAM = /bolum|program|dal(ı|lar)|(ortaogretim|lise|meslek lisesi)[^|]*\balan/;
 // Ek metinde PDF tablodan okunan kisim (satirlar bolum listesi; cumle filtresi uygulanmaz).
 export const TABLO_ISARETI = "§TABLO§";
+
+// "YDS'den en az (D)... Ancak İngilizce öğretim yapan fakülte, bilgisayar programcılığı alanında MYO mezunu olanlar..."
+// gibi yabanci dil muafiyeti cumlelerindeki bolum adlari bolum sarti degildir (2026-10-19: lisans ilani
+// Bilgisayar Programcılığı'na baglaniyordu).
+const DIL_SINAVI = /\b(yds|e-yds|yokdil|toefl|ielts|kpds|uds)\b|yabancı dil/;
+const MUAFIYET = /\bancak\b|muaf|aranmaz|aranmayacak|sayılır/;
+export function dilMuafiyetiniCikar(metin: string): string {
+  return metin
+    .split(/(?<=[.;\n])/)
+    .filter((c) => {
+      const n = normalize(c);
+      return !(DIL_SINAVI.test(n) && MUAFIYET.test(n));
+    })
+    .join("");
+}
+
+/** Ilan duzeyi (yuksek lisans lisans sayilir); bolumun duzeyi bu kumede degilse eslesmez. */
+const duzeyKumesi = (seviyeler?: EducationLevel[]) =>
+  new Set<EducationLevel>(seviyeler?.map((s) => (s === "YUKSEK_LISANS" ? "LISANS" : s)));
 
 function bolumCumleleri(metin: string, baglam: RegExp): string {
   return metin
@@ -309,8 +335,8 @@ async function sozluk(): Promise<Terim[]> {
     prisma.kpssBolum.findMany({ select: { ad: true, ogrenimDuzeyi: true } }),
   ]);
   const terimler: Terim[] = [
-    ...bolumler.map((d) => ({ norm: normalize(d.name), etiket: d.name, departmentId: d.id, seviye: d.osym ? d.level : undefined })),
-    ...ifadeler.map((a) => ({ norm: normalize(a.alias), etiket: a.alias, departmentId: a.departmentId, seviye: a.department.osym ? a.department.level : undefined })),
+    ...bolumler.map((d) => ({ norm: normalize(d.name), etiket: d.name, departmentId: d.id, seviye: d.osym ? d.level : undefined, duzey: d.level })),
+    ...ifadeler.map((a) => ({ norm: normalize(a.alias), etiket: a.alias, departmentId: a.departmentId, seviye: a.department.osym ? a.department.level : undefined, duzey: a.department.level })),
   ];
   for (const k of osym) {
     const seviye = k.ogrenimDuzeyi as EducationLevel;
@@ -345,10 +371,14 @@ function bulVeSil(metin: string, terim: string, sayim = false): string | null {
  */
 export async function matchDepartmentsForText(
   rawText: string,
-  secenek: { seviyeler?: EducationLevel[]; ekMetin?: string | null; osym?: boolean } = {},
+  // seviyeler: OSYM adlari icin (tahmini varsayilan olabilir). seviyeKesin: duzey metinden okundu; sitedeki
+  // bolumler de yalniz bu duzeylerde eslesir (varsayilan duzeyle elenmesinler).
+  secenek: { seviyeler?: EducationLevel[]; seviyeKesin?: boolean; ekMetin?: string | null; osym?: boolean } = {},
 ) {
   const terimler = await sozluk();
-  const [anaEk = "", ...tablolar] = (secenek.ekMetin ?? "").split(TABLO_ISARETI);
+  rawText = dilMuafiyetiniCikar(rawText);
+  const [anaEkHam = "", ...tablolar] = (secenek.ekMetin ?? "").split(TABLO_ISARETI);
+  const anaEk = dilMuafiyetiniCikar(anaEkHam);
   // Tablo satir sonu bir sayim siniri: "Gıda Mühendisliği\nKPSS P3" -> "gıda muhendisligi | kpss p3".
   const tablo = tablolar.map((t) => maskFalsePositiveIdioms(normalize(t.replace(/\n/g, " | ")))).join(" | ");
   let tum = [maskFalsePositiveIdioms(normalize(rawText)), bolumCumleleri(anaEk, GENIS_BAGLAM), tablo].join(" | ");
@@ -356,7 +386,14 @@ export async function matchDepartmentsForText(
   // "Seramik") yalniz PDF tablolarda ("güvenlik soruşturması", "milli güvenlik" metinde cok geciyor).
   let genis = [bolumCumleleri(rawText, DAR_BAGLAM), bolumCumleleri(anaEk, DAR_BAGLAM), tablo].join(" | ");
   let dar = tablo;
-  const seviyeler = new Set<EducationLevel>(secenek.seviyeler?.map((s) => (s === "YUKSEK_LISANS" ? "LISANS" : s)));
+  const seviyeler = duzeyKumesi(secenek.seviyeler);
+  const duzeyUygun = (t: Terim) => {
+    if (t.seviye) return secenek.osym !== false && (!seviyeler.size || seviyeler.has(t.seviye));
+    return !secenek.seviyeKesin || !t.duzey || !seviyeler.size || seviyeler.has(t.duzey);
+  };
+  // Ayni ad baska duzeyde de varsa (OSYM'de 123 ad hem lisans hem onlisans) uygun duzeydeki eslesir;
+  // hicbir duzeyi uymayan ad metinden silinir ki icindeki kisa ad ("Bilgisayar") ayrica eslesmesin.
+  const uygunAdlar = new Set(terimler.filter(duzeyUygun).map((t) => t.norm));
 
   const matches = new Map<string, { departmentId: string; matchedAlias: string }>();
   const osymEslesen = new Map<string, NonNullable<Terim["osym"]> & { seviye: EducationLevel }>();
@@ -366,9 +403,12 @@ export async function matchDepartmentsForText(
     dar = bulVeSil(dar, terim) ?? dar;
   };
   for (const t of terimler) {
+    if (!duzeyUygun(t)) {
+      if (!uygunAdlar.has(t.norm) && bulVeSil(tum, t.norm) !== null) sil(t.norm);
+      continue;
+    }
     if (t.seviye) {
-      // OSYM kurallari: ilanin duzeyi, bolum cumlesi/tablo, sayimin parcasi.
-      if (secenek.osym === false || (seviyeler.size && !seviyeler.has(t.seviye))) continue;
+      // OSYM kurallari: bolum cumlesi/tablo, sayimin parcasi.
       if (bulVeSil(t.norm.includes(" ") ? genis : dar, t.norm, true) === null) continue;
     } else if (bulVeSil(tum, t.norm) === null) continue;
     sil(t.norm);
@@ -382,7 +422,11 @@ export async function matchDepartmentsForText(
   for (const o of osymEslesen.values()) {
     // Deneme raporu (scripts/eslestirmeDene.ts) bolum eklemez: yeni bolum "osym:<ad>" sahte kimligiyle doner.
     if (process.env.BOLUM_EKLEME_KAPALI === "1") {
-      const var_ = await prisma.department.findFirst({ where: { name: { equals: o.ad, mode: "insensitive" } }, select: { id: true } });
+      // Gercek kayitla ayni kural: ad + duzey (baska duzeyde ayni ad "... (Lisans)" olarak eklenir).
+      const var_ = await prisma.department.findFirst({
+        where: { level: o.seviye, OR: [{ name: { equals: o.ad, mode: "insensitive" } }, { name: { equals: `${o.ad} (${LEVEL_LABEL[o.seviye] ?? o.seviye})`, mode: "insensitive" } }] },
+        select: { id: true },
+      });
       matches.set(var_?.id ?? `osym:${o.ad}`, { departmentId: var_?.id ?? `osym:${o.ad}`, matchedAlias: o.ad });
       continue;
     }
@@ -481,21 +525,27 @@ export async function createDepartmentFromResearch(input: {
   aliases: string[];
   osym?: boolean;
 }) {
-  const slug = slugify(input.name);
-  const existing = await prisma.department.findFirst({ where: { OR: [{ slug }, { name: { equals: input.name, mode: "insensitive" } }] } });
+  // Ayni ad baska duzeyde varsa (OSYM: "Bilişim Sistemleri ve Teknolojileri" hem lisans hem onlisans)
+  // duzey adla ayrilir: "... (Lisans)"; duz ad ifade olarak eklenir. Eskiden var olan kayit donuyor,
+  // lisans ilani onlisans bolumune baglaniyordu.
+  const adaGore = await prisma.department.findFirst({ where: { name: { equals: input.name, mode: "insensitive" } } });
+  if (adaGore?.level === input.level) return adaGore;
+  const name = adaGore ? `${input.name} (${LEVEL_LABEL[input.level] ?? input.level})` : input.name;
+  const slug = slugify(name);
+  const existing = await prisma.department.findFirst({ where: { OR: [{ slug }, { name: { equals: name, mode: "insensitive" } }] } });
   if (existing) return existing;
 
   const uniqueAliases = Array.from(
     new Set(
-      input.aliases
+      [...input.aliases, ...(adaGore ? [input.name] : [])]
         .map((a) => a.trim())
-        .filter((a) => a && normalize(a) !== normalize(input.name)),
+        .filter((a) => a && normalize(a) !== normalize(name)),
     ),
   );
 
   return prisma.department.create({
     data: {
-      name: input.name,
+      name,
       slug,
       level: input.level,
       osym: input.osym ?? false,
@@ -522,15 +572,25 @@ export async function linkDepartmentToExistingPostings(
   const postings = await prisma.posting.findMany({
     // Admin'in elle sectigi bolumlere dokunulmaz.
     where: { isActive: true, adminDuzenledi: false, departmentRequirementRaw: { not: null } },
-    select: { id: true, departmentRequirementRaw: true, ekMetin: true },
+    select: { id: true, departmentRequirementRaw: true, ekMetin: true, educationLevels: true },
   });
   sozlukOnbellek = null;
 
   let linked = 0;
   for (const posting of postings) {
     if (!posting.departmentRequirementRaw) continue;
-    const normalizedText = maskFalsePositiveIdioms(normalize(`${posting.departmentRequirementRaw} | ${(posting.ekMetin ?? "").split(TABLO_ISARETI).join(" | ")}`));
-    const matchedTerm = terms.find((t) => includesWholeWord(normalizedText, normalize(t)));
+    // Ilanin duzeyi bolumunkiyle uyusmali (lisans ilani onlisans bolumune baglanmasin).
+    const duzeyler = duzeyKumesi(posting.educationLevels);
+    if (duzeyler.size && !duzeyler.has(department.level)) continue;
+    const raw = dilMuafiyetiniCikar(posting.departmentRequirementRaw);
+    const [anaEkHam = "", ...tablolar] = (posting.ekMetin ?? "").split(TABLO_ISARETI);
+    const anaEk = dilMuafiyetiniCikar(anaEkHam);
+    const tablo = maskFalsePositiveIdioms(normalize(tablolar.join(" | ").replace(/\n/g, " | ")));
+    // OSYM bolumu: yalniz bolum cumlelerinde/tablolarda ve bir sayimin parcasiysa (matchDepartmentsForText ile ayni kural).
+    const normalizedText = department.osym
+      ? [bolumCumleleri(raw, DAR_BAGLAM), bolumCumleleri(anaEk, DAR_BAGLAM), tablo].join(" | ")
+      : [maskFalsePositiveIdioms(normalize(raw)), bolumCumleleri(anaEk, GENIS_BAGLAM), tablo].join(" | ");
+    const matchedTerm = terms.find((t) => bulVeSil(normalizedText, normalize(t), department.osym) !== null);
     if (!matchedTerm) continue;
 
     await prisma.postingDepartment.upsert({
