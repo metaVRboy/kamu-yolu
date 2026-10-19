@@ -5,7 +5,7 @@ import { DERS_SIRASI, DERS_DAGILIMI, DERS_LABEL, DUZEY_LABEL, SINAV_SURESI_DK, t
 import { KONU_DAGILIMI } from "@/lib/kpssDenemeKonular";
 
 /** Turkiye takvim gunu (sunucu hangi saat diliminde calisirsa calissin). */
-function bugununTarihi(): Date {
+export function bugununTarihi(): Date {
   const parcalar = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Istanbul" }).formatToParts(new Date());
   const y = parcalar.find((p) => p.type === "year")!.value;
   const m = parcalar.find((p) => p.type === "month")!.value;
@@ -14,11 +14,19 @@ function bugununTarihi(): Date {
 }
 
 // sonKullanim: sorunun en son ciktigi gunun zamani (hic cikmadiysa 0).
-type Aday = { id: string; sira: number; grupId: string | null; konu: string | null; sablon?: string | null; sonKullanim: number };
+type Aday = { id: string; sira: number; grupId: string | null; konu: string | null; kalip?: string | null; sonKullanim: number };
+
+/**
+ * Sorunun kalibi: sablon kimligi ya da sayilari silinmis metin + siklar. Yalniz sayilari farkli iki soru (sablon
+ * varyanti, gonderilen kalip sorulari) ayni kalip sayilir; genel kokler ("hangisinde yazim yanlisi vardir?") siklarla ayrisir.
+ */
+export function kalipAnahtari(s: { sablon: string | null; soruMetni: string; secenekler: string[] }) {
+  return s.sablon ?? [s.soruMetni, ...s.secenekler].join("|").toLocaleLowerCase("tr").replace(/\d+([.,]\d+)?/g, "#").replace(/\s+/g, " ").trim();
+}
 
 /**
  * Adaylardan tam `adet` soru secer: ortak metinli gruplar bolunmez, en uzun suredir cikmamis olan once,
- * esitler arasinda rastgele. Ayni parametrik sablonun iki varyanti (yalniz sayilari farkli) birlikte secilmez. (Eskiden kullanim SAYISINA bakiliyordu: haftalarca tekrarlanan ilk parti
+ * esitler arasinda rastgele. Ayni kaliptan iki soru (yalniz sayilari farkli) birlikte secilmez. (Eskiden kullanim SAYISINA bakiliyordu: haftalarca tekrarlanan ilk parti
  * sayaci yuksek kaldigi icin her gun ayni ikinci parti seciliyor, ardisik gunler 120 sorunun ~100'unu
  * paylasiyordu - 2026-10-19.)
  * Grup boyutlari (ör. 4'lu sozel mantik + tekil soru) tam sayiyi tutturmayabilir: oncelik
@@ -32,18 +40,18 @@ export function enAzKullanilanlar(adaylar: Aday[], adet: number): Aday[] {
     .sort((x, y) => x.kullanim - y.kullanim || x.r - y.r)
     .map((x) => x.b);
   const secim: Aday[][] = [];
-  const sablonlar = new Set<string>();
+  const kaliplar = new Set<string>();
   let adim = 0;
   const ara = (i: number, kalan: number): boolean => {
     if (kalan === 0) return true;
     for (let j = i; j < birimler.length && adim++ < 20_000; j++) {
-      const sablon = birimler[j][0].sablon;
-      if (birimler[j].length > kalan || (sablon && sablonlar.has(sablon))) continue;
+      const kalip = birimler[j][0].kalip;
+      if (birimler[j].length > kalan || (kalip && kaliplar.has(kalip))) continue;
       secim.push(birimler[j]);
-      if (sablon) sablonlar.add(sablon);
+      if (kalip) kaliplar.add(kalip);
       if (ara(j + 1, kalan - birimler[j].length)) return true;
       secim.pop();
-      if (sablon) sablonlar.delete(sablon);
+      if (kalip) kaliplar.delete(kalip);
     }
     return false;
   };
@@ -72,12 +80,17 @@ export async function getBugununDenemesi(duzey: EducationLevel) {
   for (const g of gecmis) for (const id of g.soruIdler) sonKullanim.set(id, g.tarih.getTime());
   const soruIdler: string[] = [];
   for (const ders of DERS_SIRASI) {
-    const adaylar = (
+    const ham = (
       await prisma.denemeSoru.findMany({
         where: { duzey, ders },
-        select: { id: true, sira: true, grupId: true, konu: true, sablon: true },
+        select: { id: true, sira: true, grupId: true, konu: true, sablon: true, soruMetni: true, secenekler: true },
       })
-    ).map((a) => ({ ...a, sonKullanim: sonKullanim.get(a.id) ?? 0 }));
+    ).map(({ id, sira, grupId, konu, ...m }) => ({ id, sira, grupId, konu, kalip: kalipAnahtari(m) }));
+    // Bir kaliptan herhangi bir soru yakinda ciktiysa kaliptaki her soru o kadar yeni sayilir (dunku sorunun
+    // sayilari degismis hali bugun gelmesin).
+    const kalipSon = new Map<string, number>();
+    for (const a of ham) kalipSon.set(a.kalip, Math.max(kalipSon.get(a.kalip) ?? 0, sonKullanim.get(a.id) ?? 0));
+    const adaylar = ham.map((a) => ({ ...a, sonKullanim: kalipSon.get(a.kalip)! }));
     const secilen = dagilim[ders].flatMap(([konu, adet]) => enAzKullanilanlar(adaylar.filter((a) => a.konu === konu), adet));
     // Bir konunun havuzu eksikse ders yine tam sayida olsun: dersin kalan en az kullanilanlariyla tamamlanir.
     const eksik = DERS_DAGILIMI[ders] - secilen.length;

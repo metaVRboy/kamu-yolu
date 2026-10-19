@@ -919,6 +919,351 @@ SABLONLAR.push(
   ...grafikSablonlari("LISE", "Tablo ve Grafik"),
 );
 
+// ---- Ikinci kaliplar: tek sablonlu konulara farkli soru tipi (Lisans; uygunlari LISANS_UYARLAMA_2 ile diger duzeylere) ----
+
+const ar = (a: number) => (a === 1 ? "" : String(a));
+/** p/q sade kesir ya da tam sayi, eksi isaretiyle (−3/2). */
+const sayiKesir = (p: number, q: number) => {
+  const g = ebob(p, q);
+  return q / g === 1 ? ondalik(p / g) : `${p < 0 ? "−" : ""}${Math.abs(p / g)}/${q / g}`;
+};
+const PISAGOR_ORTAK_KENAR: [number, number, number, number, number][] = [
+  // [ortak dik kenar, kisa taban, kisa hipotenus, uzun taban, uzun hipotenus]
+  [12, 5, 13, 9, 15], [12, 5, 13, 16, 20], [12, 9, 15, 16, 20], [8, 6, 10, 15, 17], [24, 7, 25, 10, 26], [24, 10, 26, 18, 30],
+  [24, 7, 25, 18, 30], [15, 8, 17, 20, 25], [20, 15, 25, 21, 29], [40, 9, 41, 30, 50], [24, 18, 30, 32, 40], [12, 9, 15, 35, 37],
+];
+const DUZGUN_COKGEN = [5, 6, 8, 9, 10, 12, 15, 18, 20];
+const MEVSIMLER = ["Kış", "İlkbahar", "Yaz", "Sonbahar", "Yıl boyunca eşit dağılır"];
+
+SABLONLAR.push(
+  {
+    id: "L-be-tamsayi-toplam",
+    duzey: "LISANS",
+    konu: "Basit Eşitsizlikler",
+    uret: () => {
+      const [p, q] = [r(2, 3), r(1, 9)];
+      const alt = r(-6, 4);
+      const ust = alt + r(5, 14);
+      const xs = (kati: boolean) => {
+        const l: number[] = [];
+        for (let x = -60; x <= 60; x++) if ((kati ? alt < p * x - q : alt <= p * x - q) && p * x - q <= ust) l.push(x);
+        return l;
+      };
+      const l = xs(true);
+      if (l.length < 2 || l.length > 9) return null;
+      const top = l.reduce((t, x) => t + x, 0);
+      return {
+        metin: `${ondalik(alt)} < ${p}x − ${q} ≤ ${ust}\n\neşitsizliğini sağlayan x tam sayılarının toplamı kaçtır?`,
+        dogru: top,
+        yanlislar: [xs(false).reduce((t, x) => t + x, 0), l.length, top - l[l.length - 1], top + l[l.length - 1] + 1],
+        aciklama: `Her tarafa ${q} eklenip taraflar ${p} ile bölünür: ${sayiKesir(alt + q, p)} < x ≤ ${sayiKesir(ust + q, p)}. Tam sayılar ${l.map(ondalik).join(", ")}; toplamları ${ondalik(top)}.`,
+      };
+    },
+  },
+  {
+    id: "L-md-kok-carpim",
+    duzey: "LISANS",
+    konu: "Mutlak Değer",
+    uret: () => {
+      const p = r(1, 3);
+      const x2 = r(-6, 4);
+      const x1 = x2 + r(2, 10);
+      if ((p * (x1 + x2)) % 2 || (p * (x1 - x2)) % 2) return null;
+      const [q, c] = [(p * (x1 + x2)) / 2, (p * (x1 - x2)) / 2];
+      if (q <= 0) return null;
+      return {
+        metin: `|${ar(p)}x − ${q}| = ${c}\n\ndenklemini sağlayan x değerlerinin çarpımı kaçtır?`,
+        dogru: x1 * x2,
+        yanlislar: [x1 + x2, -x1 * x2, x1 * x2 + p, x1 * x2 - p],
+        aciklama: `${ar(p)}x − ${q} = ${c} ⇒ x = ${x1}; ${ar(p)}x − ${q} = −${c} ⇒ x = ${ondalik(x2)}. Çarpım ${ondalik(x1 * x2)}.`,
+      };
+    },
+  },
+  {
+    id: "L-kok-kesirli",
+    duzey: "LISANS",
+    konu: "Köklü Sayılar",
+    uret: () => {
+      const m = sec([2, 3, 5, 6, 7]);
+      const [k, n] = [r(1, 4), r(2, 5)];
+      const goster = (v: number) => (v === 1 ? `√${m}` : `${v}√${m}`);
+      return {
+        metin: `{${k * m}|√${m}} + √${m * n * n}\n\nişleminin sonucu kaçtır?`,
+        dogru: k + n,
+        yanlislar: [k * n, k + n + 1, k + n - 1, k * m + n],
+        min: 1,
+        goster,
+        aciklama: `{${k * m}|√${m}} ifadesinin paydası rasyonel yapılır: {${k * m}√${m}|${m}} = ${goster(k)}. √${m * n * n} = ${goster(n)}. Toplam ${goster(k + n)}.`,
+      };
+    },
+  },
+  {
+    id: "L-ca-ters-toplam",
+    duzey: "LISANS",
+    konu: "Çarpanlara Ayırma",
+    uret: () => {
+      const k = r(3, 9);
+      const kare = Math.random() < 0.5;
+      const dogru = kare ? k * k - 2 : k * k - 4;
+      return {
+        metin: kare
+          ? `x + {1|x} = ${k}\n\nolduğuna göre x² + {1|x²} ifadesinin değeri kaçtır?`
+          : `x + {1|x} = ${k}\n\nolduğuna göre (x − {1|x})² ifadesinin değeri kaçtır?`,
+        dogru,
+        yanlislar: [k * k, k * k + 2, k * k - 1, kare ? k * k - 4 : k * k - 2, 2 * k],
+        min: 1,
+        aciklama: kare
+          ? `(x + {1|x})² = x² + 2 + {1|x²} ⇒ ${k * k} = x² + {1|x²} + 2 ⇒ x² + {1|x²} = ${dogru}.`
+          : `(x − {1|x})² = (x + {1|x})² − 4 = ${k * k} − 4 = ${dogru}.`,
+      };
+    },
+  },
+  {
+    id: "L-dc-iki-denklem",
+    duzey: "LISANS",
+    konu: "Denklem Çözme",
+    uret: () => {
+      const [p, q] = [r(2, 7), r(2, 7)];
+      const [x, y] = [r(1, 9), r(1, 9)];
+      if (p === q || x === y) return null;
+      const [A, B] = [p * x + q * y, q * x + p * y];
+      return {
+        metin: `${p}x + ${q}y = ${A}\n${q}x + ${p}y = ${B}\n\nolduğuna göre x + y toplamı kaçtır?`,
+        dogru: x + y,
+        yanlislar: [x * y, Math.abs(x - y), x + y + 1, x + y - 1, Math.abs(A - B)],
+        min: 1,
+        aciklama: `Denklemler taraf tarafa toplanır: ${p + q}x + ${p + q}y = ${A + B} ⇒ x + y = ${A + B}/${p + q} = ${x + y}.`,
+      };
+    },
+  },
+  {
+    id: "L-yas-gecmis",
+    duzey: "LISANS",
+    konu: "Yaş Problemleri",
+    uret: () => {
+      const k1 = r(2, 3);
+      const k2 = k1 + r(1, 3);
+      const n = r(2, 12);
+      const O = (n * (k2 - 1)) / (k2 - k1);
+      const B = k1 * O;
+      if (!Number.isInteger(O) || O - n < 1 || B > 75 || B - O < 20) return null;
+      return {
+        metin: `Bir babanın bugünkü yaşı, oğlunun yaşının ${k1} katıdır. ${n} yıl önce babanın yaşı, oğlunun o zamanki yaşının ${k2} katıydı.\n\nBuna göre babanın bugünkü yaşı kaçtır?`,
+        dogru: B,
+        yanlislar: [O, B - n, B + n, k2 * O],
+        adim: k1,
+        min: 1,
+        aciklama: `Oğul x ise baba ${k1}x. ${n} yıl önce: ${k1}x − ${n} = ${k2}(x − ${n}) ⇒ ${ar(k2 - k1)}x = ${n * (k2 - 1)} ⇒ x = ${O}. Baba ${k1}·${O} = ${B}.`,
+      };
+    },
+  },
+  {
+    id: "L-hp-yakalama",
+    duzey: "LISANS",
+    konu: "Hareket Problemleri",
+    uret: () => {
+      const v2 = 10 * r(4, 9);
+      const v1 = v2 + 10 * r(1, 4);
+      const t = r(2, 8);
+      const d = (v1 - v2) * t;
+      const ters = d / (v1 + v2);
+      return {
+        metin: `Aralarında ${d} km bulunan A ve B noktalarından aynı anda, A'dan B'ye doğru aynı yönde hareket eden iki araçtan A'dan çıkanın hızı saatte ${v1} km, B'den çıkanınki saatte ${v2} km'dir.\n\nA'dan çıkan araç, B'den çıkan aracı kaç saat sonra yakalar?`,
+        dogru: t,
+        yanlislar: [Number.isInteger(ters) ? ters : t + 2, t + 1, t - 1, Number.isInteger(d / v1) ? d / v1 : t + 3],
+        min: 1,
+        aciklama: `Aynı yönde giden araçlarda aradaki fark hız farkıyla kapanır: ${d} / (${v1} − ${v2}) = ${t} saat.`,
+      };
+    },
+  },
+  {
+    id: "L-yz-kar-maliyet",
+    duzey: "LISANS",
+    konu: "Yüzde-Kâr-Zarar ve Faiz Problemleri",
+    uret: () => {
+      const k = sec([10, 20, 25, 40, 50, 60]);
+      const x = 20 * r(5, 40);
+      const Y = (x * (100 + k)) / 100;
+      if (!Number.isInteger(Y)) return null;
+      return {
+        metin: `Bir satıcı, bir ürünü maliyetinin %${k} fazlasına, yani ${Y} TL'ye satmaktadır.\n\nBuna göre ürünün maliyeti kaç TL'dir?`,
+        dogru: x,
+        yanlislar: [(Y * (100 - k)) / 100, Y - k, x + 20, x - 20].filter(Number.isInteger),
+        adim: 20,
+        min: 1,
+        aciklama: `Maliyet x: x·${ondalik((100 + k) / 100)} = ${Y} ⇒ x = ${x} TL. (Satış fiyatından %${k} düşmek yanlış olur: kâr maliyet üzerinden hesaplanır.)`,
+      };
+    },
+  },
+  {
+    id: "L-km-alt-kume",
+    duzey: "LISANS",
+    konu: "Kümeler",
+    uret: () => {
+      const n = r(4, 7);
+      const enAz = Math.random() < 0.5;
+      const dogru = enAz ? 2 ** n - n - 1 : 2 ** (n - 1);
+      return {
+        metin: enAz
+          ? `${n} elemanlı bir kümenin en az iki elemanlı alt kümelerinin sayısı kaçtır?`
+          : `A = {${"abcdefg".slice(0, n).split("").join(", ")}} kümesinin alt kümelerinden kaç tanesinde a elemanı bulunur?`,
+        dogru,
+        yanlislar: [2 ** n, 2 ** n - 1, 2 ** n - n, enAz ? 2 ** (n - 1) : 2 ** n - n - 1, 2 ** (n - 2)],
+        min: 1,
+        aciklama: enAz
+          ? `Tüm alt kümeler 2^{${n}} = ${2 ** n}. Boş küme (1) ve tek elemanlılar (${n}) çıkarılır: ${2 ** n} − 1 − ${n} = ${dogru}.`
+          : `a elemanı sabit tutulur, kalan ${n - 1} eleman serbestçe seçilir: 2^{${n - 1}} = ${dogru}.`,
+      };
+    },
+  },
+  {
+    id: "L-fn-bilesim",
+    duzey: "LISANS",
+    konu: "Bağıntı ve Fonksiyon",
+    uret: () => {
+      const [a, b, c, d] = [r(2, 4), r(-5, 5), r(2, 4), r(-5, 5)];
+      const k = r(-3, 4);
+      const f = (x: number) => a * x + b;
+      const g = (x: number) => c * x + d;
+      return {
+        metin: `f(x) = ${a}x${isaretli(b)} ve g(x) = ${c}x${isaretli(d)}\n\nolduğuna göre (f∘g)(${ondalik(k)}) değeri kaçtır?`,
+        dogru: f(g(k)),
+        yanlislar: [g(f(k)), f(k) + g(k), f(k) * g(k), f(g(k)) + a],
+        aciklama: `Önce g(${ondalik(k)}) = ${ondalik(g(k))}, sonra f(${ondalik(g(k))}) = ${ondalik(f(g(k)))}.`,
+      };
+    },
+  },
+  {
+    id: "L-ol-iki-zar",
+    duzey: "LISANS",
+    konu: "Olasılık",
+    uret: () => {
+      const k = r(3, 11);
+      const say = (t: number) => (t < 2 || t > 12 ? 0 : 6 - Math.abs(7 - t));
+      const etiket = new Map<number, string>();
+      const ekle = (p: number) => (etiket.set(p / 36, kesirGoster(p, 36)), p / 36);
+      const dogru = ekle(say(k));
+      return {
+        metin: `İki zar birlikte atılıyor.\n\nÜst yüze gelen sayıların toplamının ${k} olma olasılığı kaçtır?`,
+        dogru,
+        yanlislar: [ekle(say(k) + 1), ekle(say(k) - 1 || 7), ekle(6), ekle(say(k) * 2), ekle(say(k + 2) || 9)].filter((v) => v > 0 && v < 1),
+        min: 0,
+        max: 1,
+        goster: (v) => etiket.get(v) ?? "",
+        aciklama: `36 eşit olası durumdan toplamı ${k} olanlar ${say(k)} tanedir: olasılık ${say(k)}/36 = ${kesirGoster(say(k), 36)}.`,
+      };
+    },
+  },
+  {
+    id: "L-geo-ortak-dik-kenar",
+    duzey: "LISANS",
+    konu: "Özel Üçgenler",
+    geometri: true,
+    uret: () => {
+      const [h, d1, h1, d2, h2] = sec(PISAGOR_ORTAK_KENAR);
+      return {
+        metin: `Şekildeki ABC üçgeninde [AB] ⊥ [BC]'dir. D noktası [BC] üzerinde olmak üzere |AD| = ${h1} cm, |BD| = ${d1} cm ve |DC| = ${d2 - d1} cm'dir.\n\nBuna göre |AC| kaç cm'dir?`,
+        dogru: h2,
+        yanlislar: [h1 + d2 - d1, h + d2 - d1, h2 + 1, h2 - 2, d2 + d1],
+        min: 1,
+        aciklama: `ABD dik üçgeninde |AB|² = ${h1}² − ${d1}² ⇒ |AB| = ${h}. |BC| = ${d1} + ${d2 - d1} = ${d2}. ABC dik üçgeninde |AC|² = ${h}² + ${d2}² ⇒ |AC| = ${h2} cm.`,
+        sekil: {
+          noktalar: [{ ad: "A", x: 0, y: h }, { ad: "B", x: 0, y: 0 }, { ad: "D", x: d1, y: 0 }, { ad: "C", x: d2, y: 0 }],
+          kenarlar: [["A", "B"], ["B", "C"], ["A", "C"], ["A", "D"]],
+          kenarEtiketleri: [{ kenar: ["A", "D"], metin: String(h1) }, { kenar: ["B", "D"], metin: String(d1) }, { kenar: ["D", "C"], metin: String(d2 - d1) }],
+          dikAcilar: [{ tepe: "B", a: "A", b: "C" }],
+          aciEtiketleri: [],
+        },
+      };
+    },
+  },
+  {
+    id: "L-geo-cokgen-kosegen",
+    duzey: "LISANS",
+    konu: "Dörtgenler ve Çokgenler",
+    geometri: true,
+    uret: () => {
+      const n = sec(DUZGUN_COKGEN);
+      const ic = 180 - 360 / n;
+      const dogru = (n * (n - 3)) / 2;
+      return {
+        metin: `Bir iç açısının ölçüsü ${ic}° olan düzgün çokgenin köşegen sayısı kaçtır?`,
+        dogru,
+        yanlislar: [n, (n * (n - 1)) / 2, n * (n - 3), dogru - n, ((n + 1) * (n - 2)) / 2].filter(Number.isInteger),
+        min: 1,
+        aciklama: `Bir dış açı 180° − ${ic}° = ${360 / n}°; kenar sayısı 360/${360 / n} = ${n}. Köşegen sayısı n(n − 3)/2 = ${n}·${n - 3}/2 = ${dogru}.`,
+      };
+    },
+  },
+  {
+    id: "L-ag-uzaklik-parametre",
+    duzey: "LISANS",
+    konu: "Analitik Geometri",
+    geometri: true,
+    uret: () => {
+      const [dx, dy, d] = sec([[3, 4, 5], [4, 3, 5], [6, 8, 10], [8, 6, 10], [5, 12, 13], [12, 5, 13]] as const);
+      const [x1, y2] = [r(-4, 3), r(-3, 6)];
+      const x2 = x1 + dx;
+      return {
+        metin: `Dik koordinat düzleminde A(${ondalik(x1)}, a) ve B(${ondalik(x2)}, ${ondalik(y2)}) noktaları arasındaki uzaklık ${d} birimdir.\n\nBuna göre a'nın alabileceği değerlerin toplamı kaçtır?`,
+        dogru: 2 * y2,
+        yanlislar: [y2 + dy, y2 - dy, (y2 + dy) * (y2 - dy), 2 * y2 + dx],
+        aciklama: `(${ondalik(x2)} − ${ondalik(x1)})² + (${ondalik(y2)} − a)² = ${d}² ⇒ (${ondalik(y2)} − a)² = ${dy * dy} ⇒ a = ${ondalik(y2 + dy)} veya a = ${ondalik(y2 - dy)}. Toplam ${ondalik(2 * y2)}.`,
+      };
+    },
+  },
+);
+
+/** Ikinci kaliplarin diger duzeylerdeki konusu. */
+Object.assign(LISANS_UYARLAMA, {
+  "L-be-tamsayi-toplam": { LISE: "Matematiksel İlişkilerden Yararlanma" },
+  "L-md-kok-carpim": { ONLISANS: "Mutlak Değer", LISE: "Matematiksel İlişkilerden Yararlanma" },
+  "L-kok-kesirli": { LISE: "Köklü Sayılar" },
+  "L-ca-ters-toplam": { ONLISANS: "Denklem Çözme", LISE: "Matematiksel İlişkilerden Yararlanma" },
+  "L-dc-iki-denklem": { ONLISANS: "Denklem Çözme", LISE: "Matematiksel İlişkilerden Yararlanma" },
+  "L-yas-gecmis": { ONLISANS: "Yaş Problemleri", LISE: "Problemler" },
+  "L-hp-yakalama": { ONLISANS: "Hareket Problemleri", LISE: "Problemler" },
+  "L-yz-kar-maliyet": { LISE: "Problemler" },
+  "L-km-alt-kume": { ONLISANS: "Kümeler", LISE: "Matematiksel İlişkilerden Yararlanma" },
+  "L-fn-bilesim": { ONLISANS: "Fonksiyonlar", LISE: "Matematiksel İlişkilerden Yararlanma" },
+  "L-ol-iki-zar": { ONLISANS: "Olasılık", LISE: "Problemler" },
+  "L-geo-ortak-dik-kenar": { ONLISANS: "Geometri", LISE: "Temel Geometri" },
+  "L-geo-cokgen-kosegen": { ONLISANS: "Geometri", LISE: "Temel Geometri" },
+  "L-ag-uzaklik-parametre": { ONLISANS: "Geometri", LISE: "Temel Geometri" },
+});
+for (const id of ["L-be-tamsayi-toplam", "L-md-kok-carpim", "L-kok-kesirli", "L-ca-ters-toplam", "L-dc-iki-denklem", "L-yas-gecmis", "L-hp-yakalama", "L-yz-kar-maliyet", "L-km-alt-kume", "L-fn-bilesim", "L-ol-iki-zar", "L-geo-ortak-dik-kenar", "L-geo-cokgen-kosegen", "L-ag-uzaklik-parametre"]) {
+  const s = SABLONLAR.find((x) => x.id === id)!;
+  for (const [duzey, konu] of Object.entries(LISANS_UYARLAMA[id]) as [Sablon["duzey"], string][]) SABLONLAR.push({ ...s, id: id.replace(/^L-/, `${ONEK[duzey]}-`), duzey, konu });
+}
+
+// Iklim grafiginden mevsimlik yagis: en yagisli mevsim ikincisinden en az %15 fazla olan istasyonlar sorulur.
+const iklimMevsimSablonu = (duzey: Sablon["duzey"]): Sablon => ({
+  id: `${ONEK[duzey]}-cg-iklim-mevsim`,
+  duzey,
+  ders: "COGRAFYA",
+  konu: "İklim ve Bitki Örtüsü",
+  uret: () => {
+    const ist = sec(Object.keys(IKLIM_ISTASYONLARI));
+    const y = IKLIM_ISTASYONLARI[ist].yagis;
+    const mevsim = [y[11] + y[0] + y[1], y[2] + y[3] + y[4], y[5] + y[6] + y[7], y[8] + y[9] + y[10]];
+    const sirali = [...mevsim].sort((a, b) => b - a);
+    if (sirali[0] < sirali[1] * 1.15) return null;
+    const dogru = mevsim.indexOf(sirali[0]) + 1;
+    return {
+      metin: "Aşağıdaki grafikte bir merkezin uzun yıllar aylık ortalama sıcaklık ve yağış değerleri verilmiştir.\n\nBu merkezde yağışlar en çok hangi mevsimde düşer?",
+      dogru,
+      yanlislar: [1, 2, 3, 4, 5],
+      min: 1,
+      max: 5,
+      goster: (i) => MEVSIMLER[i - 1] ?? "",
+      aciklama: `Mevsimlik toplamlar (MGM uzun yıllar, ${ist}): kış ${Math.round(mevsim[0])} mm, ilkbahar ${Math.round(mevsim[1])} mm, yaz ${Math.round(mevsim[2])} mm, sonbahar ${Math.round(mevsim[3])} mm. En yağışlı mevsim ${MEVSIMLER[dogru - 1].toLocaleLowerCase("tr")}.`,
+      svg: iklimGrafigi(IKLIM_ISTASYONLARI[ist].sicaklik, y),
+    };
+  },
+});
+SABLONLAR.push(...(["LISANS", "ONLISANS", "LISE"] as const).map(iklimMevsimSablonu));
+
+
 
 /** Sablondan bir soru: secenekler, dogru indeks, gorsel. 20 denemede kurulamazsa null. */
 export function sablondanSoru(s: Sablon, hedef = r(0, 4)) {
