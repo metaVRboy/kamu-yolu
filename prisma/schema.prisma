@@ -708,6 +708,8 @@ model DenemeSoru {
   // "elle": scripts/ altindaki veri dosyalarindan (seed yonetir, dosyada yoksa siler);
   // "gemini": gece otomatik uretilip dogrulanan (src/lib/kpssSoruUretimi.ts), seed dokunmaz.
   uretim           String              @default("elle")
+  // uretim "sablon": parametrik sablonun kimligi (src/lib/kpssSablon.ts) - ayni sablonun iki varyanti ayni denemeye girmez.
+  sablon           String?
   hataBildirimleri SoruHataBildirimi[]
 
   @@index([duzey, ders, kullanimSayisi])

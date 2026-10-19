@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { topluDongu } from "@/lib/kpssSoruUretimi";
+import { sablonGunluk } from "@/lib/kpssSablon";
 
 export const maxDuration = 300;
 
@@ -17,6 +18,19 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
   const baslangic = new Date();
+  // Parametrik matematik sablonlari: Gemini'siz, gunde bir (kredi bitse de havuz buyur).
+  let sablon = 0;
+  let sablonHata: string | null = null;
+  try {
+    sablon = await sablonGunluk();
+  } catch (e) {
+    sablonHata = String(e).slice(0, 500);
+  }
+  if (sablon || sablonHata) {
+    await prisma.scrapeRun.create({
+      data: { sourceName: "KPSS şablon soruları", status: sablonHata ? "FAILED" : "SUCCESS", startedAt: baslangic, finishedAt: new Date(), positionsProcessed: sablon, errorMessage: sablonHata },
+    });
+  }
   let ozet;
   try {
     ozet = await topluDongu();

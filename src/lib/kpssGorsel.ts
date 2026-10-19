@@ -209,8 +209,11 @@ export function geometriSekli(s: GeometriSekli) {
   const Y = 240;
   const kenarBosluk = 34;
   const olcek = Math.min((G - 2 * kenarBosluk) / Math.max(maxX - minX, 1e-6), (Y - 2 * kenarBosluk) / Math.max(maxY - minY, 1e-6));
-  const px = (x: number) => kenarBosluk + (x - minX) * olcek;
-  const py = (y: number) => Y - kenarBosluk - (y - minY) * olcek;
+  // Sekil kutunun ortasina: sigan eksende artan bosluk iki yana bolunur.
+  const ortaX = (G - 2 * kenarBosluk - (maxX - minX) * olcek) / 2;
+  const ortaY = (Y - 2 * kenarBosluk - (maxY - minY) * olcek) / 2;
+  const px = (x: number) => kenarBosluk + ortaX + (x - minX) * olcek;
+  const py = (y: number) => Y - kenarBosluk - ortaY - (y - minY) * olcek;
   const nok = new Map(s.noktalar.map((n) => [n.ad, { x: px(n.x), y: py(n.y) }]));
   const merkez = { x: [...nok.values()].reduce((t, p) => t + p.x, 0) / nok.size, y: [...nok.values()].reduce((t, p) => t + p.y, 0) / nok.size };
   let svg = "";

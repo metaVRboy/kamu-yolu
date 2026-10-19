@@ -14,11 +14,11 @@ function bugununTarihi(): Date {
 }
 
 // sonKullanim: sorunun en son ciktigi gunun zamani (hic cikmadiysa 0).
-type Aday = { id: string; sira: number; grupId: string | null; konu: string | null; sonKullanim: number };
+type Aday = { id: string; sira: number; grupId: string | null; konu: string | null; sablon?: string | null; sonKullanim: number };
 
 /**
  * Adaylardan tam `adet` soru secer: ortak metinli gruplar bolunmez, en uzun suredir cikmamis olan once,
- * esitler arasinda rastgele. (Eskiden kullanim SAYISINA bakiliyordu: haftalarca tekrarlanan ilk parti
+ * esitler arasinda rastgele. Ayni parametrik sablonun iki varyanti (yalniz sayilari farkli) birlikte secilmez. (Eskiden kullanim SAYISINA bakiliyordu: haftalarca tekrarlanan ilk parti
  * sayaci yuksek kaldigi icin her gun ayni ikinci parti seciliyor, ardisik gunler 120 sorunun ~100'unu
  * paylasiyordu - 2026-10-19.)
  * Grup boyutlari (ör. 4'lu sozel mantik + tekil soru) tam sayiyi tutturmayabilir: oncelik
@@ -32,14 +32,18 @@ export function enAzKullanilanlar(adaylar: Aday[], adet: number): Aday[] {
     .sort((x, y) => x.kullanim - y.kullanim || x.r - y.r)
     .map((x) => x.b);
   const secim: Aday[][] = [];
+  const sablonlar = new Set<string>();
   let adim = 0;
   const ara = (i: number, kalan: number): boolean => {
     if (kalan === 0) return true;
     for (let j = i; j < birimler.length && adim++ < 20_000; j++) {
-      if (birimler[j].length > kalan) continue;
+      const sablon = birimler[j][0].sablon;
+      if (birimler[j].length > kalan || (sablon && sablonlar.has(sablon))) continue;
       secim.push(birimler[j]);
+      if (sablon) sablonlar.add(sablon);
       if (ara(j + 1, kalan - birimler[j].length)) return true;
       secim.pop();
+      if (sablon) sablonlar.delete(sablon);
     }
     return false;
   };
@@ -71,7 +75,7 @@ export async function getBugununDenemesi(duzey: EducationLevel) {
     const adaylar = (
       await prisma.denemeSoru.findMany({
         where: { duzey, ders },
-        select: { id: true, sira: true, grupId: true, konu: true },
+        select: { id: true, sira: true, grupId: true, konu: true, sablon: true },
       })
     ).map((a) => ({ ...a, sonKullanim: sonKullanim.get(a.id) ?? 0 }));
     const secilen = dagilim[ders].flatMap(([konu, adet]) => enAzKullanilanlar(adaylar.filter((a) => a.konu === konu), adet));
