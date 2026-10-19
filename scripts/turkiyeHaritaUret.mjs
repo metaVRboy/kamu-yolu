@@ -1,7 +1,7 @@
 /**
  * KPSS deneme sorularindaki Turkiye haritalari icin GERCEK sinir verisini
  * (Natural Earth 10m, kamu mali) SVG path'lerine cevirir ve
- * scripts/turkiyeHaritaVerisi.ts dosyasini yazar.
+ * src/lib/turkiyeHaritaVerisi.ts dosyasini yazar.
  *
  * Kaynak dosyalar (bir klasore indirip yolunu arguman olarak verin):
  *   https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_admin_0_countries.geojson
@@ -84,5 +84,5 @@ export const IL_SINIRLARI: Record<string, string> = {
 ${iller.map(([ad, g]) => `  "${ad}": "${pathYaz(g, 0.5, 1)}",`).join("\n")}
 };
 `;
-fs.writeFileSync(new URL("./turkiyeHaritaVerisi.ts", import.meta.url), cikti);
+fs.writeFileSync(new URL("../src/lib/turkiyeHaritaVerisi.ts", import.meta.url), cikti);
 console.log(`yazildi: ${iller.length} il, ${goller.length} gol, ${(cikti.length / 1024).toFixed(1)} KB`);
