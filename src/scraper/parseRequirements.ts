@@ -141,7 +141,8 @@ export async function classifyRequirementText(
   // Isci ilanlarinda OSYM listesi aranmaz (metin genelde belge/kosul listesi, bolum sarti yok).
   const secenek = { seviyeler: educationLevels, seviyeKesin: levels.length > 0, osym: !isciIlaniMi };
   let matches = await matchDepartmentsForText(requirementText, secenek);
-  if (matches.length > 0 || isciIlaniMi || isGenericNoRestriction(requirementText)) {
+  // Yalniz ciplak kelime genislemesi (genel) varsa ek metin yine okunur: asil bolum listesi orada olabilir.
+  if (matches.some((m) => !m.genel) || isciIlaniMi || isGenericNoRestriction(requirementText)) {
     return { educationLevels, isDepartmentRestricted: matches.length > 0, matches, ekMetin: undefined };
   }
 

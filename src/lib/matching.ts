@@ -269,7 +269,8 @@ const GENEL_TEK_KELIME = new Set([
 ]);
 // Ilan metninde OSYM adi ancak bir sayimin parcasiysa bolum sayilir ("A, B ve C bölümlerinden mezun"):
 // "İngilizce dilinden", "Veteriner Hekim", "İdari Bilimler Fakültesi", "Adalet Bakanlığı" boylece elenir.
-const SAYIM_DEVAMI = String.raw`(?=\s?(,|;|/|\)|\||-|$)|\s(ve|veya|ya da|ile|bolum\p{L}*|program\p{L}*|anabilim|mezun\p{L}*|alan\p{L}*)(?![\p{L}\p{N}]))`;
+// "... Tıbbi ve Aromatik Bitkiler ön lisans programlarının": duzey kelimesi de sayimin devami.
+const SAYIM_DEVAMI = String.raw`(?=\s?(,|;|/|\)|\||-|$)|\s(ve|veya|ya da|ile|bolum\p{L}*|program\p{L}*|anabilim|mezun\p{L}*|alan\p{L}*|on ?lisans|lisans)(?![\p{L}\p{N}]))`;
 // Ana ilan metninde sitedeki bolumler mezuniyet cumlelerinde, OSYM adlari yalniz bolum/program cumlelerinde
 // aranir ("alan" yok: "siber guvenlik alaninda 7 yil deneyim" bolum sayilmasin).
 const GENIS_BAGLAM = /bolum|program|mezun|fakulte|yuksekokul|brans/;
@@ -292,6 +293,40 @@ export function dilMuafiyetiniCikar(metin: string): string {
       return !(DIL_SINAVI.test(n) && MUAFIYET.test(n));
     })
     .join("");
+}
+
+// Ciplak liste ogesi bir kelimeden fazla bolume genisliyorsa ust sinir (genel kelimeler: "fen", "turk"...).
+const CIPLAK_EN_FAZLA = 12;
+const CIPLAK_DISI = new Set(["muhendislik", "fakulte", "bilim", "bilimler", "fen", "turk", "dil", "sosyal", "uygulamalı", "temel", "genel", "ilgili", "diger", "benzer", "muadil", "dengi", "egitim", "ogretmenlik", "yukarıda", "belirtilen", "asagıda", "en az", "lisans", "onlisans"]);
+
+/**
+ * Bolum cumlesindeki mezuniyet sayiminin ("X, Y ve Z bölümlerinden mezun") eslesmemis ogeleri (1-3 kelime).
+ * Yalniz "mezun" gecen cumlede, ekli "bölümlerinden/programlarından" oncesinde ve en az iki ogeli bir
+ * sayimda ("çalışma programı", "eğitim programları" bolum listesi degil).
+ */
+// butun: "ve/ile" ile bolunmus parcanin tum obegi ("elektronik ve haberlesme"); obek bir bolum adinin
+// basiysa parcalar yerine obek kullanilir ("Tıbbi ve Aromatik Bitkiler" -> "tıbbi" olmasin).
+export function ciplakOgeler(cumle: string): { oge: string; muhendislik: boolean; butun?: string }[] {
+  if (!/mezun/.test(cumle)) return [];
+  const ogeler: { oge: string; muhendislik: boolean; butun?: string }[] = [];
+  for (const m of cumle.matchAll(/([^|]*?)\b(bolum|program)(ler|lar|un|ın|in)\p{L}*/gu)) {
+    const kapsam = m[1].split(/fakulte\p{L}*|yuksekokul\p{L}*|okul\p{L}*|:|\(/u).pop() ?? "";
+    // "Mühendislik fakültelerinin elektrik, ... bölümleri": sayim dogrudan muhendislik fakultesine bagli.
+    // "mühendislik ve fen edebiyat fakültelerinin" de sayilir.
+    const muhendislik = /muhendislik(\s+(ve|ile)\s+[\p{L} -]{2,30})?\s+fakulte\p{L}*\s*$/u.test(m[1].slice(0, m[1].length - kapsam.length));
+    const virgulle = kapsam.split(/,|;|\/|\bveya\b|\bya da\b/u);
+    if (virgulle.length < 2 && !/\bve\b|\bile\b/u.test(kapsam)) continue;
+    for (const parca of virgulle) {
+      const temiz = (x: string) => x.replace(/\b(yuksek lisans|on ?lisans|lisans|lise)\b/gu, " ").replace(/\s+/g, " ").trim();
+      const altlar = parca.split(/\bve\b|\bile\b/u);
+      const butun = altlar.length > 1 ? temiz(parca) : undefined;
+      for (const ham of altlar) {
+        const oge = temiz(ham);
+        if (/^[\p{L}-]+( [\p{L}-]+){0,2}$/u.test(oge) && oge.length >= 4 && !CIPLAK_DISI.has(oge)) ogeler.push({ oge, muhendislik, butun });
+      }
+    }
+  }
+  return ogeler;
 }
 
 /** Ilan duzeyi (yuksek lisans lisans sayilir); bolumun duzeyi bu kumede degilse eslesmez. */
@@ -325,10 +360,10 @@ function osymTerimleri(ad: string, seviye: EducationLevel): string[] {
 
 // Sozluk: sitedeki bolumler + ifadeleri + OSYM KPSS bolum listesi (KpssBolum). Tarama boyunca tekrar tekrar
 // sorgulanmasin diye kisa sure bellekte tutulur; yeni bolum eklenince sifirlanir.
-let sozlukOnbellek: { zaman: number; terimler: Terim[] } | null = null;
+let sozlukOnbellek: { zaman: number; terimler: Terim[]; kisaAdlar: Terim[] } | null = null;
 
-async function sozluk(): Promise<Terim[]> {
-  if (sozlukOnbellek && Date.now() - sozlukOnbellek.zaman < 5 * 60_000) return sozlukOnbellek.terimler;
+async function sozluk(): Promise<{ terimler: Terim[]; kisaAdlar: Terim[] }> {
+  if (sozlukOnbellek && Date.now() - sozlukOnbellek.zaman < 5 * 60_000) return sozlukOnbellek;
   const [bolumler, ifadeler, osym] = await Promise.all([
     prisma.department.findMany({ select: { id: true, name: true, osym: true, level: true } }),
     prisma.departmentAlias.findMany({ select: { departmentId: true, alias: true, department: { select: { osym: true, level: true } } } }),
@@ -338,8 +373,16 @@ async function sozluk(): Promise<Terim[]> {
     ...bolumler.map((d) => ({ norm: normalize(d.name), etiket: d.name, departmentId: d.id, seviye: d.osym ? d.level : undefined, duzey: d.level })),
     ...ifadeler.map((a) => ({ norm: normalize(a.alias), etiket: a.alias, departmentId: a.departmentId, seviye: a.department.osym ? a.department.level : undefined, duzey: a.department.level })),
   ];
+  const kisa: Terim[] = [];
   for (const k of osym) {
     const seviye = k.ogrenimDuzeyi as EducationLevel;
+    // Metinde tek basina aranmayan kisa/genel tek kelimelik OSYM adlari ("Resim", "Bilgisayar"): yalniz
+    // ciplak liste ogesi tam bu adsa kullanilir.
+    const ad0 = k.ad.split(/\s+\/\s+/)[0].replace(/\([^)]*\)/g, " ").replace(/\s+/g, " ").trim();
+    const n0 = normalize(ad0);
+    if (!n0.includes(" ") && !OSYM_GECERSIZ.has(n0) && (n0.length < 8 || GENEL_TEK_KELIME.has(n0))) {
+      kisa.push({ norm: n0, etiket: ad0, seviye, osym: { ad: ad0, aliases: [] } });
+    }
     const varyantlar = osymTerimleri(k.ad, seviye);
     for (const v of varyantlar) {
       // Lise alan/dal adi kendi basina bolum olur; diger duzeylerde ilk yazilis ad, digerleri ifade.
@@ -350,8 +393,8 @@ async function sozluk(): Promise<Terim[]> {
   // Uzun terim once (sitedeki bolum ayni uzunluktaki OSYM adindan once): eslesen kisim silinir,
   // icindeki kisa ad ("Makine Mühendisliği" icindeki "Makine") ayrica eslesmez.
   terimler.sort((a, b) => b.norm.length - a.norm.length || Number(!!a.osym) - Number(!!b.osym));
-  sozlukOnbellek = { zaman: Date.now(), terimler };
-  return terimler;
+  sozlukOnbellek = { zaman: Date.now(), terimler, kisaAdlar: kisa };
+  return sozlukOnbellek;
 }
 
 /** Terimi metinde tam kelime olarak bulur ve siler; bulamazsa null. sayim: yalniz bir sayimin parcasiysa. */
@@ -375,7 +418,7 @@ export async function matchDepartmentsForText(
   // bolumler de yalniz bu duzeylerde eslesir (varsayilan duzeyle elenmesinler).
   secenek: { seviyeler?: EducationLevel[]; seviyeKesin?: boolean; ekMetin?: string | null; osym?: boolean } = {},
 ) {
-  const terimler = await sozluk();
+  const { terimler, kisaAdlar } = await sozluk();
   rawText = dilMuafiyetiniCikar(rawText);
   const [anaEkHam = "", ...tablolar] = (secenek.ekMetin ?? "").split(TABLO_ISARETI);
   const anaEk = dilMuafiyetiniCikar(anaEkHam);
@@ -395,8 +438,9 @@ export async function matchDepartmentsForText(
   // hicbir duzeyi uymayan ad metinden silinir ki icindeki kisa ad ("Bilgisayar") ayrica eslesmesin.
   const uygunAdlar = new Set(terimler.filter(duzeyUygun).map((t) => t.norm));
 
-  const matches = new Map<string, { departmentId: string; matchedAlias: string }>();
-  const osymEslesen = new Map<string, NonNullable<Terim["osym"]> & { seviye: EducationLevel }>();
+  // genel: ciplak kelime genislemesinden (tam ad degil); ilk turda yalniz bunlar varsa ek metin yine okunur.
+  const matches = new Map<string, { departmentId: string; matchedAlias: string; genel?: boolean }>();
+  const osymEslesen = new Map<string, NonNullable<Terim["osym"]> & { seviye: EducationLevel; genel?: boolean }>();
   const sil = (terim: string) => {
     tum = bulVeSil(tum, terim) ?? tum;
     genis = bulVeSil(genis, terim) ?? genis;
@@ -404,7 +448,8 @@ export async function matchDepartmentsForText(
   };
   for (const t of terimler) {
     if (!duzeyUygun(t)) {
-      if (!uygunAdlar.has(t.norm) && bulVeSil(tum, t.norm) !== null) sil(t.norm);
+      // Yalniz tum'den: bolum cumlesinde kalsin ki asagida ciplak oge olarak ilanin duzeyine genisletilsin.
+      if (!uygunAdlar.has(t.norm)) tum = bulVeSil(tum, t.norm) ?? tum;
       continue;
     }
     if (t.seviye) {
@@ -419,6 +464,45 @@ export async function matchDepartmentsForText(
     }
   }
 
+  // Ciplak kelimeler: "fakültelerinin bilgisayar, elektrik, mekatronik ... bölümlerinden" -> ilanin (tek, metinden
+  // okunan) duzeyinde o kelimeyle baslayan tum bolumler (kullanici kurali 2026-10-19). Tam adlar yukarida
+  // eslesip silindigi icin burada yalniz eslesmemis liste ogeleri kalir.
+  const tekDuzey = seviyeler.size === 1 ? [...seviyeler][0] : undefined;
+  if (tekDuzey && secenek.seviyeKesin && secenek.osym !== false) {
+    for (const cumle of genis.split(" | ")) {
+      const duzeyde = [...terimler, ...kisaAdlar].filter((t) => (t.seviye ?? t.duzey) === tekDuzey);
+      const onekiyle = (o: string) => duzeyde.filter((t) => t.norm === o || t.norm.startsWith(`${o} `) || t.norm.startsWith(`${o}-`));
+      const islenenObek = new Set<string>();
+      for (const { oge: parca, muhendislik, butun } of ciplakOgeler(cumle)) {
+        // "elektronik ve haberlesme" bir bolum adinin basiysa obek tek oge sayilir (parcalari degil).
+        const obekAd = butun && onekiyle(butun).length ? butun : undefined;
+        if (obekAd && islenenObek.has(obekAd)) continue;
+        if (obekAd) islenenObek.add(obekAd);
+        const oge = obekAd ?? parca;
+        // Oge kendisi bir bolum adiysa ("Resim", "Seramik", "Pazarlama") yalniz o; degilse ("elektrik")
+        // o kelimeyle baslayan tum bolumler.
+        const tam = duzeyde.filter((t) => t.norm === oge);
+        const onekli = onekiyle(oge).filter((t) => t.norm !== oge);
+        // "Mühendislik fakültelerinin elektrik, elektronik ... bölümleri": o kelimenin mühendislik bolumleri
+        // ("Elektronik" adli bolum olsa da Elektronik Mühendisliği kastedilir).
+        const muhendisler = muhendislik ? onekli.filter((t) => t.norm.includes("muhendis")) : [];
+        const adaylar = muhendisler.length ? muhendisler : tam.length ? tam : onekli;
+        // Ust sinir benzersiz bolum sayisina: ayni bolum hem sitede (ad/ifade) hem OSYM adi olarak gecebilir.
+        const siteAdlari = new Set(adaylar.filter((t) => t.departmentId).map((t) => t.norm));
+        const benzersiz = new Set(adaylar.map((t) => (t.departmentId ? `d:${t.departmentId}` : siteAdlari.has(t.norm) ? null : `o:${t.norm}`)).filter(Boolean));
+        if (!benzersiz.size || benzersiz.size > CIPLAK_EN_FAZLA) continue;
+        for (const t of adaylar) {
+          if (t.departmentId) {
+            if (!matches.has(t.departmentId)) matches.set(t.departmentId, { departmentId: t.departmentId, matchedAlias: `${oge} (genel)`, genel: true });
+          } else if (t.osym) {
+            // Tam adla zaten eslesmisse "genel" isaretiyle ezilmesin.
+            if (!osymEslesen.has(normalize(t.osym.ad))) osymEslesen.set(normalize(t.osym.ad), { ...t.osym, seviye: t.seviye!, genel: true });
+          }
+        }
+      }
+    }
+  }
+
   for (const o of osymEslesen.values()) {
     // Deneme raporu (scripts/eslestirmeDene.ts) bolum eklemez: yeni bolum "osym:<ad>" sahte kimligiyle doner.
     if (process.env.BOLUM_EKLEME_KAPALI === "1") {
@@ -427,11 +511,11 @@ export async function matchDepartmentsForText(
         where: { level: o.seviye, OR: [{ name: { equals: o.ad, mode: "insensitive" } }, { name: { equals: `${o.ad} (${LEVEL_LABEL[o.seviye] ?? o.seviye})`, mode: "insensitive" } }] },
         select: { id: true },
       });
-      matches.set(var_?.id ?? `osym:${o.ad}`, { departmentId: var_?.id ?? `osym:${o.ad}`, matchedAlias: o.ad });
+      matches.set(var_?.id ?? `osym:${o.ad}`, { departmentId: var_?.id ?? `osym:${o.ad}`, matchedAlias: o.ad, genel: o.genel });
       continue;
     }
     const bolum = await createDepartmentFromResearch({ name: o.ad, level: o.seviye, aliases: o.aliases, osym: true });
-    if (!matches.has(bolum.id)) matches.set(bolum.id, { departmentId: bolum.id, matchedAlias: `${o.ad} (ÖSYM)` });
+    if (!matches.has(bolum.id)) matches.set(bolum.id, { departmentId: bolum.id, matchedAlias: `${o.ad} (ÖSYM)`, genel: o.genel });
   }
   if (osymEslesen.size) sozlukOnbellek = null;
   return Array.from(matches.values());
