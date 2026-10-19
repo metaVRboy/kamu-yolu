@@ -17,6 +17,9 @@ export const GECE_ADET = 10;
 // iki dogru sikli "hangisi yoktur" sorusu ve uydurma alinti testte gecmisti).
 const DOGRULAMA_MODEL = "gemini-pro-latest";
 const HARF = ["A", "B", "C", "D", "E"];
+// Cagri basina sure siniri: uretim + dogrulama paralel, en kotu ~200 sn < route maxDuration 300 sn.
+// Sinirsiz bir cagri uzayinca Vercel fonksiyonu olduruyor, ScrapeRun "RUNNING" kaliyordu (2026-10-18 gecesi).
+const CAGRI_SURESI_MS = 100_000;
 
 /** Cagri basina token sayaci (maliyet olcumu icin; dusunme tokenlari cikisa sayilir). */
 export type TokenSayaci = { giris: number; cikis: number; dogrulamaGiris: number; dogrulamaCikis: number };
@@ -88,6 +91,7 @@ async function konuIcinUret(duzey: Duzey, h: Hedef, hedefHarfler: number[], saya
         "olsun (çok adımlı, gerçek sınav kadar). Açıklama, doğru cevabın neden doğru olduğunu kısaca gösterir.",
       responseMimeType: "application/json",
       responseJsonSchema: toGeminiSchema(UretimSchema),
+      abortSignal: AbortSignal.timeout(CAGRI_SURESI_MS),
     },
   });
   const t = say(res.usageMetadata);
@@ -122,6 +126,7 @@ async function dogrula(duzey: Duzey, ders: DenemeDers, s: { soruMetni: string; s
         "birden fazla/hiç doğru şık varsa kısaca nedeni; yoksa boş.",
       responseMimeType: "application/json",
       responseJsonSchema: toGeminiSchema(KontrolSchema),
+      abortSignal: AbortSignal.timeout(CAGRI_SURESI_MS),
     },
   });
   const t = say(res.usageMetadata);

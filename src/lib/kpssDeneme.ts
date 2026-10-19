@@ -13,19 +13,22 @@ function bugununTarihi(): Date {
   return new Date(`${y}-${m}-${d}T00:00:00.000Z`);
 }
 
-type Aday = { id: string; sira: number; grupId: string | null; konu: string | null; kullanimSayisi: number };
+// sonKullanim: sorunun en son ciktigi gunun zamani (hic cikmadiysa 0).
+type Aday = { id: string; sira: number; grupId: string | null; konu: string | null; sonKullanim: number };
 
 /**
- * Adaylardan tam `adet` soru secer: ortak metinli gruplar bolunmez, en az kullanilan once,
- * esit kullanimlilar arasinda rastgele (havuz buyudukce her gun farkli kombinasyon).
+ * Adaylardan tam `adet` soru secer: ortak metinli gruplar bolunmez, en uzun suredir cikmamis olan once,
+ * esitler arasinda rastgele. (Eskiden kullanim SAYISINA bakiliyordu: haftalarca tekrarlanan ilk parti
+ * sayaci yuksek kaldigi icin her gun ayni ikinci parti seciliyor, ardisik gunler 120 sorunun ~100'unu
+ * paylasiyordu - 2026-10-19.)
  * Grup boyutlari (ör. 4'lu sozel mantik + tekil soru) tam sayiyi tutturmayabilir: oncelik
  * sirasini koruyan geri izlemeli arama tam toplami bulur; bulamazsa sigan kadarini dondurur.
  */
-function enAzKullanilanlar(adaylar: Aday[], adet: number): Aday[] {
+export function enAzKullanilanlar(adaylar: Aday[], adet: number): Aday[] {
   const birimMap = new Map<string, Aday[]>();
   for (const a of adaylar) birimMap.set(a.grupId ?? a.id, [...(birimMap.get(a.grupId ?? a.id) ?? []), a]);
   const birimler = [...birimMap.values()]
-    .map((b) => ({ b, kullanim: Math.max(...b.map((x) => x.kullanimSayisi)), r: Math.random() }))
+    .map((b) => ({ b, kullanim: Math.max(...b.map((x) => x.sonKullanim)), r: Math.random() }))
     .sort((x, y) => x.kullanim - y.kullanim || x.r - y.r)
     .map((x) => x.b);
   const secim: Aday[][] = [];
@@ -48,8 +51,8 @@ function enAzKullanilanlar(adaylar: Aday[], adet: number): Aday[] {
 
 /**
  * Bugunun (Turkiye gunu) sinavini dondurur; yoksa havuzdan olusturulur: her ders icin
- * KONU_DAGILIMI'ndaki sayilarla konu konu en az kullanilan sorular secilir, secilenlerin
- * kullanimSayisi artirilir. Sonuc TUM kullanicilar icin ayni (sabit) soru seti olur.
+ * KONU_DAGILIMI'ndaki sayilarla konu konu en uzun suredir cikmamis sorular secilir (gecmis gunluk
+ * denemelerden), kullanimSayisi istatistik icin artirilir. Sonuc TUM kullanicilar icin ayni soru seti olur.
  */
 export async function getBugununDenemesi(duzey: EducationLevel) {
   const tarih = bugununTarihi();
@@ -59,12 +62,18 @@ export async function getBugununDenemesi(duzey: EducationLevel) {
 
   const dagilim = KONU_DAGILIMI[duzey as keyof typeof KONU_DAGILIMI];
   if (!dagilim) throw new Error(`${DUZEY_LABEL[duzey]} icin deneme yok.`);
+  // Sorularin en son ciktigi gun: bu duzeyin gecmis gunluk denemeleri (eskiden yeniye, yeni ustune yazar).
+  const gecmis = await prisma.gunlukDeneme.findMany({ where: { duzey, tarih: { lt: tarih } }, orderBy: { tarih: "asc" }, select: { tarih: true, soruIdler: true } });
+  const sonKullanim = new Map<string, number>();
+  for (const g of gecmis) for (const id of g.soruIdler) sonKullanim.set(id, g.tarih.getTime());
   const soruIdler: string[] = [];
   for (const ders of DERS_SIRASI) {
-    const adaylar = await prisma.denemeSoru.findMany({
-      where: { duzey, ders },
-      select: { id: true, sira: true, grupId: true, konu: true, kullanimSayisi: true },
-    });
+    const adaylar = (
+      await prisma.denemeSoru.findMany({
+        where: { duzey, ders },
+        select: { id: true, sira: true, grupId: true, konu: true },
+      })
+    ).map((a) => ({ ...a, sonKullanim: sonKullanim.get(a.id) ?? 0 }));
     const secilen = dagilim[ders].flatMap(([konu, adet]) => enAzKullanilanlar(adaylar.filter((a) => a.konu === konu), adet));
     // Bir konunun havuzu eksikse ders yine tam sayida olsun: dersin kalan en az kullanilanlariyla tamamlanir.
     const eksik = DERS_DAGILIMI[ders] - secilen.length;
