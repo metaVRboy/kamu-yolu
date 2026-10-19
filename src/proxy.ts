@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { hizSiniriAs } from "@/lib/hizSiniri";
 import { gizliOzet } from "@/lib/gizliOzet";
+import { botMu } from "@/lib/botlar";
 
 // IP basina dakikalik istek sinirlari (/api). Bot taramasi, mesaj/kayit spami ve veritabani
 // kotasini (Neon) tuketen asiri istekleri durdurur. Yazma 120: KPSS denemesinde her cevap bir
@@ -23,6 +24,9 @@ export function proxy(req: NextRequest) {
     return NextResponse.next({ request: { headers: h } });
   }
   if (gorevMi(req)) return NextResponse.next();
+  if (botMu(req.headers.get("user-agent"))) {
+    return NextResponse.json({ error: "Otomatik erişime izin verilmiyor." }, { status: 403 });
+  }
   // CSRF: tarayici baska siteden gelen her POST'a Origin ekler. SameSite=Lax tek basina yetmez (text/plain
   // form POST'u req.json() ile JSON gibi okunur). Mobil uygulama Origin gondermez, etkilenmez.
   const origin = req.headers.get("origin");
