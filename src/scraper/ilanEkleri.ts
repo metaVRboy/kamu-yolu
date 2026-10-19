@@ -1,3 +1,4 @@
+import { lookup } from "node:dns/promises";
 import { gemini, GEMINI_MODEL } from "@/lib/gemini";
 import { TABLO_ISARETI } from "@/lib/matching";
 import { stripBbCode } from "./parseRequirements";
@@ -11,12 +12,36 @@ import { stripBbCode } from "./parseRequirements";
 
 const AZAMI_BAYT = 10 * 1024 * 1024;
 
+/**
+ * Ek baglantisi ilan metninden gelir (KK BBCode [url=...] herhangi bir adres olabilir) ve tarama ev
+ * bilgisayarinda calisir: yerel ag/loopback adreslerine istek atilmasin (SSRF). Yonlendirmeler de
+ * her adimda ayni kontrolden gecer.
+ */
+async function disAdresMi(url: URL): Promise<boolean> {
+  if (url.protocol !== "https:" && url.protocol !== "http:") return false;
+  const adresler = await lookup(url.hostname.replace(/^\[|\]$/g, ""), { all: true }).catch(() => []);
+  return adresler.length > 0 && adresler.every(({ address }) => !/^(127\.|10\.|192\.168\.|169\.254\.|172\.(1[6-9]|2\d|3[01])\.|0\.|::1$|::$|f[cd]|fe80:|::ffff:(127|10|192\.168|169\.254)\.)/i.test(address));
+}
+
+async function guvenliFetch(adres: string): Promise<Response> {
+  let url = new URL(adres);
+  for (let adim = 0; adim < 4; adim++) {
+    if (!(await disAdresMi(url))) throw new Error(`${url.hostname} dış adres değil, indirilmedi`);
+    const res = await fetch(url, { redirect: "manual", signal: AbortSignal.timeout(20_000), headers: { "User-Agent": "KamuYoluBot/0.1 (iletisim: info@kamuyolu.com)" } });
+    const hedef = res.status >= 300 && res.status < 400 ? res.headers.get("location") : null;
+    if (!hedef) return res;
+    url = new URL(hedef, url);
+  }
+  throw new Error(`${adres} çok fazla yönlendirme`);
+}
+
 async function indir(url: string): Promise<{ veri: Uint8Array; tur: string }> {
   // kariyerkapisi.gov.tr DNS'i ara ara bir kez cozulemiyor: bir kez daha dene.
   for (let deneme = 1; ; deneme++) {
     try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(20_000), headers: { "User-Agent": "KamuYoluBot/0.1 (iletisim: info@kamuyolu.com)" } });
+      const res = await guvenliFetch(url);
       if (!res.ok) throw new Error(`${url} -> ${res.status}`);
+      if (Number(res.headers.get("content-length")) > AZAMI_BAYT) throw new Error(`${url} çok büyük`);
       const veri = new Uint8Array(await res.arrayBuffer());
       if (veri.length > AZAMI_BAYT) throw new Error(`${url} çok büyük (${veri.length} bayt)`);
       return { veri, tur: res.headers.get("content-type") ?? "" };
