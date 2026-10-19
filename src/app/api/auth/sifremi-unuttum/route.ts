@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { kacis, sendEmail } from "@/lib/email";
 import { SITE_URL } from "@/lib/site";
+import { gizliOzet, gunlukHakKullan } from "@/lib/authAbuse";
 
 const bodySchema = z.object({
   email: z.string().trim().toLowerCase().email(),
@@ -11,6 +12,7 @@ const bodySchema = z.object({
 
 const TOKEN_GECERLILIK_SAAT = 1;
 const YENIDEN_GONDERME_MS = 60_000;
+const GUNLUK_SINIR = 5;
 
 export async function POST(req: NextRequest) {
   const parsed = bodySchema.safeParse(await req.json().catch(() => null));
@@ -25,12 +27,14 @@ export async function POST(req: NextRequest) {
   // Ayni hesaba dakikada en fazla bir baglanti (posta kutusu bombardimani, sinirsiz token satiri).
   const yakinda = user && (await prisma.passwordResetToken.count({ where: { userId: user.id, createdAt: { gt: new Date(Date.now() - YENIDEN_GONDERME_MS) } } }));
 
-  if (user && !yakinda) {
+  // Gunluk tavan da: dakikada bir bile gunde 1440 e-posta eder (bombardiman, Resend kotasi biterse kayit kodlari gitmez).
+  if (user && !yakinda && (await gunlukHakKullan(`sifre-sifirlama:${user.id}`, GUNLUK_SINIR))) {
     const token = randomBytes(32).toString("hex");
     const expiresAt = new Date(Date.now() + TOKEN_GECERLILIK_SAAT * 60 * 60 * 1000);
 
+    // Db'ye yalniz ozet yazilir: db/yedek sizsa bile bekleyen baglantilar kullanilamaz.
     await prisma.passwordResetToken.create({
-      data: { token, userId: user.id, expiresAt },
+      data: { token: gizliOzet("sifre-sifirlama", token), userId: user.id, expiresAt },
     });
 
     // Alan adi istekten (Origin) alinmaz: saldirgan kendi alan adina giden bir sifirlama linki yollatabilirdi.

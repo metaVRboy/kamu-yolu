@@ -346,18 +346,31 @@ function SifreDegistir({ sifreVar, degisti }: { sifreVar: boolean; degisti: () =
 }
 
 function GoogleBaglantisi({ bagli, sifreVar, degisti }: { bagli: boolean; sifreVar: boolean; degisti: () => void }) {
-  // Tarayicida uygulamanin oturumu yok: once kisa omurlu baglama kodu alinir, Google o kodla acilir.
+  const [sifreAcik, setSifreAcik] = useState(false);
+  const [sifre, setSifre] = useState("");
+  const [yukleniyor, setYukleniyor] = useState(false);
+
+  // Tarayicida uygulamanin oturumu yok: once (sifre teyitli) kisa omurlu baglama kodu alinir, Google o kodla
+  // acilir. Tarayici baglamaz, onay jetonu doner; baglamayi bu oturum bagla-onay ile tamamlar.
   async function bagla() {
+    setYukleniyor(true);
     try {
-      const { kod } = await api<{ kod: string }>("/api/auth/google/bagla-kodu", { method: "POST" });
+      const { kod } = await api<{ kod: string }>("/api/auth/google/bagla-kodu", { method: "POST", govde: { sifre: sifre || undefined } });
+      setSifreAcik(false);
+      setSifre("");
       const r = await WebBrowser.openAuthSessionAsync(`${SITE}/api/auth/google?bagla=${encodeURIComponent(kod)}&uygulama=1`, "kamuyolu://google-bagla");
       if (r.type !== "success") return;
-      const sonuc = r.url.match(/sonuc=([\w-]+)/)?.[1];
+      const onay = r.url.match(/onay=([^&]+)/)?.[1];
+      const sonuc = onay
+        ? (await api<{ sonuc: string }>("/api/auth/google/bagla-onay", { method: "POST", govde: { onay: decodeURIComponent(onay) } })).sonuc
+        : r.url.match(/hata=([\w-]+)/)?.[1];
       if (sonuc === "baglandi") Alert.alert("Google hesabın bağlandı.", "Artık Google ile de giriş yapabilirsin.");
       else Alert.alert("Bağlanamadı.", sonuc === "baska-hesap" ? "Bu Google hesabı başka bir Kamu Yolu hesabına bağlı." : "Lütfen tekrar dene.");
       degisti();
     } catch (e) {
       Alert.alert("Bağlanamadı.", hataMetni(e));
+    } finally {
+      setYukleniyor(false);
     }
   }
 
@@ -365,7 +378,14 @@ function GoogleBaglantisi({ bagli, sifreVar, degisti }: { bagli: boolean; sifreV
     return (
       <View style={{ gap: 10 }}>
         <T style={{ color: renk.soluk, lineHeight: 20 }}>Hesabına bağlı bir Google hesabı yok. Bağlarsan Google ile tek dokunuşla giriş yapabilirsin.</T>
-        <Buton tur="cerceve" etiket="Google hesabını bağla" onPress={bagla} />
+        {sifreAcik ? (
+          <>
+            <Girdi etiket="Devam etmek için mevcut şifren" sifre value={sifre} onChangeText={setSifre} textContentType="password" />
+            <Buton etiket="Google'a devam et" onPress={bagla} yukleniyor={yukleniyor} devreDisi={!sifre} />
+          </>
+        ) : (
+          <Buton tur="cerceve" etiket="Google hesabını bağla" onPress={() => (sifreVar ? setSifreAcik(true) : bagla())} yukleniyor={yukleniyor} />
+        )}
       </View>
     );
   }

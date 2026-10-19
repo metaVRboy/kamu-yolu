@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { fotografSurumu } from "@/lib/profil";
 
 // Istemci fotoyu 256x256'ya kucultup gonderir; bu sinir ancak hileli istekleri durdurur.
 const AZAMI_BAYT = 200 * 1024;
@@ -34,7 +35,7 @@ export async function POST(req: NextRequest) {
     create: { userId: user.id, veri, tur },
     select: { guncellenme: true },
   });
-  return NextResponse.json({ url: `/api/profil/fotograf/${user.id}?v=${kayit.guncellenme.getTime()}` });
+  return NextResponse.json({ url: `/api/profil/fotograf/${user.id}?v=${fotografSurumu(user.id, kayit.guncellenme)}` });
 }
 
 export async function DELETE() {

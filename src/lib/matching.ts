@@ -189,8 +189,9 @@ export async function getLastSuccessfulScrapeAt(): Promise<Date | null> {
 }
 
 export async function getPostingById(id: string) {
+  // Admin'in gizledigi ilan dogrudan URL ile de acilmaz (sayfa, mobil, takvim, uygunluk hepsi buradan).
   return prisma.posting.findUnique({
-    where: { id },
+    where: { id, adminGizli: false },
     include: {
       departments: { include: { department: { select: { name: true, slug: true } } } },
     },

@@ -1,13 +1,12 @@
-import { createHmac } from "crypto";
 import { redirect } from "next/navigation";
 import { getAktifOturumId, getCurrentUser } from "@/lib/auth";
+import { gizliOzet } from "@/lib/authAbuse";
 import { prisma } from "@/lib/prisma";
 
 /** Admin iki asamali dogrulamasi bir oturumda bu kadar gecerli; sonra kod tekrar istenir. */
 export const ADMIN_DOGRULAMA_MS = 12 * 3_600_000;
 
-/** Sunucu anahtariyla HMAC: ozet bir yerden sizsa bile 10^6 olasilik denenerek kod cozulemez. */
-export const kodOzeti = (kod: string) => createHmac("sha256", process.env.SESSION_SECRET!).update(`admin-kod:${kod}`).digest("hex");
+export const kodOzeti = (kod: string) => gizliOzet("admin-kod", kod);
 
 /** Giris yapmis admin + bu oturumun admin dogrulamasi gecerli mi (oturumu olmayan eski cerez: hayir). */
 export async function adminDurumu() {

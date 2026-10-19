@@ -7,10 +7,12 @@ import { kacis, sendEmail } from "@/lib/email";
 import { passwordSchema } from "@/lib/authValidation";
 import { verifyTurnstileToken } from "@/lib/turnstile";
 import { kaynakTemizle } from "@/lib/kaynak";
+import { gizliOzet, gunlukHakKullan } from "@/lib/authAbuse";
 import { Prisma } from "@/generated/prisma/client";
 
 const bodySchema = z.object({
-  adSoyad: z.string().trim().min(2).max(100),
+  // Yalniz harf: ad, herhangi bir adrese bizim alan adimizdan giden e-postaya yazilir (ad alaninda "itiraz: kotu.site" gibi oltalama).
+  adSoyad: z.string().trim().min(2).max(100).regex(/^[\p{L} .'-]+$/u, "Ad soyad yalnızca harf içerebilir."),
   email: z.string().trim().toLowerCase().email(),
   password: passwordSchema,
   // Alan adi geriye uyumluluk icin kvkkOnay; anlami: Kullanim Kosullari kabulu + 18 yas beyani.
@@ -24,6 +26,7 @@ const bodySchema = z.object({
 
 const KOD_GECERLILIK_DAKIKA = 10;
 const YENIDEN_GONDERIM_BEKLEME_SANIYE = 60;
+const GUNLUK_KOD_SINIRI = 10;
 
 export async function POST(req: NextRequest) {
   if (!isSessionConfigured()) {
@@ -65,15 +68,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (!(await gunlukHakKullan(`kayit:${email}`, GUNLUK_KOD_SINIRI))) {
+      return NextResponse.json({ error: "Bu adrese bugün çok fazla kod gönderildi. Yarın tekrar dene." }, { status: 429 });
+    }
+
     const code = randomInt(0, 1_000_000).toString().padStart(6, "0");
     const passwordHash = await hashPassword(password);
     const expiresAt = new Date(Date.now() + KOD_GECERLILIK_DAKIKA * 60 * 1000);
+    const veri = { code: gizliOzet("kayit-kodu", code), deneme: 0, adSoyad, passwordHash, kvkkOnayTarihi: new Date(), ticariIletiOnay, kaynak, expiresAt };
 
     await prisma.emailVerificationCode.upsert({
       where: { email },
       // createdAt yenilenir: tekrar gonderim beklemesi (yukarida) son gonderime gore olculur.
-      update: { code, adSoyad, passwordHash, kvkkOnayTarihi: new Date(), ticariIletiOnay, kaynak, expiresAt, usedAt: null, createdAt: new Date() },
-      create: { email, code, adSoyad, passwordHash, kvkkOnayTarihi: new Date(), ticariIletiOnay, kaynak, expiresAt },
+      update: { ...veri, usedAt: null, createdAt: new Date() },
+      create: { email, ...veri },
     });
 
     await sendEmail({

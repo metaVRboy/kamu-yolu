@@ -7,8 +7,9 @@ export async function verifyTurnstileToken(token: string | undefined | null): Pr
 
   const secret = process.env.TURNSTILE_SECRET_KEY;
   if (!secret) {
-    console.error("TURNSTILE_SECRET_KEY tanımlı değil — insan doğrulaması atlanıyor.");
-    return true;
+    // Canlida anahtar dusmusse kapali kal: yoksa giris/kayit sessizce bot korumasiz kalirdi.
+    console.error("TURNSTILE_SECRET_KEY tanımlı değil.");
+    return process.env.NODE_ENV !== "production";
   }
 
   try {

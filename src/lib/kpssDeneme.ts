@@ -222,7 +222,7 @@ export async function cevapKaydet(katilimId: string, userId: string, soruId: str
   }
   // Oku-degistir-yaz DEGIL, tek atomik jsonb birlestirme: art arda hizli
   // cevaplarda es zamanli iki istek birbirinin uzerine yazip cevap kaybettiriyordu.
-  await prisma.$executeRaw`UPDATE "DenemeKatilim" SET cevaplar = cevaplar || jsonb_build_object(${soruId}::text, ${secenekIndex}::int) WHERE id = ${katilimId}`;
+  await prisma.$executeRaw`UPDATE "DenemeKatilim" SET cevaplar = cevaplar || jsonb_build_object(${soruId}::text, ${secenekIndex}::int) WHERE id = ${katilimId} AND "bitisZamani" IS NULL`;
 }
 
 function sonucuHesapla(cevaplar: Record<string, number>, sorular: { id: string; dogruCevap: number }[]) {

@@ -7,6 +7,7 @@ import Link from "next/link";
 import { getLastSuccessfulScrapeAt } from "@/lib/matching";
 import { cn } from "@/lib/utils";
 import { getCurrentUser } from "@/lib/auth";
+import { gizliOzet } from "@/lib/gizliOzet";
 import { profilFotografiUrl } from "@/lib/profil";
 import { ILETISIM_ADRES, ILETISIM_EPOSTA, ILETISIM_TELEFON, SATICI, SATICI_BILGILERI_TAMAM, SITE_URL } from "@/lib/site";
 import { SiteMenu } from "@/components/SiteMenu";
@@ -60,7 +61,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   // Bakim modunda ziyaretciler her adreste yalniz bakim mesajini gorur (header, footer, reklam yok);
   // admin siteyi normal kullanir, /giris yalniz giris formuyla acik kalir. API'ler ve taramalar calisir.
   if (ayar.bakimModu && !user?.isAdmin) {
-    const girisSayfasi = (await headers()).get("x-giris-sayfasi") === "1";
+    // Isareti yalniz proxy koyar; deger gizli: istemci basligi kendisi gonderip bakimi atlatamaz.
+    const girisSayfasi = (await headers()).get("x-giris-sayfasi") === gizliOzet("giris-sayfasi", "1");
     return (
       <html lang="tr" className={cn("h-full antialiased", inter.variable, "font-sans")}>
         <body className="flex min-h-full flex-col items-center justify-center px-4 py-10 text-foreground">

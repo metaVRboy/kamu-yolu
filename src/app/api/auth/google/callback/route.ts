@@ -1,7 +1,7 @@
 import { after, NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { guvenlikEpostasi } from "@/lib/email";
-import { createSession, googleBaglaJetonuCoz, uygulamaGirisKoduOlustur } from "@/lib/auth";
+import { createSession, googleBaglaJetonuCoz, googleBaglaOnayJetonu, googleHesabiBagla, uygulamaGirisKoduOlustur } from "@/lib/auth";
 import { UYGULAMA_DONUS, UYGULAMA_GOOGLE_BAGLA } from "@/lib/uygulama";
 import { SITE_URL } from "@/lib/site";
 import { KAYNAK_CEREZ, kaynakCerezCoz } from "@/lib/kaynak";
@@ -59,16 +59,14 @@ export async function GET(req: NextRequest) {
     const profil = (await profilRes.json()) as GoogleProfil;
 
     // Baglama akisi (Ayarlar > Guvenlik): secilen Google hesabi oturumdaki kullaniciya baglanir, giris yapilmaz.
-    const baglaUserId = await googleBaglaJetonuCoz(req.cookies.get("google_oauth_bagla")?.value);
-    if (baglaUserId) {
-      const baska = await prisma.user.findUnique({ where: { googleId: profil.sub }, select: { id: true } });
-      let sonuc = "baska-hesap";
-      if (!baska || baska.id === baglaUserId) {
-        const u = await prisma.user.update({ where: { id: baglaUserId }, data: { googleId: profil.sub, googleBaglamaKapali: false } });
-        after(() => guvenlikEpostasi(u.email, u.adSoyad, "hesabına bir Google hesabı bağlandı"));
-        sonuc = "baglandi";
-      }
-      const res = NextResponse.redirect(uygulama ? `${UYGULAMA_GOOGLE_BAGLA}?sonuc=${sonuc}` : `${SITE_URL}/profilim/ayarlar/guvenlik?google=${sonuc}`);
+    // Uygulamada baglama burada yapilmaz: onay jetonu uygulamaya doner, uygulama kendi oturumuyla onaylar.
+    const bagla = await googleBaglaJetonuCoz(req.cookies.get("google_oauth_bagla")?.value);
+    if (bagla) {
+      const res = NextResponse.redirect(
+        uygulama
+          ? `${UYGULAMA_GOOGLE_BAGLA}?onay=${encodeURIComponent(await googleBaglaOnayJetonu(bagla, profil.sub))}`
+          : `${SITE_URL}/profilim/ayarlar/guvenlik?google=${await googleHesabiBagla(bagla.userId, profil.sub)}`,
+      );
       for (const c of ["google_oauth_state", "google_oauth_bagla", "google_oauth_uygulama"]) res.cookies.delete(c);
       return res;
     }

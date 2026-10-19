@@ -35,16 +35,18 @@ export function smsSaglayiciTanimli(): boolean {
  * ponytail: saglayici secilince yalniz `saglayiciyaGonder` doldurulur.
  */
 export async function smsGonder(params: { userId: string | null; telefon: string; metin: string; tur: SmsTuru; kapsamSonu?: Date | null }) {
+  // Kayitta dogrulama kodu maskelenir: SMS gecmisi kodu kalici tutmasin.
+  const kayit = { ...params, metin: params.tur === "DOGRULAMA" ? params.metin.replace(/\d{6}/g, "******") : params.metin };
   if (!smsSaglayiciTanimli()) {
     console.info(`[SMS TEST] ${params.tur} -> ${telefonMaskele(params.telefon)}: ${params.metin}`);
-    return prisma.smsGonderim.create({ data: { ...params, durum: "TEST" } });
+    return prisma.smsGonderim.create({ data: { ...kayit, durum: "TEST" } });
   }
   try {
     const saglayiciId = await saglayiciyaGonder(params.telefon, params.metin);
-    return prisma.smsGonderim.create({ data: { ...params, durum: "GONDERILDI", saglayiciId } });
+    return prisma.smsGonderim.create({ data: { ...kayit, durum: "GONDERILDI", saglayiciId } });
   } catch (err) {
     console.error("SMS gönderilemedi:", err);
-    return prisma.smsGonderim.create({ data: { ...params, durum: "HATA", hata: String(err).slice(0, 500) } });
+    return prisma.smsGonderim.create({ data: { ...kayit, durum: "HATA", hata: String(err).slice(0, 500) } });
   }
 }
 

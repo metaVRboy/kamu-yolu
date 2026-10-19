@@ -233,7 +233,8 @@ model TelefonDogrulamaKodu {
   userId    String   @id
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   telefon   String
-  kod       String
+  kod       String // gizliOzet (HMAC), duz kod degil
+  deneme    Int      @default(0)
   expiresAt DateTime
   createdAt DateTime @default(now())
 }
@@ -312,14 +313,15 @@ model EpostaDegisiklikKodu {
   userId    String   @id
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   yeniEmail String
-  kod       String
+  kod       String // gizliOzet (HMAC), duz kod degil
+  deneme    Int      @default(0)
   expiresAt DateTime
   createdAt DateTime @default(now())
 }
 
 model PasswordResetToken {
   id        String    @id @default(cuid())
-  token     String    @unique
+  token     String    @unique // gizliOzet (HMAC); e-postadaki ham jeton db'de yok
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
   expiresAt DateTime
@@ -363,7 +365,8 @@ model GunlukSayac {
 model EmailVerificationCode {
   id             String    @id @default(cuid())
   email          String    @unique
-  code           String
+  code           String // gizliOzet (HMAC), duz kod degil
+  deneme         Int       @default(0)
   adSoyad        String
   passwordHash   String
   kvkkOnayTarihi DateTime

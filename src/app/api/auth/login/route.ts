@@ -12,6 +12,9 @@ const bodySchema = z.object({
   beniHatirla: z.boolean().optional(),
 });
 
+// bcrypt("kamuyolu-sahte", 10): hicbir sifreyle eslesmesi beklenmez, yalniz sure esitler.
+const SAHTE_HASH = "$2b$10$LDrcezWf8lLjGOCXBdZpnui8Sg6E8Wnl4mEv/BcN96WqD8aHHLxqi";
+
 export async function POST(req: NextRequest) {
   if (!isSessionConfigured()) {
     console.error("SESSION_SECRET tanımlı değil — kayıt/giriş çalışamaz.");
@@ -39,6 +42,8 @@ export async function POST(req: NextRequest) {
   try {
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user || !user.passwordHash) {
+      // Hesap yokken de bcrypt calisir: yanit suresi e-postanin kayitli olup olmadigini ele vermesin.
+      await verifyPassword(password, SAHTE_HASH);
       await recordFailure(email);
       const mesaj = user && !user.passwordHash
         ? "Bu hesap Google ile oluşturulmuş. Lütfen \"Google ile Giriş Yap\" butonunu kullanın."

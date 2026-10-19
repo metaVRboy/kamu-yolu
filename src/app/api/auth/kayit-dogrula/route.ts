@@ -3,7 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { createSession } from "@/lib/auth";
 import { Prisma } from "@/generated/prisma/client";
-import { clearFailures, getLockoutState, lockoutMessage, recordFailure } from "@/lib/authAbuse";
+import { clearFailures, getLockoutState, gizliOzet, KOD_DENEME_HAKKI, lockoutMessage, recordFailure } from "@/lib/authAbuse";
 
 const bodySchema = z.object({
   email: z.string().trim().toLowerCase().email(),
@@ -23,15 +23,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: lockoutMessage(lockout.lockedUntil) }, { status: 429 });
   }
 
-  const pending = await prisma.emailVerificationCode.findUnique({ where: { email } });
-  // Bekleyen kod yokken hata sayilmaz: yoksa herkes istek atarak baskasinin e-postasinin kaydini kilitlerdi.
-  if (!pending || pending.usedAt || pending.expiresAt < new Date()) {
+  // Deneme hakki karsilastirmadan ONCE atomik dusulur: paralel yuzlerce tahmin de kod basina en fazla
+  // KOD_DENEME_HAKKI kadar denenebilir. Bekleyen kod yokken hata sayilmaz (baskasinin kaydini kilitlemesin).
+  const hak = await prisma.emailVerificationCode.updateMany({
+    where: { email, usedAt: null, expiresAt: { gt: new Date() }, deneme: { lt: KOD_DENEME_HAKKI } },
+    data: { deneme: { increment: 1 } },
+  });
+  const pending = hak.count ? await prisma.emailVerificationCode.findUnique({ where: { email } }) : null;
+  if (!pending) {
     return NextResponse.json(
-      { error: "Kodun süresi dolmuş. Lütfen yeni bir kod iste." },
+      { error: "Kodun süresi dolmuş ya da çok fazla hatalı deneme yapıldı. Lütfen yeni bir kod iste." },
       { status: 400 },
     );
   }
-  if (pending.code !== code) {
+  if (pending.code !== gizliOzet("kayit-kodu", code)) {
     await recordFailure(abuseIdentifier);
     return NextResponse.json({ error: "Kod hatalı." }, { status: 400 });
   }

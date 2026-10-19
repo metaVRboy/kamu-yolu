@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { clearFailures, getLockoutState, lockoutMessage, recordFailure } from "@/lib/authAbuse";
 import { yasalKayitYaz } from "@/lib/yasalKayit";
+import { guvenlikEpostasi } from "@/lib/email";
 
 const SESSION_COOKIE = "kamu_yolu_session";
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 30; // 30 gun
@@ -109,15 +110,39 @@ export async function uygulamaGirisKoduOlustur(userId: string) {
 /**
  * Google hesabi baglama: giris yapmis kullanicinin kimligi OAuth gidis-donusunde imzali, kisa
  * omurlu bir jetonla tasinir (mobilde tarayicinin site oturumu olmadigi icin URL'de de gider).
+ * Jeton oturuma baglidir: cikis, sifre degisikligi ya da oturum kapatilinca gecersiz olur.
  */
-export async function googleBaglaJetonu(userId: string, sureSn = 600) {
-  return new SignJWT({ userId, amac: "google-bagla" }).setProtectedHeader({ alg: "HS256" }).setExpirationTime(`${sureSn}s`).sign(getSecretKey());
+type BaglaKimligi = { userId: string; oturumId: string };
+
+export async function googleBaglaJetonu(k: BaglaKimligi, sureSn = 600) {
+  return new SignJWT({ ...k, amac: "google-bagla" }).setProtectedHeader({ alg: "HS256" }).setExpirationTime(`${sureSn}s`).sign(getSecretKey());
 }
 
-export async function googleBaglaJetonuCoz(jeton: string | undefined | null): Promise<string | null> {
+export async function googleBaglaJetonuCoz(jeton: string | undefined | null, amac = "google-bagla"): Promise<(BaglaKimligi & { sub?: string }) | null> {
   if (!jeton) return null;
   const p = await jwtVerify(jeton, getSecretKey()).then((r) => r.payload).catch(() => null);
-  return p?.amac === "google-bagla" && typeof p.userId === "string" ? p.userId : null;
+  if (p?.amac !== amac || typeof p.userId !== "string" || typeof p.oturumId !== "string") return null;
+  const oturum = await prisma.oturum.findUnique({ where: { id: p.oturumId }, select: { userId: true, kapatildi: true } });
+  if (!oturum || oturum.kapatildi || oturum.userId !== p.userId) return null;
+  return { userId: p.userId, oturumId: p.oturumId, sub: typeof p.sub === "string" ? p.sub : undefined };
+}
+
+/**
+ * Mobil baglama: tarayici callback'i baglamaz, bu onay jetonunu uygulamaya dondurur; uygulama kendi
+ * oturumuyla /api/auth/google/bagla-onay'a yollar. Baskasinin baglama linkini acan kurbanin Google
+ * hesabi saldirganin hesabina baglanamaz (onay, jetondaki oturumdan gelmek zorunda).
+ */
+export async function googleBaglaOnayJetonu(k: BaglaKimligi, sub: string) {
+  return new SignJWT({ ...k, sub, amac: "google-bagla-onay" }).setProtectedHeader({ alg: "HS256" }).setExpirationTime("180s").sign(getSecretKey());
+}
+
+/** Secilen Google hesabini kullaniciya baglar; baska bir hesaba bagliysa dokunmaz. */
+export async function googleHesabiBagla(userId: string, sub: string): Promise<"baglandi" | "baska-hesap"> {
+  const baska = await prisma.user.findUnique({ where: { googleId: sub }, select: { id: true } });
+  if (baska && baska.id !== userId) return "baska-hesap";
+  const u = await prisma.user.update({ where: { id: userId }, data: { googleId: sub, googleBaglamaKapali: false } });
+  after(() => guvenlikEpostasi(u.email, u.adSoyad, "hesabına bir Google hesabı bağlandı"));
+  return "baglandi";
 }
 
 /** Kodu dogrular, oturumu acar ve bu istegin (mobil uygulamanin fetch cerez deposu) cerezine yazar. */

@@ -4,6 +4,7 @@ import { Suspense, createContext, useCallback, useContext, useEffect, useState }
 import { usePathname, useRouter } from "next/navigation";
 import { X } from "lucide-react";
 import { AuthForm } from "@/components/AuthForm";
+import { siteIciYol } from "@/lib/site";
 import { AuthSplitPanel, GirisBasligi } from "@/components/AuthSplitPanel";
 
 type Mod = "giris" | "kayit";
@@ -92,7 +93,8 @@ export function AuthModalProvider({
   function basarili() {
     const sonra = durum?.sonra;
     kapat();
-    if (sonra?.startsWith("/") && !sonra.startsWith("//")) router.push(sonra);
+    const yol = siteIciYol(sonra);
+    if (yol) router.push(yol);
   }
 
   return (

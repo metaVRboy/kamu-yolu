@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { createSession, hashPassword, isSessionConfigured } from "@/lib/auth";
 import { passwordSchema } from "@/lib/authValidation";
+import { clearFailures, gizliOzet } from "@/lib/authAbuse";
 
 const bodySchema = z.object({
   token: z.string().min(1),
@@ -26,7 +27,7 @@ export async function POST(req: NextRequest) {
   }
   const { token, password } = parsed.data;
 
-  const resetToken = await prisma.passwordResetToken.findUnique({ where: { token } });
+  const resetToken = await prisma.passwordResetToken.findUnique({ where: { token: gizliOzet("sifre-sifirlama", token) } });
   if (!resetToken || resetToken.usedAt || resetToken.expiresAt < new Date()) {
     return NextResponse.json(
       { error: "Bu bağlantının süresi dolmuş veya daha önce kullanılmış." },
@@ -54,6 +55,8 @@ export async function POST(req: NextRequest) {
     prisma.oturum.updateMany({ where: { userId: resetToken.userId, kapatildi: null }, data: { kapatildi: new Date() } }),
   ]);
 
+  // E-postasina erisimini kanitladi: baskasinin yanlis denemeleriyle konan giris kilidi kalkar.
+  await clearFailures(updatedUser.email);
   await createSession(updatedUser.id, updatedUser.tokenVersion);
 
   return NextResponse.json({ ok: true });

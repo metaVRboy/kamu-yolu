@@ -5,9 +5,12 @@ import { getCurrentUser, sifreyiTeyitEt } from "@/lib/auth";
 import { sendEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 import { adminDurumu } from "@/lib/admin";
+import { gizliOzet, gunlukHakKullan } from "@/lib/authAbuse";
 
 const KOD_GECERLILIK_DAKIKA = 10;
 const YENIDEN_GONDERIM_BEKLEME_SANIYE = 30;
+// Giris yapmis kullanici bu uctan baska adreslere kod yollatabilir: gunluk tavan (spam, gonderici itibari).
+const GUNLUK_KOD_SINIRI = 5;
 
 const bodySchema = z.object({
   yeniEmail: z.string().trim().toLowerCase().email("Geçerli bir e-posta adresi gir."),
@@ -45,8 +48,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Kod az önce gönderildi. Biraz bekleyip tekrar dene." }, { status: 429 });
   }
 
+  if (!(await gunlukHakKullan(`eposta-degisikligi:${user.id}`, GUNLUK_KOD_SINIRI))) {
+    return NextResponse.json({ error: "Bugün için kod gönderme sınırına ulaştın. Yarın tekrar dene." }, { status: 429 });
+  }
+
   const kod = randomInt(0, 1_000_000).toString().padStart(6, "0");
-  const veri = { yeniEmail, kod, expiresAt: new Date(Date.now() + KOD_GECERLILIK_DAKIKA * 60 * 1000), createdAt: new Date() };
+  const veri = { yeniEmail, kod: gizliOzet("eposta-kodu", kod), deneme: 0, expiresAt: new Date(Date.now() + KOD_GECERLILIK_DAKIKA * 60 * 1000), createdAt: new Date() };
   await prisma.epostaDegisiklikKodu.upsert({ where: { userId: user.id }, update: veri, create: { userId: user.id, ...veri } });
 
   try {

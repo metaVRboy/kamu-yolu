@@ -234,6 +234,22 @@ export function GoogleBaglantisi({ bagli, sifreVar, sonuc }: { bagli: boolean; s
   const router = useRouter();
   const [onay, setOnay] = useState(false);
   const [yukleniyor, setYukleniyor] = useState(false);
+  const [sifreAcik, setSifreAcik] = useState(false);
+  const [sifre, setSifre] = useState("");
+
+  // Sifreli hesapta once sifre teyidi; sunucu bu oturuma bagli kisa omurlu jeton verir, OAuth onunla baslar.
+  async function bagla(e?: React.FormEvent) {
+    e?.preventDefault();
+    setYukleniyor(true);
+    try {
+      const res = await fetch("/api/auth/google/bagla-kodu", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sifre: sifre || undefined }) });
+      if (!res.ok) return toast.error("Bağlanamadı.", await hataMetni(res));
+      const { kod } = (await res.json()) as { kod: string };
+      window.location.href = `/api/auth/google?bagla=${encodeURIComponent(kod)}`;
+    } finally {
+      setYukleniyor(false);
+    }
+  }
 
   async function kaldir() {
     setYukleniyor(true);
@@ -258,11 +274,23 @@ export function GoogleBaglantisi({ bagli, sifreVar, sonuc }: { bagli: boolean; s
         {sonucKutusu}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-muted-foreground">Hesabına bağlı bir Google hesabı yok. Bağlarsan Google ile tek tıkla giriş yapabilirsin.</p>
-          {/* Duz baglanti: OAuth tam sayfa yonlendirmeyle Google'a gider. */}
-          <a href="/api/auth/google?bagla=1" className="inline-flex h-9 items-center rounded-xl border border-primary/20 px-3 text-sm font-semibold text-slate-800 hover:bg-slate-50">
-            Google hesabını bağla
-          </a>
+          {!sifreAcik && (
+            <Button type="button" variant="outline" disabled={yukleniyor} onClick={() => (sifreVar ? setSifreAcik(true) : bagla())}>
+              Google hesabını bağla
+            </Button>
+          )}
         </div>
+        {sifreAcik && (
+          <form onSubmit={bagla} className="mt-3 flex flex-wrap items-end gap-3">
+            <div className="min-w-56 flex-1">
+              <Label className="mb-1.5">Devam etmek için mevcut şifren</Label>
+              <PasswordInput required value={sifre} onChange={(e) => setSifre(e.target.value)} autoComplete="current-password" className="border-primary/20 bg-white" />
+            </div>
+            <Button type="submit" disabled={yukleniyor}>
+              {yukleniyor ? "Kontrol ediliyor..." : "Google'a devam et"}
+            </Button>
+          </form>
+        )}
       </div>
     );
   }

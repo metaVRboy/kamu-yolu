@@ -14,6 +14,7 @@ import { PasswordRequirementsHint } from "@/components/SifreSifirlaForm";
 import { TurnstileWidget } from "@/components/TurnstileWidget";
 import { kaynakBilgisi } from "@/lib/olcum";
 import { TICARI_ILETI_ACIK } from "@/lib/planlar";
+import { siteIciYol } from "@/lib/site";
 
 // Sunucudaki KOD_GECERLILIK_DAKIKA ile ayni. Mobilde mail uygulamasina gidip donmek 2 dk'ya sigmiyordu.
 const KOD_GECERLILIK_SANIYE = 600;
@@ -121,8 +122,7 @@ export function AuthForm({
         router.refresh();
         return;
       }
-      const sonra = searchParams.get("sonra");
-      const hedef = sonra?.startsWith("/") && !sonra.startsWith("//") ? sonra : "/profilim";
+      const hedef = siteIciYol(searchParams.get("sonra")) ?? "/profilim";
       sayfaYuklemesiniBaslat(hedef);
       router.push(hedef);
       router.refresh();

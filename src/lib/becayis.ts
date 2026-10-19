@@ -140,7 +140,7 @@ export async function getIlgilendiklerim(userId: string) {
       mevcutIlce: talep.mevcutIlce,
       istenenIller: talep.istenenIller,
       isActive: talep.isActive,
-      ilanSahibiAdSoyad: talep.user.adSoyad,
+      ilanSahibiAdSoyad: kisaAd(talep.user.adSoyad),
       mesajlar: talepMesajlari.map(({ id, gonderenId, mesaj, createdAt, okundu, sikayetEdildi }) => ({ id, gonderenId, mesaj, createdAt, okundu, sikayetEdildi })),
       okunmamisSayisi: talepMesajlari.filter((m) => !m.okundu && m.gonderenId !== userId).length,
       sonMesajTarihi: talepMesajlari[talepMesajlari.length - 1].createdAt,

@@ -35,17 +35,21 @@ export async function GET(req: NextRequest) {
   const cerez = { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax" as const, path: "/", maxAge: 600 };
   // Mobil uygulama girisi telefonun tarayicisinda baslatir; callback oturumu uygulamaya kodla dondurur.
   // Onceki yarim kalmis akisin cerezleri kalmasin (giris, baglamaya donusmesin).
-  if (req.nextUrl.searchParams.get("uygulama") === "1") res.cookies.set("google_oauth_uygulama", "1", cerez);
+  const uygulama = req.nextUrl.searchParams.get("uygulama") === "1";
+  if (uygulama) res.cookies.set("google_oauth_uygulama", "1", cerez);
   else res.cookies.delete("google_oauth_uygulama");
   res.cookies.delete("google_oauth_bagla");
 
-  // Baglama: sitede oturum cerezinden, uygulamada /api/auth/google/bagla-kodu'ndan alinan jetondan
-  // kimlik alinir; callback secilen Google hesabini bu kullaniciya baglar (giris yapmaz).
+  // Baglama: kimlik /api/auth/google/bagla-kodu'ndan (sifre teyitli) alinan jetondan gelir; callback secilen
+  // Google hesabini bu kullaniciya baglar (giris yapmaz). Sitede jeton bu tarayicinin oturumuyla eslesmeli:
+  // saldirganin kendi jetonlu linkini acan kurbanin Google hesabi saldirgana baglanmasin. Uygulamada
+  // tarayicinin oturumu yok; orada baglamayi uygulamanin kendi oturumu onaylar (bagla-onay).
   const bagla = req.nextUrl.searchParams.get("bagla");
   if (bagla) {
-    const userId = bagla === "1" ? (await getCurrentUser())?.id : await googleBaglaJetonuCoz(bagla);
-    if (!userId) return NextResponse.redirect(`${SITE_URL}/giris`);
-    res.cookies.set("google_oauth_bagla", await googleBaglaJetonu(userId), cerez);
+    const kimlik = await googleBaglaJetonuCoz(bagla);
+    const ayniOturum = uygulama || (kimlik && (await getCurrentUser())?.id === kimlik.userId);
+    if (!kimlik || !ayniOturum) return NextResponse.redirect(`${SITE_URL}/giris`);
+    res.cookies.set("google_oauth_bagla", await googleBaglaJetonu(kimlik), cerez);
   }
   return res;
 }

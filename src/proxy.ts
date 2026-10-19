@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { hizSiniriAs } from "@/lib/hizSiniri";
+import { gizliOzet } from "@/lib/gizliOzet";
 
 // IP basina dakikalik istek sinirlari (/api). Bot taramasi, mesaj/kayit spami ve veritabani
 // kotasini (Neon) tuketen asiri istekleri durdurur. Yazma 120: KPSS denemesinde her cevap bir
@@ -18,10 +19,16 @@ export function proxy(req: NextRequest) {
   // Bakim modunda tum sayfalar yalniz bakim mesajini gosterir; /giris acik kalir (admin girebilsin).
   if (req.nextUrl.pathname === "/giris") {
     const h = new Headers(req.headers);
-    h.set("x-giris-sayfasi", "1");
+    h.set("x-giris-sayfasi", gizliOzet("giris-sayfasi", "1"));
     return NextResponse.next({ request: { headers: h } });
   }
   if (gorevMi(req)) return NextResponse.next();
+  // CSRF: tarayici baska siteden gelen her POST'a Origin ekler. SameSite=Lax tek basina yetmez (text/plain
+  // form POST'u req.json() ile JSON gibi okunur). Mobil uygulama Origin gondermez, etkilenmez.
+  const origin = req.headers.get("origin");
+  if (origin && req.method !== "GET" && req.method !== "HEAD" && origin !== req.nextUrl.origin) {
+    return NextResponse.json({ error: "Geçersiz istek kaynağı." }, { status: 403 });
+  }
   // Vercel istemcinin gercek IP'sini x-real-ip'e yazar (istemci bu basligi degistiremez).
   const ip = req.headers.get("x-real-ip") ?? req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "bilinmiyor";
   const okuma = req.method === "GET" || req.method === "HEAD";

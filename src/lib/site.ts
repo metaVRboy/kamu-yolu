@@ -1,5 +1,15 @@
 export const SITE_URL = "https://www.kamuyolu.com";
 
+/**
+ * Istemciden gelen donus hedefi (?sonra=): yalniz bu sitenin yolu, degilse null. startsWith("/") yetmez:
+ * "/\kotu.site" ve "/<tab>/kotu.site" tarayicida baska siteye gider (girisin ardindan sahte sifre sayfasi).
+ */
+export function siteIciYol(hedef: string | null | undefined): string | null {
+  if (!hedef?.startsWith("/")) return null;
+  const u = new URL(hedef, "https://yerel.invalid");
+  return u.origin === "https://yerel.invalid" ? u.pathname + u.search + u.hash : null;
+}
+
 /** Kurumsal e-posta (Google Workspace kutusu): site e-postalarinin gondereni ve yasal metinlerdeki iletisim adresi. */
 export const ILETISIM_EPOSTA = "info@kamuyolu.com";
 

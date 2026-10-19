@@ -2,6 +2,7 @@ import { randomInt } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
+import { gizliOzet } from "@/lib/authAbuse";
 import { prisma } from "@/lib/prisma";
 import { proAktifMi, smsGonder, smsSaglayiciTanimli, sonSmsSayisi, telefonNormalize } from "@/lib/sms";
 
@@ -38,7 +39,7 @@ export async function POST(req: NextRequest) {
   }
 
   const kod = randomInt(0, 1_000_000).toString().padStart(6, "0");
-  const veri = { telefon, kod, expiresAt: new Date(Date.now() + KOD_GECERLILIK_DAKIKA * 60 * 1000), createdAt: new Date() };
+  const veri = { telefon, kod: gizliOzet("telefon-kodu", kod), deneme: 0, expiresAt: new Date(Date.now() + KOD_GECERLILIK_DAKIKA * 60 * 1000), createdAt: new Date() };
   await prisma.telefonDogrulamaKodu.upsert({ where: { userId: user.id }, update: veri, create: { userId: user.id, ...veri } });
 
   const gonderim = await smsGonder({
