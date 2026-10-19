@@ -98,6 +98,11 @@ export default function KullanimKosullariPage() {
           <ul className="list-disc pl-5">
             <li>Sahte, yanıltıcı veya başkasına ait kimlik/bilgi kullanmak</li>
             <li>Siteyi otomatik araçlarla (bot, scraper) aşırı yüklemek veya kötüye kullanmak</li>
+            <li>
+              Kamu Yolu&apos;nun yazılı izni olmadan sitedeki veya uygulama arayüzlerindeki (API) verileri otomatik
+              araçlarla (bot, tarayıcı, yapay zeka ajanı vb.) toplamak, toplu olarak indirmek, kopyalamak ya da
+              başka bir hizmette kullanmak; buna bölüm eşleştirmeleri, ilan derlemeleri, deneme soruları ve
+              istatistikler dahildir</li>
             <li>Becayiş modülü veya mesajlaşma üzerinden taciz, dolandırıcılık veya reklam/spam içerikli mesaj göndermek</li>
             <li>Sitenin güvenlik önlemlerini aşmaya çalışmak</li>
           </ul>
@@ -106,7 +111,8 @@ export default function KullanimKosullariPage() {
         <section>
           <h2 className="font-sans text-base font-semibold text-primary">6. Fikri Mülkiyet</h2>
           <p>
-            Sitenin tasarımı, yazılımı, logosu ve editoryal içerikleri (haberler, özetler) Kamu
+            Sitenin tasarımı, yazılımı, logosu, editoryal içerikleri (haberler, özetler), deneme
+            soruları ve ilanların bölümlere göre sınıflandırılmasıyla oluşan veri tabanı Kamu
             Yolu&apos;na aittir ve izinsiz kopyalanamaz, çoğaltılamaz veya ticari amaçla
             kullanılamaz. İlan içerikleri ilgili kamu kurumlarına aittir; Kamu Yolu yalnızca
             kaynak gösterilerek bu bilgileri derler ve yönlendirir.
@@ -154,7 +160,7 @@ export default function KullanimKosullariPage() {
           </p>
         </section>
 
-        <p className="text-xs text-muted-foreground">Son güncelleme: 13 Ekim 2026.</p>
+        <p className="text-xs text-muted-foreground">Son güncelleme: 19 Ekim 2026.</p>
       </div>
     </div>
   );
