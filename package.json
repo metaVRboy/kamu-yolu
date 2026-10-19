@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint",
     "db:seed": "tsx prisma/seed.ts",
-    "scrape:kariyerkapisi": "tsx src/scraper/run.ts"
+    "scrape:kariyerkapisi": "tsx --env-file=.env.prod src/scraper/run.ts",
+    "db:deploy:prod": "node --env-file=.env.prod node_modules/prisma/build/index.js migrate deploy"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
