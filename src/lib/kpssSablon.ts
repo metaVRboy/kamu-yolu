@@ -1,11 +1,11 @@
 /**
- * Parametrik KPSS matematik sablonlari: kod sayilari secer, cevabi formulle hesaplar, celdiricileri
+ * Parametrik KPSS sablonlari (matematik; cografyada il koordinati ve MGM istasyonu): kod sayilari secer, cevabi formulle hesaplar, celdiricileri
  * kuralla kurar. Model kullanilmaz (maliyet $0, cevap hesapla dogru). Sorular uretim "sablon" ve
  * sablon kimligiyle eklenir; ayni sablonun iki varyanti ayni denemeye girmez (kpssDeneme.ts).
  * Kontrol: npx tsx scripts/kpssSablonKontrol.ts
  */
 import { prisma } from "@/lib/prisma";
-import { geometriSekli, geometriSorunu, type GeometriSekli } from "@/lib/kpssGorsel";
+import { geometriSekli, geometriSorunu, iklimGrafigi, IKLIM_ISTASYONLARI, IL_ADLARI, ilKoordinati, turkiyeHaritasi, type GeometriSekli } from "@/lib/kpssGorsel";
 
 type Uretilen = {
   metin: string;
@@ -18,8 +18,10 @@ type Uretilen = {
   goster?: (v: number) => string;
   aciklama: string;
   sekil?: GeometriSekli;
+  // Hazir cizilmis gorsel (harita, iklim grafigi).
+  svg?: string;
 };
-export type Sablon = { id: string; duzey: "LISANS" | "ONLISANS" | "LISE"; konu: string; geometri?: boolean; uret: () => Uretilen | null };
+export type Sablon = { id: string; duzey: "LISANS" | "ONLISANS" | "LISE"; ders?: "MATEMATIK" | "COGRAFYA"; konu: string; geometri?: boolean; uret: () => Uretilen | null };
 
 const r = (a: number, b: number) => a + Math.floor(Math.random() * (b - a + 1));
 const sec = <T,>(d: readonly T[]) => d[Math.floor(Math.random() * d.length)];
@@ -604,6 +606,94 @@ export const SABLONLAR: Sablon[] = [
   },
 ];
 
+// ---- Cografya: il koordinatlarindan konum, MGM istasyonlarindan iklim ----
+
+const ROMA = ["I", "II", "III", "IV", "V"];
+const romaGoster = (v: number) => ROMA[v - 1] ?? "";
+
+/** Haritada birbirinden uzak 5 il (noktalar ust uste binmesin) ve o illerin koordinati. */
+function uzakIller() {
+  for (let i = 0; i < 50; i++) {
+    const iller = [...IL_ADLARI].sort(() => Math.random() - 0.5).slice(0, 5);
+    const k = iller.map(ilKoordinati);
+    const yakin = k.some((a, x) => k.some((b, y) => x < y && Math.hypot(a.boylam - b.boylam, a.enlem - b.enlem) < 2.2));
+    if (!yakin) return iller.map((il, j) => ({ il, ...k[j] }));
+  }
+  return null;
+}
+
+type KonumSorusu = { kok: string; deger: (k: { boylam: number; enlem: number }) => number; aciklama: string };
+const BOYLAM_SORULARI: KonumSorusu[] = [
+  { kok: "21 Mart tarihinde Güneş'in ilk doğduğu merkez", deger: (k) => k.boylam, aciklama: "Güneş doğudan doğar; 21 Mart'ta gündüz süresi her yerde eşit olduğundan Güneş en doğudaki merkezde ilk doğar." },
+  { kok: "yerel saati en ileri olan merkez", deger: (k) => k.boylam, aciklama: "Doğuya gidildikçe yerel saat ilerler; en doğudaki merkezin yerel saati en ileridir." },
+  { kok: "yerel saati en geri olan merkez", deger: (k) => -k.boylam, aciklama: "Batıya gidildikçe yerel saat geri kalır; en batıdaki merkezin yerel saati en geridir." },
+  { kok: "23 Eylül tarihinde Güneş'in en son battığı merkez", deger: (k) => -k.boylam, aciklama: "Güneş batıdan batar; ekinoks tarihinde en batıdaki merkezde en son batar." },
+];
+const ENLEM_SORULARI: KonumSorusu[] = [
+  { kok: "21 Haziran tarihinde gündüz süresinin en uzun olduğu merkez", deger: (k) => k.enlem, aciklama: "21 Haziran'da Kuzey Yarım Küre'de kuzeye gidildikçe gündüz süresi uzar; en kuzeydeki merkezde en uzundur." },
+  { kok: "21 Aralık tarihinde gündüz süresinin en uzun olduğu merkez", deger: (k) => -k.enlem, aciklama: "21 Aralık'ta Kuzey Yarım Küre'de güneye gidildikçe gündüz süresi uzar; en güneydeki merkezde en uzundur." },
+  { kok: "Dünya'nın günlük hareketine bağlı çizgisel hızın en fazla olduğu merkez", deger: (k) => -k.enlem, aciklama: "Çizgisel hız Ekvator'dan kutuplara doğru azalır; Ekvator'a en yakın (en güneydeki) merkezde en fazladır." },
+  { kok: "öğle vakti Güneş ışınlarının yere düşme açısının yıl boyunca en küçük olduğu merkez", deger: (k) => k.enlem, aciklama: "Kuzey Yarım Küre'de kuzeye gidildikçe Güneş ışınlarının geliş açısı küçülür; en kuzeydeki merkezde en küçüktür." },
+];
+
+const konumSablonu = (duzey: Sablon["duzey"], tur: "boylam" | "enlem"): Sablon => ({
+  id: `${duzey[0]}-cg-konum-${tur}`,
+  duzey,
+  ders: "COGRAFYA",
+  konu: "Coğrafi Konum",
+  uret: () => {
+    const iller = uzakIller();
+    if (!iller) return null;
+    const soru = sec(tur === "boylam" ? BOYLAM_SORULARI : ENLEM_SORULARI);
+    const degerler = iller.map(soru.deger);
+    const enIyi = Math.max(...degerler);
+    // Kenar payi: ikinci en iyi en az 0,7° geride (il merkezi yaklasik bir nokta).
+    if ([...degerler].sort((a, b) => b - a)[1] > enIyi - 0.7) return null;
+    const dogru = degerler.indexOf(enIyi) + 1;
+    return {
+      metin: `Aşağıdaki Türkiye haritasında beş merkez numaralandırılarak gösterilmiştir.\n\nBuna göre ${soru.kok} hangisidir?`,
+      dogru,
+      yanlislar: [1, 2, 3, 4, 5].filter((v) => v !== dogru),
+      min: 1,
+      max: 5,
+      goster: romaGoster,
+      aciklama: `${soru.aciklama} Bu merkez ${ROMA[dogru - 1]} numaralı noktadır (${iller[dogru - 1].il}).`,
+      svg: turkiyeHaritasi({ ilNoktalari: iller.map((x, i) => ({ etiket: ROMA[i], il: x.il })) }),
+    };
+  },
+});
+
+// Her iklim bolgesinden en fazla bir sik: secenekler grafikten ayirt edilebilsin (Antalya/İzmir gibi
+// ayni iklim tipindeki iki merkez ayni soruda yer almaz). Edirne (Ankara'ya), Trabzon (İstanbul'a) cok
+// benzedigi icin yok.
+const IKLIM_BOLGELERI = [["Antalya", "İzmir", "Adana"], ["Rize"], ["Konya", "Ankara", "Erzurum", "Van"], ["Diyarbakır"], ["İstanbul"]];
+
+const iklimSablonu = (duzey: Sablon["duzey"]): Sablon => ({
+  id: `${duzey[0]}-cg-iklim-merkez`,
+  duzey,
+  ders: "COGRAFYA",
+  konu: "İklim ve Bitki Örtüsü",
+  uret: () => {
+    const merkezler = IKLIM_BOLGELERI.map(sec).sort((a, b) => a.localeCompare(b, "tr"));
+    const cevap = sec(merkezler);
+    const v = IKLIM_ISTASYONLARI[cevap];
+    const yillik = Math.round(v.yagis.reduce((t, x) => t + x, 0));
+    return {
+      metin: "Aşağıdaki grafikte bir merkezin uzun yıllar aylık ortalama sıcaklık ve yağış değerleri verilmiştir.\n\nBu grafik aşağıdaki merkezlerden hangisine ait olabilir?",
+      dogru: merkezler.indexOf(cevap) + 1,
+      yanlislar: [1, 2, 3, 4, 5],
+      min: 1,
+      max: 5,
+      goster: (i) => merkezler[i - 1] ?? "",
+      aciklama: `Grafik ${cevap} merkezine aittir (MGM uzun yıllar ortalaması): en soğuk ay ${ondalik(Math.min(...v.sicaklik))} °C, en sıcak ay ${ondalik(Math.max(...v.sicaklik))} °C, yıllık yağış yaklaşık ${yillik} mm; en yağışlı ay ${AYLAR[v.yagis.indexOf(Math.max(...v.yagis))]}, en kurak ay ${AYLAR[v.yagis.indexOf(Math.min(...v.yagis))]}.`,
+      svg: iklimGrafigi(v.sicaklik, v.yagis),
+    };
+  },
+});
+const AYLAR = ["ocak", "şubat", "mart", "nisan", "mayıs", "haziran", "temmuz", "ağustos", "eylül", "ekim", "kasım", "aralık"];
+
+SABLONLAR.push(...(["LISANS", "ONLISANS", "LISE"] as const).flatMap((d) => [konumSablonu(d, "boylam"), konumSablonu(d, "enlem"), iklimSablonu(d)]));
+
 /** Sablondan bir soru: secenekler, dogru indeks, gorsel. 20 denemede kurulamazsa null. */
 export function sablondanSoru(s: Sablon, hedef = r(0, 4)) {
   for (let i = 0; i < 20; i++) {
@@ -612,7 +702,7 @@ export function sablondanSoru(s: Sablon, hedef = r(0, 4)) {
     if (u.sekil && geometriSorunu(u.sekil)) continue;
     const siklar = sikKur(u, hedef);
     if (!siklar) continue;
-    return { soruMetni: u.metin, aciklama: u.aciklama, gorselSvg: u.sekil ? geometriSekli(u.sekil) : null, ...siklar };
+    return { soruMetni: u.metin, aciklama: u.aciklama, gorselSvg: u.svg ?? (u.sekil ? geometriSekli(u.sekil) : null), ...siklar };
   }
   return null;
 }
@@ -636,7 +726,7 @@ export async function sablonGunluk() {
       const soru = sablondanSoru(s);
       if (!soru || (await prisma.denemeSoru.findFirst({ where: { duzey, soruMetni: soru.soruMetni }, select: { id: true } }))) continue;
       await prisma.denemeSoru.create({
-        data: { duzey, ders: "MATEMATIK", konu: s.konu, geometri: !!s.geometri, uretim: "sablon", sablon: s.id, sira: 99_999, ...soru },
+        data: { duzey, ders: s.ders ?? "MATEMATIK", konu: s.konu, geometri: !!s.geometri, uretim: "sablon", sablon: s.id, sira: 99_999, ...soru },
       });
       eklenen++;
     }

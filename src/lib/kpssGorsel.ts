@@ -23,6 +23,14 @@ function ilMerkezi(il: string): [number, number] {
   return [x / n, y / n];
 }
 
+/** Il merkezinin (haritadaki noktanin) yaklasik boylam/enlemi: projeksiyonun tersi (dogrusal). */
+export function ilKoordinati(il: string): { boylam: number; enlem: number } {
+  const [x, y] = ilMerkezi(il);
+  const [x0, y0] = projeksiyon(30, 40);
+  const [x1, y1] = projeksiyon(31, 41);
+  return { boylam: 30 + (x - x0) / (x1 - x0), enlem: 40 + (y - y0) / (y1 - y0) };
+}
+
 const isaret = (etiket: string, x: number, y: number) =>
   `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.6" fill="#dc2626" stroke="#7f1d1d" stroke-width="0.8"/><text x="${(x + 5).toFixed(1)}" y="${(y - 4).toFixed(1)}" font-size="12" font-weight="700" stroke="#fff" stroke-width="3" paint-order="stroke">${etiket}</text>`;
 

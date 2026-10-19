@@ -10,7 +10,7 @@ import { KONU_DAGILIMI } from "../src/lib/kpssDenemeKonular";
 
 const harfler = [0, 0, 0, 0, 0];
 for (const s of SABLONLAR) {
-  assert.ok(KONU_DAGILIMI[s.duzey].MATEMATIK.some(([k]) => k === s.konu), `${s.id}: konu yok`);
+  assert.ok(KONU_DAGILIMI[s.duzey][s.ders ?? "MATEMATIK"].some(([k]) => k === s.konu), `${s.id}: konu yok`);
   let basari = 0;
   for (let i = 0; i < 300; i++) {
     const u = s.uret();
