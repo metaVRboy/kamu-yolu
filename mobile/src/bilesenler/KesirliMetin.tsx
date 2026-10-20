@@ -42,26 +42,37 @@ function blokSinirlari(metin: string, acilis: number) {
   return null;
 }
 
-/** `^{...}` / `√{...}` blogunun kapanis parantezi (ic ice bloklar atlanir); yoksa -1. */
-function kapanisBul(metin: string, acilis: number) {
-  let derinlik = 0;
-  for (let i = acilis; i < metin.length; i++) {
-    if (metin[i] === "{") derinlik++;
-    else if (metin[i] === "}" && --derinlik === 0) return i;
+/**
+ * Sitedeki argumanBul ile ayni: `^`/`√` argumani `{...}`, dengeli `(...)` ya da tek terim
+ * (2^{x+1}, 9^(x - y + 1), x^y, √{x − 8}, √(6² + 8²), √112). "√2/2" basit kesirde kok metin kalir.
+ */
+function argumanBul(metin: string, i: number): { ic: string; son: number } | null {
+  const isaret = metin[i];
+  const ac = metin[i + 1];
+  if (ac === "{" || ac === "(") {
+    const kapa = ac === "{" ? "}" : ")";
+    let derinlik = 0;
+    for (let j = i + 1; j < metin.length; j++) {
+      if (metin[j] === ac) derinlik++;
+      else if (metin[j] === kapa && --derinlik === 0) return { ic: metin.slice(i + 2, j), son: j };
+    }
+    return null;
   }
-  return -1;
+  const terim = (isaret === "^" ? /^[-−]?(?:\d+|[A-Za-z])/ : /^(?:\d+(?:,\d+)?|[A-Za-z])/).exec(metin.slice(i + 1));
+  if (!terim || (isaret === "√" && metin[i + 1 + terim[0].length] === "/")) return null;
+  return { ic: terim[0], son: i + terim[0].length };
 }
 
 function parcala(metin: string, stil: Stil, renk: string): ReactNode {
   const parcalar: ReactNode[] = [];
   let duz = "";
   for (let i = 0; i < metin.length; i++) {
-    // Sitedeki gibi: ust 2^{x+1}, ustu cizgili kok √{x − 8}.
-    const ozel = (metin[i] === "^" || metin[i] === "√") && metin[i + 1] === "{" ? kapanisBul(metin, i + 1) : -1;
-    if (ozel > 0) {
+    // Sitedeki gibi: ust 2^{x+1} / 9^(x - 1) / x^y, ustu cizgili kok √{x − 8} / √(…) / √112.
+    const arguman = metin[i] === "^" || metin[i] === "√" ? argumanBul(metin, i) : null;
+    if (arguman) {
       parcalar.push(...basitKesirler(duz, stil, renk));
       duz = "";
-      const ic = parcala(metin.slice(i + 2, ozel), stil, renk);
+      const ic = parcala(arguman.ic, stil, renk);
       parcalar.push(
         metin[i] === "^" ? (
           <View style={{ transform: [{ translateY: -6 }] }}>
@@ -76,7 +87,7 @@ function parcala(metin: string, stil: Stil, renk: string): ReactNode {
           </View>
         ),
       );
-      i = ozel;
+      i = arguman.son;
       continue;
     }
     const blok = metin[i] === "{" ? blokSinirlari(metin, i) : null;
