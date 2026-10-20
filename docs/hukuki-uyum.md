@@ -26,7 +26,9 @@ Google/Meta/TikTok politika sayfaları.
 
 1. ~~**Adres ve telefon (5651 Yön. m.5 + KVKK yazılı başvuru)**~~ — 14.10.2026'da footer künyesine ve KVKK §1/§5'e
    eklendi (`src/lib/site.ts`: ILETISIM_ADRES, ILETISIM_TELEFON). Adres değişirse yalnız oradan güncellenir.
-2. **Yer sağlayıcılık bildirimi** — becayiş ilanları/mesajları nedeniyle yer sağlayıcısın. e-Devlet üzerinden
+2. ~~**Yer sağlayıcılık bildirimi**~~ — 20.10.2026'da BTK kabul etti. **Kalıcı yükümlülük:** her ayın ilk haftasında
+   alan adı bilgi dosyası (CSV) BTK sistemine yüklenir; `/api/bakim` her ayın 1'inde info@'ya hatırlatma atar; dosya: `/api/admin/btk-alan-adi` (admin, tarihler RDAP'tan canlı).
+   (Eski not:) Becayiş ilanları/mesajları nedeniyle yer sağlayıcısın. e-Devlet üzerinden
    (yersaglayici.btk.gov.tr; 7590 sayılı Kanunla yetki Siber Güvenlik Başkanlığı'na geçti, başvuru anında güncel
    formu kontrol et) "kendi bünyesinde / gerçek kişi" bildirimi. Ceza: 5651 m.5/6.
 3. **info@kamuyolu.com'u her gün kontrol et** — 5651 kapsamındaki bildirimler ve KVKK başvuruları buraya gelebilir;

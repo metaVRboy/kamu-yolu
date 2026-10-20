@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { suresiDolanYasalKayitlariSil } from "@/lib/yasalKayit";
 import { tazelikKaydet } from "@/lib/kpssTazelik";
 import { prisma } from "@/lib/prisma";
+import { sendEmail } from "@/lib/email";
+import { ILETISIM_EPOSTA, SITE_URL } from "@/lib/site";
 
 /**
  * Gunluk bakim (Vercel Cron, 04:00 TR): saklama suresi dolan yasal kayitlari siler (5651 trafik kaydi 2 yil,
@@ -16,7 +18,24 @@ export async function GET(req: NextRequest) {
   const silinen = await suresiDolanYasalKayitlariSil();
   const temizlenen = await gereksizKayitlariSil();
   const tazelik = await tazelikKaydet().catch((e) => String(e).slice(0, 300));
-  return NextResponse.json({ ok: true, silinen, temizlenen, tazelik });
+  const btk = await btkHatirlatmasi().catch((e) => String(e).slice(0, 300));
+  return NextResponse.json({ ok: true, silinen, temizlenen, tazelik, btk });
+}
+
+/**
+ * 5651 yer saglayici (BTK bildirimi kabul: 20.10.2026): her ayin ilk haftasinda barindirilan alan adlarinin
+ * bilgi dosyasi (CSV) BTK sistemine yuklenir. Ayin 1'inde (TR) kurumsal adrese hatirlatma gider.
+ */
+async function btkHatirlatmasi() {
+  if (new Date(Date.now() + 3 * 3_600_000).getUTCDate() !== 1) return "gun degil";
+  await sendEmail({
+    to: ILETISIM_EPOSTA,
+    subject: "Hatırlatma: BTK alan adı bilgi dosyası (bu hafta)",
+    html: `<p>5651 sayılı Kanun kapsamında yer sağlayıcı olarak, bu ayın ilk haftası içinde barındırılan alan adlarının bilgi dosyasını (CSV) BTK sistemine yüklemen gerekiyor.</p>
+<p>1. Dosyayı indir (admin girişiyle): <a href="${SITE_URL}/api/admin/btk-alan-adi">Barindirilan Alan Adlari.csv</a></p>
+<p>2. Yükle: <a href="https://internet.btk.gov.tr">internet.btk.gov.tr</a> → Yer Sağlayıcı → Alan Adı Bilgi Dosyasını Yükle → "Barındırılan Alan Adları"</p>`,
+  });
+  return "gonderildi";
 }
 
 /**
