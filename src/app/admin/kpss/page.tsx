@@ -1,3 +1,4 @@
+import { KesirliMetin } from "@/components/KesirliMetin";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { adminSayfasi } from "@/lib/admin";
@@ -86,7 +87,7 @@ export default async function AdminKpssPage({ searchParams }: { searchParams: Pr
             const s = liste[0].soru;
             return (
               <li key={s.id} className="rounded-2xl border border-primary/10 p-3">
-                <p className="line-clamp-2 text-sm font-semibold text-slate-900">{s.soruMetni}</p>
+                <p className="line-clamp-2 text-sm font-semibold text-slate-900"><KesirliMetin metin={s.soruMetni} /></p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
                   {DUZEY_LABEL[s.duzey]} · {DERS_LABEL[s.ders]} · {liste.length} bildirim
                 </p>
@@ -119,7 +120,7 @@ export default async function AdminKpssPage({ searchParams }: { searchParams: Pr
             <li key={s.id} className="flex flex-wrap items-center justify-between gap-3 py-2.5">
               <span className="min-w-0 flex-1">
                 <Link href={`/admin/kpss/soru/${s.id}`} className="line-clamp-1 text-sm font-medium text-slate-900 hover:text-primary">
-                  {s.soruMetni}
+                  <KesirliMetin metin={s.soruMetni} />
                 </Link>
                 <span className="text-xs text-muted-foreground">
                   {DERS_LABEL[s.ders]} · anahtar {harf(s.dogruCevap)} (%{Math.round(s.oran * 100)}) · en çok seçilen {harf(s.enCok)} (%{Math.round((s.d[s.enCok] / s.toplam) * 100)}) · {s.toplam} cevap
@@ -176,7 +177,7 @@ export default async function AdminKpssPage({ searchParams }: { searchParams: Pr
           {aramaSonucu.map((s) => (
             <li key={s.id} className="py-2">
               <Link href={`/admin/kpss/soru/${s.id}`} className="line-clamp-1 text-sm text-slate-900 hover:text-primary">
-                {s.soruMetni}
+                <KesirliMetin metin={s.soruMetni} />
               </Link>
               <span className="text-xs text-muted-foreground">
                 {DUZEY_LABEL[s.duzey]} · {DERS_LABEL[s.ders]}

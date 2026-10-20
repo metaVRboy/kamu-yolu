@@ -7,6 +7,7 @@ import { AdminBaslik, AdminKart } from "@/components/admin/AdminUI";
 import { AdminSoruForm } from "@/components/admin/AdminSoruForm";
 import { AdminIslemButonu } from "@/components/admin/AdminIslemButonu";
 import { SoruGovdesi } from "@/components/SoruGovdesi";
+import { KesirliMetin } from "@/components/KesirliMetin";
 import { cn } from "@/lib/utils";
 
 export const metadata = { title: "Soru düzelt — Admin" };
@@ -85,7 +86,7 @@ export default async function AdminSoruPage({ params }: { params: Promise<{ id: 
         <ol className="mt-3 space-y-1 text-sm text-slate-700">
           {soru.secenekler.map((s, i) => (
             <li key={i} className={cn(i === soru.dogruCevap && "font-semibold text-emerald-700")}>
-              {String.fromCharCode(65 + i)}) {s}
+              {String.fromCharCode(65 + i)}) <KesirliMetin metin={s} />
             </li>
           ))}
         </ol>

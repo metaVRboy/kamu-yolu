@@ -206,7 +206,9 @@ async function uretimIstegi(h: UretimHedefi): Promise<InlinedRequest> {
         (h.gorsel ? "" : "Görsel, tablo ya da şekil gerektiren ifade koyma. ") +
         "Gerçek kişilere söz, alıntı ya da görüş atfetme. Bilgi soruları yalnız " +
         "kesin ve tartışmasız bilgiye dayanır; tarih, sayı ve isimlerden emin değilsen o soruyu yazma. Zorluk örneklerdeki düzeyde " +
-        "olsun (çok adımlı, gerçek sınav kadar). Açıklama, doğru cevabın neden doğru olduğunu kısaca gösterir." +
+        "olsun (çok adımlı, gerçek sınav kadar). Açıklama, doğru cevabın neden doğru olduğunu kısaca gösterir. " +
+        "Matematik yazımı (sitede üst simge/kesir olarak çizilir): üs her zaman süslü parantezle 2^{x+1} ya da x^{2}; kök " +
+        "√{x − 8}; bileşik kesir {pay|payda}; eksi işareti −. ^ işaretini parantezsiz ya da (…) ile yazma." +
         (h.gorsel ? `\n\n${GORSEL_TALIMATI[h.gorsel]}` : ""),
       responseMimeType: "application/json",
       responseSchema: toGeminiResponseSchema(uretimSemasi(h.gorsel)),
