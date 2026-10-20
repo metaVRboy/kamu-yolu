@@ -7,6 +7,8 @@ import { SITE_URL } from "@/lib/site";
 import { KAYNAK_CEREZ, kaynakCerezCoz } from "@/lib/kaynak";
 import { Prisma } from "@/generated/prisma/client";
 import { GOOGLE_CALLBACK_PATH } from "../route";
+import { DAVET_CEREZ, davetEdenId } from "@/lib/davet";
+import { KAYIT_HEDIYE_GUN, proHediyeEt } from "@/lib/proHediye";
 
 type GoogleProfil = {
   sub: string;
@@ -91,6 +93,7 @@ export async function GET(req: NextRequest) {
             data: {
               email,
               googleId: profil.sub,
+              davetEdenId: await davetEdenId(req.cookies.get(DAVET_CEREZ)?.value),
               adSoyad: profil.name || email.split("@")[0],
               // Google ile devam et butonunun altinda KVKK/Kullanim
               // Kosullari'nin gecerli oldugu acikca belirtilir - bu an
@@ -101,6 +104,7 @@ export async function GET(req: NextRequest) {
             },
           });
       yeniKayit = !mevcut;
+      if (yeniKayit) await proHediyeEt(user.id, "kayit", KAYIT_HEDIYE_GUN, `Hoş geldin: ${KAYIT_HEDIYE_GUN} gün Pro hediye`);
     }
 
     if (user.askiyaAlindi) return hataYonlendir("askida");

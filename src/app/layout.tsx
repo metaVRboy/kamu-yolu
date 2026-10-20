@@ -26,7 +26,10 @@ import { SiteZemini } from "@/components/SiteZemini";
 import { HeaderAuthButton } from "@/components/HeaderAuthButton";
 import { GezinmeKaydi } from "@/components/GeriDonLinki";
 import { DuyuruSeridi } from "@/components/DuyuruSeridi";
-import { getSiteAyarlari } from "@/lib/siteAyarlari";
+import { getSiteAyarlari, kpssKalanGun } from "@/lib/siteAyarlari";
+import { bugununTarihi } from "@/lib/kpssDeneme";
+import { ProBandi } from "@/components/ProBandi";
+import { DavetYakala } from "@/components/DavetYakala";
 import { Wrench } from "lucide-react";
 import "./globals.css";
 
@@ -89,6 +92,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     );
   }
   const fotografUrl = user ? await profilFotografiUrl(user.id) : null;
+  const kpssGun = kpssKalanGun(ayar, bugununTarihi());
 
   return (
     <html lang="tr" className={cn("h-full antialiased", inter.variable, "font-sans")}>
@@ -123,6 +127,15 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             </div>
 
             <div className="flex items-center gap-2">
+              {kpssGun !== null && (
+                <Link
+                  href="/kpss-denemesi"
+                  title={ayar.kpssSinavAdi ?? "KPSS"}
+                  className="hidden items-center rounded-full bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary/15 md:inline-flex"
+                >
+                  KPSS&apos;ye {kpssGun} gün
+                </Link>
+              )}
               <NotificationBell isLoggedIn={!!user} />
               {user ? (
                 <ProfileMenu adSoyad={user.adSoyad} abonelikPlani={user.abonelikPlani} fotografUrl={fotografUrl} isAdmin={user.isAdmin} />
@@ -131,9 +144,12 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               )}
             </div>
           </div>
+          {/* Header'la birlikte yapiskan Pro bandi (Pro+ uyeye yok, mesaj uyenin gercek durumundan). */}
+          {user?.abonelikPlani !== "PRO_PLUS" && <ProBandi />}
           {/* Gezinme baslayinca header'in alt kenarinda dolan ince cizgi (useSearchParams -> Suspense). */}
           <Suspense fallback={null}>
             <SayfaYuklemeCizgisi />
+            <DavetYakala />
           </Suspense>
         </header>
 
@@ -189,6 +205,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                 <li><Link href="/haberler" className="transition-colors hover:text-white">Duyurular</Link></li>
                 <li><Link href="/kpss-puan-hesaplama" className="transition-colors hover:text-white">KPSS Puan Hesaplama</Link></li>
                 <li><Link href="/kpss-denemesi" className="transition-colors hover:text-white">KPSS Denemesi</Link></li>
+                <li><Link href="/gunun-sorulari" className="transition-colors hover:text-white">Günün Soruları</Link></li>
                 <li><Link href="/becayis" className="transition-colors hover:text-white">Becayiş İlanları</Link></li>
                 <li><Link href="/destek" className="transition-colors hover:text-white">İletişim ve Destek</Link></li>
               </ul>

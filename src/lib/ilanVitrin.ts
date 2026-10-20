@@ -161,6 +161,18 @@ export function kalanGunSayisi(bitis: Date | null, simdi = Date.now()): number |
   return bitis ? Math.ceil((bitis.getTime() - simdi) / GUN_MS) : null;
 }
 
+/** Kalan gune gore renk: 3 gun ve alti kirmizi, 7 gun ve alti turuncu, gecmisse gri. */
+export function kalanGunStili(kalan: number | null) {
+  if (kalan === null) return { metin: "Belirtilmemiş", renk: "text-slate-600", zemin: "bg-slate-100" };
+  if (kalan < 0) return { metin: "Süresi doldu", renk: "text-slate-600", zemin: "bg-slate-100" };
+  if (kalan === 0) return { metin: "Son gün bugün", renk: "text-red-700", zemin: "bg-red-50" };
+  return {
+    metin: `${kalan} gün kaldı`,
+    renk: kalan <= 3 ? "text-red-700" : kalan <= 7 ? "text-amber-700" : "text-emerald-700",
+    zemin: kalan <= 3 ? "bg-red-50" : kalan <= 7 ? "bg-amber-50" : "bg-emerald-50",
+  };
+}
+
 /**
  * "Aranan nitelikler" ham metnini maddelere ayirir: "-", "•", "*", "1)", "1." ya da "1- " ile
  * baslayan satirlar madde olur. Bolum basligini tekrarlayan "ARANAN NİTELİKLER" satiri atilir.

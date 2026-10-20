@@ -11,6 +11,7 @@ import { SoruGovdesi } from "@/components/SoruGovdesi";
 import { SoruHaritasi } from "@/components/SoruHaritasi";
 import { KilitliOzellik } from "@/components/KilitliOzellik";
 import { SoruHataBildir } from "@/components/SoruHataBildir";
+import { YukseltButonu } from "@/components/YukseltmePenceresi";
 import { cn } from "@/lib/utils";
 
 type SonucSorusu = ExamSoru & { dogruCevap: number; aciklama: string | null; konu: string | null };
@@ -220,7 +221,13 @@ export function DenemeSonucEkrani({
   duzey,
   onceki,
   plan,
+  siralama,
+  zayifKonuSayisi,
 }: {
+  /** Ayni denemeyi bitirenler arasinda (yeterli katilimci varsa): yuzde = senden dusuk puan alanlarin orani. */
+  siralama: { yuzde: number; katilimci: number } | null;
+  /** Pro+ disinda: sunucunun gercek cevaplarla saydigi kirmizi konu sayisi (konu adlari gitmez). */
+  zayifKonuSayisi: number | null;
   /** UCRETSIZ'de sunucu ornek (sahte cevapli) veri gonderir; rapor bulanik onizlemedir. */
   sorular: SonucSorusu[];
   cevaplar: Record<string, number>;
@@ -339,6 +346,25 @@ export function DenemeSonucEkrani({
             <div className="mt-4">
               <Serit dogru={dogruSayisi} yanlis={yanlisSayisi} bos={bosSayisi} kalin />
             </div>
+            {(siralama || !!zayifKonuSayisi) && (
+              <div className="mt-4 flex flex-wrap gap-2 text-sm">
+                {siralama && (
+                  <p className="rounded-xl bg-primary/10 px-3 py-2 font-semibold text-primary">
+                    Bugünkü sıralaman: en iyi %{Math.max(1, 100 - siralama.yuzde)} · {siralama.katilimci} katılımcı
+                  </p>
+                )}
+                {!!zayifKonuSayisi && (
+                  <p className="flex flex-wrap items-center gap-x-2 rounded-xl bg-red-50 px-3 py-2 text-red-900">
+                    <span>
+                      <strong>{zayifKonuSayisi} konuda</strong> yanlışın doğrundan fazla.
+                    </span>
+                    <YukseltButonu plan="PRO_PLUS" kaynak="zayif-konu" className="font-bold text-violet-700 underline">
+                      Hangileri? Pro+&apos;da gör
+                    </YukseltButonu>
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </div>
         <p className="border-t border-primary/5 px-6 py-3 text-xs text-muted-foreground sm:px-8">

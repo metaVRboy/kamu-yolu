@@ -5,6 +5,7 @@ import { sendEmail } from "@/lib/email";
 import { SILME_ONAY_METNI } from "@/lib/authValidation";
 import { prisma } from "@/lib/prisma";
 import { yasalKayitYaz } from "@/lib/yasalKayit";
+import { davetOdulunuVer } from "@/lib/davet";
 
 const EDUCATION_LEVELS = [
   "ILKOGRETIM",
@@ -48,6 +49,8 @@ export async function PATCH(req: NextRequest) {
     where: { id: user.id },
     data: { ...data, ...(telefonDegisti ? { telefonDogrulandi: null } : {}) },
   });
+  // Davetle gelen uye ilk kez bolumunu secince profil tamam sayilir: iki tarafa davet hediyesi.
+  if (updated.departmentId && !user.departmentId && updated.davetEdenId) await davetOdulunuVer(updated.id);
 
   return NextResponse.json({
     adSoyad: updated.adSoyad,

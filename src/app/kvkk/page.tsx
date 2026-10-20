@@ -54,6 +54,24 @@ const ISLEMELER: { veri: string; amac: string; sebep: string; sure: string }[] =
     sure: "Hesap açık kaldığı sürece",
   },
   {
+    veri: "Günün soruları cevapları ve serisi, takip ettiğiniz ilanlar; bunlardan hesaplanan rozetler",
+    amac: "Günlük çalışma takibi, seri ödülü (Pro günü), takip ettiğiniz ilanlar için son başvuru hatırlatması",
+    sebep: "Sözleşmenin ifası (m.5/2-c)",
+    sure: "Hesap açık kaldığı sürece; takip, ilanı takipten çıkarınca silinir",
+  },
+  {
+    veri: "Davet bilgisi: davet kodunuz ve (davet linkiyle geldiyseniz) sizi davet eden üye",
+    amac: "Davet hediyesinin (Pro günleri) iki tarafa tanımlanması",
+    sebep: "Sözleşmenin ifası (m.5/2-c)",
+    sure: "Hesap açık kaldığı sürece",
+  },
+  {
+    veri: "Tarayıcı bildirimi aboneliği (tarayıcının verdiği bildirim adresi ve şifreleme anahtarları)",
+    amac: "İzin verdiğiniz cihaza günün soruları ve (Pro) son başvuru hatırlatması gönderme",
+    sebep: "Talebiniz üzerine sözleşmenin ifası (m.5/2-c)",
+    sure: "Bildirimleri kapatana ya da tarayıcı aboneliği iptal edene kadar",
+  },
+  {
     veri: "Ücretli plan bekleme listesi (seçilen plan, dönem, talebin geldiği buton)",
     amac: "Ödeme altyapısı açıldığında talep ettiğiniz plan için size haber verme, talebi ölçme",
     sebep: "Sözleşmenin kurulmasından önce talebiniz üzerine yapılan işlem (m.5/2-c)",
@@ -111,6 +129,11 @@ const ALICILAR: { kim: string; ne: string; ulke: string }[] = [
   { kim: "Cloudflare Inc.", ne: "Robot doğrulaması (Turnstile) için tarayıcı ve IP bilgisi", ulke: "ABD" },
   { kim: "Meta Platforms / TikTok", ne: "Yalnızca çerez onayı verirseniz ve ilgili piksel etkinse reklam ölçümü", ulke: "ABD / İrlanda" },
   { kim: "SMS hizmet sağlayıcısı", ne: "SMS bildirimini açtıysanız telefon numaranız ve ileti metni (sağlayıcı bağlandığında)", ulke: "Türkiye" },
+  {
+    kim: "Tarayıcınızın bildirim servisi (ör. Google, Mozilla, Apple)",
+    ne: "Tarayıcı bildirimini açtıysanız bildirimin cihazınıza iletilmesi; içerik uçtan uca şifreli gider",
+    ulke: "Tarayıcıya göre, çoğunlukla ABD",
+  },
   ...(SATIS_ACIK
     ? [
         { kim: ODEME_KURULUSU ?? "Ödeme kuruluşu", ne: "Ücretli abonelik ödemesi; kart bilgilerinizi doğrudan ödeme kuruluşu işler", ulke: "Türkiye" },
@@ -251,7 +274,7 @@ export default function KvkkPage() {
           </p>
         </section>
 
-        <p className="text-xs text-muted-foreground">Son güncelleme: 19 Ekim 2026.</p>
+        <p className="text-xs text-muted-foreground">Son güncelleme: 20 Ekim 2026.</p>
       </div>
     </div>
   );

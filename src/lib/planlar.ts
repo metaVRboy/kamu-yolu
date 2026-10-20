@@ -28,6 +28,12 @@ export const SATIS_ACIK = false;
  * istenmez, kutucuk ve ayar gizli kalir. Veritabani alanlari ve API duruyor.
  */
 export const TICARI_ILETI_ACIK = false;
+
+/**
+ * Kurucu uye sozu (2026-10-20): satis acilmadan "Acilinca haber ver" listesine katilanlara (YukseltmeTalebi kaydi)
+ * satis acilinca ILK AY bu yuzde indirim. Bir taahhut: odeme entegrasyonunda bu kayitlara uygulanmali.
+ */
+export const KURUCU_UYE_INDIRIM = 50;
 export type Donem = "aylik" | "yillik";
 
 /** Bir plan+donem fiyati (TL, KDV dahil): liste fiyati, kampanyali odenecek tutar ve kampanya etiketi. */
@@ -83,7 +89,12 @@ export type YukseltmeKaynagi =
   | "tanitim-ilan"
   | "tanitim-kpss"
   | "tanitim-becayis"
-  | "tanitim-proplus";
+  | "tanitim-proplus"
+  // Baglilik paketi (2026-10-20): header bandi, kacirilan ilan uyarisi, ilan takip hatirlatmasi, zayif konu sayisi.
+  | "bant"
+  | "kacirilan"
+  | "ilan-takip"
+  | "zayif-konu";
 
 export const KAYNAK_METNI: Record<YukseltmeKaynagi, { baslik: string; alt: string }> = {
   genel: { baslik: "Kamu Yolu'nun tamamını aç", alt: "Bölümüne uygun ilanları ilk sen öğren, KPSS'ye her gün hazırlan." },
@@ -99,6 +110,10 @@ export const KAYNAK_METNI: Record<YukseltmeKaynagi, { baslik: string; alt: strin
   "tanitim-kpss": { baslik: "KPSS'ye her gün daha güçlü hazırlan", alt: "Ders karnen, soru çözümlerin ve gelişimin tek ekranda." },
   "tanitim-becayis": { baslik: "Becayiş eşini bul, hemen yaz", alt: "Talebini yayımla, ilgilenenlerle site içinden mesajlaş." },
   "tanitim-proplus": { baslik: "Sınırsız hazırlığa geç", alt: "Sınırsız deneme, konu bazlı değerlendirme ve öncelikli destek." },
+  bant: { baslik: "Kamu Yolu'nun tamamını aç", alt: "Bölümüne uygun ilanları ilk sen öğren, KPSS'ye her gün hazırlan." },
+  kacirilan: { baslik: "Bir daha ilan kaçırma", alt: "Bölümüne uygun yeni ilan çıktığı an haberin olsun." },
+  "ilan-takip": { baslik: "Son başvuru gününü kaçırma", alt: "Takip ettiğin ilanların son başvurusuna 3 gün ve 1 gün kala hatırlatalım." },
+  "zayif-konu": { baslik: "Eksik konularını gör", alt: "Hangi konuda zayıf olduğunu ve önce neye çalışman gerektiğini konu konu gör." },
 };
 
 /** Karsilastirma satirlari: true = var, false = yok, metin = plana gore deger. */

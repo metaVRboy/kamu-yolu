@@ -36,6 +36,14 @@ export async function GET() {
     prisma.smsGonderim.findMany({ where: { userId: user.id }, select: { telefon: true, metin: true, tur: true, durum: true, olusturma: true } }),
     prisma.soruHataBildirimi.findMany({ where: { userId: user.id }, select: { aciklama: true, createdAt: true } }),
   ]);
+  const [gunlukSorular, takipEdilenIlanlar, proHediyeleri, tarayiciBildirimleri, davetEttikleri] = await Promise.all([
+    prisma.gunlukSoruCevap.findMany({ where: { userId: user.id }, select: { tarih: true, dogru: true, cevaplar: true, olusturma: true } }),
+    prisma.ilanTakip.findMany({ where: { userId: user.id }, select: { olusturma: true, posting: { select: { title: true, institutionName: true } } } }),
+    prisma.proHediye.findMany({ where: { userId: user.id }, select: { neden: true, gun: true, olusturma: true } }),
+    // Bildirim adresi tarayici servisine aittir; yalniz kac cihazda acik oldugu ve tarihi verilir.
+    prisma.pushAbonelik.findMany({ where: { userId: user.id }, select: { olusturma: true } }),
+    prisma.user.count({ where: { davetEdenId: user.id } }),
+  ]);
 
   const veri = {
     olusturulma: new Date().toISOString(),
@@ -72,6 +80,11 @@ export async function GET() {
     destekMesajlari,
     smsGonderimleri,
     soruHataBildirimleri: soruBildirimleri,
+    gunlukSorular,
+    takipEdilenIlanlar,
+    proHediyeleri,
+    tarayiciBildirimleri,
+    davet: { davetKodu: user.davetKodu, davetleIleGeldin: !!user.davetEdenId, davetinleKatilanSayisi: davetEttikleri },
   };
 
   return new NextResponse(JSON.stringify(veri, null, 2), {

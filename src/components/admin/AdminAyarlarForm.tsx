@@ -25,7 +25,14 @@ export function AdminAyarlarForm({ baslangic }: { baslangic: SiteAyarlari }) {
       const res = await fetch("/api/admin/ayarlar", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...a, bakimMesaji: a.bakimMesaji || null, seritMetni: a.seritMetni || null, seritLink: a.seritLink || null }),
+        body: JSON.stringify({
+          ...a,
+          bakimMesaji: a.bakimMesaji || null,
+          seritMetni: a.seritMetni || null,
+          seritLink: a.seritLink || null,
+          kpssSinavAdi: a.kpssSinavAdi || null,
+          kpssSinavTarihi: a.kpssSinavTarihi || null,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Kaydedilemedi.");
@@ -87,6 +94,23 @@ export function AdminAyarlarForm({ baslangic }: { baslangic: SiteAyarlari }) {
             <DuyuruSeridi key={a.seritMetni + a.seritTur} metin={a.seritMetni} link={a.seritLink || null} tur={a.seritTur} />
           </div>
         )}
+      </section>
+
+      <section className="rounded-3xl border border-primary/10 bg-white p-5 shadow-sm sm:p-6">
+        <p className="font-bold text-slate-900">KPSS geri sayımı</p>
+        <p className="text-xs text-muted-foreground">
+          Header&apos;da ve üye kartında &quot;KPSS&apos;ye N gün&quot; olarak görünür. Tarihi ÖSYM&apos;nin resmi sınav takviminden gir; boşsa ya da tarih geçtiyse sayaç gizlenir.
+        </p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem]">
+          <label className="block text-sm font-medium text-slate-700">
+            Sınav adı
+            <input value={a.kpssSinavAdi ?? ""} onChange={(e) => set("kpssSinavAdi", e.target.value)} maxLength={80} placeholder="Örn: 2027-KPSS Lisans (GY-GK)" className={alan} />
+          </label>
+          <label className="block text-sm font-medium text-slate-700">
+            Sınav günü
+            <input type="date" value={a.kpssSinavTarihi ?? ""} onChange={(e) => set("kpssSinavTarihi", e.target.value || null)} className={alan} />
+          </label>
+        </div>
       </section>
 
       <div className="flex justify-end">

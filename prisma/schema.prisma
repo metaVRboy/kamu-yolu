@@ -90,6 +90,7 @@ model Posting {
   updatedAt                DateTime         @updatedAt
 
   departments PostingDepartment[]
+  takipler    IlanTakip[]
 
   @@index([isActive])
   @@index([isDepartmentRestricted])
@@ -148,44 +149,44 @@ model PostingDepartment {
 }
 
 model User {
-  id                String          @id @default(cuid())
-  email             String          @unique
+  id                  String          @id @default(cuid())
+  email               String          @unique
   // Google ile kayit olan kullanicilarda sifre yoktur (null) - bu durumda
   // e-posta/sifre ile giris reddedilir, sadece Google OAuth ile giris
   // yapilabilir.
-  passwordHash      String?
+  passwordHash        String?
   // Google hesabinin benzersiz kimligi ("sub" claim'i) - e-posta ile degil
   // bununla eslestirme yapilir, cunku e-posta kullanici tarafindan Google
   // disinda da degistirilebilir/yeniden kullanilabilir.
-  googleId          String?         @unique
+  googleId            String?         @unique
   // Kullanici Google baglantisini kaldirdiysa, sonraki Google girisi bu hesaba e-posta
   // eslesmesiyle sessizce yeniden baglanmaz (ele gecirilmis Google hesabiyla girilmesin).
-  googleBaglamaKapali Boolean       @default(false)
-  adSoyad           String
-  telefon           String?
-  meslek            String?
-  kurumTuru         String?
+  googleBaglamaKapali Boolean         @default(false)
+  adSoyad             String
+  telefon             String?
+  meslek              String?
+  kurumTuru           String?
   // Isaretliyse kullanici acikca "kamu calisani degilim" demistir; bu
   // durumda kurumTuru/meslek alanlari gecersiz sayilir (arayuzde de
   // tiklanamaz olur). "Henuz cevaplanmadi" (null alanlar) ile bu ikisini
   // ayirt etmek icin ayri bir alan.
-  kamuCalisaniDegil Boolean         @default(false)
+  kamuCalisaniDegil   Boolean         @default(false)
   // Odeme altyapisi henuz yok - bu alan simdilik elle/ileride kurulacak
   // odeme sistemiyle guncellenecek. "Pro" rozeti ve premium ozellik
   // kilitleri bu alana gore calisir.
-  abonelikPlani     AbonelikPlani   @default(UCRETSIZ)
-  departmentId      String?
-  department        Department?     @relation(fields: [departmentId], references: [id])
-  educationLevel    EducationLevel?
-  isAdmin           Boolean         @default(false)
+  abonelikPlani       AbonelikPlani   @default(UCRETSIZ)
+  departmentId        String?
+  department          Department?     @relation(fields: [departmentId], references: [id])
+  educationLevel      EducationLevel?
+  isAdmin             Boolean         @default(false)
   // Kayit formundaki KVKK onay kutucugu isaretlendiginde doldurulur; bu
   // ozellikten once kayit olmus hesaplarda bos olabilir.
-  kvkkOnayTarihi    DateTime?
-  createdAt         DateTime        @default(now())
+  kvkkOnayTarihi      DateTime?
+  createdAt           DateTime        @default(now())
   // Sifre degistirildiginde artirilir; o anda gecerli tum oturumlarin
   // (JWT'lerin) kimlik dogrulamasi bu deger uzerinden yapilir, boylece
   // sifre degisince tum cihazlardaki eski oturumlar aninda gecersiz olur.
-  tokenVersion      Int             @default(0)
+  tokenVersion        Int             @default(0)
 
   becayisTalepleri        BecayisTalep[]
   gonderdigiMesajlar      BecayisMesaj[]        @relation("MesajGonderen")
@@ -198,35 +199,110 @@ model User {
 
   // Admin panelden suresiz/sureli verilen planin bitisi; gecince plan
   // UCRETSIZ sayilir (getCurrentUser + bildirim sorgulari).
-  abonelikBitis        DateTime?
+  abonelikBitis         DateTime?
   // Odeme altyapisi gelince donem sonunda otomatik yenileme. Iptal = false yapmak:
   // abonelikBitis'e dokunulmaz, kullanici odenen donem sonuna kadar plani kullanir.
-  otomatikYenileme     Boolean               @default(true)
+  otomatikYenileme      Boolean               @default(true)
   // Zilin Genel sekmesini en son actigi an (uygulama saati); sonrasindaki duyurular okunmamis.
-  duyuruGorulme        DateTime?
+  duyuruGorulme         DateTime?
   // Admin askiya aldiysa: oturumlari gecersiz, giris yapamaz (neden kullaniciya gosterilir).
-  askiyaAlindi         DateTime?
-  askiNedeni           String?
+  askiyaAlindi          DateTime?
+  askiNedeni            String?
   // SMS ile dogrulanmis telefon (yalniz Pro); `telefon` degisirse sifirlanir.
-  telefonDogrulandi    DateTime?
+  telefonDogrulandi     DateTime?
   // SMS bildirim tercihleri (Pro) - varsayilan kapali, acik onayla acilir.
-  smsIlanBildirimi     Boolean               @default(false)
-  smsBecayisBildirimi  Boolean               @default(false)
+  smsIlanBildirimi      Boolean               @default(false)
+  smsBecayisBildirimi   Boolean               @default(false)
   // Ilk kez SMS iznini verdigi an (onay kaydi).
-  smsIzinTarihi        DateTime?
+  smsIzinTarihi         DateTime?
   // Ticari elektronik ileti (kampanya/duyuru SMS + e-posta) onayi - 6563 s. Kanun. Varsayilan yok;
   // tarihler onay kaydi olarak geri cekilse de saklanir.
-  ticariIletiOnay       Boolean              @default(false)
+  ticariIletiOnay       Boolean               @default(false)
   ticariIletiOnayTarihi DateTime?
   ticariIletiRetTarihi  DateTime?
   // Kayit aninda ilk temas kaynagi (utm_*, gclid/fbclid/ttclid, dis referrer, giris sayfasi) - src/lib/kaynak.ts.
-  kaynak               Json?
-  telefonDogrulama     TelefonDogrulamaKodu?
-  smsGonderimleri      SmsGonderim[]
-  yukseltmeTalebi      YukseltmeTalebi?
-  destekMesajlari      DestekMesaji[]
-  soruHataBildirimleri SoruHataBildirimi[]
+  kaynak                Json?
+  telefonDogrulama      TelefonDogrulamaKodu?
+  smsGonderimleri       SmsGonderim[]
+  yukseltmeTalebi       YukseltmeTalebi?
+  destekMesajlari       DestekMesaji[]
+  soruHataBildirimleri  SoruHataBildirimi[]
   promosyonKullanimlari PromosyonKullanim[]
+  // Arkadasini davet et: kisa kod (ilk istekte uretilir) ve davet eden uye (kayitta, ?davet= ile).
+  davetKodu             String?               @unique
+  davetEdenId           String?
+  proHediyeleri         ProHediye[]
+  gunlukSoruCevaplari   GunlukSoruCevap[]
+  ilanTakipleri         IlanTakip[]
+  pushAbonelikleri      PushAbonelik[]
+}
+
+// Bedava Pro gunleri (kayit, seri, davet, aktivite). Ayni neden bir uyeye bir kez verilir (@@unique).
+model ProHediye {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  neden     String
+  gun       Int
+  olusturma DateTime @default(now())
+
+  @@unique([userId, neden])
+}
+
+// Gunun 5 sorusu: duzey + gun icin sabit set (herkes ayni sorulari gorur), deneme havuzundan.
+model GunlukSoruSeti {
+  id        String            @id @default(cuid())
+  duzey     EducationLevel
+  tarih     DateTime          @db.Date
+  soruIdler String[]
+  cevaplar  GunlukSoruCevap[]
+
+  @@unique([duzey, tarih])
+}
+
+// Uyenin gunluk soru cevabi. Gunde bir kez (duzey fark etmez): seri gun bazli sayilir.
+model GunlukSoruCevap {
+  id        String         @id @default(cuid())
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  set       GunlukSoruSeti @relation(fields: [setId], references: [id], onDelete: Cascade)
+  setId     String
+  tarih     DateTime       @db.Date
+  // { [soruId]: secilenSecenekIndex }
+  cevaplar  Json
+  dogru     Int
+  olusturma DateTime       @default(now())
+
+  @@unique([userId, tarih])
+  @@index([setId])
+}
+
+// Takibe alinan ilan; son basvuruya 3 gun ve 1 gun kala hatirlatma (Pro) bir kez gider.
+model IlanTakip {
+  id          String    @id @default(cuid())
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  posting     Posting   @relation(fields: [postingId], references: [id], onDelete: Cascade)
+  postingId   String
+  olusturma   DateTime  @default(now())
+  hatirlatma3 DateTime?
+  hatirlatma1 DateTime?
+
+  @@unique([userId, postingId])
+  @@index([postingId])
+}
+
+// Tarayici bildirimi (Web Push) aboneligi; uye cikis yapsa da cihaz bildirimi alabilir (userId bos).
+model PushAbonelik {
+  id        String   @id @default(cuid())
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String?
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  olusturma DateTime @default(now())
+
+  @@index([userId])
 }
 
 model TelefonDogrulamaKodu {
@@ -279,14 +355,14 @@ model SmsGonderim {
 // Cihaz bazli oturum: JWT icindeki oturumId buraya bakar. Ayarlar > Guvenlik
 // sayfasinda listelenir ve tek tek kapatilabilir.
 model Oturum {
-  id         String    @id @default(cuid())
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId     String
+  id             String    @id @default(cuid())
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
   // "Chrome · Windows" gibi; tarayicinin user-agent bilgisinden turetilir. IP saklanmaz.
-  cihaz      String
-  olusturma  DateTime  @default(now())
-  sonGorulme DateTime  @default(now())
-  kapatildi  DateTime?
+  cihaz          String
+  olusturma      DateTime  @default(now())
+  sonGorulme     DateTime  @default(now())
+  kapatildi      DateTime?
   // Admin iki asamali dogrulama: panele girmek icin bu oturumda e-postaya giden kod
   // dogrulanmis olmali (12 saat gecerli). Kod yalniz SHA-256 ozeti olarak saklanir.
   adminDogrulama DateTime?
@@ -363,18 +439,18 @@ model GunlukSayac {
 
 // email alani unique - yeniden kod istenince ayni satir guncellenir.
 model EmailVerificationCode {
-  id             String    @id @default(cuid())
-  email          String    @unique
-  code           String // gizliOzet (HMAC), duz kod degil
-  deneme         Int       @default(0)
-  adSoyad        String
-  passwordHash   String
-  kvkkOnayTarihi DateTime
-  ticariIletiOnay Boolean  @default(false)
-  kaynak         Json?
-  expiresAt      DateTime
-  usedAt         DateTime?
-  createdAt      DateTime  @default(now())
+  id              String    @id @default(cuid())
+  email           String    @unique
+  code            String // gizliOzet (HMAC), duz kod degil
+  deneme          Int       @default(0)
+  adSoyad         String
+  passwordHash    String
+  kvkkOnayTarihi  DateTime
+  ticariIletiOnay Boolean   @default(false)
+  kaynak          Json?
+  expiresAt       DateTime
+  usedAt          DateTime?
+  createdAt       DateTime  @default(now())
 }
 
 model BecayisTalep {
@@ -389,6 +465,8 @@ model BecayisTalep {
   aciklama     String?
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
+  // Detay sayfasinin goruntulenme sayisi (sahibi haric), "ilgi sayaci".
+  goruntulenme Int      @default(0)
 
   mesajlar BecayisMesaj[]
 
@@ -753,13 +831,16 @@ model DestekMesaji {
 
 // Tek satirlik site ayarlari (id hep 1): bakim modu + tum sayfalarin ustundeki duyuru seridi.
 model SiteAyarlari {
-  id          Int      @id @default(1)
-  bakimModu   Boolean  @default(false)
-  bakimMesaji String?
-  seritMetni  String?
-  seritLink   String?
-  seritTur    String   @default("bilgi") // bilgi | uyari | kampanya
-  guncelleme  DateTime @updatedAt
+  id              Int       @id @default(1)
+  bakimModu       Boolean   @default(false)
+  bakimMesaji     String?
+  seritMetni      String?
+  seritLink       String?
+  seritTur        String    @default("bilgi") // bilgi | uyari | kampanya
+  // KPSS geri sayimi: OSYM'nin resmi takviminden admin girer; bos ya da gecmisse sayac gosterilmez.
+  kpssSinavAdi    String?
+  kpssSinavTarihi DateTime?
+  guncelleme      DateTime  @updatedAt
 }
 
 // Admin panelindeki her degisiklik: kim, ne zaman, ne yapti (adminAdi: admin silinse de okunur kalsin).

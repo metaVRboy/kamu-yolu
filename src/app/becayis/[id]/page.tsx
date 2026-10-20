@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
-import { MapPin, MessageCircle, User } from "lucide-react";
+import { Eye, MapPin, MessageCircle, User } from "lucide-react";
 import { KilitliOzellik } from "@/components/KilitliOzellik";
-import { getTalepDetay } from "@/lib/becayis";
+import { getTalepDetay, goruntulenmeSay } from "@/lib/becayis";
 import { getCurrentUser } from "@/lib/auth";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
@@ -23,6 +23,7 @@ export default async function BecayisDetayPage({
 
   const isSahibi = user?.id === talep.userId;
   const isPremium = !!user && user.abonelikPlani !== "UCRETSIZ";
+  const goruntulenme = goruntulenmeSay(talep, user?.id);
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-14 sm:px-6 sm:py-20">
@@ -45,9 +46,15 @@ export default async function BecayisDetayPage({
           <p className="rounded-xl bg-primary/5 p-3 text-sm text-slate-700">{talep.aciklama}</p>
         )}
 
-        <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <User className="h-3.5 w-3.5" />
-          {talep.user.adSoyad}
+        <p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <User className="h-3.5 w-3.5" />
+            {talep.user.adSoyad}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Eye className="h-3.5 w-3.5" />
+            {goruntulenme} kez görüntülendi
+          </span>
         </p>
 
         {!isSahibi && (

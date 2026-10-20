@@ -55,6 +55,16 @@ export async function getAktifTalepler(filters?: { il?: string; meslek?: string 
   return talepler.map((t) => ({ ...t, user: { adSoyad: kisaAd(t.user.adSoyad) } }));
 }
 
+/**
+ * Ilgi sayaci: sahibi disindaki her detay goruntulemesi bir artirir (site ve uygulama). Yanit beklemesin diye
+ * yanittan sonra yazilir; donus = gosterilecek sayi (bu goruntuleme dahil).
+ */
+export function goruntulenmeSay(talep: { id: string; userId: string; goruntulenme: number }, izleyenId: string | null | undefined) {
+  if (izleyenId === talep.userId) return talep.goruntulenme;
+  after(() => prisma.becayisTalep.update({ where: { id: talep.id }, data: { goruntulenme: { increment: 1 } } }));
+  return talep.goruntulenme + 1;
+}
+
 export async function getTalepDetay(id: string) {
   const talep = await prisma.becayisTalep.findUnique({
     where: { id },

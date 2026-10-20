@@ -14,7 +14,9 @@ import {
   kalanSureMs,
   oncekiDenemeOzeti,
   sinavaGuvenliHaleGetir,
+  denemeSiralamasi,
 } from "@/lib/kpssDeneme";
+import { konuAnalizi } from "@/lib/kpssDenemeAnaliz";
 import {
   DUZEY_LABEL,
   DUZEY_TEMA,
@@ -276,7 +278,13 @@ export default async function KpssDenemesiDuzeyPage({ params }: { params: Promis
       ? Object.fromEntries(sorular.flatMap((s, i) => (i % 6 === 5 ? [] : [[s.id, i % 4 === 3 ? (i + 1) % 5 : i % 5]])))
       : (katilim.cevaplar as Record<string, number>);
     // Konu gelisim takibi (gecen denemeyle karsilastirma) yalniz Pro+.
-    const onceki = plan === "PRO_PLUS" ? await oncekiDenemeOzeti(user.id, duzey, katilim.id) : null;
+    const [onceki, siralama] = await Promise.all([
+      plan === "PRO_PLUS" ? oncekiDenemeOzeti(user.id, duzey, katilim.id) : null,
+      denemeSiralamasi(katilim.gunlukDenemeId, katilim.puan ?? 0, katilim.id),
+    ]);
+    // Pro+ disinda konu adlari gitmez; yalniz gercek cevaplarla sayilan zayif (kirmizi) konu sayisi gider.
+    const zayifKonuSayisi =
+      plan === "PRO_PLUS" ? null : konuAnalizi(sorular, katilim.cevaplar as Record<string, number>).filter((k) => k.durum === "kirmizi").length;
     return (
       <DenemeSonucEkrani
         sorular={raporSorulari}
@@ -288,6 +296,8 @@ export default async function KpssDenemesiDuzeyPage({ params }: { params: Promis
         duzey={duzey}
         onceki={onceki && { ...onceki, tarihMetni: KISA_GUN.format(onceki.tarih) }}
         plan={plan}
+        siralama={siralama}
+        zayifKonuSayisi={zayifKonuSayisi}
       />
     );
   }

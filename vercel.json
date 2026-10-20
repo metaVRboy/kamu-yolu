@@ -1,5 +1,7 @@
 {
-  "regions": ["fra1"],
+  "regions": [
+    "fra1"
+  ],
   "crons": [
     {
       "path": "/api/haber-arastir",
@@ -24,6 +26,14 @@
     {
       "path": "/api/sms-ilan-bildirimi",
       "schedule": "30 6,9,12,15 * * *"
+    },
+    {
+      "path": "/api/hatirlatmalar?tur=ilan",
+      "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/hatirlatmalar?tur=seri",
+      "schedule": "0 16 * * *"
     }
   ]
 }

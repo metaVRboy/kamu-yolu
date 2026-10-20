@@ -27,6 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/kpss-denemesi/lise`, changeFrequency: "daily", priority: 0.6 },
     { url: `${SITE_URL}/kpss-denemesi/onlisans`, changeFrequency: "daily", priority: 0.6 },
     { url: `${SITE_URL}/kpss-denemesi/lisans`, changeFrequency: "daily", priority: 0.6 },
+    { url: `${SITE_URL}/gunun-sorulari`, changeFrequency: "daily", priority: 0.7 },
     { url: `${SITE_URL}/analiz`, changeFrequency: "weekly", priority: 0.4 },
     { url: `${SITE_URL}/destek`, changeFrequency: "yearly", priority: 0.3 },
     { url: `${SITE_URL}/amacimiz`, changeFrequency: "yearly", priority: 0.3 },

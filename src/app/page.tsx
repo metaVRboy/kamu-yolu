@@ -6,9 +6,8 @@ import { IlanVitrinKarti } from "@/components/IlanVitrinKarti";
 import { kurumaGoreGrupla, kurumLogolari } from "@/lib/ilanVitrin";
 import { DepartmentSearch } from "@/components/DepartmentSearch";
 import { HaberlerSection } from "@/components/HaberlerSection";
-import { HeroHaberCarousel } from "@/components/HeroHaberCarousel";
 import { BizeUlasin } from "@/components/BizeUlasin";
-import { KpssBandi } from "@/components/KpssBandi";
+import { DavetBandi, GunlukSerit, UyeProfilKarti } from "@/components/AnaSayfaUye";
 import { SayacArtis } from "@/components/SayacArtis";
 
 // Ilan verileri periyodik olarak degistigi icin sayfa build-time'da
@@ -41,14 +40,15 @@ export default async function Home() {
   const haberlerMapped = haberler.slice(0, 5).map((h) => ({ ...h, yayinTarihi: h.yayinTarihi.toISOString() }));
 
   return (
-    // Tam genislik kok: lacivert KPSS bandi kenardan kenara; icerik bloklari max-w-6xl. Hareketli zemin layout'ta (SiteZemini).
+    // Duzen H (2026-10-20): misafir = buyuk bolum aramasi + gunluk serit + ilanlar + duyurular; uye ayrica arama
+    // yaninda profil karti ve davet bandi gorur (istemciden yuklenir, sayfa onbellekli kalir). Reklam alani yok.
     <div className="relative">
-      <div className="relative mx-auto max-w-6xl px-4 pt-14 sm:px-6 sm:pt-20">
-        <section className="relative z-20 grid gap-6 lg:grid-cols-[minmax(0,400px)_1fr] lg:items-stretch">
+      <div className="relative mx-auto max-w-6xl px-4 pt-14 pb-14 sm:px-6 sm:pt-20 sm:pb-20">
+        <section className="relative z-20 flex flex-wrap items-stretch gap-6">
           {/* Isik yansimasi (box-shadow) bu disaridaki elemanda animasyonlu -
               asagidaki icerik/input ile ayni boyama baglamini paylasmiyor,
               aksi halde Safari'de input'un imleci yanlis konumda cizilebiliyor. */}
-          <div className="animate-frame-glow relative rounded-3xl">
+          <div className="animate-frame-glow relative min-w-0 flex-[999_1_560px] rounded-3xl">
             <div className="relative flex h-full flex-col justify-center overflow-hidden rounded-3xl border border-primary/10 bg-white p-8 text-center shadow-sm backdrop-blur-xl sm:p-10">
               <div aria-hidden className="pointer-events-none absolute inset-0">
                 <div className="absolute -top-20 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
@@ -82,21 +82,11 @@ export default async function Home() {
             </div>
           </div>
 
-          <div className="min-h-[360px]">
-            <HeroHaberCarousel haberler={haberlerMapped} />
-          </div>
+          <UyeProfilKarti />
         </section>
 
-        <div className="mt-16">
-          <HaberlerSection haberler={haberlerMapped} etiket="Güncel" toplamSayi={haberler.length} />
-        </div>
-      </div>
+        <GunlukSerit />
 
-      <div className="mt-16">
-        <KpssBandi />
-      </div>
-
-      <div className="relative mx-auto max-w-6xl px-4 pb-14 sm:px-6 sm:pb-20">
         <section className="mt-16">
           <BolumBasligi
             etiket="Yeni eklenenler"
@@ -113,6 +103,12 @@ export default async function Home() {
             ))}
           </div>
         </section>
+
+        <DavetBandi />
+
+        <div className="mt-16">
+          <HaberlerSection haberler={haberlerMapped} etiket="Güncel" toplamSayi={haberler.length} />
+        </div>
 
         <div className="mt-16">
           <BizeUlasin />

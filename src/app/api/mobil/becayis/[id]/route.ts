@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { getTalepDetay } from "@/lib/becayis";
+import { getTalepDetay, goruntulenmeSay } from "@/lib/becayis";
 
 /** Mobil becayis detayi: sitedeki /becayis/[id] (mesajlasma Pro; mesaj API'si de ayrica kontrol eder). */
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -16,5 +16,6 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     aciklama: talep.aciklama,
     sahipAd: talep.user.adSoyad,
     sahibi: user?.id === talep.userId,
+    goruntulenme: goruntulenmeSay(talep, user?.id),
   });
 }

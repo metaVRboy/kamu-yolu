@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 
-export type SmsTuru = "DOGRULAMA" | "ILAN" | "BECAYIS";
+export type SmsTuru = "DOGRULAMA" | "ILAN" | "BECAYIS" | "HATIRLATMA";
 
 /**
  * Turk cep telefonu numarasini "+905XXXXXXXXX" bicimine getirir; gecersizse null.

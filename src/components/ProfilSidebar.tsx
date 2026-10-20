@@ -3,8 +3,17 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, FilePlus2, Heart, Inbox, Repeat, UserRound, Settings, Crown } from "lucide-react";
+import { Award, BellRing, ChevronDown, FilePlus2, Gift, Heart, Inbox, Repeat, UserRound, Settings, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const ANA_BAGLANTILAR = [
+  { href: "/profilim", ad: "Profilim", Ikon: UserRound },
+  { href: "/profilim/takip", ad: "Takip Ettiğim İlanlar", Ikon: BellRing },
+  { href: "/profilim/rozetler", ad: "Rozetlerim", Ikon: Award },
+  { href: "/profilim/davet", ad: "Arkadaşını Davet Et", Ikon: Gift },
+  { href: "/profilim/ayarlar", ad: "Ayarlar", Ikon: Settings },
+  { href: "/profilim/abonelik", ad: "Aboneliğim", Ikon: Crown },
+];
 
 type SidebarSection = {
   key: string;
@@ -50,38 +59,19 @@ export function ProfilSidebar({
 
   return (
     <nav className="space-y-1 rounded-2xl border border-primary/15 bg-white p-1.5 shadow-sm">
-      <Link
-        href="/profilim"
-        className={cn(
-          "flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-colors",
-          pathname === "/profilim" ? "bg-primary/10 text-primary" : "text-slate-800 hover:bg-primary/5 hover:text-primary",
-        )}
-      >
-        <UserRound className="h-4 w-4" />
-        Profilim
-      </Link>
-
-      <Link
-        href="/profilim/ayarlar"
-        className={cn(
-          "flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-colors",
-          pathname.startsWith("/profilim/ayarlar") ? "bg-primary/10 text-primary" : "text-slate-800 hover:bg-primary/5 hover:text-primary",
-        )}
-      >
-        <Settings className="h-4 w-4" />
-        Ayarlar
-      </Link>
-
-      <Link
-        href="/profilim/abonelik"
-        className={cn(
-          "flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-colors",
-          pathname === "/profilim/abonelik" ? "bg-primary/10 text-primary" : "text-slate-800 hover:bg-primary/5 hover:text-primary",
-        )}
-      >
-        <Crown className="h-4 w-4" />
-        Aboneliğim
-      </Link>
+      {ANA_BAGLANTILAR.map(({ href, ad, Ikon }) => (
+        <Link
+          key={href}
+          href={href}
+          className={cn(
+            "flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-colors",
+            (href === "/profilim" ? pathname === href : pathname.startsWith(href)) ? "bg-primary/10 text-primary" : "text-slate-800 hover:bg-primary/5 hover:text-primary",
+          )}
+        >
+          <Ikon className="h-4 w-4" />
+          {ad}
+        </Link>
+      ))}
 
       {sections.map((section) => {
         const open = openSection === section.key;

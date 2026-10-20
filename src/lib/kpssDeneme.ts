@@ -362,3 +362,20 @@ export async function bugunkuDurumlar(userId: string) {
     ]),
   );
 }
+
+/** Yuzdelik dilim bu kadar bitiren olmadan gosterilmez (2 kisilik "%50" anlamsiz/yaniltici). */
+export const SIRALAMA_ASGARI_KATILIMCI = 5;
+
+/**
+ * Ayni gunun ayni duzey denemesini bitirenler arasinda kac kisiden yuksek puan: "%72'sinden iyisin".
+ * Yeterli katilimci yoksa null. Sayilar gercek kayitlardan, kullanici kendisi haric.
+ */
+export async function denemeSiralamasi(gunlukDenemeId: string, puan: number, haricKatilimId: string) {
+  const bitmis = { gunlukDenemeId, bitisZamani: { not: null }, id: { not: haricKatilimId } };
+  const [digerleri, dusuk] = await Promise.all([
+    prisma.denemeKatilim.count({ where: bitmis }),
+    prisma.denemeKatilim.count({ where: { ...bitmis, puan: { lt: puan } } }),
+  ]);
+  if (digerleri + 1 < SIRALAMA_ASGARI_KATILIMCI) return null;
+  return { yuzde: Math.round((dusuk / digerleri) * 100), katilimci: digerleri + 1 };
+}

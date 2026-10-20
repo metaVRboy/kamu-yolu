@@ -15,6 +15,9 @@ const ZORUNLU: [string, string, string][] = [
   ["Cloudflare Turnstile", "Kayıt/giriş formlarında robot doğrulaması", "Oturum"],
   ["kyCerezOnay (yerel depolama)", "Çerez tercihini (ölçüm) hatırlar", "12 ay"],
   ["kyTanitimSon, kyReklamOturumu, kyBekleyenTalep (yerel/oturum depolama)", "Tanıtım penceresinin sıklığı (kampanya linkiyle geldiğin ilk oturumda açılmaz), kayıttan önce seçtiğin plan", "Siz silene kadar / sekme kapanana kadar"],
+  ["kyBant:* (yerel depolama)", "Kapattığın üyelik bandını 24 saat gizler", "24 saat"],
+  ["ky_davet", "Bir arkadaşının davet linkiyle geldiysen, üye olduğunda davet hediyesini ikinize tanımlamak için davet kodu", "30 gün"],
+  ["Service worker (sw.js)", "Tarayıcı bildirimini açtıysan bildirimleri gösterir; içerik saklamaz", "Bildirimleri kapatana kadar"],
 ];
 
 const ONAYLI: [string, string, string][] = [
@@ -101,7 +104,7 @@ export default function CerezPolitikasiPage() {
           <p>Tarayıcı ayarlarından da çerezleri silebilir veya engelleyebilirsin; zorunlu çerezleri engellersen giriş yapamazsın.</p>
         </section>
 
-        <p className="text-xs text-muted-foreground">Son güncelleme: 14 Ekim 2026.</p>
+        <p className="text-xs text-muted-foreground">Son güncelleme: 20 Ekim 2026.</p>
       </div>
     </div>
   );

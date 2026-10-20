@@ -10,6 +10,7 @@ import { olay } from "@/lib/olcum";
 import {
   KAYNAK_METNI,
   KARSILASTIRMA,
+  KURUCU_UYE_INDIRIM,
   PLAN_ADI,
   SATIS_ACIK,
   kalanSureMetni,
@@ -451,6 +452,7 @@ function Pencere({ baslangicPlani, kaynak, kapat }: { baslangicPlani?: UcretliPl
                       <CheckCircle2 className="h-5 w-5" />
                       Bu seçim için zaten listedesin; ödeme açılınca haber vereceğiz.
                     </p>
+                    {!SATIS_ACIK && <p className="mt-1 text-xs font-medium">Kurucu üye indirimin saklı: ilk ay %{KURUCU_UYE_INDIRIM} indirim.</p>}
                     <button type="button" onClick={listedenCik} disabled={durum === "gonderiliyor"} className="mt-1.5 text-xs font-medium text-slate-500 underline hover:text-slate-800">
                       Listeden çık
                     </button>
@@ -471,6 +473,12 @@ function Pencere({ baslangicPlani, kaynak, kapat }: { baslangicPlani?: UcretliPl
                   </button>
                 )}
                 {hata && <p className="mt-2 text-center text-sm text-destructive">{hata}</p>}
+                {!SATIS_ACIK && !zatenListede && (
+                  <p className="mt-3 flex items-center justify-center gap-1.5 rounded-xl bg-amber-50 px-3 py-2 text-center text-xs font-semibold text-amber-900">
+                    <Crown className="h-4 w-4 shrink-0" />
+                    Kurucu üye ayrıcalığı: listeye katılanlara ödeme açılınca ilk ay %{KURUCU_UYE_INDIRIM} indirim.
+                  </p>
+                )}
                 <button type="button" onClick={kapat} className="mt-2 w-full py-1.5 text-sm font-medium text-muted-foreground hover:text-slate-800">
                   Şimdi değil
                 </button>

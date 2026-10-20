@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, MapPin, Send, Trash2 } from "lucide-react";
+import { ChevronDown, Eye, MapPin, Send, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -32,6 +32,7 @@ type Talep = {
   mevcutIlce: string | null;
   istenenIller: string[];
   isActive: boolean;
+  goruntulenme: number;
   threads: Thread[];
 };
 
@@ -203,6 +204,10 @@ function TalepCard({ talep, currentUserId }: { talep: Talep; currentUserId: stri
         <MapPin className="h-3.5 w-3.5" />
         {talep.mevcutIl}
         {talep.mevcutIlce ? ` / ${talep.mevcutIlce}` : ""} → {talep.istenenIller.join(", ")}
+        <span className="ml-auto flex items-center gap-1">
+          <Eye className="h-3.5 w-3.5" />
+          {talep.goruntulenme} görüntülenme
+        </span>
       </div>
 
       {talep.threads.length === 0 ? (

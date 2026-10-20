@@ -16,6 +16,8 @@ import { kurumLogolari, tekIlanKartlari } from "@/lib/ilanVitrin";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { kisiselOzet } from "@/lib/kisiselOzet";
+import { YukseltButonu } from "@/components/YukseltmePenceresi";
 
 export const metadata = { title: "Profilim — Kamu Yolu" };
 
@@ -52,9 +54,10 @@ export default async function ProfilimPage() {
       ? await getPostingsForLevel(user.educationLevel)
       : [];
   const gosterilenIlanlar = kisiselIlanlar.slice(0, 4);
-  const [logolar, bolum] = await Promise.all([
+  const [logolar, bolum, ozet] = await Promise.all([
     kurumLogolari(gosterilenIlanlar),
     user.departmentId ? prisma.department.findUnique({ where: { id: user.departmentId }, select: { slug: true, name: true } }) : null,
+    isPremium ? null : kisiselOzet(user.departmentId),
   ]);
 
   return (
@@ -83,6 +86,19 @@ export default async function ProfilimPage() {
           <Link href="/profilim/ayarlar" className={cn(buttonVariants(), "shrink-0")}>
             Bölümümü seç
           </Link>
+        </div>
+      )}
+
+      {/* Kacirilan ilanlar (ucretsiz uye): bolumune eslesip son 30 gunde son basvurusu gecmis gercek ilan sayisi. */}
+      {ozet && ozet.kacirilan30 > 0 && (
+        <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-red-200 bg-red-50 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-semibold text-red-900">Son 30 günde bölümüne uygun {ozet.kacirilan30} ilanın son başvurusu geçti</p>
+            <p className="mt-0.5 text-sm text-red-800">Pro&apos;da bölümüne uygun yeni ilan çıkınca anında haberin olur; takip ettiğin ilanlar için son gün hatırlatması gelir.</p>
+          </div>
+          <YukseltButonu plan="PRO" kaynak="kacirilan" className="shrink-0 rounded-xl bg-red-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-red-800">
+            Bir daha kaçırma
+          </YukseltButonu>
         </div>
       )}
 

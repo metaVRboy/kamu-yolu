@@ -5,6 +5,7 @@ import { proAktifMi, smsSaglayiciTanimli, telefonGoster } from "@/lib/sms";
 import { TICARI_ILETI_ACIK } from "@/lib/planlar";
 import { AyarKarti, AyarlarSayfasi } from "@/components/AyarlarSayfasi";
 import { SmsTercihleri, TelefonDogrulama, TicariIletiTercihi } from "@/components/HesapAyarlari";
+import { TarayiciBildirimi } from "@/components/TarayiciBildirimi";
 
 export const metadata = { title: "Bildirim Ayarları — Kamu Yolu" };
 
@@ -16,6 +17,13 @@ export default async function BildirimAyarlariPage() {
   const ticariIleti = TICARI_ILETI_ACIK && (
     <AyarKarti baslik="Kampanya ve duyurular" aciklama="Ticari elektronik ileti onayı; vermek zorunlu değildir.">
       <TicariIletiTercihi ilk={user.ticariIletiOnay} />
+    </AyarKarti>
+  );
+
+  // Tarayici bildirimi herkese acik (gunun sorulari hatirlatmasi); ilan son gun hatirlatmasi Pro uyelere gider.
+  const tarayici = (
+    <AyarKarti baslik="Tarayıcı bildirimleri" aciklama="Bu cihazda: günün soruları hatırlatması ve (Pro) takip ettiğin ilanların son gün hatırlatması.">
+      <TarayiciBildirimi />
     </AyarKarti>
   );
 
@@ -44,6 +52,7 @@ export default async function BildirimAyarlariPage() {
             </AyarKarti>
           </div>
         </KilitliOzellik>
+        {tarayici}
         {ticariIleti}
       </AyarlarSayfasi>
     );
@@ -72,6 +81,7 @@ export default async function BildirimAyarlariPage() {
           </AyarKarti>
         </>
       )}
+      {tarayici}
       {ticariIleti}
     </AyarlarSayfasi>
   );

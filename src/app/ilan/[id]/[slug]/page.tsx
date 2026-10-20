@@ -26,6 +26,7 @@ import {
   duzgunHarf,
   kadroAdi,
   kalanGunSayisi,
+  kalanGunStili,
   konumMetni,
   kurumLogolari,
   nitelikMaddeleri,
@@ -35,6 +36,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { GeriDonLinki } from "@/components/GeriDonLinki";
 import { IlanGorsel } from "@/components/IlanGorsel";
 import { IlanUygunluk } from "@/components/IlanUygunluk";
+import { IlanTakipButonu } from "@/components/IlanTakipButonu";
 import { IlanVitrinKarti } from "@/components/IlanVitrinKarti";
 import { HaberPaylas } from "@/components/HaberPaylas";
 import { cn } from "@/lib/utils";
@@ -51,18 +53,6 @@ const KISA_TARIH = new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "sh
 // boyle durumda kurum adini ayrica eklemek "X — X" gibi tekrara yol aciyor.
 function baslikKurumuIceriyorMu(title: string, institutionName: string): boolean {
   return title.toLocaleUpperCase("tr-TR").includes(institutionName.toLocaleUpperCase("tr-TR"));
-}
-
-/** Kalan gune gore renk: 3 gun ve alti kirmizi, 7 gun ve alti turuncu, gecmisse gri. */
-function kalanGunStili(kalan: number | null) {
-  if (kalan === null) return { metin: "Belirtilmemiş", renk: "text-slate-600", zemin: "bg-slate-100" };
-  if (kalan < 0) return { metin: "Süresi doldu", renk: "text-slate-600", zemin: "bg-slate-100" };
-  if (kalan === 0) return { metin: "Son gün bugün", renk: "text-red-700", zemin: "bg-red-50" };
-  return {
-    metin: `${kalan} gün kaldı`,
-    renk: kalan <= 3 ? "text-red-700" : kalan <= 7 ? "text-amber-700" : "text-emerald-700",
-    zemin: kalan <= 3 ? "bg-red-50" : kalan <= 7 ? "bg-amber-50" : "bg-emerald-50",
-  };
 }
 
 export async function generateMetadata({
@@ -324,6 +314,7 @@ export default async function IlanDetayPage({
               <span className={cn("mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-bold", kalanStil.zemin, kalanStil.renk)}>{kalanStil.metin}</span>
             </div>
             {resmiIlanButonu}
+            {posting.applicationEnd && <IlanTakipButonu ilanId={posting.id} />}
             {posting.applicationEnd && (
               <a href={`/api/ilan/${posting.id}/takvim`} className={buttonVariants({ variant: "outline", className: "w-full rounded-full" })}>
                 <CalendarPlus className="h-4 w-4" />
@@ -340,6 +331,7 @@ export default async function IlanDetayPage({
 
       {/* Mobil: paylasim ve takvim icerigin sonunda, basvuru butonu altta sabit. */}
       <div className="mt-6 space-y-3 lg:hidden">
+        {posting.applicationEnd && <IlanTakipButonu ilanId={posting.id} />}
         {posting.applicationEnd && (
           <a href={`/api/ilan/${posting.id}/takvim`} className={buttonVariants({ variant: "outline", className: "w-full rounded-full" })}>
             <CalendarPlus className="h-4 w-4" />

@@ -3,6 +3,8 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { createSession } from "@/lib/auth";
 import { Prisma } from "@/generated/prisma/client";
+import { DAVET_CEREZ, davetEdenId } from "@/lib/davet";
+import { KAYIT_HEDIYE_GUN, proHediyeEt } from "@/lib/proHediye";
 import { clearFailures, getLockoutState, gizliOzet, KOD_DENEME_HAKKI, lockoutMessage, recordFailure } from "@/lib/authAbuse";
 
 const bodySchema = z.object({
@@ -51,6 +53,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const davetEden = await davetEdenId(req.cookies.get(DAVET_CEREZ)?.value);
     const user = await prisma.$transaction(async (tx) => {
       const created = await tx.user.create({
         data: {
@@ -60,12 +63,14 @@ export async function POST(req: NextRequest) {
           kvkkOnayTarihi: pending.kvkkOnayTarihi,
           ...(pending.ticariIletiOnay ? { ticariIletiOnay: true, ticariIletiOnayTarihi: pending.kvkkOnayTarihi } : {}),
           kaynak: pending.kaynak ?? Prisma.DbNull,
+          davetEdenId: davetEden,
         },
       });
       await tx.emailVerificationCode.delete({ where: { email } });
       return created;
     });
 
+    await proHediyeEt(user.id, "kayit", KAYIT_HEDIYE_GUN, `Hoş geldin: ${KAYIT_HEDIYE_GUN} gün Pro hediye`);
     await createSession(user.id, user.tokenVersion);
 
     return NextResponse.json({ id: user.id, adSoyad: user.adSoyad, email: user.email });
