@@ -67,15 +67,7 @@ export default async function Home() {
 
               <div className="relative grid gap-8 p-7 sm:p-9 @4xl:grid-cols-[minmax(0,1fr)_17rem] @4xl:items-center">
                 <div className="min-w-0">
-                  <p className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50/90 px-3 py-1 text-xs font-semibold text-emerald-800">
-                    <span className="relative flex h-2 w-2" aria-hidden>
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60 motion-reduce:animate-none" />
-                      <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-                    </span>
-                    Şu an {stats.postingCount.toLocaleString("tr-TR")} aktif kamu ilanı
-                  </p>
-
-                  <h1 className="mt-4 font-sans text-[1.75rem] leading-tight font-bold tracking-tight text-balance text-slate-900 sm:text-4xl">
+                  <h1 className="font-sans text-[1.75rem] leading-tight font-bold tracking-tight text-balance text-slate-900 sm:text-4xl">
                     Mezun olduğun bölüme uygun{" "}
                     <span className="relative whitespace-nowrap text-primary">
                       kamu ilanlarını
@@ -93,22 +85,34 @@ export default async function Home() {
                     <DepartmentSearch departments={departments} />
                   </div>
 
-                  {/* Dar kartta hizli secim cipleri; genis kartta ayni bilgi sagdaki panelde. */}
-                  <div className="mt-4 flex flex-wrap items-center gap-2 @4xl:hidden">
-                    <span className="text-xs font-semibold text-slate-500">En çok ilan:</span>
-                    {populer.slice(0, 4).map((d) => (
-                      <Link
-                        key={d.slug}
-                        href={`/bolum/${d.slug}`}
-                        className="inline-flex items-center gap-1.5 rounded-full border border-primary/15 bg-white/90 px-3 py-1 text-xs font-medium text-slate-700 transition-colors hover:border-primary/40 hover:text-primary"
-                      >
-                        {d.name}
-                        <span className="rounded-full bg-primary/10 px-1.5 text-[11px] font-bold text-primary tabular-nums">{d.ilanSayisi}</span>
-                      </Link>
-                    ))}
+                  {/* Dar kartta (uye, telefon) en cok ilanli bolumler: sirali mini kartlar, gercek sayi ve goreli cubuk.
+                      Genis kartta ayni bilgi sagdaki panelde. */}
+                  <div className="mt-6 @4xl:hidden">
+                    <p className="text-[11px] font-bold tracking-widest text-slate-500">EN ÇOK İLANI OLAN BÖLÜMLER</p>
+                    <ol className="mt-2.5 grid grid-cols-2 gap-2.5 @xl:grid-cols-4">
+                      {populer.slice(0, 4).map((d, i) => (
+                        <li key={d.slug}>
+                          <Link
+                            href={`/bolum/${d.slug}`}
+                            className="group flex h-full flex-col justify-between gap-2.5 rounded-2xl border border-slate-200/80 bg-white/90 p-3 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-[0_8px_20px_-8px_rgba(37,99,235,0.3)]"
+                          >
+                            <span className="flex items-center justify-between gap-2">
+                              <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-slate-900 text-[11px] font-bold text-white tabular-nums group-hover:bg-primary">{i + 1}</span>
+                              <span className="text-sm font-bold text-slate-900 tabular-nums">
+                                {d.ilanSayisi} <span className="text-xs font-medium text-slate-500">ilan</span>
+                              </span>
+                            </span>
+                            <span className="line-clamp-2 text-[13px] leading-snug font-semibold text-slate-700 group-hover:text-primary">{d.name}</span>
+                            <span className="block h-1 overflow-hidden rounded-full bg-slate-100">
+                              <span className="block h-full rounded-full bg-gradient-to-r from-primary to-indigo-500" style={{ width: `${Math.round((d.ilanSayisi / enCok) * 100)}%` }} />
+                            </span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ol>
                   </div>
 
-                  {/* Uye gorunumunde (yaninda profil karti, orta genislik) gizli: sayilar profil kartinda ve rozette var. */}
+                  {/* Uye gorunumunde (yaninda profil karti, orta genislik) gizli: kart dolmasin, uye sayilari profil kartinda gorur. */}
                   <dl className="mt-7 grid grid-cols-3 gap-3 border-t border-slate-100 pt-5 @min-[600px]:@max-4xl:hidden @4xl:flex @4xl:gap-x-8">
                     {[
                       { label: "aktif ilan", value: stats.postingCount, ikon: Briefcase },
@@ -141,7 +145,7 @@ export default async function Home() {
                             <span className="shrink-0 text-xs font-bold text-slate-900 tabular-nums">{d.ilanSayisi} ilan</span>
                           </span>
                           <span className="mt-1.5 block h-1.5 overflow-hidden rounded-full bg-primary/10">
-                            <span className="block h-full rounded-full bg-primary" style={{ width: `${Math.round((d.ilanSayisi / enCok) * 100)}%` }} />
+                            <span className="block h-full rounded-full bg-gradient-to-r from-primary to-indigo-500" style={{ width: `${Math.round((d.ilanSayisi / enCok) * 100)}%` }} />
                           </span>
                         </Link>
                       </li>

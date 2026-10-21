@@ -68,15 +68,9 @@ export default function AnaSayfa() {
             />
           }
         >
-          {/* Sitedeki hero: canli ilan rozeti, vurgulu baslik, arama, en cok ilanli bolumler, ikonlu sayilar. */}
+          {/* Sitedeki hero: vurgulu baslik, arama, en cok ilanli bolumler (sirali mini kartlar), ikonlu sayilar. */}
           <Kart style={{ padding: 22 }}>
-            <View style={s.canliRozet}>
-              <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: "#10b981" }} />
-              <T w="yariKalin" style={{ fontSize: 12, color: "#065f46" }}>
-                Şu an {sayi(veri.istatistik.ilan)} aktif kamu ilanı
-              </T>
-            </View>
-            <T w="kalin" style={{ marginTop: 14, fontSize: 27, lineHeight: 34, letterSpacing: -0.6 }}>
+            <T w="kalin" style={{ fontSize: 27, lineHeight: 34, letterSpacing: -0.6 }}>
               Mezun olduğun bölüme uygun{" "}
               <T w="kalin" style={{ fontSize: 27, color: renk.birincil, textDecorationLine: "underline", textDecorationColor: "rgba(36,102,195,0.3)" }}>
                 kamu ilanlarını
@@ -87,27 +81,7 @@ export default function AnaSayfa() {
             <View style={{ marginTop: 18 }}>
               <BolumArama bolumler={veri.bolumler} />
             </View>
-            <View style={{ marginTop: 14, flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
-              <T w="yariKalin" style={{ fontSize: 12, color: renk.soluk }}>
-                En çok ilan:
-              </T>
-              {[...veri.bolumler]
-                .sort((a, b) => b.ilanSayisi - a.ilanSayisi)
-                .slice(0, 4)
-                .filter((b) => b.ilanSayisi > 0)
-                .map((b) => (
-                  <Pressable key={b.slug} onPress={() => router.push({ pathname: "/liste", params: { kapsam: "bolum", deger: b.slug } })} style={s.bolumCipi}>
-                    <T w="orta" style={{ fontSize: 12, color: "#334155" }}>
-                      {b.ad}
-                    </T>
-                    <View style={s.cipSayi}>
-                      <T w="kalin" style={{ fontSize: 11, color: renk.birincil }}>
-                        {b.ilanSayisi}
-                      </T>
-                    </View>
-                  </Pressable>
-                ))}
-            </View>
+            <EnCokIlan bolumler={veri.bolumler} />
             <View style={s.istatistik}>
               {[
                 { ad: "aktif ilan", n: veri.istatistik.ilan, ikon: Briefcase },
@@ -200,6 +174,46 @@ export default function AnaSayfa() {
   );
 }
 
+/** En cok aktif ilani olan 4 bolum: sirali mini kartlar (2x2), gercek sayi ve goreli cubuk. */
+function EnCokIlan({ bolumler }: { bolumler: AnaSayfaVeri["bolumler"] }) {
+  const ilk = [...bolumler].sort((a, b) => b.ilanSayisi - a.ilanSayisi).filter((b) => b.ilanSayisi > 0).slice(0, 4);
+  if (!ilk.length) return null;
+  const enCok = ilk[0].ilanSayisi;
+  return (
+    <View style={{ marginTop: 20 }}>
+      <T w="kalin" style={{ fontSize: 11, letterSpacing: 1.2, color: "#64748b" }}>
+        EN ÇOK İLANI OLAN BÖLÜMLER
+      </T>
+      <View style={{ marginTop: 10, flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+        {ilk.map((b, i) => (
+          <Pressable
+            key={b.slug}
+            onPress={() => router.push({ pathname: "/liste", params: { kapsam: "bolum", deger: b.slug } })}
+            style={({ pressed }) => [s.enCokKart, pressed && { borderColor: "rgba(36,102,195,0.35)", backgroundColor: renk.birincilZemin }]}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+              <View style={s.sira}>
+                <T w="kalin" style={{ fontSize: 11, color: "#fff" }}>
+                  {i + 1}
+                </T>
+              </View>
+              <T w="kalin" style={{ fontSize: 14 }}>
+                {b.ilanSayisi} <T style={{ fontSize: 12, color: renk.soluk }}>ilan</T>
+              </T>
+            </View>
+            <T w="yariKalin" numberOfLines={2} style={{ fontSize: 13, lineHeight: 17, color: "#334155", minHeight: 34 }}>
+              {b.ad}
+            </T>
+            <View style={{ height: 4, borderRadius: 2, backgroundColor: "#f1f5f9", overflow: "hidden" }}>
+              <LinearGradient colors={[renk.birincil, "#6366f1"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ height: "100%", width: `${Math.round((b.ilanSayisi / enCok) * 100)}%`, borderRadius: 2 }} />
+            </View>
+          </Pressable>
+        ))}
+      </View>
+    </View>
+  );
+}
+
 /** Sitedeki HeroHaberCarousel: tam gorselli haber slaytlari, 6 sn'de bir kendiliginden kayar. */
 function HaberKaruseli({ haberler }: { haberler: HaberKartiVeri[] }) {
   const genislik = useWindowDimensions().width - 32;
@@ -286,10 +300,9 @@ const s = StyleSheet.create({
   nokta: { position: "absolute", top: 8, right: 9, width: 8, height: 8, borderRadius: 4, backgroundColor: "#ef4444" },
   ust: { height: 56, flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, borderBottomWidth: 1, borderBottomColor: renk.kenar, backgroundColor: "#fff" },
   istatistik: { marginTop: 22, flexDirection: "row", gap: 12, borderTopWidth: 1, borderTopColor: "#f1f5f9", paddingTop: 18 },
+  enCokKart: { width: "47.5%", flexGrow: 1, gap: 9, borderRadius: 16, borderWidth: 1, borderColor: "#e2e8f0", backgroundColor: "#fff", padding: 12 },
+  sira: { width: 24, height: 24, borderRadius: 8, backgroundColor: "#0f172a", alignItems: "center", justifyContent: "center" },
   istatistikIkon: { width: 40, height: 40, borderRadius: 12, backgroundColor: renk.birincilZemin, alignItems: "center", justifyContent: "center" },
-  canliRozet: { alignSelf: "flex-start", flexDirection: "row", alignItems: "center", gap: 7, borderRadius: 999, borderWidth: 1, borderColor: "#a7f3d0", backgroundColor: "#ecfdf5", paddingHorizontal: 11, paddingVertical: 5 },
-  bolumCipi: { flexDirection: "row", alignItems: "center", gap: 6, borderRadius: 999, borderWidth: 1, borderColor: renk.birincilKenar, backgroundColor: "#fff", paddingLeft: 11, paddingRight: 5, paddingVertical: 4 },
-  cipSayi: { borderRadius: 999, backgroundColor: renk.birincilZemin, paddingHorizontal: 6, paddingVertical: 1 },
   detayButon: { alignSelf: "flex-start", flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "#fff", borderRadius: 999, paddingHorizontal: 16, paddingVertical: 9, marginTop: 4 },
   kapanis: { marginTop: 40, borderRadius: 16, backgroundColor: renk.birincil, paddingHorizontal: 24, paddingVertical: 48, alignItems: "center" },
   amblemKutu: { width: 64, height: 64, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.1)", alignItems: "center", justifyContent: "center" },
