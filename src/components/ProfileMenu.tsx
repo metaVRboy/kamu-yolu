@@ -2,8 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { sayfaYuklemesiniBaslat } from "@/components/SayfaYuklemeCizgisi";
+import { oturumDegisti } from "@/lib/oturumIstemci";
 import { UserRound, Settings, CreditCard, Repeat, LogOut, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -21,7 +20,6 @@ export function ProfileMenu({
   fotografUrl: string | null;
   isAdmin: boolean;
 }) {
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -38,9 +36,7 @@ export function ProfileMenu({
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
-    sayfaYuklemesiniBaslat("/");
-    router.push("/");
-    router.refresh();
+    oturumDegisti("/");
   }
 
   const proRozeti =

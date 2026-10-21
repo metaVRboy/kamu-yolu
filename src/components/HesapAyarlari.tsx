@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { sayfaYuklemesiniBaslat } from "@/components/SayfaYuklemeCizgisi";
+import { oturumDegisti } from "@/lib/oturumIstemci";
 import { Camera, LogOut, Monitor, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -387,7 +387,6 @@ export function OturumListesi({ oturumlar }: { oturumlar: OturumSatiri[] }) {
 }
 
 export function HesapSilForm({ sifreVar }: { sifreVar: boolean }) {
-  const router = useRouter();
   const [deger, setDeger] = useState("");
   const [onay, setOnay] = useState(false);
   const [hata, setHata] = useState<string | null>(null);
@@ -408,9 +407,8 @@ export function HesapSilForm({ sifreVar }: { sifreVar: boolean }) {
         return;
       }
       toast.success("Hesabın silindi.", "Kamu Yolu'nu kullandığın için teşekkür ederiz.");
-      sayfaYuklemesiniBaslat("/");
-      router.push("/");
-      router.refresh();
+      // Bildirim okunsun diye kisa bekleme, sonra tam yukleme (istemci onbellekleri silinen hesapla kalmasin).
+      window.setTimeout(() => oturumDegisti("/"), 1500);
     } finally {
       setYukleniyor(false);
     }

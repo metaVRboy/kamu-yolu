@@ -1,19 +1,14 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { sayfaYuklemesiniBaslat } from "@/components/SayfaYuklemeCizgisi";
 import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { oturumDegisti } from "@/lib/oturumIstemci";
 
 /** kapakta: profil kartinin mavi kapagi uzerinde (beyaz, yari saydam). */
 export function LogoutButton({ kapakta = false }: { kapakta?: boolean }) {
-  const router = useRouter();
-
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
-    sayfaYuklemesiniBaslat("/");
-    router.push("/");
-    router.refresh();
+    oturumDegisti("/");
   }
 
   if (kapakta) {

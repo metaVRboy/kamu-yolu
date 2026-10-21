@@ -3,7 +3,7 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { sayfaYuklemesiniBaslat } from "@/components/SayfaYuklemeCizgisi";
+import { oturumDegisti } from "@/lib/oturumIstemci";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -120,13 +120,10 @@ export function AuthForm({
       // ?sonra= ile istedigi sayfaya (yalniz site ici yol), yoksa profile gider.
       if (onBasarili) {
         onBasarili();
-        router.refresh();
+        oturumDegisti();
         return;
       }
-      const hedef = siteIciYol(searchParams.get("sonra")) ?? "/profilim";
-      sayfaYuklemesiniBaslat(hedef);
-      router.push(hedef);
-      router.refresh();
+      oturumDegisti(siteIciYol(searchParams.get("sonra")) ?? "/profilim");
     } catch {
       setError("Bağlantı hatası, tekrar deneyin.");
     } finally {
@@ -198,10 +195,8 @@ export function AuthForm({
       }
       toast.success("Hesabın oluşturuldu.");
       onBasarili?.();
-      sayfaYuklemesiniBaslat("/profilim");
       // ?yeni=1: profil sayfasi bolum secimini ister.
-      router.push("/profilim?yeni=1");
-      router.refresh();
+      oturumDegisti("/profilim?yeni=1");
     } catch {
       setError("Bağlantı hatası, tekrar deneyin.");
     } finally {
