@@ -3,16 +3,20 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { YeniKayitOlayi } from "@/components/YeniKayitOlayi";
-import { Briefcase, Inbox, MessageCircle, Repeat, UserRound } from "lucide-react";
+import { Briefcase, Inbox, MessageCircle, Repeat, Settings } from "lucide-react";
 import { KilitliOzellik } from "@/components/KilitliOzellik";
-import { SayfaBasligi } from "@/components/SayfaBasligi";
+import { ProfilKarti } from "@/components/ProfilKarti";
 import { getCurrentUser } from "@/lib/auth";
+import { rozetDurumu } from "@/lib/rozetler";
+import { profilFotografiUrl } from "@/lib/profil";
+import { DUZEY_LABEL } from "@/lib/kpssDenemeSabitler";
+import { PLAN_ADI } from "@/lib/planlar";
 import { getOkunmamisIlgilendiklerimSayisi, getOkunmamisMesajSayisi, getTaleplerim } from "@/lib/becayis";
 import { getPostingsForDepartment, getPostingsForLevel } from "@/lib/matching";
 import { ProfilLayout } from "@/components/ProfilLayout";
 import { LogoutButton } from "@/components/LogoutButton";
 import { IlanVitrinKarti } from "@/components/IlanVitrinKarti";
-import { kurumLogolari, tekIlanKartlari } from "@/lib/ilanVitrin";
+import { kalanGunSayisi, kurumLogolari, tekIlanKartlari } from "@/lib/ilanVitrin";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -54,23 +58,47 @@ export default async function ProfilimPage() {
       ? await getPostingsForLevel(user.educationLevel)
       : [];
   const gosterilenIlanlar = kisiselIlanlar.slice(0, 4);
-  const [logolar, bolum, ozet] = await Promise.all([
+  const [logolar, bolum, ozet, rozet, fotoUrl] = await Promise.all([
     kurumLogolari(gosterilenIlanlar),
     user.departmentId ? prisma.department.findUnique({ where: { id: user.departmentId }, select: { slug: true, name: true } }) : null,
     isPremium ? null : kisiselOzet(user.departmentId),
+    rozetDurumu(user),
+    profilFotografiUrl(user.id),
   ]);
+  const kazanilanRozetler = rozet.rozetler.filter((r) => r.kazanildi);
 
   return (
     <ProfilLayout
       okunmamisMesajSayisi={okunmamisSayisi}
       okunmamisIlgilendiklerimSayisi={okunmamisIlgilendiklerimSayisi}
     >
-      <SayfaBasligi
-        kompakt
-        ikon={UserRound}
-        baslik="Profilim"
-        aciklama={`${user.adSoyad} — ${user.email}`}
-        aksiyonlar={<LogoutButton />}
+      <ProfilKarti
+        yatay
+        eposta={user.email}
+        v={{
+          adSoyad: user.adSoyad,
+          fotoUrl,
+          altSatir: [bolum?.name, user.educationLevel ? DUZEY_LABEL[user.educationLevel] : null].filter(Boolean).join(" · ") || "Bölümünü henüz seçmedin",
+          seriGun: rozet.seri.gun,
+          denemeSayisi: rozet.denemeSayisi,
+          rozetSayisi: kazanilanRozetler.length,
+          rozetler: kazanilanRozetler.slice(0, 4).map(({ id, ad, renk }) => ({ id, ad, renk })),
+          plan: user.abonelikPlani,
+          planAdi: PLAN_ADI[user.abonelikPlani],
+          kalanGun: isPremium ? kalanGunSayisi(user.abonelikBitis) : null,
+        }}
+        aksiyonlar={
+          <>
+            <Link
+              href="/profilim/ayarlar"
+              className="inline-flex h-8 items-center gap-1.5 rounded-full bg-white/15 px-3 text-sm font-semibold text-white ring-1 ring-white/30 transition-colors hover:bg-white/25"
+            >
+              <Settings className="h-3.5 w-3.5" aria-hidden />
+              Profili düzenle
+            </Link>
+            <LogoutButton kapakta />
+          </>
+        }
       />
       <Suspense fallback={null}>
         <YeniKayitOlayi />

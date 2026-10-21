@@ -2,82 +2,35 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { CalendarCheck, Flame, Gift, Sparkles } from "lucide-react";
 import { useAuthModal } from "@/components/AuthModal";
-import { useYukseltme } from "@/components/YukseltmePenceresi";
+import { ProfilKarti } from "@/components/ProfilKarti";
 import { toast } from "@/components/ui/toast";
 import { useUyeOzeti } from "@/lib/uyeOzetiIstemci";
-import { ROZET_RENGI } from "@/lib/rozetRenkleri";
 import { cn } from "@/lib/utils";
 
 const SERI_HEDEFI = 7;
 
-function basHarfler(ad: string) {
-  return ad
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((p) => p[0]!.toLocaleUpperCase("tr"))
-    .join("");
-}
-
 /** Ana sayfa: arama kutusunun yanindaki uye profil karti. Misafirde hic yer kaplamaz. */
 export function UyeProfilKarti() {
   const veri = useUyeOzeti();
-  const yukselt = useYukseltme();
   const u = veri?.uye;
   if (!u) return null;
-  const kalanGun = u.planKalanGun;
   return (
-    <aside className="flex min-w-0 flex-[1_1_300px] flex-col overflow-hidden rounded-3xl border border-primary/10 bg-white shadow-sm">
-      <div className="h-16 bg-primary" />
-      <div className="flex flex-1 flex-col gap-3 px-5 pb-5">
-        {u.fotoUrl ? (
-          <Image src={u.fotoUrl} alt="" width={80} height={80} unoptimized className="relative -mt-10 h-20 w-20 rounded-full border-4 border-white object-cover" />
-        ) : (
-          <div className="relative -mt-10 flex h-20 w-20 items-center justify-center rounded-full border-4 border-white bg-blue-100 text-2xl font-bold text-primary">{basHarfler(u.adSoyad)}</div>
-        )}
-        <div>
-          <p className="text-lg font-bold text-slate-900">{u.adSoyad}</p>
-          <p className="text-sm text-muted-foreground">{[u.bolum, u.duzey].filter(Boolean).join(" · ") || "Bölümünü henüz seçmedin"}</p>
-        </div>
-        <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="rounded-xl bg-amber-50 px-1 py-2">
-            <p className="text-xl font-bold text-amber-700">{u.seri.gun}</p>
-            <p className="text-[11px] text-amber-900">gün seri</p>
-          </div>
-          <div className="rounded-xl bg-primary/10 px-1 py-2">
-            <p className="text-xl font-bold text-primary">{u.denemeSayisi}</p>
-            <p className="text-[11px] text-primary">deneme</p>
-          </div>
-          <Link href="/profilim/rozetler" className="rounded-xl bg-emerald-50 px-1 py-2 hover:bg-emerald-100">
-            <p className="text-xl font-bold text-emerald-700">{u.rozetSayisi}</p>
-            <p className="text-[11px] text-emerald-800">rozet</p>
-          </Link>
-        </div>
-        {u.rozetler.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {u.rozetler.map((r) => (
-              <span key={r.id} className={cn("rounded-full px-2.5 py-1 text-xs font-semibold", ROZET_RENGI[r.renk])}>
-                {r.ad}
-              </span>
-            ))}
-          </div>
-        )}
-        <div className="mt-auto flex items-center justify-between border-t border-border pt-3 text-sm">
-          <span className="text-muted-foreground">
-            Üyelik: <span className="font-semibold text-slate-800">{u.planAdi}</span>
-            {kalanGun !== null && <span> · {kalanGun} gün kaldı</span>}
-          </span>
-          {u.plan !== "PRO_PLUS" && (
-            <button type="button" onClick={() => yukselt({ kaynak: "genel" })} className="font-semibold text-primary hover:underline">
-              Yükselt
-            </button>
-          )}
-        </div>
-      </div>
-    </aside>
+    <ProfilKarti
+      v={{
+        adSoyad: u.adSoyad,
+        fotoUrl: u.fotoUrl,
+        altSatir: [u.bolum, u.duzey].filter(Boolean).join(" · ") || "Bölümünü henüz seçmedin",
+        seriGun: u.seri.gun,
+        denemeSayisi: u.denemeSayisi,
+        rozetSayisi: u.rozetSayisi,
+        rozetler: u.rozetler,
+        plan: u.plan,
+        planAdi: u.planAdi,
+        kalanGun: u.planKalanGun,
+      }}
+    />
   );
 }
 

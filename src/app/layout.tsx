@@ -117,6 +117,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                   width={54}
                   height={40}
                   className="h-9 w-auto sm:h-10"
+                  style={{ width: "auto" }}
                   priority
                 />
               </Link>
