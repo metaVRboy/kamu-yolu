@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useFocusEffect } from "expo-router";
-import { ArrowRight, ArrowUpRight, Bell } from "lucide-react-native";
+import { ArrowRight, ArrowUpRight, Bell, Briefcase, Building2, GraduationCap } from "lucide-react-native";
 import { BolumBasligi, HataKutusu, Kart, T, Yukleniyor } from "@/bilesenler/ui";
 import { BolumArama } from "@/bilesenler/BolumArama";
 import { IlanKarti } from "@/bilesenler/IlanKarti";
@@ -68,31 +68,64 @@ export default function AnaSayfa() {
             />
           }
         >
-          <Kart style={{ padding: 24, alignItems: "center" }}>
-            <T w="yariKalin" style={{ fontSize: 24, lineHeight: 31, textAlign: "center", letterSpacing: -0.5 }}>
+          {/* Sitedeki hero: canli ilan rozeti, vurgulu baslik, arama, en cok ilanli bolumler, ikonlu sayilar. */}
+          <Kart style={{ padding: 22 }}>
+            <View style={s.canliRozet}>
+              <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: "#10b981" }} />
+              <T w="yariKalin" style={{ fontSize: 12, color: "#065f46" }}>
+                Şu an {sayi(veri.istatistik.ilan)} aktif kamu ilanı
+              </T>
+            </View>
+            <T w="kalin" style={{ marginTop: 14, fontSize: 27, lineHeight: 34, letterSpacing: -0.6 }}>
               Mezun olduğun bölüme uygun{" "}
-              <T w="yariKalin" style={{ fontSize: 24, color: renk.birincil, fontStyle: "italic" }}>
+              <T w="kalin" style={{ fontSize: 27, color: renk.birincil, textDecorationLine: "underline", textDecorationColor: "rgba(36,102,195,0.3)" }}>
                 kamu ilanlarını
               </T>{" "}
               bul.
             </T>
-            <T style={{ marginTop: 10, textAlign: "center", color: renk.yaziIkincil, lineHeight: 20 }}>Bölümünü seç, sana uygun güncel kamu ilanlarını hemen listeleyelim.</T>
-            <View style={{ marginTop: 20, width: "100%" }}>
+            <T style={{ marginTop: 10, color: renk.yaziIkincil, lineHeight: 21 }}>Bölümünü seç; başvurabileceğin güncel ilanları ve son başvuru tarihlerini tek listede gör.</T>
+            <View style={{ marginTop: 18 }}>
               <BolumArama bolumler={veri.bolumler} />
+            </View>
+            <View style={{ marginTop: 14, flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
+              <T w="yariKalin" style={{ fontSize: 12, color: renk.soluk }}>
+                En çok ilan:
+              </T>
+              {[...veri.bolumler]
+                .sort((a, b) => b.ilanSayisi - a.ilanSayisi)
+                .slice(0, 4)
+                .filter((b) => b.ilanSayisi > 0)
+                .map((b) => (
+                  <Pressable key={b.slug} onPress={() => router.push({ pathname: "/liste", params: { kapsam: "bolum", deger: b.slug } })} style={s.bolumCipi}>
+                    <T w="orta" style={{ fontSize: 12, color: "#334155" }}>
+                      {b.ad}
+                    </T>
+                    <View style={s.cipSayi}>
+                      <T w="kalin" style={{ fontSize: 11, color: renk.birincil }}>
+                        {b.ilanSayisi}
+                      </T>
+                    </View>
+                  </Pressable>
+                ))}
             </View>
             <View style={s.istatistik}>
               {[
-                ["Aktif İlan", veri.istatistik.ilan],
-                ["Kurum", veri.istatistik.kurum],
-                ["Bölüm", veri.istatistik.bolum],
-              ].map(([ad, n], i) => (
-                <View key={ad} style={[{ flex: 1, alignItems: "center" }, i > 0 && { borderLeftWidth: 1, borderLeftColor: renk.kenar }]}>
-                  <T w="kalin" style={{ fontSize: 22, color: renk.birincil }}>
-                    {sayi(n as number)}
-                  </T>
-                  <T w="orta" style={{ fontSize: 12, color: renk.soluk, marginTop: 2 }}>
-                    {ad}
-                  </T>
+                { ad: "aktif ilan", n: veri.istatistik.ilan, ikon: Briefcase },
+                { ad: "kurum", n: veri.istatistik.kurum, ikon: Building2 },
+                { ad: "bölüm", n: veri.istatistik.bolum, ikon: GraduationCap },
+              ].map((x) => (
+                <View key={x.ad} style={{ flex: 1, gap: 8 }}>
+                  <View style={s.istatistikIkon}>
+                    <x.ikon size={19} color={renk.birincil} />
+                  </View>
+                  <View>
+                    <T w="kalin" style={{ fontSize: 20 }}>
+                      {sayi(x.n)}
+                    </T>
+                    <T w="orta" style={{ fontSize: 12, color: renk.soluk }}>
+                      {x.ad}
+                    </T>
+                  </View>
                 </View>
               ))}
             </View>
@@ -252,7 +285,11 @@ const s = StyleSheet.create({
   zil: { width: 38, height: 38, borderRadius: 10, borderWidth: 1, borderColor: renk.kenar, alignItems: "center", justifyContent: "center" },
   nokta: { position: "absolute", top: 8, right: 9, width: 8, height: 8, borderRadius: 4, backgroundColor: "#ef4444" },
   ust: { height: 56, flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, borderBottomWidth: 1, borderBottomColor: renk.kenar, backgroundColor: "#fff" },
-  istatistik: { marginTop: 28, flexDirection: "row", width: "100%", borderTopWidth: 1, borderTopColor: renk.kenar, paddingTop: 18 },
+  istatistik: { marginTop: 22, flexDirection: "row", gap: 12, borderTopWidth: 1, borderTopColor: "#f1f5f9", paddingTop: 18 },
+  istatistikIkon: { width: 40, height: 40, borderRadius: 12, backgroundColor: renk.birincilZemin, alignItems: "center", justifyContent: "center" },
+  canliRozet: { alignSelf: "flex-start", flexDirection: "row", alignItems: "center", gap: 7, borderRadius: 999, borderWidth: 1, borderColor: "#a7f3d0", backgroundColor: "#ecfdf5", paddingHorizontal: 11, paddingVertical: 5 },
+  bolumCipi: { flexDirection: "row", alignItems: "center", gap: 6, borderRadius: 999, borderWidth: 1, borderColor: renk.birincilKenar, backgroundColor: "#fff", paddingLeft: 11, paddingRight: 5, paddingVertical: 4 },
+  cipSayi: { borderRadius: 999, backgroundColor: renk.birincilZemin, paddingHorizontal: 6, paddingVertical: 1 },
   detayButon: { alignSelf: "flex-start", flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "#fff", borderRadius: 999, paddingHorizontal: 16, paddingVertical: 9, marginTop: 4 },
   kapanis: { marginTop: 40, borderRadius: 16, backgroundColor: renk.birincil, paddingHorizontal: 24, paddingVertical: 48, alignItems: "center" },
   amblemKutu: { width: 64, height: 64, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.1)", alignItems: "center", justifyContent: "center" },

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { sayfaYuklemesiniBaslat } from "@/components/SayfaYuklemeCizgisi";
-import { Search } from "lucide-react";
+import { ArrowRight, Search } from "lucide-react";
 import { LEVEL_LABEL } from "@/lib/labels";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -93,10 +93,12 @@ export function DepartmentSearch({
   }
 
   return (
-    <div className="mx-auto w-full max-w-xl">
-      <div className="relative flex items-center gap-2">
-        <div className="relative flex-1">
-          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+    // Tek parca arama kutusu: buton kutunun icinde, odakta tum kutu halkalanir.
+    <div className="w-full max-w-xl">
+      <div className="relative flex items-center gap-1.5 rounded-2xl border border-primary/20 bg-white p-1.5 shadow-[0_6px_24px_-8px_rgba(37,99,235,0.25)] transition-shadow focus-within:border-primary/50 focus-within:shadow-[0_0_0_4px_rgba(37,99,235,0.12),0_6px_24px_-8px_rgba(37,99,235,0.3)]">
+        {/* Ic kutu konumlanmaz: ikon ve oneri listesi dis kutuya gore yerlesir (liste kutu genisliginde). */}
+        <div className="flex-1">
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-primary/70" />
           <Input
             type="text"
             value={query}
@@ -111,14 +113,14 @@ export function DepartmentSearch({
             aria-expanded={isOpen}
             aria-controls="department-search-list"
             placeholder="Bölümünü yaz (ör. Bilgisayar Mühendisliği)"
-            className="h-12 rounded-2xl border-primary/20 bg-white pl-11 text-sm shadow-sm sm:text-base"
+            className="h-11 rounded-xl border-0 bg-transparent pl-10 text-sm shadow-none focus-visible:ring-0 sm:text-base"
           />
 
           {isOpen && filtered.length > 0 && (
             <ul
               id="department-search-list"
               ref={listRef}
-              className="absolute z-50 mt-2 max-h-80 w-full overflow-y-auto rounded-2xl border border-primary/15 bg-white/95 p-1 shadow-lg backdrop-blur-xl"
+              className="absolute top-full left-0 z-50 mt-2 max-h-80 w-full overflow-y-auto rounded-2xl border border-primary/15 bg-white/95 p-1 shadow-lg backdrop-blur-xl"
             >
               {filtered.map((d, i) => (
                 <li key={d.slug}>
@@ -152,7 +154,7 @@ export function DepartmentSearch({
             </ul>
           )}
           {isOpen && query && filtered.length === 0 && (
-            <div className="absolute z-50 mt-2 w-full rounded-2xl border border-primary/15 bg-white/95 px-4 py-3 text-sm text-muted-foreground shadow-lg backdrop-blur-xl">
+            <div className="absolute top-full left-0 z-50 mt-2 w-full rounded-2xl border border-primary/15 bg-white/95 px-4 py-3 text-sm text-muted-foreground shadow-lg backdrop-blur-xl">
               Bölüm bulunamadı. Farklı bir isimle deneyin.
             </div>
           )}
@@ -163,10 +165,10 @@ export function DepartmentSearch({
           onClick={handleSearch}
           disabled={!query.trim()}
           aria-label="Ara"
-          className={buttonVariants({ className: "h-12 shrink-0 rounded-2xl px-3.5 sm:px-5" })}
+          className={buttonVariants({ className: "h-11 shrink-0 rounded-xl px-3.5 font-semibold sm:px-5" })}
         >
-          <Search className="h-4 w-4" />
-          <span className="hidden sm:inline">Ara</span>
+          <span className="hidden sm:inline">İlanları göster</span>
+          <ArrowRight className="h-4 w-4" />
         </button>
       </div>
     </div>

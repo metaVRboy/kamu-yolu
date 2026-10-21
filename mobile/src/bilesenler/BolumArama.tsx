@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Keyboard, Pressable, StyleSheet, TextInput, View } from "react-native";
 import { router } from "expo-router";
-import { Search } from "lucide-react-native";
+import { ArrowRight, Search } from "lucide-react-native";
 import { T } from "@/bilesenler/ui";
 import { renk, yazi } from "@/lib/tema";
 import { DUZEY_ADI } from "@/lib/bicim";
@@ -35,9 +35,9 @@ export function BolumArama({ bolumler }: { bolumler: BolumSecenegi[] }) {
 
   return (
     <View style={{ width: "100%" }}>
-      <View style={{ flexDirection: "row", gap: 8 }}>
+      <View style={s.kutu}>
         <View style={s.girdiKutu}>
-          <Search size={16} color={renk.soluk} />
+          <Search size={16} color={renk.birincil} />
           <TextInput
             value={sorgu}
             onChangeText={(t) => {
@@ -53,7 +53,7 @@ export function BolumArama({ bolumler }: { bolumler: BolumSecenegi[] }) {
           />
         </View>
         <Pressable onPress={ara} style={[s.araButon, !sorgu.trim() && { opacity: 0.5 }]} disabled={!sorgu.trim()}>
-          <Search size={18} color="#fff" />
+          <ArrowRight size={18} color="#fff" />
         </Pressable>
       </View>
 
@@ -83,9 +83,11 @@ export function BolumArama({ bolumler }: { bolumler: BolumSecenegi[] }) {
 }
 
 const s = StyleSheet.create({
-  girdiKutu: { flex: 1, flexDirection: "row", alignItems: "center", gap: 8, height: 48, borderRadius: 16, borderWidth: 1, borderColor: "rgba(36,102,195,0.2)", backgroundColor: "#fff", paddingHorizontal: 14 },
+  // Tek parca arama kutusu (sitedeki gibi): buton kutunun icinde.
+  kutu: { flexDirection: "row", alignItems: "center", gap: 6, borderRadius: 18, borderWidth: 1, borderColor: "rgba(36,102,195,0.2)", backgroundColor: "#fff", padding: 5, shadowColor: "#2563eb", shadowOpacity: 0.12, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 3 },
+  girdiKutu: { flex: 1, flexDirection: "row", alignItems: "center", gap: 8, height: 44, paddingHorizontal: 10 },
   girdi: { flex: 1, fontFamily: yazi.normal, fontSize: 14, color: renk.yazi },
-  araButon: { width: 48, height: 48, borderRadius: 16, backgroundColor: renk.birincil, alignItems: "center", justifyContent: "center" },
+  araButon: { width: 44, height: 44, borderRadius: 13, backgroundColor: renk.birincil, alignItems: "center", justifyContent: "center" },
   liste: { marginTop: 8, maxHeight: 320, borderRadius: 16, borderWidth: 1, borderColor: "rgba(36,102,195,0.15)", backgroundColor: "#fff", padding: 4, overflow: "hidden" },
   oneri: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 12 },
   duzey: { borderRadius: 999, backgroundColor: renk.birincilZemin, paddingHorizontal: 8, paddingVertical: 2 },

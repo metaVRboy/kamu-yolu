@@ -9,6 +9,8 @@ import { HaberlerSection } from "@/components/HaberlerSection";
 import { BizeUlasin } from "@/components/BizeUlasin";
 import { DavetBandi, GunlukSerit, UyeProfilKarti } from "@/components/AnaSayfaUye";
 import { SayacArtis } from "@/components/SayacArtis";
+import Link from "next/link";
+import { ArrowRight, Briefcase, Building2, GraduationCap } from "lucide-react";
 
 // Ilan verileri periyodik olarak degistigi icin sayfa build-time'da
 // dondurulmamali; her birkac dakikada bir yeniden olusturulur.
@@ -34,6 +36,10 @@ export default async function Home() {
     ilanSayisi: postingCounts.get(d.id) ?? 0,
   }));
 
+  // Bolum basina gercek aktif ilan sayisina gore (arama verisi tutulmuyor: "sik aranan" denmez).
+  const populer = departments.filter((d) => d.ilanSayisi > 0).sort((a, b) => b.ilanSayisi - a.ilanSayisi);
+  const enCok = populer[0]?.ilanSayisi ?? 1;
+
   const ilanGruplari = kurumaGoreGrupla(latestPostings, 6);
   const ilanLogolari = await kurumLogolari(ilanGruplari.map((g) => g.ilk));
 
@@ -49,35 +55,103 @@ export default async function Home() {
               asagidaki icerik/input ile ayni boyama baglamini paylasmiyor,
               aksi halde Safari'de input'un imleci yanlis konumda cizilebiliyor. */}
           <div className="animate-frame-glow relative min-w-0 flex-[999_1_560px] rounded-3xl">
-            <div className="relative flex h-full flex-col justify-center overflow-hidden rounded-3xl border border-primary/10 bg-white p-8 text-center shadow-sm backdrop-blur-xl sm:p-10">
-              <div aria-hidden className="pointer-events-none absolute inset-0">
-                <div className="absolute -top-20 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
+            {/* Kart kendi genisligine gore dizilir: uye gorunumunde (yaninda profil karti) tek sutun, misafirde
+                genis kart sagda "en cok ilan" paneliyle. Sayilar gercek (aktif ilan, bolum basina ilan). */}
+            {/* Kart tasmayi gosterir (bolum onerileri listesi kesilmesin); susler kendi katmaninda kirpilir. */}
+            <div className="@container relative flex h-full flex-col justify-center rounded-3xl border border-primary/10 bg-white shadow-sm">
+              <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl">
+                <div className="absolute -top-24 -left-16 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+                <div className="absolute -right-12 -bottom-28 h-72 w-72 rounded-full bg-indigo-400/10 blur-3xl" />
+                <div className="absolute inset-0 [background-image:radial-gradient(rgba(37,99,235,0.13)_1px,transparent_1px)] [background-size:18px_18px] [mask-image:linear-gradient(to_bottom,black,transparent_65%)]" />
               </div>
 
-              <h1 className="relative font-sans text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
-                Mezun olduğun bölüme uygun{" "}
-                <span className="italic text-primary">kamu ilanlarını</span> bul.
-              </h1>
-              <p className="mx-auto mt-3 max-w-sm text-balance text-sm text-slate-600">
-                Bölümünü seç, sana uygun güncel kamu ilanlarını hemen listeleyelim.
-              </p>
-              <div className="mt-6 flex justify-center">
-                <DepartmentSearch departments={departments} />
-              </div>
+              <div className="relative grid gap-8 p-7 sm:p-9 @4xl:grid-cols-[minmax(0,1fr)_17rem] @4xl:items-center">
+                <div className="min-w-0">
+                  <p className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50/90 px-3 py-1 text-xs font-semibold text-emerald-800">
+                    <span className="relative flex h-2 w-2" aria-hidden>
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60 motion-reduce:animate-none" />
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                    </span>
+                    Şu an {stats.postingCount.toLocaleString("tr-TR")} aktif kamu ilanı
+                  </p>
 
-              <div className="mx-auto mt-8 grid w-full max-w-sm grid-cols-3 divide-x divide-border border-t border-border pt-5">
-                {[
-                  { label: "Aktif İlan", value: stats.postingCount },
-                  { label: "Kurum", value: stats.institutionCount },
-                  { label: "Bölüm", value: stats.departmentCount },
-                ].map((stat) => (
-                  <div key={stat.label}>
-                    <p className="text-xl font-bold text-primary tabular-nums sm:text-2xl">
-                      <SayacArtis deger={stat.value} />
-                    </p>
-                    <p className="mt-0.5 text-xs font-medium text-muted-foreground">{stat.label}</p>
+                  <h1 className="mt-4 font-sans text-[1.75rem] leading-tight font-bold tracking-tight text-balance text-slate-900 sm:text-4xl">
+                    Mezun olduğun bölüme uygun{" "}
+                    <span className="relative whitespace-nowrap text-primary">
+                      kamu ilanlarını
+                      <svg aria-hidden viewBox="0 0 200 12" preserveAspectRatio="none" className="absolute -bottom-1.5 left-0 h-2.5 w-full text-primary/30">
+                        <path d="M2 9 C 50 2, 150 2, 198 8" stroke="currentColor" strokeWidth="4" fill="none" strokeLinecap="round" />
+                      </svg>
+                    </span>{" "}
+                    bul.
+                  </h1>
+                  <p className="mt-3 max-w-lg text-[15px] leading-relaxed text-slate-600">
+                    Bölümünü seç; başvurabileceğin güncel ilanları ve son başvuru tarihlerini tek listede gör.
+                  </p>
+
+                  <div className="mt-6">
+                    <DepartmentSearch departments={departments} />
                   </div>
-                ))}
+
+                  {/* Dar kartta hizli secim cipleri; genis kartta ayni bilgi sagdaki panelde. */}
+                  <div className="mt-4 flex flex-wrap items-center gap-2 @4xl:hidden">
+                    <span className="text-xs font-semibold text-slate-500">En çok ilan:</span>
+                    {populer.slice(0, 4).map((d) => (
+                      <Link
+                        key={d.slug}
+                        href={`/bolum/${d.slug}`}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-primary/15 bg-white/90 px-3 py-1 text-xs font-medium text-slate-700 transition-colors hover:border-primary/40 hover:text-primary"
+                      >
+                        {d.name}
+                        <span className="rounded-full bg-primary/10 px-1.5 text-[11px] font-bold text-primary tabular-nums">{d.ilanSayisi}</span>
+                      </Link>
+                    ))}
+                  </div>
+
+                  {/* Uye gorunumunde (yaninda profil karti, orta genislik) gizli: sayilar profil kartinda ve rozette var. */}
+                  <dl className="mt-7 grid grid-cols-3 gap-3 border-t border-slate-100 pt-5 @min-[600px]:@max-4xl:hidden @4xl:flex @4xl:gap-x-8">
+                    {[
+                      { label: "aktif ilan", value: stats.postingCount, ikon: Briefcase },
+                      { label: "kurum", value: stats.institutionCount, ikon: Building2 },
+                      { label: "bölüm", value: stats.departmentCount, ikon: GraduationCap },
+                    ].map((stat) => (
+                      <div key={stat.label} className="flex flex-col items-start gap-2 @4xl:flex-row @4xl:items-center @4xl:gap-3">
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                          <stat.ikon className="h-5 w-5" aria-hidden />
+                        </span>
+                        <div className="flex flex-col-reverse">
+                          <dt className="mt-1 text-xs font-medium text-muted-foreground">{stat.label}</dt>
+                          <dd className="text-xl leading-none font-bold text-slate-900 tabular-nums">
+                            <SayacArtis deger={stat.value} />
+                          </dd>
+                        </div>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+
+                <aside className="hidden rounded-2xl border border-primary/10 bg-white/85 p-5 shadow-sm backdrop-blur @4xl:block">
+                  <p className="text-xs font-bold tracking-widest text-primary">EN ÇOK İLANI OLAN BÖLÜMLER</p>
+                  <ul className="mt-4 space-y-3.5">
+                    {populer.slice(0, 5).map((d) => (
+                      <li key={d.slug}>
+                        <Link href={`/bolum/${d.slug}`} className="group block">
+                          <span className="flex items-baseline justify-between gap-2 text-sm">
+                            <span className="truncate font-medium text-slate-700 group-hover:text-primary">{d.name}</span>
+                            <span className="shrink-0 text-xs font-bold text-slate-900 tabular-nums">{d.ilanSayisi} ilan</span>
+                          </span>
+                          <span className="mt-1.5 block h-1.5 overflow-hidden rounded-full bg-primary/10">
+                            <span className="block h-full rounded-full bg-primary" style={{ width: `${Math.round((d.ilanSayisi / enCok) * 100)}%` }} />
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link href="/ilanlar" className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline">
+                    Tüm ilanlar
+                    <ArrowRight className="h-4 w-4" aria-hidden />
+                  </Link>
+                </aside>
               </div>
             </div>
           </div>
