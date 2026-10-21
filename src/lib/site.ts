@@ -15,7 +15,8 @@ export const ILETISIM_EPOSTA = "info@kamuyolu.com";
 
 // Kunye (5651 Yon. m.5), satici adresi ve KVKK yazili basvuru adresi: vergi kaydindaki isyeri (faaliyet) adresi
 // (ise baslama 19.10.2026). Ev adresi yayinlanmaz.
-export const ILETISIM_ADRES = "Büyükesat Mah. Koza 1 Cd. No:153 İç Kapı No:8, Çankaya/Ankara";
+// Vergi levhasindaki is yeri adresiyle birebir (yasal sayfalar, kunye, sozlesmeler bu adresi kullanir).
+export const ILETISIM_ADRES = "Büyükesat Mah. Koza 1 Cd. Sev Apt. No:153 İç Kapı No:8, Çankaya/Ankara";
 export const ILETISIM_TELEFON = { goster: "0547 749 61 61", tel: "+905477496161" };
 
 /**
