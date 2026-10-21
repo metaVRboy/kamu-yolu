@@ -94,7 +94,9 @@ export default async function ProfilimPage() {
               className="inline-flex h-8 items-center gap-1.5 rounded-full bg-white/15 px-3 text-sm font-semibold text-white ring-1 ring-white/30 transition-colors hover:bg-white/25"
             >
               <Settings className="h-3.5 w-3.5" aria-hidden />
-              Profili düzenle
+              {/* Dar ekranda kisa: kapaktaki avatarla cakismasin. */}
+              <span className="sm:hidden">Düzenle</span>
+              <span className="hidden sm:inline">Profili düzenle</span>
             </Link>
             <LogoutButton kapakta />
           </>

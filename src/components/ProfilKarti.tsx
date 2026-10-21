@@ -30,7 +30,7 @@ function basHarfler(ad: string) {
 }
 
 function Avatar({ v, buyuk }: { v: ProfilKartiVerisi; buyuk?: boolean }) {
-  const boyut = buyuk ? "h-24 w-24 -mt-12 text-3xl" : "h-20 w-20 -mt-10 text-2xl";
+  const boyut = buyuk ? "h-20 w-20 -mt-10 text-2xl sm:h-24 sm:w-24 sm:-mt-12 sm:text-3xl" : "h-20 w-20 -mt-10 text-2xl";
   return v.fotoUrl ? (
     <Image src={v.fotoUrl} alt="" width={96} height={96} unoptimized className={cn("relative shrink-0 rounded-full border-4 border-white object-cover", boyut)} />
   ) : (
@@ -113,7 +113,7 @@ export function ProfilKarti({ v, yatay, eposta, aksiyonlar }: { v: ProfilKartiVe
   return (
     <section className="overflow-hidden rounded-3xl border border-primary/10 bg-white shadow-sm">
       {/* Aksiyonlar kapagin sag ustunde: dar sutunda da avatar satirini itmez. */}
-      <div className="relative flex h-20 items-start justify-end gap-2 bg-primary p-3 sm:h-24 sm:p-4">{aksiyonlar}</div>
+      <div className="relative flex h-14 items-start justify-end gap-2 bg-primary p-3 sm:h-16 sm:p-3">{aksiyonlar}</div>
       <div className="flex flex-wrap items-end gap-x-5 gap-y-3 px-5 sm:px-6">
         <Avatar v={v} buyuk />
         <div className="min-w-0 flex-[1_1_220px] pt-3">
