@@ -4,6 +4,7 @@ import { router, useFocusEffect, type Href } from "expo-router";
 import {
   Award,
   BarChart3,
+  Eye,
   Bell,
   BellRing,
   Briefcase,
@@ -27,6 +28,7 @@ import { IlanKarti } from "@/bilesenler/IlanKarti";
 import { KilitliOzellik, yukseltmeAc } from "@/bilesenler/KilitliOzellik";
 import { GirisKarti } from "@/bilesenler/GirisDaveti";
 import { ProfilKarti } from "@/bilesenler/UyeKartlari";
+import { TesvikKarti } from "@/bilesenler/TesvikKarti";
 import { useVeri } from "@/lib/api";
 import { useOturum } from "@/lib/oturum";
 import { renk } from "@/lib/tema";
@@ -103,17 +105,12 @@ export default function Profil() {
 
       {/* Kacirilan ilanlar (ucretsiz uye): bolumune eslesip son 30 gunde son basvurusu gecmis gercek ilan sayisi. */}
       {veri.kacirilan30 > 0 && veri.kisiselIlanSayisi > 0 && (
-        <View style={[s.uyariKutu, { borderColor: "#fecaca", backgroundColor: "#fef2f2" }]}>
-          <T w="yariKalin" style={{ color: "#7f1d1d" }}>
-            Son 30 günde bölümüne uygun {veri.kacirilan30} ilanın son başvurusu geçti
-          </T>
-          <T style={{ color: "#991b1b", lineHeight: 20 }}>Pro&apos;da bölümüne uygun yeni ilan çıkınca anında haberin olur; takip ettiğin ilanlar için son gün hatırlatması gelir.</T>
-          <Pressable onPress={() => yukseltmeAc("PRO", "kacirilan")} style={{ alignSelf: "flex-start", borderRadius: 12, backgroundColor: "#b91c1c", paddingHorizontal: 16, paddingVertical: 10 }}>
-            <T w="kalin" style={{ color: "#fff" }}>
-              Bir daha kaçırma
-            </T>
-          </Pressable>
-        </View>
+        <TesvikKarti
+          tema="sis"
+          baslik={`Son 30 günde bölümüne uygun ${veri.kacirilan30} ilanın son başvurusu geçti`}
+          metin="Pro'da bölümüne uygun yeni ilan çıkınca anında haberin olur; takip ettiğin ilanlar için son gün hatırlatması gelir."
+          cagri={{ etiket: "Bir daha kaçırma", ikon: Eye, onPress: () => yukseltmeAc("PRO", "kacirilan") }}
+        />
       )}
 
       <Menu
@@ -191,25 +188,26 @@ export default function Profil() {
             tamamla.
           </T>
         ) : veri.kisiselIlanSayisi === 0 ? (
-          // Bolum girili ama su an acik ilan yok: ucretsize gercek sayiyla Pro yonlendirmesi, Pro'ya yalniz bilgi.
-          <Kart style={{ padding: 18, gap: 10 }}>
-            <T w="yariKalin">Şu an {k.bolum ? `${k.bolum.ad} için` : "bölümüne uygun"} açık ilan yok.</T>
-            <T style={{ color: renk.yaziIkincil, lineHeight: 20 }}>
-              {premium
+          // Bolum girili ama su an acik ilan yok: kacirilan varsa sis, yoksa sinyal; Pro'da sinyal iyi halde.
+          <TesvikKarti
+            tema={!premium && veri.kacirilan30 > 0 ? "sis" : "sinyal"}
+            iyi={premium}
+            baslik={`Şu an ${k.bolum ? `${k.bolum.ad} için` : "bölümüne uygun"} açık ilan yok.`}
+            metin={
+              premium
                 ? "Yeni ilan yayımlandığında sana hemen bildirim gelecek; bu sayfada da listelenecek."
                 : veri.kacirilan30 > 0
                   ? `Son 30 günde bölümüne uygun ${veri.kacirilan30} ilan yayımlandı ve son başvuruları geçti. Pro ile bir sonraki ilan çıktığı an haberin olur.`
-                  : "Yeni ilan yayımlandığında ilk senin haberin olsun: Pro'da bölümüne uygun her yeni ilanda anında bildirim alırsın."}
-            </T>
-            {!premium && (
-              <Buton
-                etiket={veri.kacirilan30 > 0 ? "Bir daha kaçırma" : "İlk ben haberdar olayım"}
-                ikon={Crown}
-                onPress={() => yukseltmeAc("PRO", veri.kacirilan30 > 0 ? "kacirilan" : "bildirim")}
-                style={{ alignSelf: "flex-start", paddingVertical: 10 }}
-              />
-            )}
-          </Kart>
+                  : "Yeni ilan yayımlandığında ilk senin haberin olsun: Pro'da bölümüne uygun her yeni ilanda anında bildirim alırsın."
+            }
+            cagri={
+              premium
+                ? null
+                : veri.kacirilan30 > 0
+                  ? { etiket: "Bir daha kaçırma", ikon: Eye, onPress: () => yukseltmeAc("PRO", "kacirilan") }
+                  : { etiket: "İlk ben haberdar olayım", ikon: Bell, onPress: () => yukseltmeAc("PRO", "bildirim") }
+            }
+          />
         ) : k.plan === "UCRETSIZ" ? (
           <>
           <KilitliOzellik

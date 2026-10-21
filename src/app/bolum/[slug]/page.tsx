@@ -1,9 +1,10 @@
 import { bolumIstatistigi } from "@/lib/kisiselOzet";
 import { BolumIstatistikSeridi } from "@/components/ProTesvikleri";
+import { TESVIK_IKINCIL } from "@/lib/tesvik";
+import { TesvikKarti } from "@/components/TesvikKarti";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { buttonVariants } from "@/components/ui/button";
-import { Bell, GraduationCap } from "lucide-react";
+import { Bell, Eye, GraduationCap } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import {
   getAvailableFiltersForDepartment,
@@ -117,41 +118,47 @@ export default async function DepartmentResultsPage({
       )}
 
       <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {postings.length === 0 && (
-          <div className="rounded-2xl border border-dashed border-primary/25 bg-primary/5 p-8 text-center text-sm text-muted-foreground sm:col-span-2 lg:col-span-3">
-            {tumIlanlar.length === 0 ? (
-              // Bolumlerin cogunda cogu zaman ozel ilan yok: ziyaretci bos sayfada kalmasin.
-              <>
-                <p className="font-semibold text-slate-800">Şu an {department.name} şartı arayan aktif bir ilan yok.</p>
-                <p className="mt-1">
-                  {istatistik.son30 > 0
-                    ? `Son 30 günde bu bölüme ${istatistik.son30} ilan yayımlandı ve süreleri doldu${istatistik.ortalamaGun !== null ? `; ilanlar ortalama ${istatistik.ortalamaGun} gün açık kalıyor` : ""}. `
-                    : ""}
-                  {!user
-                    ? "Üye ol, bölümünü seç: yeni ilan çıkınca ilk sen öğren."
-                    : yukseltmeKartiGoster
-                      ? "Yeni ilan yayımlandığında ilk senin haberin olsun: Pro'da bölümüne uygun her yeni ilanda anında bildirim."
-                      : "Bu bölüm profilindeyse yeni ilan çıkınca sana bildirim gelecek."}{" "}
-                  Bölüm şartı aramayan ilanlara da başvurabilirsin.
-                </p>
-                <div className="mt-4 flex flex-wrap justify-center gap-2">
-                  {seviyeSlug && (
-                    <Link href={`/seviye/${seviyeSlug}`} className={buttonVariants()}>
-                      {LEVEL_LABEL[department.level] ?? department.level} mezunlarının tüm ilanları
-                    </Link>
-                  )}
+        {postings.length === 0 &&
+          (tumIlanlar.length === 0 ? (
+            // Bolumlerin cogunda cogu zaman ozel ilan yok: ziyaretci bos sayfada kalmasin. Kacirilan varsa sis
+            // (kayip), yoksa sinyal (ilk sen ogren); Pro'da sinyal iyi halde.
+            <TesvikKarti
+              tema={yukseltmeKartiGoster && istatistik.son30 > 0 ? "sis" : "sinyal"}
+              className="sm:col-span-2 lg:col-span-3"
+              iyi={!yukseltmeKartiGoster}
+              baslik={`Şu an ${department.name} şartı arayan aktif bir ilan yok.`}
+              metin={`${
+                istatistik.son30 > 0
+                  ? `Son 30 günde bu bölüme ${istatistik.son30} ilan yayımlandı ve süreleri doldu${istatistik.ortalamaGun !== null ? `; ilanlar ortalama ${istatistik.ortalamaGun} gün açık kalıyor` : ""}. `
+                  : ""
+              }${
+                !user
+                  ? "Üye ol, bölümünü seç: yeni ilan çıkınca ilk sen öğren."
+                  : yukseltmeKartiGoster
+                    ? "Yeni ilan yayımlandığında ilk senin haberin olsun: Pro'da bölümüne uygun her yeni ilanda anında bildirim."
+                    : "Bu bölüm profilindeyse yeni ilan çıkınca sana bildirim gelecek."
+              } Bölüm şartı aramayan ilanlara da başvurabilirsin.`}
+              aksiyon={
+                <>
                   {yukseltmeKartiGoster && (
-                    <YukseltButonu plan="PRO" kaynak={istatistik.son30 > 0 ? "kacirilan" : "bildirim"} className={buttonVariants({ variant: "outline" })}>
+                    <YukseltButonu plan="PRO" kaynak={istatistik.son30 > 0 ? "kacirilan" : "bildirim"} className="tsv-btn">
+                      {istatistik.son30 > 0 ? <Eye className="h-4 w-4" aria-hidden /> : <Bell className="h-4 w-4" aria-hidden />}
                       {user ? "İlk ben haberdar olayım" : "Ücretsiz üye ol"}
                     </YukseltButonu>
                   )}
-                </div>
-              </>
-            ) : (
-              "Seçtiğin kriterlere uyan aktif bir ilan bulunmuyor. Filtreleri değiştirmeyi veya daha sonra tekrar kontrol etmeyi deneyebilirsin."
-            )}
-          </div>
-        )}
+                  {seviyeSlug && (
+                    <Link href={`/seviye/${seviyeSlug}`} className={TESVIK_IKINCIL}>
+                      {LEVEL_LABEL[department.level] ?? department.level} mezunlarının tüm ilanları
+                    </Link>
+                  )}
+                </>
+              }
+            />
+          ) : (
+            <div className="rounded-2xl border border-dashed border-primary/25 bg-primary/5 p-8 text-center text-sm text-muted-foreground sm:col-span-2 lg:col-span-3">
+              Seçtiğin kriterlere uyan aktif bir ilan bulunmuyor. Filtreleri değiştirmeyi veya daha sonra tekrar kontrol etmeyi deneyebilirsin.
+            </div>
+          ))}
         {tekIlanKartlari(postings).map((grup) => (
           <IlanVitrinKarti
             key={grup.ilk.id}

@@ -3,7 +3,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { YeniKayitOlayi } from "@/components/YeniKayitOlayi";
-import { Briefcase, Inbox, MessageCircle, Repeat, Settings } from "lucide-react";
+import { Bell, Briefcase, Eye, Inbox, MessageCircle, Repeat, Settings } from "lucide-react";
+import { TesvikKarti } from "@/components/TesvikKarti";
 import { KilitliOzellik } from "@/components/KilitliOzellik";
 import { ProfilKarti } from "@/components/ProfilKarti";
 import { getCurrentUser } from "@/lib/auth";
@@ -121,15 +122,18 @@ export default async function ProfilimPage() {
 
       {/* Kacirilan ilanlar (ucretsiz uye): bolumune eslesip son 30 gunde son basvurusu gecmis gercek ilan sayisi. */}
       {ozet && ozet.kacirilan30 > 0 && kisiselIlanlar.length > 0 && (
-        <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-red-200 bg-red-50 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="font-semibold text-red-900">Son 30 günde bölümüne uygun {ozet.kacirilan30} ilanın son başvurusu geçti</p>
-            <p className="mt-0.5 text-sm text-red-800">Pro&apos;da bölümüne uygun yeni ilan çıkınca anında haberin olur; takip ettiğin ilanlar için son gün hatırlatması gelir.</p>
-          </div>
-          <YukseltButonu plan="PRO" kaynak="kacirilan" className="shrink-0 rounded-xl bg-red-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-red-800">
-            Bir daha kaçırma
-          </YukseltButonu>
-        </div>
+        <TesvikKarti
+          tema="sis"
+          className="mt-6"
+          baslik={`Son 30 günde bölümüne uygun ${ozet.kacirilan30} ilanın son başvurusu geçti`}
+          metin="Pro'da bölümüne uygun yeni ilan çıkınca anında haberin olur; takip ettiğin ilanlar için son gün hatırlatması gelir."
+          aksiyon={
+            <YukseltButonu plan="PRO" kaynak="kacirilan" className="tsv-btn">
+              <Eye className="h-4 w-4" aria-hidden />
+              Bir daha kaçırma
+            </YukseltButonu>
+          }
+        />
       )}
 
       <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -233,27 +237,28 @@ export default async function ProfilimPage() {
           </p>
         ) : kisiselIlanlar.length === 0 ? (
           // Bolum girili ama su an acik ilan yok: ucretsiz uyeye gercek sayiyla Pro yonlendirmesi, Pro'ya yalniz bilgi.
-          <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-primary/15 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="font-semibold text-slate-900">Şu an {bolum ? `${bolum.name} için` : "bölümüne uygun"} açık ilan yok.</p>
-              <p className="mt-0.5 text-sm text-slate-600">
-                {isPremium
-                  ? "Yeni ilan yayımlandığında sana hemen bildirim gelecek; bu sayfada da listelenecek."
-                  : ozet && ozet.kacirilan30 > 0
-                    ? `Son 30 günde bölümüne uygun ${ozet.kacirilan30} ilan yayımlandı ve son başvuruları geçti. Pro ile bir sonraki ilan çıktığı an haberin olur.`
-                    : "Yeni ilan yayımlandığında ilk senin haberin olsun: Pro'da bölümüne uygun her yeni ilanda anında bildirim alırsın."}
-              </p>
-            </div>
-            {!isPremium && (
-              <YukseltButonu
-                plan="PRO"
-                kaynak={ozet && ozet.kacirilan30 > 0 ? "kacirilan" : "bildirim"}
-                className="shrink-0 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground hover:bg-primary/90"
-              >
-                {ozet && ozet.kacirilan30 > 0 ? "Bir daha kaçırma" : "İlk ben haberdar olayım"}
-              </YukseltButonu>
-            )}
-          </div>
+          // Kacirilan varsa sis (kayip), yoksa sinyal (ilk sen ogren); Pro'da sinyal iyi halde.
+          <TesvikKarti
+            tema={!isPremium && ozet && ozet.kacirilan30 > 0 ? "sis" : "sinyal"}
+            className="mt-4"
+            iyi={isPremium}
+            baslik={`Şu an ${bolum ? `${bolum.name} için` : "bölümüne uygun"} açık ilan yok.`}
+            metin={
+              isPremium
+                ? "Yeni ilan yayımlandığında sana hemen bildirim gelecek; bu sayfada da listelenecek."
+                : ozet && ozet.kacirilan30 > 0
+                  ? `Son 30 günde bölümüne uygun ${ozet.kacirilan30} ilan yayımlandı ve son başvuruları geçti. Pro ile bir sonraki ilan çıktığı an haberin olur.`
+                  : "Yeni ilan yayımlandığında ilk senin haberin olsun: Pro'da bölümüne uygun her yeni ilanda anında bildirim alırsın."
+            }
+            aksiyon={
+              !isPremium && (
+                <YukseltButonu plan="PRO" kaynak={ozet && ozet.kacirilan30 > 0 ? "kacirilan" : "bildirim"} className="tsv-btn">
+                  {ozet && ozet.kacirilan30 > 0 ? <Eye className="h-4 w-4" aria-hidden /> : <Bell className="h-4 w-4" aria-hidden />}
+                  {ozet && ozet.kacirilan30 > 0 ? "Bir daha kaçırma" : "İlk ben haberdar olayım"}
+                </YukseltButonu>
+              )
+            }
+          />
         ) : (
           <div className="mt-4">
             {(() => {

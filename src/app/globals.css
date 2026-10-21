@@ -362,3 +362,315 @@
     mask-image: none;
   }
 }
+
+/*
+ * Pro tesvik kartlari (TesvikKarti): "su an kotu" sahnesi; ana butonun uzerine gelince (dokunmatikte kart ekrana
+ * girince bir kez) "Pro ile iyi" sahnesine doner. .on = iyi hal (Pro sahibinde hep acik). Temalar: sis (kacirilan
+ * ilan), sinyal (bildirim cagrisi), gece (seri koruma). Kart kendi genisligine gore dizilir (container query).
+ */
+.tsv {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  container-type: inline-size;
+  border-radius: 1.25rem;
+  border: 1px solid;
+  padding: 1.25rem 1.4rem;
+  transition: background-color 0.7s, border-color 0.7s;
+}
+.tsv-icerik {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+@container (min-width: 520px) {
+  .tsv-icerik {
+    max-width: 62%;
+  }
+}
+.tsv-baslik {
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.35;
+  transition: color 0.7s;
+}
+.tsv-metin {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  transition: color 0.7s;
+}
+.tsv-aksiyon {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.tsv .tsv-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  border: 1.5px solid transparent;
+  padding: 0.65rem 1.1rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  transition: background-color 0.5s, color 0.5s, border-color 0.5s, box-shadow 0.5s, transform 0.2s;
+}
+.tsv .tsv-btn:hover {
+  transform: translateY(-1px);
+}
+.tsv-dekor {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  transition: opacity 0.7s;
+}
+/* Kart icindeki kucuk surum (seri karti icinde seri koruma). */
+.tsv-kompakt { padding: 0.85rem 1rem; border-radius: 0.9rem; }
+.tsv-kompakt .tsv-icerik { gap: 0.6rem; }
+.tsv-kompakt .tsv-baslik { font-size: 0.875rem; }
+.tsv-kompakt .tsv-metin { margin-top: 0.1rem; font-size: 0.78rem; }
+.tsv-kompakt .tsv-btn { padding: 0.45rem 0.8rem; font-size: 0.8rem; }
+.tsv-kompakt .tsv-ay { right: 1.6rem; top: auto; bottom: 1.3rem; width: 1.3rem; height: 1.3rem; box-shadow: -5px 4px 0 0 #cbd5e1; }
+.tsv-kompakt .tsv-gunes { right: 1.2rem; bottom: -2rem; width: 4rem; height: 4rem; }
+.tsv-kompakt .tsv-ufuk { height: 0.5rem; }
+
+/* Sis: bulanik, gri "suresi doldu" ilanlari -> sis acilir, ilanlar netlesir. */
+.tsv-sis {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+}
+.tsv-sis.on {
+  background: #f8fbff;
+  border-color: #bfdbfe;
+}
+.tsv-sis .tsv-baslik { color: #334155; }
+.tsv-sis.on .tsv-baslik { color: #0f172a; }
+.tsv-sis .tsv-metin { color: #64748b; }
+.tsv-sis.on .tsv-metin { color: #1e3a8a; }
+.tsv-sis .tsv-btn { background: #475569; color: #fff; }
+.tsv-sis.on .tsv-btn { background: #2563eb; box-shadow: 0 8px 22px rgba(37, 99, 235, 0.35); }
+.tsv-vitrin {
+  right: 1.25rem;
+  top: 1rem;
+  bottom: 1rem;
+  width: 13rem;
+}
+.tsv-mini {
+  position: absolute;
+  width: 10.5rem;
+  box-sizing: border-box;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.75rem;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+  filter: grayscale(1) blur(1.4px);
+  opacity: 0.55;
+  transition: filter 0.7s, opacity 0.7s, transform 0.7s;
+}
+.tsv-mini:nth-child(1) { top: 0; right: 1.75rem; transform: rotate(-4deg); }
+.tsv-mini:nth-child(2) { top: calc(50% - 1.6rem); right: 0; transform: rotate(3deg); transition-delay: 0.1s; }
+.tsv-mini:nth-child(3) { top: calc(100% - 3.2rem); right: 1.4rem; transform: rotate(-2deg); transition-delay: 0.2s; }
+.tsv.on .tsv-mini { filter: none; opacity: 1; transform: none; }
+.tsv-cizgi {
+  height: 0.45rem;
+  border-radius: 0.25rem;
+  background: #cbd5e1;
+  margin-bottom: 0.4rem;
+  transition: background-color 0.7s;
+}
+.tsv-cizgi + .tsv-cizgi { width: 58%; }
+.tsv.on .tsv-cizgi { background: #bfdbfe; }
+.tsv-etk { position: relative; height: 1.25rem; }
+.tsv-etk span {
+  position: absolute;
+  left: 0;
+  top: 0;
+  white-space: nowrap;
+  border-radius: 999px;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  transition: opacity 0.5s;
+}
+.tsv-etk span:first-child { background: #fee2e2; color: #991b1b; }
+.tsv-etk span:last-child { background: #dbeafe; color: #1e40af; opacity: 0; }
+.tsv.on .tsv-etk span:first-child { opacity: 0; }
+.tsv.on .tsv-etk span:last-child { opacity: 1; }
+.tsv-perde {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(90deg, #f1f5f9 0%, rgba(241, 245, 249, 0.92) 52%, rgba(241, 245, 249, 0.35) 78%, rgba(241, 245, 249, 0.15) 100%);
+  transition: opacity 0.8s;
+}
+.tsv.on .tsv-perde { opacity: 0.35; }
+
+/* Sinyal: ustu cizili sessiz zil, tek cubuk -> zil calar, dalgalar yayilir, sinyal dolar. */
+.tsv-sinyal {
+  background: #f8fafc;
+  border: 1.5px dashed #cbd5e1;
+}
+.tsv-sinyal.on {
+  background: #eff6ff;
+  border-style: solid;
+  border-color: #93c5fd;
+}
+.tsv-sinyal .tsv-baslik { color: #475569; }
+.tsv-sinyal.on .tsv-baslik { color: #0f172a; }
+.tsv-sinyal .tsv-metin { color: #64748b; }
+.tsv-sinyal.on .tsv-metin { color: #1e3a8a; }
+.tsv-sinyal .tsv-btn { background: #fff; color: #334155; border-color: #cbd5e1; }
+.tsv-sinyal.on .tsv-btn { background: #2563eb; color: #fff; border-color: #2563eb; box-shadow: 0 8px 22px rgba(37, 99, 235, 0.35); }
+.tsv-anten {
+  right: 1.25rem;
+  top: 50%;
+  width: 10.5rem;
+  height: calc(100% - 1.5rem);
+  max-height: 9.5rem;
+  transform: translateY(-50%);
+}
+.tsv-halka {
+  fill: none;
+  stroke: #2563eb;
+  stroke-width: 1.5;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.tsv-zil { color: #94a3b8; transition: color 0.6s; }
+.tsv-zilg { transform-box: fill-box; transform-origin: 50% 8%; }
+.tsv-kesik { stroke: #94a3b8; transition: opacity 0.5s; }
+.tsv-cubuk { fill: #e2e8f0; transition: fill 0.4s; }
+.tsv-cubuk:first-of-type { fill: #94a3b8; }
+.tsv-cubuk:nth-of-type(2) { transition-delay: 0.12s; }
+.tsv-cubuk:nth-of-type(3) { transition-delay: 0.24s; }
+.tsv-cubuk:nth-of-type(4) { transition-delay: 0.36s; }
+@keyframes tsv-dalga {
+  from { transform: scale(0.55); opacity: 0.75; }
+  to { transform: scale(1.45); opacity: 0; }
+}
+@keyframes tsv-salla {
+  0%, 100% { transform: rotate(0); }
+  20% { transform: rotate(14deg); }
+  40% { transform: rotate(-12deg); }
+  60% { transform: rotate(8deg); }
+  80% { transform: rotate(-4deg); }
+}
+.tsv.on .tsv-halka { animation: tsv-dalga 1.8s ease-out infinite; }
+.tsv.on .tsv-halka:nth-of-type(2) { animation-delay: 0.6s; }
+.tsv.on .tsv-halka:nth-of-type(3) { animation-delay: 1.2s; }
+.tsv.on .tsv-zil { color: #2563eb; }
+.tsv.on .tsv-zilg { animation: tsv-salla 1.2s ease-in-out infinite; }
+.tsv.on .tsv-kesik { opacity: 0; }
+.tsv.on .tsv-cubuk { fill: #2563eb; }
+
+/* Gece: yildizli lacivert -> gunes dogar, gokyuzu aydinlanir. */
+.tsv-gece {
+  background: #1e293b;
+  border-color: #334155;
+}
+.tsv-gece::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(0deg, #fde68a 0%, #fef3c7 30%, #e0f2fe 75%, #dbeafe 100%);
+  opacity: 0;
+  transition: opacity 1s;
+}
+.tsv-gece.on { border-color: #fcd34d; }
+.tsv-gece.on::before { opacity: 1; }
+.tsv-gece .tsv-baslik { color: #f1f5f9; }
+.tsv-gece.on .tsv-baslik { color: #1c1917; }
+.tsv-gece .tsv-metin { color: #cbd5e1; }
+.tsv-gece.on .tsv-metin { color: #44403c; }
+.tsv-gece .tsv-btn { background: #334155; color: #e2e8f0; }
+.tsv-gece.on .tsv-btn { background: #f59e0b; color: #1c1917; box-shadow: 0 8px 22px rgba(245, 158, 11, 0.4); }
+.tsv-gokyuzu { inset: 0; }
+.tsv-yildiz {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  opacity: 0.75;
+  transition: opacity 0.7s;
+}
+.tsv-ay {
+  position: absolute;
+  right: 5.5rem;
+  top: 1rem;
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 50%;
+  box-shadow: -7px 5px 0 0 #cbd5e1;
+  transform: rotate(-20deg);
+  transition: opacity 0.6s, transform 0.9s;
+}
+.tsv-gunes {
+  position: absolute;
+  right: 2rem;
+  bottom: -2.6rem;
+  width: 5.2rem;
+  height: 5.2rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fbbf24 0%, #f59e0b 60%, #f97316 100%);
+  box-shadow: 0 0 0 12px rgba(251, 191, 36, 0.18), 0 0 0 26px rgba(251, 191, 36, 0.1);
+  transform: translateY(5rem);
+  transition: transform 1.1s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.tsv-ufuk {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 0.9rem;
+  background: #0f172a;
+  transition: background-color 1s;
+}
+.tsv.on .tsv-yildiz { opacity: 0; }
+.tsv.on .tsv-ay { opacity: 0; transform: rotate(-20deg) translateY(-2rem); }
+.tsv.on .tsv-gunes { transform: none; }
+.tsv.on .tsv-ufuk { background: #86efac; }
+
+/* Dar kartta sahne metnin arkasinda degil, ustunde kucuk bir serit (yaziya yazi binmesin). Temel kurallardan
+   SONRA gelmeli: @container ozgulluk eklemez, once yazilirsa asagidaki temel kurallar ezer. */
+@container (max-width: 519px) {
+  .tsv-vitrin {
+    position: relative;
+    inset: auto;
+    width: auto;
+    height: 4.2rem;
+    margin-bottom: 0.9rem;
+  }
+  .tsv-mini { width: 31%; padding: 0.45rem 0.5rem; }
+  .tsv-mini:nth-child(1) { top: 0.3rem; left: 0; right: auto; }
+  .tsv-mini:nth-child(2) { top: 0; left: 34.5%; right: auto; }
+  .tsv-mini:nth-child(3) { top: 0.4rem; left: 69%; right: auto; }
+  .tsv-perde { display: none; }
+  .tsv-anten {
+    position: relative;
+    top: auto;
+    right: auto;
+    display: block;
+    width: 5.5rem;
+    height: 4.6rem;
+    margin-bottom: 0.4rem;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tsv,
+  .tsv *,
+  .tsv::before {
+    transition: none !important;
+    animation: none !important;
+  }
+}

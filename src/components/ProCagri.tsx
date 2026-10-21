@@ -18,6 +18,7 @@ export function ProCagri({
   misafirEtiket = "Ücretsiz üye ol",
   sahipIcerik,
   className,
+  ikon,
 }: {
   kaynak: YukseltmeKaynagi;
   gerekenPlan?: "PRO" | "PRO_PLUS";
@@ -25,6 +26,8 @@ export function ProCagri({
   misafirEtiket?: string;
   sahipIcerik?: ReactNode;
   className?: string;
+  /** Etiketin onundeki ikon (tesvik kartlarinin ana butonu). */
+  ikon?: ReactNode;
 }) {
   const oturum = useOturumPlani();
   const authAc = useAuthModal();
@@ -33,6 +36,7 @@ export function ProCagri({
   if (!oturum.girisli) {
     return (
       <button type="button" onClick={() => authAc("kayit")} className={sinif}>
+        {ikon}
         {misafirEtiket}
       </button>
     );
@@ -41,6 +45,7 @@ export function ProCagri({
   if (yeterli) return <>{sahipIcerik ?? null}</>;
   return (
     <YukseltButonu plan={gerekenPlan} kaynak={kaynak} className={sinif}>
+      {ikon}
       {uyeEtiket}
     </YukseltButonu>
   );

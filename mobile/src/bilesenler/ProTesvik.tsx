@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Alert, Pressable, View, type StyleProp, type ViewStyle } from "react-native";
+import { ActivityIndicator, Alert, Pressable, View } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
-import { BellPlus, BellRing, CalendarX2, Crown, X } from "lucide-react-native";
-import { Buton, T } from "@/bilesenler/ui";
+import { Bell, BellPlus, BellRing, Eye, X, type LucideIcon } from "lucide-react-native";
+import { T } from "@/bilesenler/ui";
 import { yukseltmeAc } from "@/bilesenler/KilitliOzellik";
+import { TesvikKarti, type TesvikCagrisi } from "@/bilesenler/TesvikKarti";
 import { api } from "@/lib/api";
 import { siteLinkiAc } from "@/lib/baglanti";
 import { useOturum } from "@/lib/oturum";
@@ -21,29 +22,11 @@ export function usePlanDurumu(gereken: "PRO" | "PRO_PLUS" = "PRO"): PlanDurumu |
   return kullanici.plan === "PRO_PLUS" || (gereken === "PRO" && kullanici.plan === "PRO") ? "sahip" : "ucretsiz";
 }
 
-/** Sitedeki ProCagri: misafire uyelik, ucretsize yukseltme; ozelligin sahibine hicbir sey. */
-export function ProCagri({
-  kaynak,
-  uyeEtiket,
-  misafirEtiket = "Ücretsiz üye ol",
-  gerekenPlan = "PRO",
-  tur = "dolu",
-  style,
-}: {
-  kaynak: string;
-  uyeEtiket: string;
-  misafirEtiket?: string;
-  gerekenPlan?: "PRO" | "PRO_PLUS";
-  tur?: "dolu" | "cerceve" | "koyu";
-  style?: StyleProp<ViewStyle>;
-}) {
-  const durum = usePlanDurumu(gerekenPlan);
-  if (!durum || durum === "sahip") return null;
-  return durum === "misafir" ? (
-    <Buton etiket={misafirEtiket} tur={tur} onPress={() => router.push("/kayit")} style={style} />
-  ) : (
-    <Buton etiket={uyeEtiket} ikon={Crown} tur={tur} onPress={() => yukseltmeAc(gerekenPlan, kaynak)} style={style} />
-  );
+/** Sitedeki ProCagri, tesvik kartinin ana butonu olarak: misafire uyelik, ucretsize yukseltme; sahibine yok. */
+export function planCagrisi(durum: PlanDurumu | undefined, kaynak: string, uyeEtiket: string, ikon: LucideIcon, misafirEtiket = "Ücretsiz üye ol"): TesvikCagrisi | null {
+  if (durum === "misafir") return { etiket: misafirEtiket, ikon, onPress: () => router.push("/kayit") };
+  if (durum === "ucretsiz") return { etiket: uyeEtiket, ikon, onPress: () => yukseltmeAc("PRO", kaynak) };
+  return null;
 }
 
 const BANT_KAPALI_MS = 24 * 3_600_000;
@@ -115,24 +98,17 @@ export function SuresiDolanIlanKarti({ bolum }: { bolum?: { ad: string; slug: st
         : durum === "sahip"
           ? `${hedef[0].toLocaleUpperCase("tr") + hedef.slice(1)} yeni ilan çıkınca sana bildirim gelecek.`
           : null;
+  if (!durum) return null;
   return (
-    <View style={{ borderRadius: 20, borderWidth: 1, borderColor: "#fde68a", backgroundColor: renk.amberZemin, padding: 18, gap: 12 }}>
-      <View style={{ flexDirection: "row", gap: 10 }}>
-        <CalendarX2 size={22} color="#b45309" />
-        <View style={{ flex: 1 }}>
-          <T w="kalin" style={{ color: "#451a03", fontSize: 15 }}>
-            Bu ilanın başvuru süresi doldu.
-          </T>
-          {!!metin && <T style={{ marginTop: 2, color: "#78350f", lineHeight: 20 }}>{metin}</T>}
-        </View>
-      </View>
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-        <ProCagri kaynak="kacirilan" uyeEtiket="Bir daha kaçırma" style={{ paddingVertical: 10 }} />
-        {!!bolum && (
-          <Buton tur="cerceve" etiket="Açık ilanlara bak" onPress={() => router.push({ pathname: "/liste", params: { kapsam: "bolum", deger: bolum.slug } })} style={{ paddingVertical: 10 }} />
-        )}
-      </View>
-    </View>
+    <TesvikKarti
+      key={durum}
+      tema="sis"
+      iyi={durum === "sahip"}
+      baslik="Bu ilanın başvuru süresi doldu."
+      metin={metin}
+      cagri={planCagrisi(durum, "kacirilan", "Bir daha kaçırma", Eye)}
+      ikincil={bolum ? { etiket: "Açık ilanlara bak", onPress: () => router.push({ pathname: "/liste", params: { kapsam: "bolum", deger: bolum.slug } }) } : null}
+    />
   );
 }
 
@@ -222,56 +198,46 @@ export function IlanTakipDugmesi({ ilanId }: { ilanId: string }) {
 export function KurumTakipKarti({ kurum }: { kurum: string }) {
   const yol = `/api/kurum-takip?kurum=${encodeURIComponent(kurum)}`;
   const { d, isleniyor, degistir } = useTakip(yol, (sil) => api("/api/kurum-takip", { method: sil ? "DELETE" : "POST", govde: { kurum } }));
+  if (!d) return null;
+  const takipEt = () => degistir((pro) => Alert.alert(`${kurum} takipte.`, pro ? "İlanı yayımlanınca hemen haber vereceğiz." : "Bildirim Pro üyelere gider."));
+  // Sinyal temasi: takipte + Pro = iyi hal; takipte + ucretsiz = ana cagri "Bildirimi ac".
   return (
-    <View style={{ borderRadius: 16, borderWidth: 1, borderColor: "rgba(36,102,195,0.15)", backgroundColor: "#fff", padding: 16, gap: 12 }}>
-      <View style={{ flexDirection: "row", gap: 10 }}>
-        <BellRing size={20} color={renk.birincil} style={{ marginTop: 1 }} />
-        <View style={{ flex: 1 }}>
-          <T w="yariKalin">{kurum} ilanı yayımlanınca ilk sen öğren</T>
-          <T style={{ marginTop: 2, color: renk.soluk, lineHeight: 20 }}>
-            {d?.takipte && !d.pro ? (
-              <>
-                Takiptesin. İlan yayımlandığında bildirim Pro&apos;da gelir.{" "}
-                <T w="yariKalin" style={{ color: renk.birincil, textDecorationLine: "underline" }} onPress={() => yukseltmeAc("PRO", "duyuru-takip")}>
-                  Bildirimi aç
-                </T>
-              </>
-            ) : d?.takipte ? (
-              "Takiptesin: ilan yayımlandığında sana hemen bildirim gelecek."
-            ) : (
-              "Duyurular ilandan önce çıkar. Kurumu takip et, ilan yayımlanınca haber verelim."
-            )}
-          </T>
-        </View>
-      </View>
-      <TakipButonu
-        takipte={!!d?.takipte}
-        isleniyor={isleniyor}
-        hazir={!!d}
-        etiket={["Kurumu takip et", "Takibi bırak"]}
-        onPress={() => degistir((pro) => Alert.alert(`${kurum} takipte.`, pro ? "İlanı yayımlanınca hemen haber vereceğiz." : "Bildirim Pro üyelere gider."))}
-      />
-    </View>
+    <TesvikKarti
+      key={`${d.takipte}-${d.pro}`}
+      tema="sinyal"
+      iyi={d.takipte && d.pro}
+      baslik={`${kurum} ilanı yayımlanınca ilk sen öğren`}
+      metin={
+        d.takipte && !d.pro
+          ? "Takiptesin. İlan yayımlandığında bildirim Pro'da gelir."
+          : d.takipte
+            ? "Takiptesin: ilan yayımlandığında sana hemen bildirim gelecek."
+            : "Duyurular ilandan önce çıkar. Kurumu takip et, ilan yayımlanınca haber verelim."
+      }
+      cagri={
+        !d.takipte
+          ? { etiket: isleniyor ? "Kaydediliyor..." : "Kurumu takip et", ikon: BellPlus, onPress: takipEt }
+          : !d.pro
+            ? { etiket: "Bildirimi aç", ikon: Bell, onPress: () => yukseltmeAc("PRO", "duyuru-takip") }
+            : null
+      }
+      ikincil={d.takipte ? { etiket: "Takibi bırak", onPress: takipEt } : null}
+    />
   );
 }
 
-/** Sitedeki BolumIstatistikSeridi: gercek istatistik + "yeni ilanda haber ver" cagrisi. */
+/** Sitedeki BolumIstatistikSeridi: gercek istatistik + "yeni ilanda haber ver" cagrisi. Sinyal temasi. */
 export function BolumIstatistikSeridi({ bolumAdi, son30, ortalamaGun }: { bolumAdi: string; son30: number; ortalamaGun: number | null }) {
+  const durum = usePlanDurumu();
+  if (!durum) return null;
   return (
-    <View style={{ borderRadius: 16, borderWidth: 1, borderColor: "rgba(36,102,195,0.15)", backgroundColor: renk.birincilZemin, padding: 16, gap: 12 }}>
-      <View style={{ flexDirection: "row", gap: 8 }}>
-        <BellRing size={16} color={renk.birincil} style={{ marginTop: 2 }} />
-        <T style={{ flex: 1, color: "#334155", lineHeight: 20 }}>
-          {bolumAdi} için son 30 günde <T w="kalin">{son30} ilan</T> yayımlandı
-          {ortalamaGun !== null && (
-            <>
-              ; ilanlar ortalama <T w="kalin">{ortalamaGun} gün</T> açık kalıyor
-            </>
-          )}
-          . Yeni ilanı ilk günden yakala.
-        </T>
-      </View>
-      <ProCagri kaynak="bildirim" uyeEtiket="Yeni ilanda haber ver" style={{ paddingVertical: 10, alignSelf: "flex-start" }} />
-    </View>
+    <TesvikKarti
+      key={durum}
+      tema="sinyal"
+      iyi={durum === "sahip"}
+      baslik={`${bolumAdi} için son 30 günde ${son30} ilan yayımlandı`}
+      metin={`${ortalamaGun !== null ? `İlanlar ortalama ${ortalamaGun} gün açık kalıyor. ` : ""}Yeni ilanı ilk günden yakala.`}
+      cagri={planCagrisi(durum, "bildirim", "Yeni ilanda haber ver", Bell)}
+    />
   );
 }

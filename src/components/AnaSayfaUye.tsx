@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { CalendarCheck, Flame, Gift, Sparkles } from "lucide-react";
+import { CalendarCheck, Flame, Gift, Sparkles, Sun } from "lucide-react";
+import { TesvikKarti } from "@/components/TesvikKarti";
 import { useAuthModal } from "@/components/AuthModal";
 import { ProfilKarti } from "@/components/ProfilKarti";
 import { YukseltButonu } from "@/components/YukseltmePenceresi";
@@ -44,35 +45,25 @@ type SeriBilgisi = { gun: number; bugunCozuldu: boolean; enIyi: number; dondurma
 export function SeriKoruma({ seri }: { seri: SeriBilgisi | null | undefined }) {
   if (!seri || seri.bugunCozuldu) return null;
   const pro = seri.dondurmaKalan !== null;
-  if (seri.gun > 0) {
-    return (
-      <p className="flex flex-wrap items-center gap-x-2 rounded-xl bg-white/10 px-3 py-2 text-xs text-slate-200">
-        {pro ? (
-          seri.dondurmaKalan ? (
-            <>Seri koruması açık: bu ay {seri.dondurmaKalan} dondurma hakkın var; bir gün kaçırsan da serin sürer.</>
-          ) : (
-            <>Bu ayki dondurma hakların bitti; serini korumak için bugün çöz.</>
-          )
-        ) : (
-          <>
-            Bugün çözmezsen serin bozulur.
-            <YukseltButonu plan="PRO" kaynak="seri" className="font-semibold text-orange-300 underline">
-              Pro&apos;da seri korunur
-            </YukseltButonu>
-          </>
-        )}
-      </p>
+  // Gece temasi: koruma yoksa gece, Pro'da hak varsa gun dogmus (iyi) hal.
+  const cagri = (etiket: string) => (
+    <YukseltButonu plan="PRO" kaynak="seri" className="tsv-btn">
+      <Sun className="h-4 w-4" aria-hidden />
+      {etiket}
+    </YukseltButonu>
+  );
+  if (seri.gun > 0 && pro) {
+    return seri.dondurmaKalan ? (
+      <TesvikKarti tema="gece" className="tsv-kompakt" iyi baslik="Seri koruması açık" metin={`Bu ay ${seri.dondurmaKalan} dondurma hakkın var; bir gün kaçırsan da serin sürer.`} />
+    ) : (
+      <TesvikKarti tema="gece" className="tsv-kompakt" baslik="Bu ayki dondurma hakların bitti" metin="Serini korumak için bugün çöz." />
     );
   }
+  if (seri.gun > 0) {
+    return <TesvikKarti tema="gece" className="tsv-kompakt" baslik="Bugün çözmezsen serin bozulur." metin="Pro'da ayda 2 seri dondurma hakkın olur." aksiyon={cagri("Pro'da seri korunur")} />;
+  }
   if (!pro && seri.enIyi >= 2) {
-    return (
-      <p className="flex flex-wrap items-center gap-x-2 rounded-xl bg-white/10 px-3 py-2 text-xs text-slate-200">
-        {seri.enIyi} günlük serin bozuldu. Pro&apos;da ayda 2 seri dondurma hakkın olur.
-        <YukseltButonu plan="PRO" kaynak="seri" className="font-semibold text-orange-300 underline">
-          Pro&apos;yu incele
-        </YukseltButonu>
-      </p>
-    );
+    return <TesvikKarti tema="gece" className="tsv-kompakt" baslik={`${seri.enIyi} günlük serin bozuldu.`} metin="Pro'da ayda 2 seri dondurma hakkın olur." aksiyon={cagri("Pro'yu incele")} />;
   }
   return null;
 }

@@ -2,7 +2,8 @@ import { useState, type ReactNode } from "react";
 import { Alert, Pressable, Share, StyleSheet, View } from "react-native";
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import { CalendarCheck, Flame, Gift, Sparkles } from "lucide-react-native";
+import { CalendarCheck, Flame, Gift, Sparkles, Sun } from "lucide-react-native";
+import { TesvikKarti } from "@/bilesenler/TesvikKarti";
 import { Kart, T } from "@/bilesenler/ui";
 import { yukseltmeAc } from "@/bilesenler/KilitliOzellik";
 import { SITE, api } from "@/lib/api";
@@ -161,29 +162,18 @@ function Sayac({ deger, etiket, zemin, r, onPress, yatay }: { deger: number; eti
 export function SeriKoruma({ seri }: { seri: SeriBilgisi | null | undefined }) {
   if (!seri || seri.bugunCozuldu) return null;
   const pro = seri.dondurmaKalan !== null;
-  let metin: string;
-  let cagri: string | null = null;
-  if (seri.gun > 0) {
-    if (pro) metin = seri.dondurmaKalan ? `Seri koruması açık: bu ay ${seri.dondurmaKalan} dondurma hakkın var; bir gün kaçırsan da serin sürer.` : "Bu ayki dondurma hakların bitti; serini korumak için bugün çöz.";
-    else [metin, cagri] = ["Bugün çözmezsen serin bozulur.", "Pro'da seri korunur"];
-  } else if (!pro && seri.enIyi >= 2) {
-    [metin, cagri] = [`${seri.enIyi} günlük serin bozuldu. Pro'da ayda 2 seri dondurma hakkın olur.`, "Pro'yu incele"];
-  } else return null;
-  return (
-    <View style={{ borderRadius: 12, backgroundColor: "rgba(255,255,255,0.1)", paddingHorizontal: 12, paddingVertical: 8 }}>
-      <T style={{ fontSize: 12, color: "#e2e8f0", lineHeight: 17 }}>
-        {metin}
-        {!!cagri && (
-          <>
-            {" "}
-            <T w="yariKalin" style={{ fontSize: 12, color: "#fdba74", textDecorationLine: "underline" }} onPress={() => yukseltmeAc("PRO", "seri")}>
-              {cagri}
-            </T>
-          </>
-        )}
-      </T>
-    </View>
-  );
+  // Gece temasi: koruma yoksa gece, Pro'da hak varsa gun dogmus (iyi) hal.
+  const cagri = (etiket: string) => ({ etiket, ikon: Sun, onPress: () => yukseltmeAc("PRO", "seri") });
+  if (seri.gun > 0 && pro) {
+    return seri.dondurmaKalan ? (
+      <TesvikKarti tema="gece" kompakt iyi baslik="Seri koruması açık" metin={`Bu ay ${seri.dondurmaKalan} dondurma hakkın var; bir gün kaçırsan da serin sürer.`} />
+    ) : (
+      <TesvikKarti tema="gece" kompakt baslik="Bu ayki dondurma hakların bitti" metin="Serini korumak için bugün çöz." />
+    );
+  }
+  if (seri.gun > 0) return <TesvikKarti tema="gece" kompakt baslik="Bugün çözmezsen serin bozulur." metin="Pro'da ayda 2 seri dondurma hakkın olur." cagri={cagri("Pro'da seri korunur")} />;
+  if (!pro && seri.enIyi >= 2) return <TesvikKarti tema="gece" kompakt baslik={`${seri.enIyi} günlük serin bozuldu.`} metin="Pro'da ayda 2 seri dondurma hakkın olur." cagri={cagri("Pro'yu incele")} />;
+  return null;
 }
 
 /** Sitedeki GunlukSerit: gunun sorulari (seri), bugun senin icin, KPSS denemesi. Telefonda alt alta. */

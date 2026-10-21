@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { FlatList, RefreshControl, View } from "react-native";
 import { router } from "expo-router";
-import { Building2, Hourglass, Lock, Sparkles } from "lucide-react-native";
-import { Bos, BolumBasligi, Buton, Cip, HataKutusu, SayfaBasligi, T, Yukleniyor } from "@/bilesenler/ui";
+import { Bell, Building2, Eye, Hourglass, Lock, Sparkles } from "lucide-react-native";
+import { Bos, BolumBasligi, Cip, HataKutusu, SayfaBasligi, Yukleniyor } from "@/bilesenler/ui";
 import { IlanKarti } from "@/bilesenler/IlanKarti";
 import { HaberKarti } from "@/bilesenler/HaberKarti";
 import { FiltreCubugu, type Filtre } from "@/bilesenler/FiltreCubugu";
 import { yukseltmeAc } from "@/bilesenler/KilitliOzellik";
-import { BolumIstatistikSeridi, ProCagri, usePlanDurumu } from "@/bilesenler/ProTesvik";
+import { BolumIstatistikSeridi, planCagrisi, usePlanDurumu } from "@/bilesenler/ProTesvik";
+import { TesvikKarti } from "@/bilesenler/TesvikKarti";
 import { useVeri } from "@/lib/api";
 import { DUZEY_ADI, SEVIYE_ENUM } from "@/lib/bicim";
 import { renk } from "@/lib/tema";
@@ -19,27 +20,29 @@ import type { IlanListesiVeri } from "@/lib/tipler";
  */
 function BolumBosDurum({ b, planDurumu }: { b: NonNullable<IlanListesiVeri["bolum"]>; planDurumu: ReturnType<typeof usePlanDurumu> }) {
   const duzeyAdi = b.seviyeSlug ? DUZEY_ADI[SEVIYE_ENUM[b.seviyeSlug]] : undefined;
+  if (!planDurumu) return null;
+  const kacirilan = planDurumu !== "sahip" && b.son30 > 0;
+  // Kacirilan varsa sis (kayip), yoksa sinyal (ilk sen ogren); Pro'da sinyal iyi halde.
   return (
-    <View style={{ borderWidth: 1, borderStyle: "dashed", borderColor: "rgba(36,102,195,0.25)", backgroundColor: renk.birincilZemin, borderRadius: 16, padding: 22, gap: 8 }}>
-      <T w="yariKalin" style={{ textAlign: "center" }}>
-        Şu an {b.ad} şartı arayan aktif bir ilan yok.
-      </T>
-      <T style={{ textAlign: "center", color: renk.soluk, lineHeight: 20 }}>
-        {b.son30 > 0 ? `Son 30 günde bu bölüme ${b.son30} ilan yayımlandı ve süreleri doldu${b.ortalamaGun !== null ? `; ilanlar ortalama ${b.ortalamaGun} gün açık kalıyor` : ""}. ` : ""}
-        {planDurumu === "misafir"
+    <TesvikKarti
+      key={planDurumu}
+      tema={kacirilan ? "sis" : "sinyal"}
+      iyi={planDurumu === "sahip"}
+      baslik={`Şu an ${b.ad} şartı arayan aktif bir ilan yok.`}
+      metin={`${b.son30 > 0 ? `Son 30 günde bu bölüme ${b.son30} ilan yayımlandı ve süreleri doldu${b.ortalamaGun !== null ? `; ilanlar ortalama ${b.ortalamaGun} gün açık kalıyor` : ""}. ` : ""}${
+        planDurumu === "misafir"
           ? "Üye ol, bölümünü seç: yeni ilan çıkınca ilk sen öğren."
           : planDurumu === "ucretsiz"
             ? "Yeni ilan yayımlandığında ilk senin haberin olsun: Pro'da bölümüne uygun her yeni ilanda anında bildirim."
-            : "Bu bölüm profilindeyse yeni ilan çıkınca sana bildirim gelecek."}{" "}
-        Bölüm şartı aramayan ilanlara da başvurabilirsin.
-      </T>
-      <View style={{ marginTop: 8, gap: 8 }}>
-        {!!b.seviyeSlug && !!duzeyAdi && (
-          <Buton etiket={`${duzeyAdi} mezunlarının tüm ilanları`} onPress={() => router.push({ pathname: "/liste", params: { kapsam: "seviye", deger: b.seviyeSlug! } })} />
-        )}
-        <ProCagri tur="cerceve" kaynak={b.son30 > 0 ? "kacirilan" : "bildirim"} uyeEtiket="İlk ben haberdar olayım" />
-      </View>
-    </View>
+            : "Bu bölüm profilindeyse yeni ilan çıkınca sana bildirim gelecek."
+      } Bölüm şartı aramayan ilanlara da başvurabilirsin.`}
+      cagri={planCagrisi(planDurumu, kacirilan ? "kacirilan" : "bildirim", "İlk ben haberdar olayım", kacirilan ? Eye : Bell)}
+      ikincil={
+        b.seviyeSlug && duzeyAdi
+          ? { etiket: `${duzeyAdi} mezunlarının tüm ilanları`, onPress: () => router.push({ pathname: "/liste", params: { kapsam: "seviye", deger: b.seviyeSlug! } }) }
+          : null
+      }
+    />
   );
 }
 
