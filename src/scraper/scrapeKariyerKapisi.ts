@@ -10,6 +10,7 @@ import {
 import { classifyRequirementText, detectInstitutionType, stripBbCode } from "./parseRequirements";
 import { kkEkMetni } from "./ilanEkleri";
 import { notifyUsersForMatchedPosting } from "@/lib/notifications";
+import { kurumTakipBildir } from "@/lib/kurumTakip";
 import {
   buildCrossSourceDuplicateIndex,
   removeCrossSourceDuplicate,
@@ -151,6 +152,8 @@ async function upsertPosting(
       departments: departments.map((d) => ({ departmentId: d.id, slug: d.slug })),
     });
   }
+  // Kurum takibi: bolum eslesmesinden bagimsiz; yeni ilanda kurumu takip eden Pro uyelere.
+  if (!existing && posting.isActive) await kurumTakipBildir(posting);
 }
 
 /**

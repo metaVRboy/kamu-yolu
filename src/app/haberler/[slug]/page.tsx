@@ -1,3 +1,4 @@
+import { KurumTakipKarti } from "@/components/ProTesvikleri";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -200,6 +201,9 @@ export default async function HaberDetayPage({
             <p className="text-sm font-medium text-slate-500">Haber Özeti</p>
             <p className="mt-1 text-base leading-relaxed text-slate-800">{haber.ozet}</p>
           </div>
+
+          {/* Duyuru ilandan once cikar: kurumu takip et, ilan yayimlaninca haber ver (bildirim Pro). */}
+          {haber.kurumAdi && <KurumTakipKarti kurum={haber.kurumAdi} />}
 
           <HaberGorsel
             src={haber.gorselUrl}

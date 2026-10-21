@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { kisiselOzet } from "@/lib/kisiselOzet";
 import { KAYIT_HEDIYE_GUN } from "@/lib/proHediye";
+import { prisma } from "@/lib/prisma";
+import { getSiteAyarlari, kpssKalanGun } from "@/lib/siteAyarlari";
+import { bugununTarihi } from "@/lib/kpssDeneme";
 
 export type BantMesaji = {
   /** Kapatma anahtari: ayni tur mesaj kapatilinca 24 saat gorunmez, farkli tur gelirse gorunur. */
@@ -33,9 +36,40 @@ export async function GET() {
   }
   if (user.abonelikPlani === "PRO_PLUS") return yanit(null);
 
+  // KPSS'ye 90/60/30 gun kala (birer haftalik pencere) ve son hafta: eksik konu analizi Pro+'da.
+  const kpssGun = kpssKalanGun(await getSiteAyarlari(), bugununTarihi());
+  const kpssEsigi = kpssGun === null || kpssGun < 1 ? null : kpssGun <= 7 ? 7 : [30, 60, 90].find((e) => kpssGun <= e && kpssGun > e - 7);
+  const kpssMesaji: BantMesaji = kpssEsigi
+    ? {
+        tur: `kpss-${kpssEsigi}`,
+        once: "KPSS'ye ",
+        vurgu: `${kpssGun} gün`,
+        sonra: " kaldı. Eksik konularını Pro+ ile konu konu gör, önce onlara çalış.",
+        cta: { etiket: "Pro+'yı incele", eylem: "yukselt", plan: "PRO_PLUS" },
+      }
+    : null;
+
   if (user.abonelikPlani === "PRO") {
     const kalan = user.abonelikBitis ? Math.ceil((user.abonelikBitis.getTime() - Date.now()) / GUN_MS) : null;
     if (kalan !== null && kalan <= 7) {
+      // Hediye (deneme) Pro bitiyorsa: o sureden gercek kullanim ozeti. Sayilar 0 ise duz hatirlatma.
+      const hediye = kalan <= 2 ? await prisma.proHediye.findFirst({ where: { userId: user.id }, orderBy: { olusturma: "desc" }, select: { olusturma: true } }) : null;
+      if (hediye) {
+        const [ilanBildirimi, deneme] = await Promise.all([
+          prisma.bildirim.count({ where: { userId: user.id, tur: { in: ["ILAN_ESLESME", "KURUM_ILAN"] }, createdAt: { gte: hediye.olusturma } } }),
+          prisma.denemeKatilim.count({ where: { userId: user.id, bitisZamani: { gte: hediye.olusturma } } }),
+        ]);
+        const ozet = [ilanBildirimi > 0 && `${ilanBildirimi} ilan bildirimi aldın`, deneme > 0 && `${deneme} deneme raporu açtın`].filter(Boolean).join(", ");
+        if (ozet) {
+          return yanit({
+            tur: "pro-bitiyor-ozet",
+            once: `Pro'nun bitmesine ${kalan} gün kaldı. Bu sürede `,
+            vurgu: ozet,
+            sonra: ". Bitince bunlar kapanır.",
+            cta: { etiket: "Pro'da kal", eylem: "yukselt", plan: "PRO" },
+          });
+        }
+      }
       return yanit({
         tur: "pro-bitiyor",
         once: "Pro üyeliğinin bitmesine ",
@@ -44,6 +78,7 @@ export async function GET() {
         cta: { etiket: "Pro'da kal", eylem: "yukselt", plan: "PRO" },
       });
     }
+    if (kpssMesaji) return yanit(kpssMesaji);
     return yanit({
       tur: "pro-plus",
       once: "Pro+ ile ",
@@ -53,6 +88,7 @@ export async function GET() {
     });
   }
 
+  if (kpssMesaji) return yanit(kpssMesaji);
   if (!user.departmentId) {
     return yanit({
       tur: "bolum-sec",

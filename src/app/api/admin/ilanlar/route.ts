@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { adminApi } from "@/lib/admin";
 import { ilanFormSchema, ilanSayfalariniYenile, sonGun } from "@/lib/adminIlan";
 import { notifyUsersForMatchedPosting } from "@/lib/notifications";
+import { kurumTakipBildir } from "@/lib/kurumTakip";
 import { islemKaydet } from "@/lib/islemKaydi";
 
 const bodySchema = ilanFormSchema.extend({ sourceUrl: z.url({ protocol: /^https?$/, error: "Geçerli bir ilan bağlantısı gir." }).trim().max(500) });
@@ -33,6 +34,7 @@ export async function POST(req: NextRequest) {
   if (bolumler.length > 0) {
     await notifyUsersForMatchedPosting({ postingTitle: posting.title, departments: bolumler.map((b) => ({ departmentId: b.id, slug: b.slug })) });
   }
+  await kurumTakipBildir(posting);
   ilanSayfalariniYenile();
   await islemKaydet(admin, "ilan.ekle", posting.title, `/admin/ilanlar/${posting.id}`);
   return NextResponse.json({ id: posting.id });

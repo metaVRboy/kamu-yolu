@@ -54,8 +54,8 @@ const ISLEMELER: { veri: string; amac: string; sebep: string; sure: string }[] =
     sure: "Hesap açık kaldığı sürece",
   },
   {
-    veri: "Günün soruları cevapları ve serisi, takip ettiğiniz ilanlar; bunlardan hesaplanan rozetler",
-    amac: "Günlük çalışma takibi, seri ödülü (Pro günü), takip ettiğiniz ilanlar için son başvuru hatırlatması",
+    veri: "Günün soruları cevapları, serisi ve seri dondurma günleri; takip ettiğiniz ilanlar ve kurumlar; bunlardan hesaplanan rozetler",
+    amac: "Günlük çalışma takibi, seri ödülü (Pro günü), takip ettiğiniz ilanlar için son başvuru hatırlatması, takip ettiğiniz kurumun yeni ilanının bildirimi",
     sebep: "Sözleşmenin ifası (m.5/2-c)",
     sure: "Hesap açık kaldığı sürece; takip, ilanı takipten çıkarınca silinir",
   },

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { CalendarCheck, Flame, Gift, Sparkles } from "lucide-react";
 import { useAuthModal } from "@/components/AuthModal";
 import { ProfilKarti } from "@/components/ProfilKarti";
+import { YukseltButonu } from "@/components/YukseltmePenceresi";
 import { toast } from "@/components/ui/toast";
 import { useUyeOzeti } from "@/lib/uyeOzetiIstemci";
 import { cn } from "@/lib/utils";
@@ -32,6 +33,48 @@ export function UyeProfilKarti() {
       }}
     />
   );
+}
+
+type SeriBilgisi = { gun: number; bugunCozuldu: boolean; enIyi: number; dondurmaKalan: number | null };
+
+/**
+ * Seri dondurma (Pro ayricaligi) satiri: seri bozulmak uzereyken Pro'ya kalan hak, ucretsize uyari; seri bozulduysa
+ * ucretsize "Pro'da ayda 2 dondurma". Koyu zemin icin (seri karti ve gunun sorulari ozeti).
+ */
+export function SeriKoruma({ seri }: { seri: SeriBilgisi | null | undefined }) {
+  if (!seri || seri.bugunCozuldu) return null;
+  const pro = seri.dondurmaKalan !== null;
+  if (seri.gun > 0) {
+    return (
+      <p className="flex flex-wrap items-center gap-x-2 rounded-xl bg-white/10 px-3 py-2 text-xs text-slate-200">
+        {pro ? (
+          seri.dondurmaKalan ? (
+            <>Seri koruması açık: bu ay {seri.dondurmaKalan} dondurma hakkın var; bir gün kaçırsan da serin sürer.</>
+          ) : (
+            <>Bu ayki dondurma hakların bitti; serini korumak için bugün çöz.</>
+          )
+        ) : (
+          <>
+            Bugün çözmezsen serin bozulur.
+            <YukseltButonu plan="PRO" kaynak="seri" className="font-semibold text-orange-300 underline">
+              Pro&apos;da seri korunur
+            </YukseltButonu>
+          </>
+        )}
+      </p>
+    );
+  }
+  if (!pro && seri.enIyi >= 2) {
+    return (
+      <p className="flex flex-wrap items-center gap-x-2 rounded-xl bg-white/10 px-3 py-2 text-xs text-slate-200">
+        {seri.enIyi} günlük serin bozuldu. Pro&apos;da ayda 2 seri dondurma hakkın olur.
+        <YukseltButonu plan="PRO" kaynak="seri" className="font-semibold text-orange-300 underline">
+          Pro&apos;yu incele
+        </YukseltButonu>
+      </p>
+    );
+  }
+  return null;
 }
 
 /** Arama kutusunun altindaki uc kart: gunun sorulari (seri), bugun senin icin, KPSS denemesi. Misafire genel hali. */
@@ -66,6 +109,7 @@ export function GunlukSerit() {
               ? `Bugünü tamamladın. ${hediyeyeKalan === 0 ? "1 gün Pro hediyeni kazandın!" : `Pro hediyeye ${hediyeyeKalan} gün kaldı.`}`
               : `Türkçe, Matematik, Tarih, Coğrafya, Vatandaşlık. Pro hediyeye ${hediyeyeKalan} gün kaldı.`}
         </p>
+        <SeriKoruma seri={seri} />
         <Link href="/gunun-sorulari" className="mt-auto rounded-xl bg-orange-400 py-3 text-center font-bold text-slate-900 transition-colors hover:bg-orange-300">
           {seri?.bugunCozuldu ? "Sonuçlarını gör" : seri && seri.gun > 0 ? "Devam et" : "Çözmeye başla"}
         </Link>

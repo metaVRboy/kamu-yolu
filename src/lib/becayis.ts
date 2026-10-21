@@ -55,6 +55,29 @@ export async function getAktifTalepler(filters?: { il?: string; meslek?: string 
   return talepler.map((t) => ({ ...t, user: { adSoyad: kisaAd(t.user.adSoyad) } }));
 }
 
+const meslekAnahtari = (m: string) => m.toLocaleLowerCase("tr").replace(/\s+/g, " ").trim();
+
+/**
+ * Karsilikli eslesme (becayisin asil degeri): ayni meslek, karsi taraf benim ilime gitmek istiyor ve ben onun iline.
+ * Talep id -> eslesen aktif talepler (ad kisaltilmis).
+ */
+export async function karsilikliEslesmeler(talepler: { id: string; meslek: string; mevcutIl: string; istenenIller: string[]; isActive: boolean }[], userId: string) {
+  const aktif = talepler.filter((t) => t.isActive);
+  if (!aktif.length) return new Map<string, { id: string; meslek: string; mevcutIl: string; mevcutIlce: string | null; adSoyad: string }[]>();
+  const adaylar = await prisma.becayisTalep.findMany({
+    where: { isActive: true, userId: { not: userId }, mevcutIl: { in: aktif.flatMap((t) => t.istenenIller) } },
+    select: { id: true, meslek: true, mevcutIl: true, mevcutIlce: true, istenenIller: true, user: { select: { adSoyad: true } } },
+  });
+  return new Map(
+    aktif.map((t) => [
+      t.id,
+      adaylar
+        .filter((a) => meslekAnahtari(a.meslek) === meslekAnahtari(t.meslek) && t.istenenIller.includes(a.mevcutIl) && a.istenenIller.includes(t.mevcutIl))
+        .map((a) => ({ id: a.id, meslek: a.meslek, mevcutIl: a.mevcutIl, mevcutIlce: a.mevcutIlce, adSoyad: kisaAd(a.user.adSoyad) })),
+    ]),
+  );
+}
+
 /**
  * Ilgi sayaci: sahibi disindaki her detay goruntulemesi bir artirir (site ve uygulama). Yanit beklemesin diye
  * yanittan sonra yazilir; donus = gosterilecek sayi (bu goruntuleme dahil).

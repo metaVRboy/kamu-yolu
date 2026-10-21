@@ -8,6 +8,7 @@ import {
 import { classifyRequirementText, detectInstitutionType } from "./parseRequirements";
 import { memurlarEkMetni } from "./ilanEkleri";
 import { notifyUsersForMatchedPosting } from "@/lib/notifications";
+import { kurumTakipBildir } from "@/lib/kurumTakip";
 import { buildCrossSourceDuplicateIndex, removeCrossSourceDuplicate, expireOverduePostings } from "@/lib/postingDedupe";
 
 export const SOURCE_NAME = "Memurlar.Net";
@@ -179,6 +180,8 @@ export async function scrapeMemurlarNet(prisma: PrismaClient): Promise<ScrapeSum
             departments: departments.map((d) => ({ departmentId: d.id, slug: d.slug })),
           });
         }
+        // Kurum takibi: bolum eslesmesinden bagimsiz; yeni ilanda kurumu takip eden Pro uyelere.
+        if (!existing && posting.isActive) await kurumTakipBildir(posting);
 
         await sleep(250);
       }

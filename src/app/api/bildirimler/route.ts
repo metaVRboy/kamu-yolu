@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { deleteTumBildirimler, getBanaOzelBildirimler, getOkunmamisBildirimSayisi, kullaniciDuyurulari } from "@/lib/notifications";
 import { proAktifMi } from "@/lib/sms";
+import { bolumHaftalikYeni } from "@/lib/kisiselOzet";
 
 export async function GET() {
   const user = await getCurrentUser();
@@ -9,10 +10,12 @@ export async function GET() {
   // admin mesajlari ve destek yanitlari gelir, digerlerinin yerine bulanik ornek gosterilir.
   const pro = !!user && proAktifMi(user);
 
-  const [duyurular, banaOzel, bildirimOkunmamis] = await Promise.all([
+  const [duyurular, banaOzel, bildirimOkunmamis, kacanEslesme] = await Promise.all([
     kullaniciDuyurulari(user),
     user ? getBanaOzelBildirimler(user.id, 30, !pro) : Promise.resolve([]),
     user ? getOkunmamisBildirimSayisi(user.id, !pro) : Promise.resolve(0),
+    // Ucretsiz uyenin zilinde: bu hafta bolumune eslesen ilan sayisi (Pro'da her biri zile duserdi).
+    user && !pro && user.departmentId ? bolumHaftalikYeni(user.departmentId) : Promise.resolve(0),
   ]);
   // Zili en son actigindan sonra yayinlanan duyurular okunmamis sayilir (kirmizi nokta).
   const sonGorulme = user ? (user.duyuruGorulme ?? user.createdAt).getTime() : Infinity;
@@ -24,6 +27,7 @@ export async function GET() {
     okunmamisSayisi: bildirimOkunmamis + duyuruOkunmamis,
     plan: user?.abonelikPlani ?? null,
     banaOzelKilitli: !!user && !pro,
+    kacanEslesme,
   });
 }
 

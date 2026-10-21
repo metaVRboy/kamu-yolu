@@ -37,6 +37,7 @@ import { GeriDonLinki } from "@/components/GeriDonLinki";
 import { IlanGorsel } from "@/components/IlanGorsel";
 import { IlanUygunluk } from "@/components/IlanUygunluk";
 import { IlanTakipButonu } from "@/components/IlanTakipButonu";
+import { SuresiDolanIlanCagrisi } from "@/components/ProTesvikleri";
 import { IlanVitrinKarti } from "@/components/IlanVitrinKarti";
 import { HaberPaylas } from "@/components/HaberPaylas";
 import { cn } from "@/lib/utils";
@@ -207,6 +208,9 @@ export default async function IlanDetayPage({
         </div>
       </header>
 
+      {/* Suresi dolmus ilan (cogu Google'dan gelir): "bir dahakini ilk sen ogren" (uyelik / Pro). */}
+      {((kalan !== null && kalan < 0) || !posting.isActive) && <SuresiDolanIlanCagrisi bolumAdi={tekBolum?.name} bolumSlug={tekBolum?.slug} />}
+
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="space-y-6">
           <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
@@ -314,7 +318,7 @@ export default async function IlanDetayPage({
               <span className={cn("mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-bold", kalanStil.zemin, kalanStil.renk)}>{kalanStil.metin}</span>
             </div>
             {resmiIlanButonu}
-            {posting.applicationEnd && <IlanTakipButonu ilanId={posting.id} />}
+            {kalan !== null && kalan >= 0 && <IlanTakipButonu ilanId={posting.id} />}
             {posting.applicationEnd && (
               <a href={`/api/ilan/${posting.id}/takvim`} className={buttonVariants({ variant: "outline", className: "w-full rounded-full" })}>
                 <CalendarPlus className="h-4 w-4" />
@@ -331,7 +335,7 @@ export default async function IlanDetayPage({
 
       {/* Mobil: paylasim ve takvim icerigin sonunda, basvuru butonu altta sabit. */}
       <div className="mt-6 space-y-3 lg:hidden">
-        {posting.applicationEnd && <IlanTakipButonu ilanId={posting.id} />}
+        {kalan !== null && kalan >= 0 && <IlanTakipButonu ilanId={posting.id} />}
         {posting.applicationEnd && (
           <a href={`/api/ilan/${posting.id}/takvim`} className={buttonVariants({ variant: "outline", className: "w-full rounded-full" })}>
             <CalendarPlus className="h-4 w-4" />

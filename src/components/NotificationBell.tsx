@@ -33,7 +33,7 @@ export function NotificationBell({ isLoggedIn }: { isLoggedIn: boolean }) {
   const [banaOzel, setBanaOzel] = useState<Bildirim[]>([]);
   const [okunmamisSayisi, setOkunmamisSayisi] = useState(0);
   // Kisisel bildirimler Pro: ucretsizde sekme bulanik ornekle gosterilir.
-  const [kilit, setKilit] = useState<{ kilitli: boolean; plan: Plan | null }>({ kilitli: false, plan: null });
+  const [kilit, setKilit] = useState<{ kilitli: boolean; plan: Plan | null; kacanEslesme: number }>({ kilitli: false, plan: null, kacanEslesme: 0 });
   const [panelPos, setPanelPos] = useState<{ top: number; left: number } | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -57,7 +57,7 @@ export function NotificationBell({ isLoggedIn }: { isLoggedIn: boolean }) {
       setGenel(data.genel);
       setBanaOzel(data.banaOzel);
       setOkunmamisSayisi(data.okunmamisSayisi);
-      setKilit({ kilitli: !!data.banaOzelKilitli, plan: data.plan ?? null });
+      setKilit({ kilitli: !!data.banaOzelKilitli, plan: data.plan ?? null, kacanEslesme: data.kacanEslesme ?? 0 });
     } catch {
       // Sessizce yok say - 30sn sonraki periyodik denemede tekrar dener.
     }
@@ -240,7 +240,11 @@ export function NotificationBell({ isLoggedIn }: { isLoggedIn: boolean }) {
                   mevcutPlan={kilit.plan ?? "UCRETSIZ"}
                   gerekenPlan="PRO"
                   kaynak="bildirim"
-                  baslik="Kişisel bildirimler Pro'da"
+                  baslik={
+                    kilit.kacanEslesme > 0
+                      ? `Bu hafta bölümüne ${kilit.kacanEslesme} ilan eşleşti. Pro'da her biri buraya düşer`
+                      : "Kişisel bildirimler Pro'da"
+                  }
                 >
                   <div className="min-h-64 space-y-1">
                     {ORNEK_BILDIRIMLER.map((b) => (

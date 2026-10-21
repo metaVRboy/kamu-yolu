@@ -36,13 +36,15 @@ export async function GET() {
     prisma.smsGonderim.findMany({ where: { userId: user.id }, select: { telefon: true, metin: true, tur: true, durum: true, olusturma: true } }),
     prisma.soruHataBildirimi.findMany({ where: { userId: user.id }, select: { aciklama: true, createdAt: true } }),
   ]);
-  const [gunlukSorular, takipEdilenIlanlar, proHediyeleri, tarayiciBildirimleri, davetEttikleri] = await Promise.all([
+  const [gunlukSorular, takipEdilenIlanlar, proHediyeleri, tarayiciBildirimleri, davetEttikleri, takipEdilenKurumlar, seriDondurmalari] = await Promise.all([
     prisma.gunlukSoruCevap.findMany({ where: { userId: user.id }, select: { tarih: true, dogru: true, cevaplar: true, olusturma: true } }),
     prisma.ilanTakip.findMany({ where: { userId: user.id }, select: { olusturma: true, posting: { select: { title: true, institutionName: true } } } }),
     prisma.proHediye.findMany({ where: { userId: user.id }, select: { neden: true, gun: true, olusturma: true } }),
     // Bildirim adresi tarayici servisine aittir; yalniz kac cihazda acik oldugu ve tarihi verilir.
     prisma.pushAbonelik.findMany({ where: { userId: user.id }, select: { olusturma: true } }),
     prisma.user.count({ where: { davetEdenId: user.id } }),
+    prisma.kurumTakip.findMany({ where: { userId: user.id }, select: { kurumAdi: true, olusturma: true } }),
+    prisma.seriDondurma.findMany({ where: { userId: user.id }, select: { tarih: true } }),
   ]);
 
   const veri = {
@@ -82,6 +84,8 @@ export async function GET() {
     soruHataBildirimleri: soruBildirimleri,
     gunlukSorular,
     takipEdilenIlanlar,
+    takipEdilenKurumlar,
+    seriDondurmalari,
     proHediyeleri,
     tarayiciBildirimleri,
     davet: { davetKodu: user.davetKodu, davetleIleGeldin: !!user.davetEdenId, davetinleKatilanSayisi: davetEttikleri },

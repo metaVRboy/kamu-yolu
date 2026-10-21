@@ -13,7 +13,7 @@ export type UyeOzeti = {
     plan: "UCRETSIZ" | "PRO" | "PRO_PLUS";
     planAdi: string;
     planKalanGun: number | null;
-    seri: { gun: number; bugunCozuldu: boolean; enIyi: number; toplamGun: number };
+    seri: { gun: number; bugunCozuldu: boolean; enIyi: number; toplamGun: number; dondurmaKalan: number | null };
     denemeSayisi: number;
     rozetSayisi: number;
     rozetler: { id: string; ad: string; renk: RozetRengi }[];

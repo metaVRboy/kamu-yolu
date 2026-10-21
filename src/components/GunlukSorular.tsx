@@ -9,6 +9,8 @@ import { toast } from "@/components/ui/toast";
 import { DERS_LABEL, DUZEY_LABEL, type ExamSoru } from "@/lib/kpssDenemeSabitler";
 import { bildirimDurumu, bildirimleriAc, type BildirimDurumu } from "@/lib/pushIstemci";
 import { uyeOzetiniTazele } from "@/lib/uyeOzetiIstemci";
+import { useOturumPlani } from "@/lib/oturumIstemci";
+import { YukseltButonu } from "@/components/YukseltmePenceresi";
 import { apiHatasi, cn } from "@/lib/utils";
 
 type Duzey = "LISE" | "ONLISANS" | "LISANS";
@@ -23,6 +25,7 @@ const DUZEYLER: Duzey[] = ["LISE", "ONLISANS", "LISANS"];
 /** Gunun 5 sorusu: tek ekranda cozulur, gonderince dogru cevap, aciklama ve uyelerin dogru yuzdesi acilir. */
 export function GunlukSorular({ girisli }: { girisli: boolean }) {
   const authAc = useAuthModal();
+  const oturum = useOturumPlani();
   const [duzey, setDuzey] = useState<Duzey | null>(null);
   const [veri, setVeri] = useState<Yanit | null>(null);
   const [cevaplar, setCevaplar] = useState<Record<string, number>>({});
@@ -133,6 +136,14 @@ export function GunlukSorular({ girisli }: { girisli: boolean }) {
               </p>
             )}
           </div>
+          {oturum?.girisli && oturum.plan !== "PRO_PLUS" && veri.dogru < sorular.length && (
+            <p className="mt-4 border-t border-white/10 pt-4 text-sm text-slate-300">
+              Bugün {sorular.length - veri.dogru} yanlışın var. Hangi konularda eksiğin olduğunu KPSS denemelerinde Pro+ konu konu gösterir.{" "}
+              <YukseltButonu plan="PRO_PLUS" kaynak="zayif-konu" className="font-semibold text-orange-300 underline hover:text-orange-200">
+                Eksik konularını gör
+              </YukseltButonu>
+            </p>
+          )}
         </div>
       )}
 

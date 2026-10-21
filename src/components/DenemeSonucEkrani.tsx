@@ -272,7 +272,8 @@ export function DenemeSonucEkrani({
         gerekenPlan="PRO"
         kaynak="rapor"
         uzun
-        baslik="Sınav sonu raporun"
+        // Kisinin gercek yanlis sayisi (ozet sayilar ucretsizde de gercek; yalniz cozumler orneklenir).
+        baslik={yanlisSayisi > 0 ? `${yanlisSayisi} yanlışının doğru cevabı ve açıklaması Pro'da` : "Sınav sonu raporun"}
         ozellikler={[
           "Pro: ders karnesi (her derste doğru, yanlış, boş ve net)",
           "Pro: soruların doğru cevapları ve açıklamaları",

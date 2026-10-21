@@ -212,7 +212,7 @@ export default async function ProfilimPage() {
         </Card>
       </div>
 
-      <div className="mt-6">
+      <div id="bana-ozel" className="mt-6 scroll-mt-32">
         <h2 className="flex items-center gap-2 font-sans font-semibold text-primary">
           <Briefcase className="h-4 w-4 text-primary" />
           Bana Özel İlanlar

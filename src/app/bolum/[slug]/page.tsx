@@ -1,3 +1,5 @@
+import { bolumIstatistigi } from "@/lib/kisiselOzet";
+import { BolumIstatistikSeridi } from "@/components/ProTesvikleri";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { buttonVariants } from "@/components/ui/button";
@@ -47,7 +49,7 @@ export default async function DepartmentResultsPage({
   const department = await prisma.department.findUnique({ where: { slug } });
   if (!department) notFound();
 
-  const [tumIlanlar, filterOptions, ilgiliHaberler, user, bolumSatirlari, bolumIlanSayilari] = await Promise.all([
+  const [tumIlanlar, filterOptions, ilgiliHaberler, user, bolumSatirlari, bolumIlanSayilari, istatistik] = await Promise.all([
     getPostingsForDepartment(department.id, {
       institutionType: kurum,
       ilanTuru,
@@ -59,6 +61,7 @@ export default async function DepartmentResultsPage({
     getCurrentUser(),
     prisma.department.findMany({ select: { id: true, slug: true, name: true, level: true }, orderBy: { name: "asc" } }),
     getDepartmentPostingCounts(),
+    bolumIstatistigi(department.id),
   ]);
   const yakindaDurumu = yakindaFiltresi(tumIlanlar, `/bolum/${slug}`, { kurum, ilanTuru, il, bolumSarti, yakinda });
   const postings = yakindaDurumu.gosterilen;
@@ -106,6 +109,13 @@ export default async function DepartmentResultsPage({
         <FilterBar options={filterOptions} />
       </div>
 
+      {/* Gercek istatistik + yeni ilan cagrisi (ilan varken); ilan yokken bos durum kendisi soyler. */}
+      {postings.length > 0 && istatistik.son30 > 0 && (
+        <div className="mt-6">
+          <BolumIstatistikSeridi bolumAdi={department.name} son30={istatistik.son30} ortalamaGun={istatistik.ortalamaGun} />
+        </div>
+      )}
+
       <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {postings.length === 0 && (
           <div className="rounded-2xl border border-dashed border-primary/25 bg-primary/5 p-8 text-center text-sm text-muted-foreground sm:col-span-2 lg:col-span-3">
@@ -113,7 +123,17 @@ export default async function DepartmentResultsPage({
               // Bolumlerin cogunda cogu zaman ozel ilan yok: ziyaretci bos sayfada kalmasin.
               <>
                 <p className="font-semibold text-slate-800">Şu an {department.name} şartı arayan aktif bir ilan yok.</p>
-                <p className="mt-1">Bölüm şartı aramayan ilanlara da başvurabilirsin; yeni bir ilan çıkınca haber almak için listeye katıl.</p>
+                <p className="mt-1">
+                  {istatistik.son30 > 0
+                    ? `Son 30 günde bu bölüme ${istatistik.son30} ilan yayımlandı ve süreleri doldu${istatistik.ortalamaGun !== null ? `; ilanlar ortalama ${istatistik.ortalamaGun} gün açık kalıyor` : ""}. `
+                    : ""}
+                  {!user
+                    ? "Üye ol, bölümünü seç: yeni ilan çıkınca ilk sen öğren."
+                    : yukseltmeKartiGoster
+                      ? "Yeni ilan yayımlandığında ilk senin haberin olsun: Pro'da bölümüne uygun her yeni ilanda anında bildirim."
+                      : "Bu bölüm profilindeyse yeni ilan çıkınca sana bildirim gelecek."}{" "}
+                  Bölüm şartı aramayan ilanlara da başvurabilirsin.
+                </p>
                 <div className="mt-4 flex flex-wrap justify-center gap-2">
                   {seviyeSlug && (
                     <Link href={`/seviye/${seviyeSlug}`} className={buttonVariants()}>
@@ -121,8 +141,8 @@ export default async function DepartmentResultsPage({
                     </Link>
                   )}
                   {yukseltmeKartiGoster && (
-                    <YukseltButonu plan="PRO" kaynak="sms" className={buttonVariants({ variant: "outline" })}>
-                      Yeni ilan çıkınca haber ver
+                    <YukseltButonu plan="PRO" kaynak={istatistik.son30 > 0 ? "kacirilan" : "bildirim"} className={buttonVariants({ variant: "outline" })}>
+                      {user ? "İlk ben haberdar olayım" : "Ücretsiz üye ol"}
                     </YukseltButonu>
                   )}
                 </div>

@@ -235,6 +235,33 @@ model User {
   gunlukSoruCevaplari   GunlukSoruCevap[]
   ilanTakipleri         IlanTakip[]
   pushAbonelikleri      PushAbonelik[]
+  seriDondurmalari      SeriDondurma[]
+  kurumTakipleri        KurumTakip[]
+}
+
+// Pro ayricaligi: cozulmeyen gun seriyi bozmaz (ayda SERI_DONDURMA_HAKKI kez, otomatik kullanilir).
+model SeriDondurma {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  tarih     DateTime @db.Date
+  olusturma DateTime @default(now())
+
+  @@unique([userId, tarih])
+}
+
+// Duyuru/kurum takibi: alim duyurusu cikan kurumun ilani yayimlaninca haber ver (takip herkese, bildirim Pro).
+// kurumNorm: kucuk harf, noktalamasiz kurum adi; yeni ilanin kurum adiyla karsilastirilir.
+model KurumTakip {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  kurumAdi  String
+  kurumNorm String
+  olusturma DateTime @default(now())
+
+  @@unique([userId, kurumNorm])
+  @@index([kurumNorm])
 }
 
 // Bedava Pro gunleri (kayit, seri, davet, aktivite). Ayni neden bir uyeye bir kez verilir (@@unique).

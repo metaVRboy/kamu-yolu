@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { Prisma, type DenemeDers, type EducationLevel } from "@/generated/prisma/client";
 import { bugununTarihi, getBugununDenemesi } from "@/lib/kpssDeneme";
 import { proHediyeEt } from "@/lib/proHediye";
+import { proAktifMi } from "@/lib/sms";
 
 const GUN_MS = 86_400_000;
 /** Her gun her dersten bir soru (Guncel Bilgiler havuzu kucuk ve cabuk eskiyor: dahil degil). */
@@ -79,12 +80,47 @@ async function dogruYuzdeleri(setId: string, sorular: { id: string; dogruCevap: 
   );
 }
 
-/** Ardisik gun serisi: bugun cozulmediyse dunden geriye sayilir (gun bitene kadar seri yasar). */
+/** Pro ayricaligi: ayda bu kadar cozulmeyen gun seriyi bozmaz (otomatik kullanilir). */
+export const SERI_DONDURMA_HAKKI = 2;
+
+/** Bu takvim ayinda kullanilan dondurma sayisi (TR gunu, UTC gece yarisi gosterimi). */
+function buAyKullanilan(dondurulan: number[], bugun: number) {
+  const d = new Date(bugun);
+  const ayBasi = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1);
+  return dondurulan.filter((t) => t >= ayBasi).length;
+}
+
+/**
+ * Pro uye bir ya da birkac gun cozmeden donerse, son etkinlik gunu ile dun arasindaki bosluk kalan aylik hakla
+ * kapanabiliyorsa otomatik dondurulur (seri bozulmaz). Idempotent: ayni gun iki kez yazilmaz. Eklenen gunler doner.
+ */
+async function seriyiKoru(userId: string, cozulen: number[], dondurulan: number[], bugun: number): Promise<number[]> {
+  const son = Math.max(...cozulen, ...dondurulan);
+  if (!Number.isFinite(son)) return [];
+  const eksik: number[] = [];
+  for (let t = son + GUN_MS; t < bugun; t += GUN_MS) eksik.push(t);
+  if (!eksik.length || eksik.length > SERI_DONDURMA_HAKKI - buAyKullanilan(dondurulan, bugun)) return [];
+  await prisma.seriDondurma.createMany({ data: eksik.map((t) => ({ userId, tarih: new Date(t) })), skipDuplicates: true });
+  return eksik;
+}
+
+/**
+ * Ardisik gun serisi: bugun cozulmediyse dunden geriye sayilir (gun bitene kadar seri yasar). Pro uyede dondurulan
+ * gunler seriyi surdurur; dondurmaKalan Pro'da bu ayki kalan hak, ucretsizde null.
+ */
 export async function seriDurumu(userId: string) {
-  const kayitlar = await prisma.gunlukSoruCevap.findMany({ where: { userId }, orderBy: { tarih: "desc" }, select: { tarih: true }, take: 400 });
-  const gunler = kayitlar.map((k) => k.tarih.getTime());
+  const [kayitlar, dondurmalar, uye] = await Promise.all([
+    prisma.gunlukSoruCevap.findMany({ where: { userId }, orderBy: { tarih: "desc" }, select: { tarih: true }, take: 400 }),
+    prisma.seriDondurma.findMany({ where: { userId }, orderBy: { tarih: "desc" }, select: { tarih: true }, take: 60 }),
+    prisma.user.findUnique({ where: { id: userId }, select: { abonelikPlani: true, abonelikBitis: true } }),
+  ]);
+  const cozulen = kayitlar.map((k) => k.tarih.getTime());
   const bugun = bugununTarihi().getTime();
-  const bugunCozuldu = gunler[0] === bugun;
+  const pro = !!uye && proAktifMi(uye);
+  let dondurulan = dondurmalar.map((d) => d.tarih.getTime());
+  if (pro) dondurulan = [...dondurulan, ...(await seriyiKoru(userId, cozulen, dondurulan, bugun))];
+  const gunler = [...new Set([...cozulen, ...dondurulan])].sort((a, b) => b - a);
+  const bugunCozuldu = cozulen[0] === bugun;
   let gun = 0;
   let beklenen = bugunCozuldu ? bugun : bugun - GUN_MS;
   for (const t of gunler) {
@@ -99,7 +135,13 @@ export async function seriDurumu(userId: string) {
     kosu = i > 0 && gunler[i - 1] - gunler[i] === GUN_MS ? kosu + 1 : 1;
     enIyi = Math.max(enIyi, kosu);
   }
-  return { gun, bugunCozuldu, enIyi, toplamGun: gunler.length };
+  return {
+    gun,
+    bugunCozuldu,
+    enIyi,
+    toplamGun: cozulen.length,
+    dondurmaKalan: pro ? Math.max(0, SERI_DONDURMA_HAKKI - buAyKullanilan(dondurulan, bugun)) : null,
+  };
 }
 
 export class GecersizCevapError extends Error {}

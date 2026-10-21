@@ -94,7 +94,10 @@ export type YukseltmeKaynagi =
   | "bant"
   | "kacirilan"
   | "ilan-takip"
-  | "zayif-konu";
+  | "zayif-konu"
+  // Pro tesvikleri 2 (2026-10-21): seri dondurma, duyuru/kurum takibi.
+  | "seri"
+  | "duyuru-takip";
 
 export const KAYNAK_METNI: Record<YukseltmeKaynagi, { baslik: string; alt: string }> = {
   genel: { baslik: "Kamu Yolu'nun tamamını aç", alt: "Bölümüne uygun ilanları ilk sen öğren, KPSS'ye her gün hazırlan." },
@@ -114,6 +117,8 @@ export const KAYNAK_METNI: Record<YukseltmeKaynagi, { baslik: string; alt: strin
   kacirilan: { baslik: "Bir daha ilan kaçırma", alt: "Bölümüne uygun yeni ilan çıktığı an haberin olsun." },
   "ilan-takip": { baslik: "Son başvuru gününü kaçırma", alt: "Takip ettiğin ilanların son başvurusuna 3 gün ve 1 gün kala hatırlatalım." },
   "zayif-konu": { baslik: "Eksik konularını gör", alt: "Hangi konuda zayıf olduğunu ve önce neye çalışman gerektiğini konu konu gör." },
+  seri: { baslik: "Serini koru", alt: "Pro'da ayda 2 seri dondurma hakkın olur: bir gün kaçırsan da serin bozulmaz." },
+  "duyuru-takip": { baslik: "İlanı ilk sen öğren", alt: "Takip ettiğin kurumun ilanı yayımlandığı an haberin olsun." },
 };
 
 /** Karsilastirma satirlari: true = var, false = yok, metin = plana gore deger. */
@@ -127,6 +132,8 @@ export const KARSILASTIRMA: { ozellik: string; kaynak?: YukseltmeKaynagi; degerl
   { ozellik: "Becayiş talebi oluşturma", kaynak: "becayis-talep", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
   { ozellik: "Becayiş mesajlaşması", kaynak: "becayis-mesaj", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
   { ozellik: "Bana özel ilanlar", kaynak: "ozel-ilanlar", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
+  { ozellik: "İlan ve kurum takibinde hatırlatma", kaynak: "duyuru-takip", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
+  { ozellik: "Seri dondurma (ayda 2)", kaynak: "seri", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
   { ozellik: "Öncelikli destek", degerler: { UCRETSIZ: false, PRO: false, PRO_PLUS: true } },
 ];
 

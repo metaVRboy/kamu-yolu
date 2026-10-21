@@ -1,3 +1,4 @@
+import { BanaUygunDugmesi } from "@/components/ProTesvikleri";
 import { ClipboardList } from "lucide-react";
 import { getAllActivePostings, getAvailableFiltersForAll } from "@/lib/matching";
 import { IlanVitrinKarti } from "@/components/IlanVitrinKarti";
@@ -48,7 +49,10 @@ export default async function TumIlanlarPage({
         filtreHedefi="#filtreler"
       />
 
-      <div id="filtreler" className="mt-6 scroll-mt-32">
+      <div id="filtreler" className="mt-6 scroll-mt-32 space-y-3">
+        <div className="flex justify-end">
+          <BanaUygunDugmesi />
+        </div>
         <FilterBar options={filterOptions} />
       </div>
 
