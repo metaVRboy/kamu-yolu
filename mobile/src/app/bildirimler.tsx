@@ -12,7 +12,7 @@ import { renk } from "@/lib/tema";
 
 type Duyuru = { id: string; baslik: string; icerik: string; link: string | null };
 type Bildirim = { id: string; baslik: string; icerik: string | null; link: string | null; okundu: boolean };
-type Veri = { genel: Duyuru[]; banaOzel: Bildirim[]; okunmamisSayisi: number; plan: Plan | null; banaOzelKilitli: boolean };
+type Veri = { genel: Duyuru[]; banaOzel: Bildirim[]; okunmamisSayisi: number; plan: Plan | null; banaOzelKilitli: boolean; kacanEslesme?: number };
 
 // Kilitli onizleme icin ornek (gercek kullanici verisi degil).
 const ORNEK = [
@@ -103,7 +103,12 @@ export default function Bildirimler() {
             // Ucretsizde yalniz admin mesajlari ve destek yanitlari gelir; altinda kilitli onizleme.
             <>
             {banaOzel.length > 0 && ozelListe}
-            <KilitliOzellik mevcutPlan={veri.plan ?? "UCRETSIZ"} gerekenPlan="PRO" kaynak="bildirim" baslik="Kişisel bildirimler Pro'da">
+            <KilitliOzellik
+              mevcutPlan={veri.plan ?? "UCRETSIZ"}
+              gerekenPlan="PRO"
+              kaynak="bildirim"
+              baslik={veri.kacanEslesme ? `Bu hafta bölümüne ${veri.kacanEslesme} ilan eşleşti. Pro'da her biri buraya düşer` : "Kişisel bildirimler Pro'da"}
+            >
               <View style={{ minHeight: 340, gap: 8 }}>
                 {ORNEK.map((b, i) => (
                   <View key={i} style={[s.kart, { backgroundColor: renk.birincilZemin }]}>

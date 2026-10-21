@@ -1,15 +1,17 @@
 import { useCallback, type ReactNode } from "react";
 import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
-import { Image } from "expo-image";
 import { router, useFocusEffect, type Href } from "expo-router";
 import {
+  Award,
   BarChart3,
   Bell,
+  BellRing,
   Briefcase,
   ChevronRight,
   Crown,
   FilePlus2,
-  GraduationCap,
+  Flame,
+  Gift,
   Heart,
   Inbox,
   LifeBuoy,
@@ -22,14 +24,13 @@ import {
 } from "lucide-react-native";
 import { Buton, HataKutusu, Kart, T, Yukleniyor } from "@/bilesenler/ui";
 import { IlanKarti } from "@/bilesenler/IlanKarti";
-import { KilitliOzellik } from "@/bilesenler/KilitliOzellik";
+import { KilitliOzellik, yukseltmeAc } from "@/bilesenler/KilitliOzellik";
 import { GirisKarti } from "@/bilesenler/GirisDaveti";
-import { SITE, useVeri } from "@/lib/api";
+import { ProfilKarti } from "@/bilesenler/UyeKartlari";
+import { useVeri } from "@/lib/api";
 import { useOturum } from "@/lib/oturum";
 import { renk } from "@/lib/tema";
 import type { ProfilVeri } from "@/lib/tipler";
-
-const PLAN_RENGI = { UCRETSIZ: { zemin: renk.griZemin, yazi: "#475569" }, PRO: { zemin: "#e0f2fe", yazi: "#0369a1" }, PRO_PLUS: { zemin: "#ede9fe", yazi: "#6d28d9" } } as const;
 
 type Oge = { yol: Href; etiket: string; ikon: LucideIcon; rozet?: number };
 // Giris gerektirmeyen sayfalar (sitede ust menude).
@@ -62,47 +63,67 @@ export default function Profil() {
   if (hata && !veri) return <HataKutusu mesaj={hata} tekrar={yenile} />;
   if (!veri?.kullanici) return <Yukleniyor />;
   const k = veri.kullanici;
-  const foto = k.fotografUrl && (k.fotografUrl.startsWith("/") ? SITE + k.fotografUrl : k.fotografUrl);
-  const planRenk = PLAN_RENGI[k.plan];
   const ilanlar = veri.kisiselIlanlar.map((i) => <IlanKarti key={i.id} ilan={i} />);
+  const premium = k.plan !== "UCRETSIZ";
 
   return (
     <ScrollView contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 32 }} refreshControl={<RefreshControl refreshing={yenileniyor} onRefresh={yenile} tintColor={renk.birincil} />}>
-      <Kart style={{ padding: 20, flexDirection: "row", alignItems: "center", gap: 14 }}>
-        <View style={s.avatar}>{foto ? <Image source={{ uri: foto }} style={{ width: "100%", height: "100%" }} /> : <T w="kalin" style={{ fontSize: 22, color: renk.birincil }}>{k.adSoyad.charAt(0)}</T>}</View>
-        <View style={{ flex: 1 }}>
-          <T w="kalin" style={{ fontSize: 18 }}>
-            {k.adSoyad}
-          </T>
-          <T style={{ color: renk.soluk, fontSize: 13 }}>{k.email}</T>
-          <View style={[s.plan, { backgroundColor: planRenk.zemin }]}>
-            <T w="kalin" style={{ fontSize: 12, color: planRenk.yazi }}>
-              {k.planAdi}
+      <ProfilKarti
+        eposta={k.email}
+        v={{
+          adSoyad: k.adSoyad,
+          fotoUrl: k.fotografUrl,
+          altSatir: [k.bolum?.ad, k.duzeyAdi].filter(Boolean).join(" · ") || "Bölümünü henüz seçmedin",
+          seriGun: veri.seriGun,
+          denemeSayisi: veri.denemeSayisi,
+          rozetSayisi: veri.rozetSayisi,
+          rozetler: veri.rozetler,
+          plan: k.plan,
+          planAdi: k.planAdi,
+          kalanGun: k.kalanGun,
+        }}
+        kapakSag={
+          <Pressable onPress={() => router.push("/profil-duzenle")} style={s.kapakButon}>
+            <Pencil size={13} color="#fff" />
+            <T w="yariKalin" style={{ color: "#fff", fontSize: 13 }}>
+              Profili düzenle
             </T>
-          </View>
-        </View>
-      </Kart>
+          </Pressable>
+        }
+      />
 
-      <Kart style={{ padding: 20, gap: 12 }}>
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-          <T w="yariKalin" style={{ color: renk.birincil, fontSize: 15 }}>
-            Profil Bilgilerim
+      {/* Bolumu olmayan uye sitenin ana degerini goremez: ilk is bolum secimi. */}
+      {!k.bolum && (
+        <View style={[s.uyariKutu, { borderColor: "rgba(36,102,195,0.3)", backgroundColor: renk.birincilZemin }]}>
+          <T w="yariKalin">Mezun olduğun bölümü seç</T>
+          <T style={{ color: renk.yaziIkincil, lineHeight: 20 }}>Bölümüne uygun kamu ilanlarını ve yeni ilan bildirimlerini buna göre hazırlıyoruz.</T>
+          <Buton etiket="Bölümümü seç" onPress={() => router.push("/profil-duzenle")} style={{ alignSelf: "flex-start", paddingVertical: 10 }} />
+        </View>
+      )}
+
+      {/* Kacirilan ilanlar (ucretsiz uye): bolumune eslesip son 30 gunde son basvurusu gecmis gercek ilan sayisi. */}
+      {veri.kacirilan30 > 0 && veri.kisiselIlanSayisi > 0 && (
+        <View style={[s.uyariKutu, { borderColor: "#fecaca", backgroundColor: "#fef2f2" }]}>
+          <T w="yariKalin" style={{ color: "#7f1d1d" }}>
+            Son 30 günde bölümüne uygun {veri.kacirilan30} ilanın son başvurusu geçti
           </T>
-          <Pressable onPress={() => router.push("/profil-duzenle")} hitSlop={8} style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-            <Pencil size={14} color={renk.birincil} />
-            <T w="yariKalin" style={{ color: renk.birincil }}>
-              Düzenle
+          <T style={{ color: "#991b1b", lineHeight: 20 }}>Pro&apos;da bölümüne uygun yeni ilan çıkınca anında haberin olur; takip ettiğin ilanlar için son gün hatırlatması gelir.</T>
+          <Pressable onPress={() => yukseltmeAc("PRO", "kacirilan")} style={{ alignSelf: "flex-start", borderRadius: 12, backgroundColor: "#b91c1c", paddingHorizontal: 16, paddingVertical: 10 }}>
+            <T w="kalin" style={{ color: "#fff" }}>
+              Bir daha kaçırma
             </T>
           </Pressable>
         </View>
-        <Satir ikon={GraduationCap} etiket="Bölüm" deger={k.bolum?.ad ?? "Seçilmedi"} />
-        <Satir ikon={Briefcase} etiket="Öğrenim düzeyi" deger={k.duzeyAdi ?? "Seçilmedi"} />
-      </Kart>
+      )}
 
       <Menu
         ogeler={[
           { yol: "/ayarlar", etiket: "Ayarlar", ikon: Settings },
           { yol: "/abonelik", etiket: "Aboneliğim", ikon: Crown },
+          { yol: "/gunun-sorulari", etiket: "Günün 5 Sorusu", ikon: Flame },
+          { yol: "/takip", etiket: "Takip Ettiğim İlanlar", ikon: BellRing },
+          { yol: "/rozetler", etiket: "Rozetlerim", ikon: Award },
+          { yol: "/davet", etiket: "Arkadaşını Davet Et", ikon: Gift },
           { yol: "/becayis/talep-olustur", etiket: "Becayiş Talebi Oluştur", ikon: FilePlus2 },
           { yol: "/becayis/taleplerim", etiket: "Mevcut Taleplerim", ikon: Inbox, rozet: veri.okunmamisMesaj },
           { yol: "/becayis/ilgilendiklerim", etiket: "İlgilendiğim İlanlar", ikon: Heart, rozet: veri.okunmamisIlgilendiklerim },
@@ -161,7 +182,7 @@ export default function Profil() {
           </T>
         </View>
         <T style={{ color: renk.soluk, lineHeight: 20 }}>Profilinde belirttiğin bölüm/öğrenim düzeyine uygun ilanlar burada listelenir.</T>
-        {veri.kisiselIlanSayisi === 0 ? (
+        {veri.kisiselIlanSayisi === 0 && !k.bolum && !k.duzey ? (
           <T style={{ color: renk.soluk, lineHeight: 20 }}>
             Eşleşen ilan bulabilmemiz için{" "}
             <T w="orta" style={{ color: renk.birincil }} onPress={() => router.push("/profil-duzenle")}>
@@ -169,17 +190,49 @@ export default function Profil() {
             </T>{" "}
             tamamla.
           </T>
+        ) : veri.kisiselIlanSayisi === 0 ? (
+          // Bolum girili ama su an acik ilan yok: ucretsize gercek sayiyla Pro yonlendirmesi, Pro'ya yalniz bilgi.
+          <Kart style={{ padding: 18, gap: 10 }}>
+            <T w="yariKalin">Şu an {k.bolum ? `${k.bolum.ad} için` : "bölümüne uygun"} açık ilan yok.</T>
+            <T style={{ color: renk.yaziIkincil, lineHeight: 20 }}>
+              {premium
+                ? "Yeni ilan yayımlandığında sana hemen bildirim gelecek; bu sayfada da listelenecek."
+                : veri.kacirilan30 > 0
+                  ? `Son 30 günde bölümüne uygun ${veri.kacirilan30} ilan yayımlandı ve son başvuruları geçti. Pro ile bir sonraki ilan çıktığı an haberin olur.`
+                  : "Yeni ilan yayımlandığında ilk senin haberin olsun: Pro'da bölümüne uygun her yeni ilanda anında bildirim alırsın."}
+            </T>
+            {!premium && (
+              <Buton
+                etiket={veri.kacirilan30 > 0 ? "Bir daha kaçırma" : "İlk ben haberdar olayım"}
+                ikon={Crown}
+                onPress={() => yukseltmeAc("PRO", veri.kacirilan30 > 0 ? "kacirilan" : "bildirim")}
+                style={{ alignSelf: "flex-start", paddingVertical: 10 }}
+              />
+            )}
+          </Kart>
         ) : k.plan === "UCRETSIZ" ? (
+          <>
           <KilitliOzellik
             mevcutPlan={k.plan}
             gerekenPlan="PRO"
             kaynak="ozel-ilanlar"
             uzun
             baslik={`Sana özel ${veri.kisiselIlanSayisi} ilan bulundu`}
-            ozellikler={["Bölümüne ve öğrenim düzeyine uygun ilanlar tek listede", "Yeni ilan çıkınca öncelikli bildirim ve SMS"]}
+            ozellikler={["Bölümüne ve öğrenim düzeyine uygun ilanlar tek listede", "Yeni ilan çıkınca anında bildirim"]}
           >
             <View style={{ gap: 16 }}>{ilanlar}</View>
           </KilitliOzellik>
+          {/* Kayit "bolumune uygun ilanlari takip et" vaat ediyor: bolum sayfasi herkese ucretsiz. */}
+          {!!k.bolum && (
+            <T style={{ color: renk.yaziIkincil, lineHeight: 20 }}>
+              {k.bolum.ad} için tüm ilanları{" "}
+              <T w="orta" style={{ color: renk.birincil }} onPress={() => router.push({ pathname: "/liste", params: { kapsam: "bolum", deger: k.bolum!.slug } })}>
+                bölüm sayfasında ücretsiz görebilirsin
+              </T>
+              ; Pro ile bölümüne ve öğrenim düzeyine göre süzülmüş listeyi ve yeni ilan bildirimlerini alırsın.
+            </T>
+          )}
+          </>
         ) : (
           <>
             {ilanlar}
@@ -254,24 +307,9 @@ function Rozet({ n }: { n: number }) {
   );
 }
 
-function Satir({ ikon: Ikon, etiket, deger }: { ikon: LucideIcon; etiket: string; deger: string }) {
-  return (
-    <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-      <View style={s.satirIkon}>
-        <Ikon size={18} color={renk.birincil} />
-      </View>
-      <View style={{ flex: 1 }}>
-        <T style={{ fontSize: 12, color: renk.soluk }}>{etiket}</T>
-        <T w="yariKalin">{deger}</T>
-      </View>
-    </View>
-  );
-}
-
 const s = StyleSheet.create({
-  avatar: { width: 64, height: 64, borderRadius: 32, backgroundColor: renk.birincilZemin, alignItems: "center", justifyContent: "center", overflow: "hidden" },
-  plan: { alignSelf: "flex-start", marginTop: 6, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 3 },
-  satirIkon: { width: 36, height: 36, borderRadius: 10, backgroundColor: renk.birincilZemin, alignItems: "center", justifyContent: "center" },
+  kapakButon: { flexDirection: "row", alignItems: "center", gap: 6, borderRadius: 999, borderWidth: 1, borderColor: "rgba(255,255,255,0.3)", backgroundColor: "rgba(255,255,255,0.15)", paddingHorizontal: 12, paddingVertical: 6 },
+  uyariKutu: { borderWidth: 1, borderRadius: 16, padding: 16, gap: 8 },
   menu: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 18, paddingVertical: 14 },
   rozet: { minWidth: 20, height: 20, borderRadius: 10, paddingHorizontal: 6, backgroundColor: renk.birincil, alignItems: "center", justifyContent: "center" },
   kutu: { borderWidth: 1, borderColor: renk.birincilKenar, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 9 },

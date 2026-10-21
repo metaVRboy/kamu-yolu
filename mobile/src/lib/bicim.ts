@@ -14,6 +14,9 @@ export const DUZEY_ADI: Record<string, string> = {
   YUKSEK_LISANS: "Yüksek Lisans",
 };
 
+/** Sitedeki /seviye/[slug] adresleri -> duzey. */
+export const SEVIYE_ENUM: Record<string, string> = { lise: "LISE", onlisans: "ONLISANS", lisans: "LISANS", "yuksek-lisans": "YUKSEK_LISANS", ilkogretim: "ILKOGRETIM" };
+
 /** Kalan gune gore rozet (sitedeki IlanVitrinKarti / kalanGunStili). */
 export function kalanGunRozeti(kalan: number | null) {
   if (kalan === null) return { metin: "Belirtilmemiş", renk: "#475569", zemin: "#f1f5f9" };

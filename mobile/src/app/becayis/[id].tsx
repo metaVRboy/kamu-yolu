@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
-import { MapPin, MessageCircle, Send, User } from "lucide-react-native";
+import { Eye, MapPin, MessageCircle, Send, User } from "lucide-react-native";
 import { Buton, HataKutusu, Kart, T, Yukleniyor } from "@/bilesenler/ui";
 import { KilitliOzellik } from "@/bilesenler/KilitliOzellik";
 import { konumYazi } from "@/bilesenler/Becayis";
@@ -44,6 +44,8 @@ export default function BecayisDetayEkrani() {
         <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
           <User size={14} color={renk.soluk} />
           <T style={{ fontSize: 12, color: renk.soluk }}>{t.sahipAd}</T>
+          <Eye size={14} color={renk.soluk} style={{ marginLeft: 8 }} />
+          <T style={{ fontSize: 12, color: renk.soluk }}>{t.goruntulenme} kez görüntülendi</T>
         </View>
 
         {t.sahibi ? (

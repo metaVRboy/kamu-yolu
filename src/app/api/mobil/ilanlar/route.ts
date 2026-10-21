@@ -14,6 +14,7 @@ import { LEVEL_SLUG_TO_ENUM } from "@/lib/levels";
 import { INSTITUTION_TYPE_LABEL, LEVEL_LABEL } from "@/lib/labels";
 import { yakindaBitenler } from "@/lib/ilanVitrin";
 import { haberKarti, ilanKartlari } from "@/lib/mobil";
+import { bolumIstatistigi } from "@/lib/kisiselOzet";
 
 /**
  * Sitedeki uc liste sayfasi tek uctan: kapsam=tum (/ilanlar), seviye (/seviye/[level]),
@@ -36,16 +37,20 @@ export async function GET(req: NextRequest) {
   let aciklama: string;
   let tumIlanlar, secenekler;
   let haberler: ReturnType<typeof haberKarti>[] = [];
+  // Bolum sayfasi: gercek istatistik (bos durum ve "yeni ilanda haber ver" seridi icin).
+  let bolumBilgisi: { ad: string; seviyeSlug: string | null; son30: number; ortalamaGun: number | null } | null = null;
   if (kapsam === "bolum") {
     const bolum = await prisma.department.findUnique({ where: { slug: deger } });
     if (!bolum) return NextResponse.json({ error: "Bölüm bulunamadı." }, { status: 404 });
-    let ilgili;
-    [tumIlanlar, secenekler, ilgili] = await Promise.all([
+    let ilgili, istatistik;
+    [tumIlanlar, secenekler, ilgili, istatistik] = await Promise.all([
       getPostingsForDepartment(bolum.id, filtre),
       getAvailableFiltersForDepartment(bolum.id),
       getHaberlerForDepartment(bolum),
+      bolumIstatistigi(bolum.id),
     ]);
     haberler = ilgili.map(haberKarti);
+    bolumBilgisi = { ad: bolum.name, seviyeSlug: Object.entries(LEVEL_SLUG_TO_ENUM).find(([, v]) => v === bolum.level)?.[0] ?? null, ...istatistik };
     baslik = `${bolum.name} mezunları için ilanlar`;
     aciklama = "Sadece bu bölüme özel şart koşan güncel kamu ilanları listelenir.";
   } else if (kapsam === "seviye") {
@@ -76,5 +81,6 @@ export async function GET(req: NextRequest) {
     },
     ilanlar: await ilanKartlari(gosterilen),
     haberler,
+    bolum: bolumBilgisi,
   });
 }

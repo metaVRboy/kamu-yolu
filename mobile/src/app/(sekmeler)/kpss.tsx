@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useFocusEffect } from "expo-router";
-import { BookOpen, Calculator, ChartColumnBig, Clock, GraduationCap, History, ListChecks, MousePointerClick, School, Timer, type LucideIcon } from "lucide-react-native";
+import { BookOpen, Calculator, ChartColumnBig, ChevronRight, Clock, Flame, GraduationCap, History, ListChecks, MousePointerClick, School, Timer, type LucideIcon } from "lucide-react-native";
 import { Cip, HataKutusu, Kart, SayfaBasligi, T, Yukleniyor } from "@/bilesenler/ui";
 import { KilitliOzellik, yukseltmeAc } from "@/bilesenler/KilitliOzellik";
 import { DersSeridi } from "@/bilesenler/SoruParcalari";
@@ -53,6 +53,18 @@ export default function KpssEkrani() {
           </>
         }
       />
+
+      {/* Gunluk aliskanlik: 130 dakikalik denemeden once 5 dakikalik giris. */}
+      <Pressable onPress={() => router.push("/gunun-sorulari")} style={({ pressed }) => [s.gunluk, pressed && { opacity: 0.9 }]}>
+        <Flame size={22} color="#fb923c" />
+        <View style={{ flex: 1 }}>
+          <T w="kalin" style={{ color: "#fff", fontSize: 15 }}>
+            Günün 5 sorusu
+          </T>
+          <T style={{ color: "#cbd5e1", fontSize: 12 }}>Her dersten bir soru; 7 gün seri = 1 gün Pro hediye.</T>
+        </View>
+        <ChevronRight size={18} color="#fb923c" />
+      </Pressable>
 
       <Kart style={{ padding: 16, gap: 8 }} yaricap={16}>
         <T style={{ color: "#334155", lineHeight: 20 }}>
@@ -239,6 +251,7 @@ export default function KpssEkrani() {
 }
 
 const s = StyleSheet.create({
+  gunluk: { flexDirection: "row", alignItems: "center", gap: 12, borderRadius: 20, backgroundColor: "#0f172a", padding: 16 },
   ikonKutu: { width: 44, height: 44, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.15)", borderWidth: 1, borderColor: "rgba(255,255,255,0.3)", alignItems: "center", justifyContent: "center" },
   satir: { flexDirection: "row", alignItems: "center", gap: 6 },
   buton: { alignItems: "center", borderRadius: 999, paddingVertical: 12 },

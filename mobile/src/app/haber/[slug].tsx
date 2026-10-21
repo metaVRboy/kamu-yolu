@@ -4,6 +4,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { ArrowUpRight, Building2, CalendarClock, CalendarDays, GraduationCap, ListChecks, Share2, Users, type LucideIcon } from "lucide-react-native";
 import { Buton, HataKutusu, Kart, T, Yukleniyor } from "@/bilesenler/ui";
 import { HaberGorsel, HaberSatiri } from "@/bilesenler/HaberKarti";
+import { KurumTakipKarti } from "@/bilesenler/ProTesvik";
 import { useVeri } from "@/lib/api";
 import { tarihUzun } from "@/lib/bicim";
 import { renk } from "@/lib/tema";
@@ -51,6 +52,12 @@ export default function HaberDetay() {
           </T>
           <T style={{ marginTop: 4, fontSize: 16, lineHeight: 24, color: "#1e293b" }}>{h.ozet}</T>
         </View>
+
+        {!!h.kurumAdi && (
+          <View style={{ marginTop: 16 }}>
+            <KurumTakipKarti kurum={h.kurumAdi} />
+          </View>
+        )}
 
         <HaberGorsel h={h} style={{ marginTop: 20, borderRadius: 16 }} />
 

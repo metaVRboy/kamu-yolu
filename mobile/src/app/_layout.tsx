@@ -50,6 +50,10 @@ export default function KokDuzen() {
         <Stack.Screen name="abonelik" options={{ title: "Aboneliğim" }} />
         <Stack.Screen name="destek" options={{ title: "İletişim ve Destek" }} />
         <Stack.Screen name="analiz" options={{ title: "Alım Analizi" }} />
+        <Stack.Screen name="gunun-sorulari" options={{ title: "Günün 5 Sorusu" }} />
+        <Stack.Screen name="takip" options={{ title: "Takip Ettiğim İlanlar" }} />
+        <Stack.Screen name="rozetler" options={{ title: "Rozetlerim" }} />
+        <Stack.Screen name="davet" options={{ title: "Arkadaşını Davet Et" }} />
       </Stack>
     </OturumSaglayici>
   );

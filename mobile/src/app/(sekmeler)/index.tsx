@@ -13,18 +13,40 @@ import { useVeri } from "@/lib/api";
 import { sayi } from "@/lib/bicim";
 import { useOturum } from "@/lib/oturum";
 import { renk } from "@/lib/tema";
-import type { AnaSayfaVeri, HaberKartiVeri } from "@/lib/tipler";
+import type { AnaSayfaVeri, HaberKartiVeri, UyeOzeti } from "@/lib/tipler";
+import { ProBandi } from "@/bilesenler/ProTesvik";
+import { DavetBandi, GunlukSerit, ProfilKarti } from "@/bilesenler/UyeKartlari";
 
 export default function AnaSayfa() {
   const { veri, hata, yenileniyor, yenile } = useVeri<AnaSayfaVeri>("/api/mobil/ana-sayfa");
+  const { kullanici } = useOturum();
+  // Uye parcalari (profil karti, seri, bugun senin icin): misafirde { uye: null }. Gunun sorulari cozulup donunce tazelenir.
+  const uye = useVeri<UyeOzeti>(kullanici === undefined ? null : `/api/benim-ozetim?u=${kullanici?.id ?? ""}`);
+  const uyeYenile = uye.yenile;
+  useFocusEffect(
+    useCallback(() => {
+      uyeYenile(false);
+    }, [uyeYenile]),
+  );
   const kaydirma = useRef<ScrollView>(null);
+  const u = uye.veri?.uye;
 
   return (
     <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: "#fff" }}>
       <View style={s.ust}>
         <Image source={require("../../../assets/logo.png")} style={{ width: 54, height: 40 }} contentFit="contain" />
-        <Zil />
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          {veri?.kpssGun != null && (
+            <Pressable onPress={() => router.navigate("/kpss")} style={s.kpssCip}>
+              <T w="yariKalin" style={{ fontSize: 12, color: renk.birincil }}>
+                KPSS&apos;ye {veri.kpssGun} gün
+              </T>
+            </Pressable>
+          )}
+          <Zil />
+        </View>
       </View>
+      <ProBandi />
       {hata && !veri ? (
         <HataKutusu mesaj={hata} tekrar={yenile} />
       ) : !veri ? (
@@ -35,7 +57,16 @@ export default function AnaSayfa() {
           style={{ backgroundColor: renk.zemin }}
           contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
           keyboardShouldPersistTaps="handled"
-          refreshControl={<RefreshControl refreshing={yenileniyor} onRefresh={yenile} tintColor={renk.birincil} />}
+          refreshControl={
+            <RefreshControl
+              refreshing={yenileniyor}
+              onRefresh={() => {
+                yenile();
+                uyeYenile(false);
+              }}
+              tintColor={renk.birincil}
+            />
+          }
         >
           <Kart style={{ padding: 24, alignItems: "center" }}>
             <T w="yariKalin" style={{ fontSize: 24, lineHeight: 31, textAlign: "center", letterSpacing: -0.5 }}>
@@ -67,6 +98,28 @@ export default function AnaSayfa() {
             </View>
           </Kart>
 
+          {/* Sitedeki duzen H: uyeye profil karti; herkese gunun sorulari / bugun senin icin / KPSS denemesi. */}
+          <View style={{ marginTop: 16, gap: 12 }}>
+            {!!u && (
+              <ProfilKarti
+                kompakt
+                v={{
+                  adSoyad: u.adSoyad,
+                  fotoUrl: u.fotoUrl,
+                  altSatir: [u.bolum, u.duzey].filter(Boolean).join(" · ") || "Bölümünü henüz seçmedin",
+                  seriGun: u.seri.gun,
+                  denemeSayisi: u.denemeSayisi,
+                  rozetSayisi: u.rozetSayisi,
+                  rozetler: u.rozetler,
+                  plan: u.plan,
+                  planAdi: u.planAdi,
+                  kalanGun: u.planKalanGun,
+                }}
+              />
+            )}
+            {!!uye.veri && <GunlukSerit veri={uye.veri} />}
+          </View>
+
           {veri.haberler.length > 0 && <HaberKaruseli haberler={veri.haberler} />}
 
           <View style={{ marginTop: 40, gap: 16 }}>
@@ -86,6 +139,12 @@ export default function AnaSayfa() {
               <IlanKarti key={i.id} ilan={i} />
             ))}
           </View>
+
+          {!!u && (
+            <View style={{ marginTop: 40 }}>
+              <DavetBandi />
+            </View>
+          )}
 
           <View style={s.kapanis}>
             <View style={s.amblemKutu}>
@@ -189,6 +248,7 @@ function Zil() {
 }
 
 const s = StyleSheet.create({
+  kpssCip: { borderRadius: 999, backgroundColor: renk.birincilZemin, paddingHorizontal: 12, paddingVertical: 7 },
   zil: { width: 38, height: 38, borderRadius: 10, borderWidth: 1, borderColor: renk.kenar, alignItems: "center", justifyContent: "center" },
   nokta: { position: "absolute", top: 8, right: 9, width: 8, height: 8, borderRadius: 4, backgroundColor: "#ef4444" },
   ust: { height: 56, flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, borderBottomWidth: 1, borderBottomColor: renk.kenar, backgroundColor: "#fff" },

@@ -27,6 +27,12 @@ export const KAYNAK_METNI: Record<string, { baslik: string; alt: string }> = {
   "becayis-mesaj": { baslik: "Becayiş eşini bul, hemen yaz", alt: "Talep sahipleriyle site içinden doğrudan mesajlaş." },
   "becayis-talep": { baslik: "Becayiş talebini yayımla", alt: "Talebin herkese açık listelensin, yer değiştirmek isteyenler sana ulaşsın." },
   "ozel-ilanlar": { baslik: "Sana özel ilanları gör", alt: "Bölümüne ve öğrenim düzeyine uygun ilanlar tek listede." },
+  bant: { baslik: "Kamu Yolu'nun tamamını aç", alt: "Bölümüne uygun ilanları ilk sen öğren, KPSS'ye her gün hazırlan." },
+  kacirilan: { baslik: "Bir daha ilan kaçırma", alt: "Bölümüne uygun yeni ilan çıktığı an haberin olsun." },
+  "ilan-takip": { baslik: "Son başvuru gününü kaçırma", alt: "Takip ettiğin ilanların son başvurusuna 3 gün ve 1 gün kala hatırlatalım." },
+  "zayif-konu": { baslik: "Eksik konularını gör", alt: "Hangi konuda zayıf olduğunu ve önce neye çalışman gerektiğini konu konu gör." },
+  seri: { baslik: "Serini koru", alt: "Pro'da ayda 2 seri dondurma hakkın olur: bir gün kaçırsan da serin bozulmaz." },
+  "duyuru-takip": { baslik: "İlanı ilk sen öğren", alt: "Takip ettiğin kurumun ilanı yayımlandığı an haberin olsun." },
 };
 
 export const KARSILASTIRMA: { ozellik: string; kaynak?: string; degerler: Record<Plan, boolean | string> }[] = [
@@ -39,5 +45,7 @@ export const KARSILASTIRMA: { ozellik: string; kaynak?: string; degerler: Record
   { ozellik: "Becayiş talebi oluşturma", kaynak: "becayis-talep", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
   { ozellik: "Becayiş mesajlaşması", kaynak: "becayis-mesaj", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
   { ozellik: "Bana özel ilanlar", kaynak: "ozel-ilanlar", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
+  { ozellik: "İlan ve kurum takibinde hatırlatma", kaynak: "duyuru-takip", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
+  { ozellik: "Seri dondurma (ayda 2)", kaynak: "seri", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
   { ozellik: "Öncelikli destek", degerler: { UCRETSIZ: false, PRO: false, PRO_PLUS: true } },
 ];

@@ -7,24 +7,32 @@ import { LEVEL_LABEL } from "@/lib/labels";
 import { PLAN_ADI } from "@/lib/planlar";
 import { ilanKartlari } from "@/lib/mobil";
 import { getOkunmamisIlgilendiklerimSayisi, getOkunmamisMesajSayisi, getTaleplerim } from "@/lib/becayis";
+import { rozetDurumu } from "@/lib/rozetler";
+import { kisiselOzet } from "@/lib/kisiselOzet";
+import { kalanGunSayisi } from "@/lib/ilanVitrin";
 
-/** Mobil profil: sitedeki /profilim (kullanici, becayis ozeti, okunmamislar, bana ozel ilanlar). Giris yoksa { kullanici: null }. */
+/** Mobil profil: sitedeki /profilim (profil karti, kacirilan ilanlar, becayis ozeti, okunmamislar, bana ozel ilanlar). Giris yoksa { kullanici: null }. */
 export async function GET() {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ kullanici: null });
-  const [bolum, foto, ilanlar, taleplerim, okunmamisMesaj, okunmamisIlgilendiklerim] = await Promise.all([
+  const premium = user.abonelikPlani !== "UCRETSIZ";
+  const [bolum, foto, ilanlar, taleplerim, okunmamisMesaj, okunmamisIlgilendiklerim, rozet, ozet] = await Promise.all([
     user.departmentId ? prisma.department.findUnique({ where: { id: user.departmentId }, select: { id: true, name: true, slug: true } }) : null,
     profilFotografiUrl(user.id),
     user.departmentId ? getPostingsForDepartment(user.departmentId) : user.educationLevel ? getPostingsForLevel(user.educationLevel) : Promise.resolve([]),
     getTaleplerim(user.id),
     getOkunmamisMesajSayisi(user.id),
     getOkunmamisIlgilendiklerimSayisi(user.id),
+    rozetDurumu(user),
+    // Kacirilan ilan sayisi yalniz ucretsiz uyeye (Pro'ya yonlendirme).
+    premium ? null : kisiselOzet(user.departmentId),
   ]);
   const aktifTalepler = taleplerim.filter((t) => t.isActive);
   const sonMesajlar = taleplerim
     .flatMap((t) => t.threads.flatMap((th) => th.mesajlar.map((m) => ({ id: m.id, karsiAdSoyad: th.karsiAdSoyad, mesaj: m.mesaj, createdAt: m.createdAt, okundu: m.okundu || m.gonderenId === user.id }))))
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
     .slice(0, 5);
+  const kazanilan = rozet.rozetler.filter((r) => r.kazanildi);
   return NextResponse.json({
     kullanici: {
       adSoyad: user.adSoyad,
@@ -32,11 +40,17 @@ export async function GET() {
       plan: user.abonelikPlani,
       planAdi: PLAN_ADI[user.abonelikPlani],
       abonelikBitis: user.abonelikBitis?.toISOString() ?? null,
+      kalanGun: premium ? kalanGunSayisi(user.abonelikBitis) : null,
       fotografUrl: foto,
       bolum: bolum && { id: bolum.id, ad: bolum.name, slug: bolum.slug },
       duzey: user.educationLevel,
       duzeyAdi: user.educationLevel ? LEVEL_LABEL[user.educationLevel] : null,
     },
+    seriGun: rozet.seri.gun,
+    denemeSayisi: rozet.denemeSayisi,
+    rozetSayisi: kazanilan.length,
+    rozetler: kazanilan.slice(0, 4).map(({ id, ad, renk }) => ({ id, ad, renk })),
+    kacirilan30: ozet?.kacirilan30 ?? 0,
     aktifTalepler: aktifTalepler.slice(0, 3).map((t) => ({ id: t.id, meslek: t.meslek, mevcutIl: t.mevcutIl, mevcutIlce: t.mevcutIlce })),
     sonMesajlar: sonMesajlar.map((m) => ({ id: m.id, karsiAdSoyad: m.karsiAdSoyad, mesaj: m.mesaj, okundu: m.okundu })),
     okunmamisMesaj,

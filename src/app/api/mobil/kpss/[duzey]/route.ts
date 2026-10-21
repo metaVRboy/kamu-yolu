@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
+import { konuAnalizi } from "@/lib/kpssDenemeAnaliz";
 import {
+  denemeSiralamasi,
   denemeyiBitir,
   getBugununDenemesi,
   getDenemeSorulari,
@@ -61,7 +63,12 @@ export async function GET(_req: Request, { params }: { params: Promise<{ duzey: 
   const raporCevaplari = ucretsiz
     ? Object.fromEntries(sorular.flatMap((s, i) => (i % 6 === 5 ? [] : [[s.id, i % 4 === 3 ? (i + 1) % 5 : i % 5]])))
     : katilim.cevaplar;
-  const onceki = plan === "PRO_PLUS" ? await oncekiDenemeOzeti(user.id, duzey, katilim.id) : null;
+  const [onceki, siralama] = await Promise.all([
+    plan === "PRO_PLUS" ? oncekiDenemeOzeti(user.id, duzey, katilim.id) : null,
+    denemeSiralamasi(katilim.gunlukDenemeId, katilim.puan ?? 0, katilim.id),
+  ]);
+  // Pro+ disinda konu adlari gitmez; yalniz gercek cevaplarla sayilan zayif (kirmizi) konu sayisi.
+  const zayifKonuSayisi = plan === "PRO_PLUS" ? null : konuAnalizi(sorular, katilim.cevaplar as Record<string, number>).filter((k) => k.durum === "kirmizi").length;
   return NextResponse.json({
     durum: "bitti",
     plan,
@@ -71,6 +78,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ duzey: 
     yanlis: katilim.yanlisSayisi ?? 0,
     bos: katilim.bosSayisi ?? 0,
     puan: katilim.puan ?? 0,
+    siralama,
+    zayifKonuSayisi,
     onceki: onceki && { tarihMetni: KISA_GUN.format(onceki.tarih), net: onceki.net, puan: onceki.puan, dersNetleri: onceki.dersNetleri, konuDurumlari: onceki.konuDurumlari },
   });
 }

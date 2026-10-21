@@ -21,7 +21,7 @@ import {
 } from "lucide-react-native";
 import { Kart, T } from "@/bilesenler/ui";
 import { KesirliMetin } from "@/bilesenler/KesirliMetin";
-import { KilitliOzellik } from "@/bilesenler/KilitliOzellik";
+import { KilitliOzellik, yukseltmeAc } from "@/bilesenler/KilitliOzellik";
 import { SoruGovdesi, SoruHaritasi } from "@/bilesenler/SoruParcalari";
 import { SoruHataBildir } from "@/bilesenler/SoruHataBildir";
 import { DERS_LABEL, DUZEY_LABEL, DUZEY_TEMA, dersKarnesi, konuAnalizi, sayiFmt, type DenemeDuzeyi, type Ders, type KonuDurumu, type KonuSonucu, type Plan, type SonucSorusu } from "@/lib/kpss";
@@ -202,6 +202,8 @@ export function DenemeSonuc({
   duzey,
   onceki,
   plan,
+  siralama,
+  zayifKonuSayisi,
 }: {
   sorular: SonucSorusu[];
   cevaplar: Record<string, number>;
@@ -212,6 +214,10 @@ export function DenemeSonuc({
   duzey: DenemeDuzeyi;
   onceki: OncekiOzet | null;
   plan: Plan;
+  /** Ayni denemeyi bitirenler arasinda (yeterli katilimci varsa): yuzde = senden dusuk puan alanlarin orani. */
+  siralama?: { yuzde: number; katilimci: number } | null;
+  /** Pro+ disinda: yanlisi dogrusundan fazla konu sayisi (konu adlari Pro+'da). */
+  zayifKonuSayisi?: number | null;
 }) {
   const durum = (soru: SonucSorusu): "dogru" | "yanlis" | "bos" => {
     const v = cevaplar[soru.id];
@@ -490,6 +496,26 @@ export function DenemeSonuc({
             <View style={{ marginTop: 14 }}>
               <Serit dogru={dogru} yanlis={yanlis} bos={bos} kalin />
             </View>
+            {!!siralama && (
+              <View style={{ marginTop: 12, borderRadius: 12, backgroundColor: renk.birincilZemin, paddingHorizontal: 12, paddingVertical: 8 }}>
+                <T w="yariKalin" style={{ color: renk.birincil, textAlign: "center" }}>
+                  Bugünkü sıralaman: en iyi %{Math.max(1, 100 - siralama.yuzde)} · {siralama.katilimci} katılımcı
+                </T>
+              </View>
+            )}
+            {!!zayifKonuSayisi && (
+              <View style={{ marginTop: 8, borderRadius: 12, backgroundColor: "#fef2f2", paddingHorizontal: 12, paddingVertical: 8 }}>
+                <T style={{ color: "#7f1d1d", textAlign: "center", lineHeight: 20 }}>
+                  <T w="kalin" style={{ color: "#7f1d1d" }}>
+                    {zayifKonuSayisi} konuda
+                  </T>{" "}
+                  yanlışın doğrundan fazla.{" "}
+                  <T w="kalin" style={{ color: "#6d28d9", textDecorationLine: "underline" }} onPress={() => yukseltmeAc("PRO_PLUS", "zayif-konu")}>
+                    Hangileri? Pro+&apos;da gör
+                  </T>
+                </T>
+              </View>
+            )}
           </View>
         </View>
         <T style={{ borderTopWidth: 1, borderTopColor: "rgba(36,102,195,0.05)", paddingHorizontal: 20, paddingVertical: 12, fontSize: 12, color: renk.soluk, lineHeight: 18 }}>
@@ -503,7 +529,7 @@ export function DenemeSonuc({
           gerekenPlan="PRO"
           kaynak="rapor"
           uzun
-          baslik="Sınav sonu raporun"
+          baslik={yanlis > 0 ? `${yanlis} yanlışının doğru cevabı ve açıklaması Pro'da` : "Sınav sonu raporun"}
           ozellikler={[
             "Pro: ders karnesi (her derste doğru, yanlış, boş ve net)",
             "Pro: soruların doğru cevapları ve açıklamaları",

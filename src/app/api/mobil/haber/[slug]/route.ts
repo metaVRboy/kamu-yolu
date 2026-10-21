@@ -30,6 +30,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
   return NextResponse.json({
     ...haberKarti(h),
     kaynakUrl: h.kaynakUrl,
+    kurumAdi: h.kurumAdi || null,
     paylasimUrl: `${SITE_URL}/haberler/${h.slug}`,
     suresiGecti: haberSuresiGectiMi(h),
     bilgiKutulari: dolu([

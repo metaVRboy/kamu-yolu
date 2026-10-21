@@ -4,15 +4,18 @@ import { getDepartmentPostingCounts, getHomepageStats, getLatestPostings } from 
 import { getYayindakiHaberler } from "@/lib/haberler";
 import { kurumaGoreGrupla, kurumLogolari } from "@/lib/ilanVitrin";
 import { haberKarti, ilanKarti } from "@/lib/mobil";
+import { getSiteAyarlari, kpssKalanGun } from "@/lib/siteAyarlari";
+import { bugununTarihi } from "@/lib/kpssDeneme";
 
 /** Mobil ana sayfa: sitedeki ana sayfanin verisi (istatistik, bolum arama listesi, haberler, kurum bazli yeni ilanlar). */
 export async function GET() {
-  const [latestPostings, haberler, bolumSatirlari, stats, ilanSayilari] = await Promise.all([
+  const [latestPostings, haberler, bolumSatirlari, stats, ilanSayilari, ayar] = await Promise.all([
     getLatestPostings(120),
     getYayindakiHaberler(),
     prisma.department.findMany({ select: { id: true, slug: true, name: true, level: true }, orderBy: { name: "asc" } }),
     getHomepageStats(),
     getDepartmentPostingCounts(),
+    getSiteAyarlari(),
   ]);
   const gruplar = kurumaGoreGrupla(latestPostings, 6);
   const logolar = await kurumLogolari(gruplar.map((g) => g.ilk));
@@ -22,5 +25,7 @@ export async function GET() {
     haberler: haberler.slice(0, 5).map(haberKarti),
     haberSayisi: haberler.length,
     ilanlar: gruplar.map((g) => ilanKarti(g, logolar.get(g.ilk.institutionName) ?? null)),
+    // KPSS geri sayimi (admin OSYM tarihini girmediyse null; sitedeki ust cubuk cipi).
+    kpssGun: kpssKalanGun(ayar, bugununTarihi()),
   });
 }

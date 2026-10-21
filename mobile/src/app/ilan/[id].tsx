@@ -22,6 +22,7 @@ import {
 } from "lucide-react-native";
 import { Buton, HataKutusu, Kart, T, Yukleniyor } from "@/bilesenler/ui";
 import { IlanGorsel, IlanKarti } from "@/bilesenler/IlanKarti";
+import { IlanTakipDugmesi, SuresiDolanIlanKarti } from "@/bilesenler/ProTesvik";
 import { useVeri } from "@/lib/api";
 import { kalanGunRozeti, tarihKisa, tarihUzun } from "@/lib/bicim";
 import { useOturum } from "@/lib/oturum";
@@ -38,6 +39,9 @@ export default function IlanDetay() {
   if (!i) return <Yukleniyor />;
   const kalan = kalanGunRozeti(i.kalanGun);
   const resmiIlan = () => WebBrowser.openBrowserAsync(i.kaynakUrl);
+  // Takip yalniz basvurusu suren ilanda anlamli; suresi dolmussa "bir dahakini kacirma" karti.
+  const suresiDoldu = (i.kalanGun !== null && i.kalanGun < 0) || !i.aktif;
+  const acik = i.kalanGun !== null && i.kalanGun >= 0;
 
   return (
     <View style={{ flex: 1 }}>
@@ -62,6 +66,8 @@ export default function IlanDetay() {
             </View>
           </View>
         </Kart>
+
+        {suresiDoldu && <SuresiDolanIlanKarti bolum={i.bolumler.length === 1 ? i.bolumler[0] : undefined} />}
 
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
           <BilgiKutusu ikon={Hourglass} etiket="Kalan süre" vurgu={{ renk: kalan.renk, zemin: kalan.zemin }}>
@@ -146,7 +152,8 @@ export default function IlanDetay() {
         )}
 
         <View style={{ gap: 12 }}>
-          {!!i.takvimUrl && <Buton tur="cerceve" ikon={CalendarPlus} etiket="Son başvuru gününü takvime ekle" onPress={() => Linking.openURL(i.takvimUrl!)} />}
+          {acik && <IlanTakipDugmesi ilanId={i.id} />}
+          {!!i.takvimUrl &&<Buton tur="cerceve" ikon={CalendarPlus} etiket="Son başvuru gününü takvime ekle" onPress={() => Linking.openURL(i.takvimUrl!)} />}
           <Buton tur="cerceve" ikon={Share2} etiket="Paylaş" onPress={() => Share.share({ message: `${i.kadro} — ${i.kurum}\n${i.paylasimUrl}` })} />
         </View>
 

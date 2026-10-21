@@ -38,7 +38,40 @@ export type AnaSayfaVeri = {
   haberler: HaberKartiVeri[];
   haberSayisi: number;
   ilanlar: IlanKartiVeri[];
+  kpssGun: number | null;
 };
+
+export type RozetRengi = "mavi" | "turuncu" | "yesil" | "mor";
+export type RozetOzet = { id: string; ad: string; renk: RozetRengi };
+export type SeriBilgisi = { gun: number; bugunCozuldu: boolean; enIyi: number; toplamGun: number; dondurmaKalan: number | null };
+
+/** /api/benim-ozetim: ana sayfanin uye parcalari (misafirde uye null). */
+export type UyeOzeti = {
+  uye: {
+    adSoyad: string;
+    fotoUrl: string | null;
+    bolum: string | null;
+    duzey: string | null;
+    plan: "UCRETSIZ" | "PRO" | "PRO_PLUS";
+    planAdi: string;
+    planKalanGun: number | null;
+    seri: SeriBilgisi;
+    denemeSayisi: number;
+    rozetSayisi: number;
+    rozetler: RozetOzet[];
+  } | null;
+  ozet?: { bolumAdi: string; bolumSlug: string; yeni7: number; yaklasan: number; kacirilan30: number; aktif: number } | null;
+  sonDeneme?: { puan: number | null; siralama: { yuzde: number; katilimci: number } | null } | null;
+};
+
+/** /api/pro-bandi: uyenin gercek durumundan secilen Pro mesaji (Pro+ ve bos durumda null). */
+export type BantMesaji = {
+  tur: string;
+  once: string;
+  vurgu: string;
+  sonra: string;
+  cta: { etiket: string; eylem: "kayit" | "yukselt" | "link"; href?: string; plan?: "PRO" | "PRO_PLUS" };
+} | null;
 
 export type IlanListesiVeri = {
   baslik: string;
@@ -49,6 +82,7 @@ export type IlanListesiVeri = {
   filtreler: { kurumTurleri: { deger: string; ad: string }[]; ilanTurleri: string[]; iller: string[] };
   ilanlar: IlanKartiVeri[];
   haberler: HaberKartiVeri[];
+  bolum: { ad: string; seviyeSlug: string | null; son30: number; ortalamaGun: number | null } | null;
 };
 
 export type IlanDetayVeri = {
@@ -78,6 +112,7 @@ export type IlanDetayVeri = {
 
 export type HaberDetayVeri = HaberKartiVeri & {
   kaynakUrl: string | null;
+  kurumAdi: string | null;
   paylasimUrl: string;
   suresiGecti: boolean;
   bilgiKutulari: { etiket: string; deger: string; vurgu: boolean }[];
@@ -103,11 +138,17 @@ export type ProfilVeri = {
     plan: "UCRETSIZ" | "PRO" | "PRO_PLUS";
     planAdi: string;
     abonelikBitis: string | null;
+    kalanGun: number | null;
     fotografUrl: string | null;
     bolum: { id: string; ad: string; slug: string } | null;
     duzey: string | null;
     duzeyAdi: string | null;
   } | null;
+  seriGun: number;
+  denemeSayisi: number;
+  rozetSayisi: number;
+  rozetler: RozetOzet[];
+  kacirilan30: number;
   aktifTalepler: { id: string; meslek: string; mevcutIl: string; mevcutIlce: string | null }[];
   sonMesajlar: { id: string; karsiAdSoyad: string; mesaj: string; okundu: boolean }[];
   okunmamisMesaj: number;
@@ -117,11 +158,16 @@ export type ProfilVeri = {
 };
 
 export type BecayisOzet = { id: string; meslek: string; kurumTuru: string | null; mevcutIl: string; mevcutIlce: string | null; istenenIller: string[] };
-export type BecayisDetay = BecayisOzet & { aciklama: string | null; sahipAd: string; sahibi: boolean };
+export type BecayisDetay = BecayisOzet & { aciklama: string | null; sahipAd: string; sahibi: boolean; goruntulenme: number };
 export type BecayisMesaj = { id: string; gonderenId: string | null; mesaj: string; createdAt: string; sikayetEdildi: boolean };
 export type BecayisSohbet = { karsiId: string; karsiAdSoyad: string; okunmamisSayisi: number; mesajlar: BecayisMesaj[] };
 type BecayisKendi = Omit<BecayisOzet, "kurumTuru"> & { isActive: boolean };
-export type TaleplerimVeri = { kullaniciId: string; talepler: (BecayisKendi & { threads: BecayisSohbet[] })[] };
+export type BecayisEslesme = { id: string; meslek: string; mevcutIl: string; mevcutIlce: string | null; adSoyad: string };
+export type TaleplerimVeri = {
+  kullaniciId: string;
+  pro: boolean;
+  talepler: (BecayisKendi & { goruntulenme: number; eslesmeler: BecayisEslesme[]; threads: BecayisSohbet[] })[];
+};
 export type IlgilendiklerimVeri = {
   kullaniciId: string;
   talepler: (BecayisKendi & { ilanSahibiAdSoyad: string; okunmamisSayisi: number; mesajlar: BecayisMesaj[] })[];

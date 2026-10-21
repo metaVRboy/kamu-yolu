@@ -18,7 +18,19 @@ type Durum =
   | { durum: "giris-yok" }
   | { durum: "baslamadi"; plan: Plan; hak: { limit: number | null; kullanilan: number; doldu: boolean } }
   | { durum: "suruyor"; katilimId: string; kalanMs: number; sorular: ExamSoru[]; cevaplar: Record<string, number> }
-  | { durum: "bitti"; plan: Plan; sorular: SonucSorusu[]; cevaplar: Record<string, number>; dogru: number; yanlis: number; bos: number; puan: number; onceki: OncekiOzet | null };
+  | {
+      durum: "bitti";
+      plan: Plan;
+      sorular: SonucSorusu[];
+      cevaplar: Record<string, number>;
+      dogru: number;
+      yanlis: number;
+      bos: number;
+      puan: number;
+      onceki: OncekiOzet | null;
+      siralama?: { yuzde: number; katilimci: number } | null;
+      zayifKonuSayisi?: number | null;
+    };
 
 const PLAN_ADI = { UCRETSIZ: "Ücretsiz", PRO: "Pro", PRO_PLUS: "Pro+" } as const;
 const HAK: Record<Plan, number | null> = { UCRETSIZ: 1, PRO: 3, PRO_PLUS: null };

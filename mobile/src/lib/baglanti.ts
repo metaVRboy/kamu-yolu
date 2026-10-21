@@ -5,7 +5,7 @@ import { SITE } from "@/lib/api";
 // Sitedeki yol → uygulamadaki ekran. Karsiligi olmayan yol (ve dis baglanti) tarayicida acilir.
 const ESLEME: [RegExp, (m: RegExpMatchArray) => Href][] = [
   [/^\/$/, () => "/"],
-  [/^\/ilan\/([^/]+)$/, (m) => ({ pathname: "/ilan/[id]", params: { id: m[1] } })],
+  [/^\/ilan\/([^/]+)(\/[^/]*)?$/, (m) => ({ pathname: "/ilan/[id]", params: { id: m[1] } })],
   [/^\/haberler\/([^/]+)$/, (m) => ({ pathname: "/haber/[slug]", params: { slug: m[1] } })],
   [/^\/haberler$/, () => "/haberler"],
   [/^\/ilanlar$/, () => "/ilanlar"],
@@ -21,6 +21,8 @@ const ESLEME: [RegExp, (m: RegExpMatchArray) => Href][] = [
   [/^\/analiz$/, () => "/analiz"],
   [/^\/profilim\/abonelik$/, () => "/abonelik"],
   [/^\/profilim\/ayarlar$/, () => "/ayarlar"],
+  [/^\/profilim\/(takip|rozetler|davet)$/, (m) => `/${m[1]}` as Href],
+  [/^\/gunun-sorulari$/, () => "/gunun-sorulari"],
   [/^\/profilim$/, () => "/profil"],
 ];
 
