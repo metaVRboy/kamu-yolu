@@ -194,7 +194,8 @@ function Pencere({ baslangicPlani, kaynak, kapat }: { baslangicPlani?: UcretliPl
       aria-modal="true"
       aria-labelledby="yukseltme-baslik"
     >
-      <div className="animate-yukselt-ac relative grid max-h-[94vh] w-full max-w-4xl overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:rounded-3xl md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+      {/* Telefonda (tek sutun) pencerenin tamami kayar; masaustunde yalniz sag sutun (yoksa alt satirlar kesiliyordu). */}
+      <div className="animate-yukselt-ac relative grid max-h-[94vh] w-full max-w-4xl overflow-y-auto rounded-t-3xl bg-white shadow-2xl sm:rounded-3xl md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:overflow-hidden">
         <button
           type="button"
           onClick={kapat}
@@ -263,7 +264,7 @@ function Pencere({ baslangicPlani, kaynak, kapat }: { baslangicPlani?: UcretliPl
         </div>
 
         {/* Sag: plan secimi, karsilastirma, eylem */}
-        <div className="overflow-y-auto p-5 md:p-7">
+        <div className="p-5 md:max-h-[94vh] md:overflow-y-auto md:p-7">
           {durum === "tamam" ? (
             <div className="flex min-h-80 flex-col items-center justify-center text-center">
               <span className={cn("flex h-16 w-16 items-center justify-center rounded-full", tema.acik)}>
@@ -482,7 +483,7 @@ function Pencere({ baslangicPlani, kaynak, kapat }: { baslangicPlani?: UcretliPl
                 <button type="button" onClick={kapat} className="mt-2 w-full py-1.5 text-sm font-medium text-muted-foreground hover:text-slate-800">
                   Şimdi değil
                 </button>
-                <p className="mt-2 text-center text-[11px] text-muted-foreground">
+                <p className="mt-2 text-center text-xs leading-relaxed text-slate-600">
                   {SATIS_ACIK ? (
                     <>
                       Ödemeden önce{" "}
