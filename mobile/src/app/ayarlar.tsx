@@ -472,7 +472,7 @@ function OturumListesi({ oturumlar, degisti }: { oturumlar: OturumSatiri[]; degi
   );
 }
 
-/* ---------------- Bildirimler (WhatsApp) ---------------- */
+/* ---------------- Bildirimler (WhatsApp + e-posta) ---------------- */
 
 const WHATSAPP_SECENEKLERI = [
   { alan: "whatsappIlanBildirimi", baslik: "Bölümüne uygun yeni ilanlar", aciklama: "Taramalardan sonra yeni ilanlar tek WhatsApp mesajında toplanır; günde en fazla 3 mesaj." },
@@ -523,6 +523,34 @@ function TicariIletiTercihi({ ilk }: { ilk: boolean }) {
   );
 }
 
+/** Pro: bolumune uygun yeni ilanlar e-postayla (tarama sonrasi tek e-postada). Varsayilan acik. */
+function EpostaIlanTercihi({ ilk }: { ilk: boolean }) {
+  const [acik, setAcik] = useState(ilk);
+  const [kaydediliyor, setKaydediliyor] = useState(false);
+
+  async function degistir(deger: boolean) {
+    setAcik(deger);
+    setKaydediliyor(true);
+    try {
+      await api("/api/profil/bildirim-tercihleri", { method: "PATCH", govde: { epostaIlanBildirimi: deger } });
+    } catch (e) {
+      setAcik(!deger);
+      Alert.alert("Tercih kaydedilemedi.", hataMetni(e));
+    } finally {
+      setKaydediliyor(false);
+    }
+  }
+
+  return (
+    <View style={s.tercih} pointerEvents={kaydediliyor ? "none" : "auto"}>
+      <Onay secili={acik} degistir={degistir}>
+        <T w="yariKalin">Bölümüne uygun yeni ilanlar</T>
+        <T style={{ fontSize: 12, color: renk.soluk, lineHeight: 17 }}>Taramalardan sonra yeni ilanlar tek e-postada toplanır; e-posta adresine gönderilir.</T>
+      </Onay>
+    </View>
+  );
+}
+
 function WhatsappKartlari({ v, degisti }: { v: AyarlarVeri; degisti: () => void }) {
   const kartlar = (telefon: ReactNode, tercihler: ReactNode) => (
     <View style={{ gap: 16 }}>
@@ -532,33 +560,41 @@ function WhatsappKartlari({ v, degisti }: { v: AyarlarVeri; degisti: () => void 
       <AyarKarti baslik="WhatsApp bildirimleri" aciklama="Hangi bildirimlerin WhatsApp ile gelmesini istediğini seç. Site içi bildirimler her zaman açık.">
         {tercihler}
       </AyarKarti>
+      <AyarKarti baslik="E-posta bildirimleri" aciklama="Hesabındaki e-posta adresine gönderilir.">
+        <EpostaIlanTercihi ilk={v.bildirim.pro ? v.bildirim.epostaIlanBildirimi : true} />
+      </AyarKarti>
     </View>
   );
 
-  if (!v.whatsapp.pro) {
+  if (!v.bildirim.pro) {
     // Ekran ayni kalir, bulanik ve dokunulamaz; API'ler de Pro kontrolu yapar.
     return (
       <KilitliOzellik
         mevcutPlan={v.plan}
         gerekenPlan="PRO"
         kaynak="whatsapp"
-        baslik="WhatsApp bildirimleri Pro'da"
-        ozellikler={["Bölümüne uygun yeni ilan çıkınca anında WhatsApp mesajı", "Becayiş talebine mesaj gelince WhatsApp mesajı", "Kişisel site içi bildirimler de Pro ile açılır", "Genel duyurular her planda açık"]}
+        baslik="İlan bildirimleri Pro'da"
+        ozellikler={["Bölümüne uygun yeni ilan çıkınca WhatsApp, e-posta ve site bildirimi", "Becayiş talebine mesaj gelince WhatsApp mesajı", "Kişisel site içi bildirimler de Pro ile açılır", "Genel duyurular her planda açık"]}
       >
         {kartlar(<TelefonDogrulama dogrulanmis={null} degisti={degisti} />, <WhatsappTercihleri ilk={{ whatsappIlanBildirimi: true, whatsappBecayisBildirimi: true }} telefonDogrulandi={false} />)}
       </KilitliOzellik>
     );
   }
-  if (v.whatsapp.hazirDegil) {
+  if (v.bildirim.hazirDegil) {
     return (
-      <AyarKarti baslik="WhatsApp bildirimleri">
-        <T style={{ color: "#334155", lineHeight: 20 }}>WhatsApp bildirimlerini kuruyoruz. Çok yakında bu sayfadan telefonunu doğrulayıp WhatsApp bildirimlerini açabileceksin.</T>
-      </AyarKarti>
+      <View style={{ gap: 16 }}>
+        <AyarKarti baslik="WhatsApp bildirimleri">
+          <T style={{ color: "#334155", lineHeight: 20 }}>WhatsApp bildirimlerini kuruyoruz. Çok yakında bu sayfadan telefonunu doğrulayıp WhatsApp bildirimlerini açabileceksin.</T>
+        </AyarKarti>
+        <AyarKarti baslik="E-posta bildirimleri" aciklama="Hesabındaki e-posta adresine gönderilir.">
+          <EpostaIlanTercihi ilk={v.bildirim.epostaIlanBildirimi} />
+        </AyarKarti>
+      </View>
     );
   }
   return kartlar(
-    <TelefonDogrulama dogrulanmis={v.whatsapp.dogrulanmisTelefon} degisti={degisti} />,
-    <WhatsappTercihleri ilk={{ whatsappIlanBildirimi: v.whatsapp.whatsappIlanBildirimi, whatsappBecayisBildirimi: v.whatsapp.whatsappBecayisBildirimi }} telefonDogrulandi={!!v.whatsapp.dogrulanmisTelefon} />,
+    <TelefonDogrulama dogrulanmis={v.bildirim.dogrulanmisTelefon} degisti={degisti} />,
+    <WhatsappTercihleri ilk={{ whatsappIlanBildirimi: v.bildirim.whatsappIlanBildirimi, whatsappBecayisBildirimi: v.bildirim.whatsappBecayisBildirimi }} telefonDogrulandi={!!v.bildirim.dogrulanmisTelefon} />,
   );
 }
 
@@ -664,7 +700,7 @@ function WhatsappTercihleri({ ilk, telefonDogrulandi }: { ilk: Record<WhatsappAl
     setTercih((t) => ({ ...t, [alan]: deger }));
     setKaydediliyor(alan);
     try {
-      await api("/api/profil/whatsapp-tercihleri", { method: "PATCH", govde: { [alan]: deger } });
+      await api("/api/profil/bildirim-tercihleri", { method: "PATCH", govde: { [alan]: deger } });
     } catch (e) {
       setTercih((t) => ({ ...t, [alan]: !deger }));
       Alert.alert("Tercih kaydedilemedi.", hataMetni(e));

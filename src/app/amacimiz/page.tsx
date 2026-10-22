@@ -91,7 +91,7 @@ const GRUPLAR: { ad: string; aciklama: string; renk: { rozet: string; ikon: stri
     ozellikler: [
       { ikon: Newspaper, baslik: "Kamu haberleri", metin: "Alım duyuruları ve kamu personelini ilgilendiren haberler, kaynağıyla doğrulanarak yayımlanır.", href: "/haberler" },
       { ikon: Bell, baslik: "Bildirimler", metin: "Bölümüne uygun yeni ilan çıkınca ya da becayiş talebine mesaj gelince haberin olur.", href: "/profilim/ayarlar/bildirimler", pro: "Pro" },
-      { ikon: Smartphone, baslik: "WhatsApp ile anlık bildirim", metin: "Yeni ilanı WhatsApp'ına gelen mesajla herkesten önce öğren.", href: "/profilim/ayarlar/bildirimler", pro: "Pro" },
+      { ikon: Smartphone, baslik: "Anlık ilan bildirimi", metin: "Yeni ilanı WhatsApp, e-posta ve site bildirimiyle herkesten önce öğren.", href: "/profilim/ayarlar/bildirimler", pro: "Pro" },
       { ikon: UserCheck, baslik: "Bana özel ilanlar", metin: "Profilindeki bölüm ve öğrenim düzeyine uygun ilanlar tek listede.", href: "/profilim", pro: "Pro" },
     ],
   },
@@ -297,7 +297,7 @@ export default async function AmacimizPage() {
               fiyat: `${tl(fiyatlar.PRO.aylik.odenecek)} / ay`,
               maddeler: [
                 "Haftada toplam 3 deneme, ders karnesi ve soru çözümleri",
-                "Kişisel bildirimler ve WhatsApp ile anlık ilan bildirimi",
+                "Kişisel bildirimler; WhatsApp ve e-posta ile anlık ilan bildirimi",
                 "Becayiş talebi oluşturma ve mesajlaşma",
                 "Bana özel ilanlar",
               ],

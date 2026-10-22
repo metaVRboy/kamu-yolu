@@ -29,7 +29,7 @@ const PLANLAR: { key: Plan; aciklama: string; populer?: boolean; ozellikler: str
       "Standart'taki her şey",
       "Kişisel bildirimler: yeni ilan ve becayiş mesajı",
       "Bana özel ilanlar",
-      "WhatsApp ile anlık ilan bildirimi",
+      "WhatsApp ve e-posta ile anlık ilan bildirimi",
       "Becayiş talebi oluşturma",
       "Becayiş için site içi mesajlaşma",
       "Haftada toplam 3 KPSS denemesi, ders karnesi ve soru çözümleri",

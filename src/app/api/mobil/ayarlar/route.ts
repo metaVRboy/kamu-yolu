@@ -39,13 +39,14 @@ export async function GET() {
     sifreVar: !!user.passwordHash,
     googleBagli: !!user.googleId,
     oturumlar: oturumlar.map((o) => ({ id: o.id, cihaz: o.cihaz, olusturma: TARIH.format(o.olusturma), sonGorulme: TARIH.format(o.sonGorulme), buCihaz: o.id === aktifOturumId })),
-    whatsapp: {
+    bildirim: {
       pro,
       // Saglayici baglanana kadar yalniz admin test edebilir (kod ekranda gosterilir).
       hazirDegil: !whatsappTanimli() && !user.isAdmin,
       dogrulanmisTelefon: telefonDogrulandi && user.telefon ? telefonGoster(user.telefon) : null,
       whatsappIlanBildirimi: user.whatsappIlanBildirimi,
       whatsappBecayisBildirimi: user.whatsappBecayisBildirimi,
+      epostaIlanBildirimi: user.epostaIlanBildirimi,
     },
     kvkkOnayTarihi: user.kvkkOnayTarihi ? TARIH.format(user.kvkkOnayTarihi) : null,
     ticariIletiOnay: user.ticariIletiOnay,

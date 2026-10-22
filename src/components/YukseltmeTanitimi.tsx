@@ -162,7 +162,7 @@ type Slayt = {
 const vurgu = (s: ReactNode) => <span className="bg-gradient-to-r from-amber-200 to-yellow-100 bg-clip-text text-transparent">{s}</span>;
 
 /**
- * Kaydirilabilir ozellik slaytlari: once SMS, sonra ilanlar, KPSS, becayis, Pro+ farki. Tum sayilar
+ * Kaydirilabilir ozellik slaytlari: once WhatsApp bildirimi, sonra ilanlar, KPSS, becayis, Pro+ farki. Tum sayilar
  * gercek; anlamsiz kucukse sayisiz metin. Pro uye yalniz Pro+'in kattiklarini gorur.
  */
 function slaytlar(v: Veri): Slayt[] {
@@ -232,7 +232,7 @@ function slaytlar(v: Veri): Slayt[] {
       alt: "Bölümüne uygun bir ilan yayımlandığında siteye girmeni beklemeden haber veririz; başvuru süresini kaçırmazsın.",
       cipler: [
         { ikon: Smartphone, metin: "Zaten kullandığın WhatsApp'a gelir" },
-        { ikon: BellRing, metin: "Site içi bildirim de gelir" },
+        { ikon: BellRing, metin: "E-posta ve site bildirimi de gelir" },
       ],
       gorsel: (
         <div className="w-full max-w-xs rounded-2xl bg-white/95 p-3 text-slate-800 shadow-xl shadow-indigo-950/30 ring-1 ring-white/60">
@@ -303,7 +303,7 @@ const PLAN_KART: Record<UcretliPlan, { ad: string; rozet: string; maddeler: stri
   PRO: {
     ad: "Pro",
     rozet: "Önerilen", // satis yokken "en populer" ispatlanamaz bir iddia
-    maddeler: ["Bölümüne uygun yeni ilan çıkınca anında WhatsApp mesajı", "Sana özel ilanlar tek listede", "Becayiş talebi oluştur ve mesajlaş", "Haftada 3 KPSS denemesi + ders karnesi ve çözümler"],
+    maddeler: ["Bölümüne uygun yeni ilan çıkınca anında WhatsApp ve e-posta", "Sana özel ilanlar tek listede", "Becayiş talebi oluştur ve mesajlaş", "Haftada 3 KPSS denemesi + ders karnesi ve çözümler"],
     kart: "border-blue-200 bg-gradient-to-b from-blue-50/80 to-white",
     buton: "from-blue-600 to-indigo-600 shadow-blue-600/30",
     vurgu: "text-blue-700",

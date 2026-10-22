@@ -607,6 +607,46 @@ export function TicariIletiTercihi({ ilk }: { ilk: boolean }) {
   );
 }
 
+/** Pro: bolumune uygun yeni ilanlar e-postayla (tarama sonrasi tek e-postada). Varsayilan acik. */
+export function EpostaIlanTercihi({ ilk }: { ilk: boolean }) {
+  const [acik, setAcik] = useState(ilk);
+  const [kaydediliyor, setKaydediliyor] = useState(false);
+
+  async function degistir(deger: boolean) {
+    setAcik(deger);
+    setKaydediliyor(true);
+    try {
+      const res = await fetch("/api/profil/bildirim-tercihleri", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ epostaIlanBildirimi: deger }),
+      });
+      if (!res.ok) {
+        setAcik(!deger);
+        toast.error("Tercih kaydedilemedi.", await hataMetni(res));
+      }
+    } finally {
+      setKaydediliyor(false);
+    }
+  }
+
+  return (
+    <label className="flex items-start gap-3 rounded-xl border border-primary/15 p-4">
+      <input
+        type="checkbox"
+        checked={acik}
+        disabled={kaydediliyor}
+        onChange={(e) => degistir(e.target.checked)}
+        className="mt-0.5 h-4 w-4 rounded border-primary/30 accent-primary"
+      />
+      <span>
+        <span className="block text-sm font-semibold text-slate-800">Bölümüne uygun yeni ilanlar</span>
+        <span className="block text-xs text-muted-foreground">Taramalardan sonra yeni ilanlar tek e-postada toplanır; e-posta adresine gönderilir.</span>
+      </span>
+    </label>
+  );
+}
+
 const WHATSAPP_SECENEKLERI = [
   { alan: "whatsappIlanBildirimi", baslik: "Bölümüne uygun yeni ilanlar", aciklama: "Taramalardan sonra yeni ilanlar tek WhatsApp mesajında toplanır; günde en fazla 3 mesaj." },
   { alan: "whatsappBecayisBildirimi", baslik: "Becayiş mesajları", aciklama: "Becayiş ilanlarında sana yeni bir mesaj geldiğinde (30 dakikada en fazla 1 mesaj)." },
@@ -624,7 +664,7 @@ export function WhatsappTercihleri({ ilk, telefonDogrulandi }: { ilk: Record<Wha
     setTercih((t) => ({ ...t, [alan]: deger }));
     setKaydediliyor(alan);
     try {
-      const res = await fetch("/api/profil/whatsapp-tercihleri", {
+      const res = await fetch("/api/profil/bildirim-tercihleri", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ [alan]: deger }),

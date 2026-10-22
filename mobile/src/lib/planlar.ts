@@ -41,7 +41,7 @@ export const KARSILASTIRMA: { ozellik: string; kaynak?: string; degerler: Record
   { ozellik: "Ders karnesi ve soru çözümleri", kaynak: "rapor", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
   { ozellik: "Konu bazlı değerlendirme ve gelişim", kaynak: "gelisim", degerler: { UCRETSIZ: false, PRO: false, PRO_PLUS: true } },
   { ozellik: "Kişisel bildirimler", kaynak: "bildirim", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
-  { ozellik: "WhatsApp ile anlık ilan bildirimi", kaynak: "whatsapp", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
+  { ozellik: "WhatsApp ve e-posta ile anlık ilan bildirimi", kaynak: "whatsapp", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
   { ozellik: "Becayiş talebi oluşturma", kaynak: "becayis-talep", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
   { ozellik: "Becayiş mesajlaşması", kaynak: "becayis-mesaj", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
   { ozellik: "Bana özel ilanlar", kaynak: "ozel-ilanlar", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },

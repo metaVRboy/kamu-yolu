@@ -4,7 +4,7 @@ import { KilitliOzellik } from "@/components/KilitliOzellik";
 import { proAktifMi, whatsappTanimli, telefonGoster } from "@/lib/whatsapp";
 import { TICARI_ILETI_ACIK } from "@/lib/planlar";
 import { AyarKarti, AyarlarSayfasi } from "@/components/AyarlarSayfasi";
-import { WhatsappTercihleri, TelefonDogrulama, TicariIletiTercihi } from "@/components/HesapAyarlari";
+import { EpostaIlanTercihi, WhatsappTercihleri, TelefonDogrulama, TicariIletiTercihi } from "@/components/HesapAyarlari";
 import { TarayiciBildirimi } from "@/components/TarayiciBildirimi";
 
 export const metadata = { title: "Bildirim Ayarları — Kamu Yolu" };
@@ -27,6 +27,12 @@ export default async function BildirimAyarlariPage() {
     </AyarKarti>
   );
 
+  const eposta = (ilk: boolean) => (
+    <AyarKarti baslik="E-posta bildirimleri" aciklama="Hesabındaki e-posta adresine gönderilir.">
+      <EpostaIlanTercihi ilk={ilk} />
+    </AyarKarti>
+  );
+
   if (!proAktifMi(user)) {
     // Ekran ayni kalir, bulanik ve tiklanamaz (inert); API'ler de Pro kontrolu yapar.
     return (
@@ -35,9 +41,9 @@ export default async function BildirimAyarlariPage() {
           mevcutPlan={user.abonelikPlani}
           gerekenPlan="PRO"
           kaynak="whatsapp"
-          baslik="WhatsApp bildirimleri Pro'da"
+          baslik="İlan bildirimleri Pro'da"
           ozellikler={[
-            "Bölümüne uygun yeni ilan çıkınca anında WhatsApp mesajı",
+            "Bölümüne uygun yeni ilan çıkınca WhatsApp, e-posta ve site bildirimi",
             "Becayiş talebine mesaj gelince WhatsApp mesajı",
             "Kişisel site içi bildirimler de Pro ile açılır",
             "Genel duyurular her planda açık",
@@ -50,6 +56,7 @@ export default async function BildirimAyarlariPage() {
             <AyarKarti baslik="WhatsApp bildirimleri" aciklama="Hangi bildirimlerin WhatsApp ile gelmesini istediğini seç. Site içi bildirimler her zaman açık.">
               <WhatsappTercihleri telefonDogrulandi={false} ilk={{ whatsappIlanBildirimi: true, whatsappBecayisBildirimi: true }} />
             </AyarKarti>
+            {eposta(true)}
           </div>
         </KilitliOzellik>
         {tarayici}
@@ -81,6 +88,7 @@ export default async function BildirimAyarlariPage() {
           </AyarKarti>
         </>
       )}
+      {eposta(user.epostaIlanBildirimi)}
       {tarayici}
       {ticariIleti}
     </AyarlarSayfasi>

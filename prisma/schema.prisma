@@ -214,6 +214,10 @@ model User {
   // (2026-10-22 WhatsApp'a gecildi, hic SMS izni verilmemisti): ad degisti, kesintisiz deploy icin kolon ayni.
   whatsappIlanBildirimi    Boolean               @default(false) @map("smsIlanBildirimi")
   whatsappBecayisBildirimi Boolean               @default(false) @map("smsBecayisBildirimi")
+  // E-posta ile ilan ozeti (Pro): servis bildirimi, varsayilan acik; ayarlardan kapatilir (e-postada link var).
+  epostaIlanBildirimi      Boolean               @default(true)
+  // Son ilan e-postasinin kapsadigi en yeni bildirimin createdAt'i: sonraki e-posta bundan yenileri sayar.
+  epostaIlanKapsam         DateTime?
   // Ilk kez WhatsApp iznini verdigi an (onay kaydi).
   whatsappIzinTarihi       DateTime?             @map("smsIzinTarihi")
   // Ticari elektronik ileti (kampanya/duyuru e-posta; 2026-10-22 oncesi metin "SMS ve e-posta") onayi - 6563 s. Kanun. Varsayilan yok;
@@ -345,7 +349,7 @@ model TelefonDogrulamaKodu {
 
 // Odeme altyapisi gelene kadar "Acilinca haber ver": kullanici basina son istedigi
 // plan/donem (talep olcumu + odeme acilinca e-posta listesi). kaynak = hangi
-// yukseltme butonundan geldi (ör. "rapor", "sms").
+// yukseltme butonundan geldi (ör. "rapor", "whatsapp").
 model YukseltmeTalebi {
   id         String        @id @default(cuid())
   user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
