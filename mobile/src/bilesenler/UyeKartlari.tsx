@@ -2,7 +2,8 @@ import { useState, type ReactNode } from "react";
 import { Alert, Pressable, Share, StyleSheet, View } from "react-native";
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import { CalendarCheck, Flame, Gift, Sparkles, Sun } from "lucide-react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { CalendarCheck, Check, Crown, Flame, Gift, Lock, Sparkles, Sun } from "lucide-react-native";
 import { TesvikKarti } from "@/bilesenler/TesvikKarti";
 import { Kart, T } from "@/bilesenler/ui";
 import { yukseltmeAc } from "@/bilesenler/KilitliOzellik";
@@ -46,8 +47,69 @@ const basHarfler = (ad: string) =>
  * Sitedeki ProfilKarti: mavi kapak, foto, bolum, seri/deneme/rozet sayilari, rozetler, uyelik. Profil sekmesinde tam;
  * ana sayfada kompakt (telefonda ekranin yarisini kaplamasin, dokununca profil sekmesi).
  */
+type Renkler = [string, string, ...string[]];
+/** Sitedeki PLAN_TEMASI: ucretli uye kartinda kendini ozel hissetsin. Ayricaliklar planlardaki gercek ozellikler. */
+const PLAN_TEMASI: Record<string, { kapak: Renkler; halka: Renkler; rozet: Renkler; yazi: string; ayricalik: string[] } | undefined> = {
+  PRO: {
+    kapak: ["#2563eb", "#4f46e5", "#0ea5e9"],
+    halka: ["#7dd3fc", "#3b82f6", "#4f46e5"],
+    rozet: ["#2563eb", "#4f46e5"],
+    yazi: "#4338ca",
+    ayricalik: ["Bana özel ilanlar ve anında bildirim", "Ders karnesi ve soru çözümleri", "Seri koruması (ayda 2 dondurma)"],
+  },
+  PRO_PLUS: {
+    kapak: ["#6d28d9", "#c026d3", "#4338ca"],
+    halka: ["#fde68a", "#e879f9", "#7c3aed"],
+    rozet: ["#7c3aed", "#c026d3"],
+    yazi: "#7e22ce",
+    ayricalik: ["Sınırsız KPSS denemesi", "Konu konu eksik analizi ve gelişim", "Bana özel ilanlar ve anında bildirim"],
+  },
+};
+
+/** Isim yanindaki tacli plan rozeti (yalniz ucretli planda). */
+function PlanRozeti({ v }: { v: ProfilKartiVerisi }) {
+  const tema = PLAN_TEMASI[v.plan];
+  if (!tema) return null;
+  return (
+    <LinearGradient colors={tema.rozet} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={s.planRozeti}>
+      <Crown size={12} color="#fde68a" />
+      <T w="kalin" style={{ fontSize: 11, letterSpacing: 0.8, color: "#fff" }}>
+        {v.planAdi.toLocaleUpperCase("tr")}
+      </T>
+    </LinearGradient>
+  );
+}
+
+/** Ucretli uyenin ayricaliklari; ucretsizde ayni yerde kilitli ve soluk "Pro'da seni bekleyenler". */
+function Ayricaliklar({ v }: { v: ProfilKartiVerisi }) {
+  const tema = PLAN_TEMASI[v.plan];
+  const liste = (tema ?? PLAN_TEMASI.PRO!).ayricalik;
+  return (
+    <View style={{ gap: 6 }}>
+      {!tema && (
+        <T w="kalin" style={{ fontSize: 11, letterSpacing: 1, color: "#94a3b8" }}>
+          PRO&apos;DA SENİ BEKLEYENLER
+        </T>
+      )}
+      {liste.map((a) => (
+        <View key={a} style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          {tema ? (
+            <LinearGradient colors={tema.rozet} style={s.tik}>
+              <Check size={10} color="#fff" strokeWidth={3} />
+            </LinearGradient>
+          ) : (
+            <Lock size={13} color="#94a3b8" />
+          )}
+          <T style={{ flex: 1, fontSize: 13, color: tema ? "#475569" : "#94a3b8" }}>{a}</T>
+        </View>
+      ))}
+    </View>
+  );
+}
+
 export function ProfilKarti({ v, eposta, kapakSag, kompakt }: { v: ProfilKartiVerisi; eposta?: string; kapakSag?: ReactNode; kompakt?: boolean }) {
   const foto = v.fotoUrl && (v.fotoUrl.startsWith("/") ? SITE + v.fotoUrl : v.fotoUrl);
+  const tema = PLAN_TEMASI[v.plan];
   if (kompakt) {
     return (
       <Pressable onPress={() => router.navigate("/profil")}>
@@ -70,10 +132,14 @@ export function ProfilKarti({ v, eposta, kapakSag, kompakt }: { v: ProfilKartiVe
                 {v.altSatir}
               </T>
             </View>
-            <View style={{ alignItems: "flex-end" }}>
-              <T w="yariKalin" style={{ fontSize: 12 }}>
-                {v.planAdi}
-              </T>
+            <View style={{ alignItems: "flex-end", gap: 3 }}>
+              {tema ? (
+                <PlanRozeti v={v} />
+              ) : (
+                <T w="yariKalin" style={{ fontSize: 12 }}>
+                  {v.planAdi}
+                </T>
+              )}
               {v.kalanGun !== null && <T style={{ fontSize: 11, color: renk.soluk }}>{v.kalanGun} gün kaldı</T>}
             </View>
           </View>
@@ -88,21 +154,46 @@ export function ProfilKarti({ v, eposta, kapakSag, kompakt }: { v: ProfilKartiVe
   }
   return (
     <Kart style={{ overflow: "hidden" }}>
-      <View style={s.kapak}>{kapakSag}</View>
+      {tema ? (
+        <LinearGradient colors={tema.kapak} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.kapak}>
+          <Crown size={64} color="rgba(255,255,255,0.15)" style={{ position: "absolute", right: -6, bottom: -18, transform: [{ rotate: "12deg" }] }} />
+          {kapakSag}
+        </LinearGradient>
+      ) : (
+        <View style={s.kapak}>{kapakSag}</View>
+      )}
       <View style={{ paddingHorizontal: 18, paddingBottom: 18, gap: 12 }}>
-        <View style={s.avatar}>
-          {foto ? (
-            <Image source={{ uri: foto }} style={{ width: "100%", height: "100%" }} />
-          ) : (
-            <T w="kalin" style={{ fontSize: 22, color: renk.birincil }}>
-              {basHarfler(v.adSoyad)}
-            </T>
-          )}
-        </View>
+        {/* Ucretli planda avatarin cevresinde plan renginde halka. */}
+        {tema ? (
+          <LinearGradient colors={tema.halka} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.halka}>
+            <View style={[s.avatar, { marginTop: 0 }]}>
+              {foto ? (
+                <Image source={{ uri: foto }} style={{ width: "100%", height: "100%" }} />
+              ) : (
+                <T w="kalin" style={{ fontSize: 22, color: renk.birincil }}>
+                  {basHarfler(v.adSoyad)}
+                </T>
+              )}
+            </View>
+          </LinearGradient>
+        ) : (
+          <View style={s.avatar}>
+            {foto ? (
+              <Image source={{ uri: foto }} style={{ width: "100%", height: "100%" }} />
+            ) : (
+              <T w="kalin" style={{ fontSize: 22, color: renk.birincil }}>
+                {basHarfler(v.adSoyad)}
+              </T>
+            )}
+          </View>
+        )}
         <View>
-          <T w="kalin" style={{ fontSize: 18 }}>
-            {v.adSoyad}
-          </T>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
+            <T w="kalin" style={{ fontSize: 18 }}>
+              {v.adSoyad}
+            </T>
+            <PlanRozeti v={v} />
+          </View>
           <T style={{ color: renk.soluk, fontSize: 13 }}>{v.altSatir}</T>
           {!!eposta && <T style={{ color: renk.soluk, fontSize: 12, marginTop: 2 }}>{eposta}</T>}
         </View>
@@ -111,9 +202,10 @@ export function ProfilKarti({ v, eposta, kapakSag, kompakt }: { v: ProfilKartiVe
           <Sayac deger={v.denemeSayisi} etiket="deneme" zemin="rgba(36,102,195,0.1)" r={renk.birincil} />
           <Sayac deger={v.rozetSayisi} etiket="rozet" zemin="#ecfdf5" r="#047857" onPress={() => router.push("/rozetler")} />
         </View>
-        {v.rozetler.length > 0 ? (
+        {/* "Pro üye" rozeti plan rozetiyle tekrar etmesin. */}
+        {v.rozetler.some((r) => r.id !== "pro") && (
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
-            {v.rozetler.map((r) => (
+            {v.rozetler.filter((r) => r.id !== "pro").map((r) => (
               <View key={r.id} style={{ borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4, backgroundColor: ROZET_RENGI[r.renk].zemin }}>
                 <T w="yariKalin" style={{ fontSize: 12, color: ROZET_RENGI[r.renk].yazi }}>
                   {r.ad}
@@ -121,19 +213,30 @@ export function ProfilKarti({ v, eposta, kapakSag, kompakt }: { v: ProfilKartiVe
               </View>
             ))}
           </View>
-        ) : (
-          <T style={{ fontSize: 13, color: renk.soluk }}>Henüz rozetin yok. Günün sorularını çöz, ilk rozetini kazan.</T>
         )}
+        <Ayricaliklar v={v} />
         <View style={s.uyelik}>
-          <T style={{ flex: 1, fontSize: 13, color: renk.soluk }}>
-            Üyelik: <T w="yariKalin" style={{ fontSize: 13 }}>{v.planAdi}</T>
-            {v.kalanGun !== null && ` · ${v.kalanGun} gün kaldı`}
-          </T>
-          {v.plan !== "PRO_PLUS" && (
+          {tema ? (
+            <View style={{ flex: 1 }}>
+              <T w="kalin" style={{ fontSize: 13, color: tema.yazi }}>
+                {v.planAdi} üyesin
+              </T>
+              {v.kalanGun !== null && <T style={{ fontSize: 12, color: renk.soluk }}>{v.kalanGun} gün kaldı</T>}
+            </View>
+          ) : (
+            <T style={{ flex: 1, fontSize: 13, color: renk.soluk }}>
+              Üyelik: <T w="yariKalin" style={{ fontSize: 13 }}>{v.planAdi}</T>
+            </T>
+          )}
+          {v.plan === "UCRETSIZ" ? (
             <T w="yariKalin" style={{ color: renk.birincil }} onPress={() => yukseltmeAc(undefined, "genel")}>
               Yükselt
             </T>
-          )}
+          ) : v.plan === "PRO" ? (
+            <T w="yariKalin" style={{ color: "#6d28d9" }} onPress={() => yukseltmeAc("PRO_PLUS", "genel")}>
+              Pro+&apos;ya geç
+            </T>
+          ) : null}
         </View>
       </View>
     </Kart>
@@ -337,6 +440,9 @@ const s = StyleSheet.create({
   kapak: { height: 56, backgroundColor: renk.birincil, flexDirection: "row", justifyContent: "flex-end", alignItems: "flex-start", padding: 10, gap: 8 },
   avatar: { marginTop: -32, width: 64, height: 64, borderRadius: 32, borderWidth: 3, borderColor: "#fff", backgroundColor: "#dbeafe", alignItems: "center", justifyContent: "center", overflow: "hidden" },
   uyelik: { flexDirection: "row", alignItems: "center", gap: 12, borderTopWidth: 1, borderTopColor: renk.kenar, paddingTop: 12 },
+  halka: { marginTop: -35, alignSelf: "flex-start", borderRadius: 999, padding: 3 },
+  planRozeti: { flexDirection: "row", alignItems: "center", gap: 4, borderRadius: 999, paddingHorizontal: 9, paddingVertical: 3 },
+  tik: { width: 16, height: 16, borderRadius: 8, alignItems: "center", justifyContent: "center" },
   seriKarti: { borderRadius: 24, backgroundColor: "#0f172a", padding: 20, gap: 12 },
   turuncuButon: { marginTop: 4, alignItems: "center", borderRadius: 12, backgroundColor: TURUNCU, paddingVertical: 13 },
   cerceveButon: { marginTop: 8, alignItems: "center", borderRadius: 12, borderWidth: 1, borderColor: renk.birincil, paddingVertical: 11 },

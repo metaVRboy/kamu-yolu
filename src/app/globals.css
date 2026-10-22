@@ -363,6 +363,23 @@
   }
 }
 
+/* Profil kartindaki Pro/Pro+ rozeti: yavas, aralikli bir isik parlamasi (hareketi azaltta yok). */
+.plan-rozeti::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.55) 50%, transparent 70%);
+  transform: translateX(-120%);
+  animation: plan-rozeti-parilti 4.5s ease-in-out infinite;
+}
+@keyframes plan-rozeti-parilti {
+  0%, 60% { transform: translateX(-120%); }
+  85%, 100% { transform: translateX(120%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .plan-rozeti::after { animation: none; display: none; }
+}
+
 /*
  * Ana sayfa haber kaydirmasi (genis ekran): koyu metin alanindan acik logo alanina tek gradyan. Dogrusal gecis koyu
  * uca yaklasirken "birden koyulasiyor" gorunur; bu yuzden yavas baslayip yavas biten (smoothstep) cok duraklı egri,
