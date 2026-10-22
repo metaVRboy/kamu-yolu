@@ -14,7 +14,7 @@ Google/Meta/TikTok politika sayfaları.
 | Reklam | 14.10.2026'dan itibaren sitede reklam yok (AdSense, ads.txt ve reklam çerezleri kaldırıldı). |
 | Memurlar.net (FSEK Ek m.8, TTK m.55) | İlan metni sitede, mobilde ve arama motoru verisinde gösterilmez; yalnızca içeride bölüm eşleştirmesi için kullanılır. Kullanıcı kaynağa yönlendirilir. |
 | Haber fotoğrafları (FSEK) | Kaynak sitelerin fotoğrafları kullanılmıyor; 100 eski kayıt temizlendi (27'si kurum logosu, 73'ü görselsiz). |
-| Basın Kanunu (5187) | "Haberler" → "Kamu Alım Duyuruları" olarak konumlandı; her özet kaynağa bağlantılı, "yapay zekâ ile özetlenmiştir" notu; detay sayfaları noindex. Beyanname verilmedi (internet haber sitesi statüsü istenmiyor). |
+| Basın Kanunu (5187) | Bölüm adı kullanıcı kararıyla "Haberler" (2026-10-13 "Duyurular" yapılmıştı, 2026-10-22 geri alındı; ad tek başına statüyü belirlemez); her özet kaynağa bağlantılı, "yapay zekâ ile özetlenmiştir" notu; detay sayfaları noindex. Beyanname verilmedi (internet haber sitesi statüsü istenmiyor). |
 | 5651 yer sağlayıcı | Becayiş ilanı/mesajı ve girişte IP + zaman kaydı, satır başına HMAC (bütünlük), 2 yıl sonra otomatik silme (`/api/bakim` cron). İlanlarda "Uygunsuz içeriği bildir", mesajlarda şikâyet. Footer'da yer sağlayıcı unvan/adresi. |
 | Ticari ileti (6563, İYS) | İYS kaydı olmadığı için kampanya onayı toplanmıyor (`TICARI_ILETI_ACIK=false`); bekleme listesine e-posta değil yalnız site/uygulama içi bildirim; ilan SMS'leri saf bilgilendirme. |
 | Satış (6502, Ticari Reklam Yön.) | `SATIS_ACIK=false`: kampanya/geri sayım/üstü çizili fiyat yok, satış sözleşmeleri yayında değil, "En Popüler" yok. |
@@ -86,7 +86,7 @@ Cloudflare (privacyquestions@cloudflare.com).
 3. KVKK sözleşmesi imzalamayan ABD merkezli vendor'lar için risk kabulü mü, Türkiye'de barındırmaya geçiş mi?
 4. Memurlar.net'ten yalnızca "yeni ilan var" sinyali ve içeride eşleştirme için metin almak (gösterilmeden) FSEK Ek m.8
    / TTK m.55 bakımından yeterli mi, yoksa yazılı lisans mı alınmalı (MN Yazılım Medya Bilişim A.Ş.)?
-5. "Kamu Alım Duyuruları" modeli 5187 internet haber sitesi tanımının dışında kalıyor mu?
+5. "Haberler" bölümü (kaynaklı yapay zekâ özetleri) 5187 internet haber sitesi tanımının dışında kalıyor mu?
 6. Gerçek kişi İYS'ye kaydolabilir mi; onay kayıtları için 3 yıl (Yön. m.13) mı 10 yıl (6563 m.11/3) mı?
 
 ## 5. Kalan riskler (dürüst özet)

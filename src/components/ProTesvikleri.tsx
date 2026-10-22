@@ -14,7 +14,7 @@ import { TESVIK_IKINCIL } from "@/lib/tesvik";
 
 /**
  * Alim duyurusu sayfasi: "bu kurumun ilani yayimlaninca haber ver" (madde 5). Takip herkese, bildirim Pro'da.
- * Duyurular ilandan haftalar once cikar: "ilk ben bileyim" istegi en yuksek oldugu yer. Sinyal temasi.
+ * Alim haberleri ilandan haftalar once cikar: "ilk ben bileyim" istegi en yuksek oldugu yer. Sinyal temasi.
  */
 export function KurumTakipKarti({ kurum }: { kurum: string }) {
   const authAc = useAuthModal();
@@ -53,7 +53,7 @@ export function KurumTakipKarti({ kurum }: { kurum: string }) {
           ? "Takiptesin. İlan yayımlandığında bildirim Pro'da gelir."
           : d?.takipte
             ? "Takiptesin: ilan yayımlandığında sana hemen bildirim gelecek."
-            : "Duyurular ilandan önce çıkar. Kurumu takip et, ilan yayımlanınca haber verelim."
+            : "Alım haberleri ilandan önce çıkar. Kurumu takip et, ilan yayımlanınca haber verelim."
       }
       aksiyon={
         d?.takipte ? (

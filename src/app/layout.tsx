@@ -203,7 +203,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               <ul className="mt-4 space-y-2.5 text-sm text-slate-400">
                 <li><Link href="/" className="transition-colors hover:text-white">Ana Sayfa</Link></li>
                 <li><Link href="/amacimiz" className="transition-colors hover:text-white">Hakkımızda</Link></li>
-                <li><Link href="/haberler" className="transition-colors hover:text-white">Duyurular</Link></li>
+                <li><Link href="/haberler" className="transition-colors hover:text-white">Haberler</Link></li>
                 <li><Link href="/kpss-puan-hesaplama" className="transition-colors hover:text-white">KPSS Puan Hesaplama</Link></li>
                 <li><Link href="/kpss-denemesi" className="transition-colors hover:text-white">KPSS Denemesi</Link></li>
                 <li><Link href="/gunun-sorulari" className="transition-colors hover:text-white">Günün Soruları</Link></li>

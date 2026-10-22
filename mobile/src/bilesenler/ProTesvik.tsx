@@ -212,7 +212,7 @@ export function KurumTakipKarti({ kurum }: { kurum: string }) {
           ? "Takiptesin. İlan yayımlandığında bildirim Pro'da gelir."
           : d.takipte
             ? "Takiptesin: ilan yayımlandığında sana hemen bildirim gelecek."
-            : "Duyurular ilandan önce çıkar. Kurumu takip et, ilan yayımlanınca haber verelim."
+            : "Alım haberleri ilandan önce çıkar. Kurumu takip et, ilan yayımlanınca haber verelim."
       }
       cagri={
         !d.takipte

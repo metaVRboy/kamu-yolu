@@ -145,7 +145,7 @@ export default function HaberDetay() {
       {h.benzerler.length > 0 && (
         <Kart style={{ padding: 16 }} yaricap={16}>
           <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 8 }}>
-            <T w="yariKalin">Benzer Duyurular</T>
+            <T w="yariKalin">Benzer Haberler</T>
             <T w="orta" style={{ fontSize: 12, color: renk.birincil }} onPress={() => router.navigate("/haberler")}>
               Tümünü Gör
             </T>

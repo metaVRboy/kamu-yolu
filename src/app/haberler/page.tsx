@@ -6,10 +6,10 @@ import { sonGunlerdeYayinlanan } from "@/lib/haberYayin";
 
 export const revalidate = 300;
 
-// "Duyurular": kamu alim duyurularinin kaynakli ozetleri; haber sitesi (5187) olarak konumlanmaz.
+// Haberler: kaynakli, yapay zeka destekli ozetler (her biri kaynagina baglanir; detaylar noindex).
 export const metadata = {
-  title: "Kamu Alım Duyuruları — Kamu Yolu",
-  description: "Kamu personel alımları ve toplu alım duyurularının kaynağına bağlantılı kısa özetleri.",
+  title: "Haberler — Kamu Yolu",
+  description: "Kamu personel alımları, toplu alım duyuruları ve gündemdeki gelişmeler; her haber kaynağına bağlantılı.",
 };
 
 export default async function HaberlerPage() {
@@ -20,14 +20,14 @@ export default async function HaberlerPage() {
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <SayfaBasligi
         ikon={Newspaper}
-        breadcrumb={[{ ad: "Ana Sayfa", href: "/" }, { ad: "Duyurular" }]}
-        baslik="Kamu Alım Duyuruları"
-        aciklama="Kamu personel alımı duyurularının yapay zekâ desteğiyle hazırlanmış kısa özetleri; her özet kaynağına bağlantı verir, resmî metin esastır. Başvuru süresi dolanlar listeden otomatik kalkar."
+        breadcrumb={[{ ad: "Ana Sayfa", href: "/" }, { ad: "Haberler" }]}
+        baslik="Haberler"
+        aciklama="Kamu personel alımları, toplu alım duyuruları ve gündemdeki gelişmeler. Haberler yapay zekâ desteğiyle özetlenir ve kaynağına bağlantı verir; resmî metin esastır. Başvuru süresi dolan haberler listeden otomatik kalkar."
         cipler={[
-          { etiket: `${haberler.length} güncel duyuru` },
-          ...(buHafta > 0 ? [{ etiket: `${buHafta} duyuru bu hafta eklendi`, durum: "vurgu" as const }] : []),
+          { etiket: `${haberler.length} güncel haber` },
+          ...(buHafta > 0 ? [{ etiket: `${buHafta} haber bu hafta eklendi`, durum: "vurgu" as const }] : []),
         ]}
-        mobilBaslik="Duyurular"
+        mobilBaslik="Haberler"
       />
 
       <HaberlerSection

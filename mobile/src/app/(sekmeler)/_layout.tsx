@@ -28,7 +28,7 @@ export default function Sekmeler() {
       <Tabs.Screen name="index" options={{ title: "Ana Sayfa", headerShown: false, tabBarIcon: ikon(House) }} />
       <Tabs.Screen name="ilanlar" options={{ title: "İlanlar", tabBarIcon: ikon(Search) }} />
       <Tabs.Screen name="kpss" options={{ title: "KPSS", tabBarIcon: ikon(GraduationCap) }} />
-      <Tabs.Screen name="haberler" options={{ title: "Duyurular", tabBarIcon: ikon(Newspaper) }} />
+      <Tabs.Screen name="haberler" options={{ title: "Haberler", tabBarIcon: ikon(Newspaper) }} />
       <Tabs.Screen name="profil" options={{ title: kullanici ? "Profil" : "Giriş", headerTitle: "Profilim", tabBarIcon: ikon(UserRound) }} />
     </Tabs>
   );

@@ -130,7 +130,7 @@ export default function AnaSayfa() {
           {veri.haberler.length > 0 && <HaberKaruseli haberler={veri.haberler} />}
 
           <View style={{ marginTop: 40, gap: 16 }}>
-            <BolumBasligi etiket="Güncel" baslik="Duyurular" tumu={{ etiket: `Tüm duyurular (${veri.haberSayisi})`, onPress: () => router.navigate("/haberler") }} />
+            <BolumBasligi etiket="Güncel" baslik="Haberler" tumu={{ etiket: `Tüm haberler (${veri.haberSayisi})`, onPress: () => router.navigate("/haberler") }} />
             {veri.haberler.map((h) => (
               <HaberKarti key={h.slug} h={h} />
             ))}

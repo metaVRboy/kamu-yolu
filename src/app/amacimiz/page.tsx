@@ -266,7 +266,7 @@ export default async function AmacimizPage() {
                 listeden kalkar.
               </p>
               <p className="mt-3 text-sm leading-relaxed text-white/80">
-                Duyuru özetleri yapay zekâ ile araştırılır ve yayımlanmadan önce kaynak sayfasındaki metinle karşılaştırılarak doğrulanır.
+                Haberler yapay zekâ ile araştırılır ve yayımlanmadan önce kaynak sayfasındaki metinle karşılaştırılarak doğrulanır.
               </p>
             </div>
           </div>

@@ -6,6 +6,7 @@ import { IlanVitrinKarti } from "@/components/IlanVitrinKarti";
 import { kurumaGoreGrupla, kurumLogolari } from "@/lib/ilanVitrin";
 import { DepartmentSearch } from "@/components/DepartmentSearch";
 import { HaberlerSection } from "@/components/HaberlerSection";
+import { HeroHaberCarousel } from "@/components/HeroHaberCarousel";
 import { BizeUlasin } from "@/components/BizeUlasin";
 import { DavetBandi, GunlukSerit, UyeProfilKarti } from "@/components/AnaSayfaUye";
 import { SayacArtis } from "@/components/SayacArtis";
@@ -164,6 +165,13 @@ export default async function Home() {
         </section>
 
         <GunlukSerit />
+
+        {/* Kaydirilabilir haberler: duzen H'de kaldirilmisti, kullanici istedi (2026-10-22); tam genislik. */}
+        {haberlerMapped.length > 0 && (
+          <section aria-label="Güncel haberler" className="mt-6 h-[380px]">
+            <HeroHaberCarousel haberler={haberlerMapped} />
+          </section>
+        )}
 
         <section className="mt-16">
           <BolumBasligi

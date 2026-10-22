@@ -161,7 +161,7 @@ export default async function HaberDetayPage({
         </Link>
         <span>›</span>
         <Link href="/haberler" className="hover:text-foreground">
-          Duyurular
+          Haberler
         </Link>
         <span>›</span>
         <span className="truncate text-foreground">{haber.baslik}</span>
@@ -325,7 +325,7 @@ export default async function HaberDetayPage({
           {digerHaberler.length > 0 && (
             <div className="rounded-2xl border border-border bg-white p-4">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-slate-900">Benzer Duyurular</p>
+                <p className="text-sm font-semibold text-slate-900">Benzer Haberler</p>
                 <Link href="/haberler" className="text-xs font-medium text-primary hover:underline">
                   Tümünü Gör
                 </Link>
@@ -392,7 +392,7 @@ export default async function HaberDetayPage({
         className="mt-10 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
-        Tüm duyurular
+        Tüm haberler
       </Link>
     </div>
   );
