@@ -1,6 +1,7 @@
 // Istemci bilesenleri de kullanir (ornek mesaj): prisma iceren whatsapp.ts'ten ayri.
 
-export type MesajTuru = "DOGRULAMA" | "ILAN" | "BECAYIS" | "HATIRLATMA";
+// WhatsApp yalniz kisiye ozel ilan + becayis bildirimi (kullanici karari 2026-10-22); DOGRULAMA numara icin sart.
+export type MesajTuru = "DOGRULAMA" | "ILAN" | "BECAYIS";
 
 /**
  * Meta onayli WhatsApp sablonlari (isletme baslatan mesaj serbest metin olamaz). scripts/whatsappSablonlari.ts
@@ -24,12 +25,5 @@ export const SABLONLAR = {
     govde: "Becayiş talebinle ilgili yeni bir mesajın var. Yanıtlamak için Kamu Yolu'na gir.",
     ornek: [],
     buton: { metin: "Mesajı gör", ornekYol: "becayis/taleplerim" },
-  },
-  HATIRLATMA: {
-    ad: "kamuyolu_son_basvuru",
-    kategori: "UTILITY",
-    govde: 'Takip ettiğin "{{1}}" ilanının son başvurusuna {{2}} gün kaldı.',
-    ornek: ["Sağlık Bakanlığı Sözleşmeli Personel Alımı", "3"],
-    buton: { metin: "İlana git", ornekYol: "ilan/ornek" },
   },
 } as const;
