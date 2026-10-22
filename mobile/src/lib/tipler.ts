@@ -192,7 +192,7 @@ export type AyarlarVeri = {
   sifreVar: boolean;
   googleBagli: boolean;
   oturumlar: OturumSatiri[];
-  sms: { pro: boolean; hazirDegil: boolean; dogrulanmisTelefon: string | null; smsIlanBildirimi: boolean; smsBecayisBildirimi: boolean };
+  whatsapp: { pro: boolean; hazirDegil: boolean; dogrulanmisTelefon: string | null; whatsappIlanBildirimi: boolean; whatsappBecayisBildirimi: boolean };
   kvkkOnayTarihi: string | null;
   ticariIletiOnay: boolean;
 };

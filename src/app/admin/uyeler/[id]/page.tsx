@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { adminSayfasi } from "@/lib/admin";
-import { proAktifMi, telefonMaskele } from "@/lib/sms";
+import { proAktifMi, telefonMaskele } from "@/lib/whatsapp";
 import { sonDenemeler } from "@/lib/kpssDeneme";
 import { LEVEL_LABEL } from "@/lib/labels";
 import { DUZEY_LABEL } from "@/lib/kpssDenemeSabitler";

@@ -3,7 +3,7 @@ import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { deleteMesajlar, getTalepDetay, sendMesaj } from "@/lib/becayis";
-import { proAktifMi } from "@/lib/sms";
+import { proAktifMi } from "@/lib/whatsapp";
 
 const SAATLIK_MESAJ = 30;
 

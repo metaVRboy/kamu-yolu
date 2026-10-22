@@ -60,7 +60,7 @@ export default function BecayisDetayEkrani() {
             gerekenPlan="PRO"
             kaynak="becayis-mesaj"
             baslik="Becayiş mesajlaşması Pro'da"
-            ozellikler={["Talep sahibine site içinden mesaj gönder", "Cevap gelince bildirim ve SMS ile haberdar ol"]}
+            ozellikler={["Talep sahibine site içinden mesaj gönder", "Cevap gelince bildirim ve WhatsApp ile haberdar ol"]}
           >
             <View style={{ minHeight: 300, justifyContent: "center" }}>{mesajButonu}</View>
           </KilitliOzellik>

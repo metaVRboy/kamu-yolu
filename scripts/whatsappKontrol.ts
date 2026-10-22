@@ -1,6 +1,6 @@
-/** SMS yardimcilarinin hizli kontrolu. Calistirma: npx tsx scripts/smsKontrol.ts */
+/** WhatsApp yardimcilari + sablon kurallari. Calistirma: npx tsx scripts/whatsappKontrol.ts */
 import assert from "node:assert/strict";
-import { proAktifMi, sessizSaatMi, telefonGoster, telefonMaskele, telefonNormalize } from "../src/lib/sms";
+import { proAktifMi, SABLONLAR, sessizSaatMi, telefonGoster, telefonMaskele, telefonNormalize } from "../src/lib/whatsapp";
 
 for (const girdi of ["0532 123 45 67", "532-123-4567", "+90 532 123 45 67", "905321234567", "(0532) 123 4567"]) {
   assert.equal(telefonNormalize(girdi), "+905321234567", girdi);
@@ -23,4 +23,11 @@ assert.equal(proAktifMi({ abonelikPlani: "PRO", abonelikBitis: null }, simdi), t
 assert.equal(proAktifMi({ abonelikPlani: "PRO", abonelikBitis: new Date("2026-10-08") }, simdi), true);
 assert.equal(proAktifMi({ abonelikPlani: "PRO_PLUS", abonelikBitis: new Date("2026-10-06") }, simdi), false);
 
-console.log("smsKontrol: hepsi gecti");
+// Meta sablon kurallari: degisken govdenin basinda/sonunda olamaz, {{n}} sayisi ornek sayisiyla ayni.
+for (const [tur, s] of Object.entries(SABLONLAR)) {
+  if (s.kategori === "AUTHENTICATION") continue; // govdeyi Meta hazir verir
+  assert.ok(!/^\{\{|\}\}[.!]?$/.test(s.govde), `${tur}: degisken basta/sonda`);
+  assert.equal(s.govde.match(/\{\{\d\}\}/g)?.length ?? 0, s.ornek.length, `${tur}: ornek sayisi`);
+}
+
+console.log("whatsappKontrol: hepsi gecti");

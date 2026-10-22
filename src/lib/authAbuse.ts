@@ -54,7 +54,7 @@ export async function clearFailures(identifier: string): Promise<void> {
 }
 
 /**
- * E-posta/SMS gonderen uclar icin 24 saatlik tavan (posta kutusu bombardimani, Resend kotasi).
+ * E-posta/WhatsApp gonderen uclar icin 24 saatlik tavan (posta kutusu bombardimani, Resend kotasi).
  * Hak varsa true; kullanim sayilir.
  */
 export async function gunlukHakKullan(identifier: string, sinir: number): Promise<boolean> {

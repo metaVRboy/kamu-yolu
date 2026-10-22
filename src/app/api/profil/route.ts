@@ -42,7 +42,7 @@ export async function PATCH(req: NextRequest) {
     data.meslek = null;
   }
 
-  // Dogrulanmis numara elle degistirilirse SMS'ler yeni numaraya gitmesin: dogrulama sifirlanir.
+  // Dogrulanmis numara elle degistirilirse WhatsApp mesajlari yeni numaraya gitmesin: dogrulama sifirlanir.
   const telefonDegisti = data.telefon !== undefined && (data.telefon || null) !== user.telefon;
 
   const updated = await prisma.user.update({

@@ -235,7 +235,7 @@ export function GirisFormu({ mod }: { mod: "giris" | "kayit" }) {
                   {TICARI_ILETI_ACIK && (
                     <Onay secili={ticariIleti} degistir={setTicariIleti}>
                       <T style={{ fontSize: 12, color: renk.yaziIkincil, lineHeight: 18 }}>
-                        Kampanya, indirim ve duyurulardan SMS ve e-posta ile haberdar olmak için ticari elektronik ileti almayı kabul ediyorum.{" "}
+                        Kampanya, indirim ve duyurulardan WhatsApp ve e-posta ile haberdar olmak için ticari elektronik ileti almayı kabul ediyorum.{" "}
                         <T style={{ fontSize: 12, color: renk.soluk }}>(İsteğe bağlı)</T>
                       </T>
                     </Onay>

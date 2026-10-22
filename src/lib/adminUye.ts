@@ -1,5 +1,5 @@
 import type { Prisma } from "@/generated/prisma/client";
-import { aktifProKosulu, proAktifMi } from "@/lib/sms";
+import { aktifProKosulu, proAktifMi } from "@/lib/whatsapp";
 import type { UyeSatiri } from "@/components/admin/AdminUyeListesi";
 
 /** Liste satirindaki plan / admin / askida rozetleri. */

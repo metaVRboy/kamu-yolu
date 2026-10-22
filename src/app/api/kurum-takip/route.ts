@@ -3,7 +3,7 @@ import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { kurumNorm } from "@/lib/kurumTakip";
-import { proAktifMi } from "@/lib/sms";
+import { proAktifMi } from "@/lib/whatsapp";
 
 const kurumSema = z.string().trim().min(3).max(200);
 

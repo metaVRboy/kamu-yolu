@@ -384,7 +384,7 @@ export default async function HaberDetayPage({
             <p className="mt-1 text-xs text-muted-foreground">
               Bölümüne uygun yeni ilan ve haberleri kaçırma.
             </p>
-            <YukseltButonu plan="PRO" kaynak="sms" className={cn(buttonVariants({ size: "sm" }), "mt-3 w-full")}>
+            <YukseltButonu plan="PRO" kaynak="whatsapp" className={cn(buttonVariants({ size: "sm" }), "mt-3 w-full")}>
               Bildirimleri Aç
             </YukseltButonu>
           </div>

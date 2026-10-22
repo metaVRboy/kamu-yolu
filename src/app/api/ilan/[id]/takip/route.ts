@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getPostingById } from "@/lib/matching";
-import { proAktifMi } from "@/lib/sms";
+import { proAktifMi } from "@/lib/whatsapp";
 
 type Baglam = { params: Promise<{ id: string }> };
 

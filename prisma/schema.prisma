@@ -199,44 +199,45 @@ model User {
 
   // Admin panelden suresiz/sureli verilen planin bitisi; gecince plan
   // UCRETSIZ sayilir (getCurrentUser + bildirim sorgulari).
-  abonelikBitis         DateTime?
+  abonelikBitis            DateTime?
   // Odeme altyapisi gelince donem sonunda otomatik yenileme. Iptal = false yapmak:
   // abonelikBitis'e dokunulmaz, kullanici odenen donem sonuna kadar plani kullanir.
-  otomatikYenileme      Boolean               @default(true)
+  otomatikYenileme         Boolean               @default(true)
   // Zilin Genel sekmesini en son actigi an (uygulama saati); sonrasindaki duyurular okunmamis.
-  duyuruGorulme         DateTime?
+  duyuruGorulme            DateTime?
   // Admin askiya aldiysa: oturumlari gecersiz, giris yapamaz (neden kullaniciya gosterilir).
-  askiyaAlindi          DateTime?
-  askiNedeni            String?
-  // SMS ile dogrulanmis telefon (yalniz Pro); `telefon` degisirse sifirlanir.
-  telefonDogrulandi     DateTime?
-  // SMS bildirim tercihleri (Pro) - varsayilan kapali, acik onayla acilir.
-  smsIlanBildirimi      Boolean               @default(false)
-  smsBecayisBildirimi   Boolean               @default(false)
-  // Ilk kez SMS iznini verdigi an (onay kaydi).
-  smsIzinTarihi         DateTime?
-  // Ticari elektronik ileti (kampanya/duyuru SMS + e-posta) onayi - 6563 s. Kanun. Varsayilan yok;
+  askiyaAlindi             DateTime?
+  askiNedeni               String?
+  // WhatsApp koduyla dogrulanmis telefon (yalniz Pro); `telefon` degisirse sifirlanir.
+  telefonDogrulandi        DateTime?
+  // WhatsApp bildirim tercihleri (Pro) - varsayilan kapali, acik onayla acilir. Kolonlar SMS doneminden
+  // (2026-10-22 WhatsApp'a gecildi, hic SMS izni verilmemisti): ad degisti, kesintisiz deploy icin kolon ayni.
+  whatsappIlanBildirimi    Boolean               @default(false) @map("smsIlanBildirimi")
+  whatsappBecayisBildirimi Boolean               @default(false) @map("smsBecayisBildirimi")
+  // Ilk kez WhatsApp iznini verdigi an (onay kaydi).
+  whatsappIzinTarihi       DateTime?             @map("smsIzinTarihi")
+  // Ticari elektronik ileti (kampanya/duyuru e-posta; 2026-10-22 oncesi metin "SMS ve e-posta") onayi - 6563 s. Kanun. Varsayilan yok;
   // tarihler onay kaydi olarak geri cekilse de saklanir.
-  ticariIletiOnay       Boolean               @default(false)
-  ticariIletiOnayTarihi DateTime?
-  ticariIletiRetTarihi  DateTime?
+  ticariIletiOnay          Boolean               @default(false)
+  ticariIletiOnayTarihi    DateTime?
+  ticariIletiRetTarihi     DateTime?
   // Kayit aninda ilk temas kaynagi (utm_*, gclid/fbclid/ttclid, dis referrer, giris sayfasi) - src/lib/kaynak.ts.
-  kaynak                Json?
-  telefonDogrulama      TelefonDogrulamaKodu?
-  smsGonderimleri       SmsGonderim[]
-  yukseltmeTalebi       YukseltmeTalebi?
-  destekMesajlari       DestekMesaji[]
-  soruHataBildirimleri  SoruHataBildirimi[]
-  promosyonKullanimlari PromosyonKullanim[]
+  kaynak                   Json?
+  telefonDogrulama         TelefonDogrulamaKodu?
+  whatsappGonderimleri     WhatsappGonderim[]
+  yukseltmeTalebi          YukseltmeTalebi?
+  destekMesajlari          DestekMesaji[]
+  soruHataBildirimleri     SoruHataBildirimi[]
+  promosyonKullanimlari    PromosyonKullanim[]
   // Arkadasini davet et: kisa kod (ilk istekte uretilir) ve davet eden uye (kayitta, ?davet= ile).
-  davetKodu             String?               @unique
-  davetEdenId           String?
-  proHediyeleri         ProHediye[]
-  gunlukSoruCevaplari   GunlukSoruCevap[]
-  ilanTakipleri         IlanTakip[]
-  pushAbonelikleri      PushAbonelik[]
-  seriDondurmalari      SeriDondurma[]
-  kurumTakipleri        KurumTakip[]
+  davetKodu                String?               @unique
+  davetEdenId              String?
+  proHediyeleri            ProHediye[]
+  gunlukSoruCevaplari      GunlukSoruCevap[]
+  ilanTakipleri            IlanTakip[]
+  pushAbonelikleri         PushAbonelik[]
+  seriDondurmalari         SeriDondurma[]
+  kurumTakipleri           KurumTakip[]
 }
 
 // Pro ayricaligi: cozulmeyen gun seriyi bozmaz (ayda SERI_DONDURMA_HAKKI kez, otomatik kullanilir).
@@ -356,8 +357,8 @@ model YukseltmeTalebi {
   guncelleme DateTime      @updatedAt
 }
 
-// Gonderilen (ya da saglayici yokken test modunda yazilan) her SMS.
-model SmsGonderim {
+// Gonderilen (ya da anahtar yokken test modunda yazilan) her WhatsApp mesaji. Tablo adi SMS doneminden.
+model WhatsappGonderim {
   id          String    @id @default(cuid())
   // Hesap silinince kayit da silinir (telefon kisisel veri).
   user        User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -370,13 +371,14 @@ model SmsGonderim {
   durum       String
   saglayiciId String?
   hata        String?
-  // ILAN SMS'inin kapsadigi en son bildirimin createdAt'i. Sonraki tarama bundan
-  // yenileri sayar - SMS'in kendi zamani kullanilmaz (farkli saatler kayabilir).
+  // ILAN mesajinin kapsadigi en son bildirimin createdAt'i. Sonraki tarama bundan
+  // yenileri sayar - mesajin kendi zamani kullanilmaz (farkli saatler kayabilir).
   kapsamSonu  DateTime?
   olusturma   DateTime  @default(now())
 
   @@index([userId, tur, olusturma])
   @@index([olusturma])
+  @@map("SmsGonderim")
 }
 
 // Cihaz bazli oturum: JWT icindeki oturumId buraya bakar. Ayarlar > Guvenlik

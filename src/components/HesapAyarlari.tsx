@@ -455,7 +455,7 @@ export function HesapSilForm({ sifreVar }: { sifreVar: boolean }) {
   );
 }
 
-/** Pro: telefon numarasini SMS koduyla dogrular. Test modunda (saglayici yok) kod admine ekranda gosterilir. */
+/** Pro: telefon numarasini WhatsApp koduyla dogrular. Test modunda (saglayici yok) kod admine ekranda gosterilir. */
 export function TelefonDogrulama({ dogrulanmisTelefon }: { dogrulanmisTelefon: string | null }) {
   const router = useRouter();
   const [adim, setAdim] = useState<"bos" | "numara" | "kod">(dogrulanmisTelefon ? "bos" : "numara");
@@ -514,10 +514,10 @@ export function TelefonDogrulama({ dogrulanmisTelefon }: { dogrulanmisTelefon: s
 
   return adim === "kod" ? (
     <form onSubmit={dogrula} className="space-y-4">
-      <p className="text-sm text-muted-foreground">Numarana 6 haneli bir kod gönderdik. Kod 10 dakika geçerli.</p>
+      <p className="text-sm text-muted-foreground">WhatsApp&apos;ına 6 haneli bir kod gönderdik. Kod 10 dakika geçerli.</p>
       {testKodu && (
         <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
-          <strong>Test modu:</strong> SMS sağlayıcısı henüz bağlı değil, gerçek SMS gönderilmedi. Kod: <strong className="tracking-widest">{testKodu}</strong>
+          <strong>Test modu:</strong> WhatsApp henüz bağlı değil, gerçek mesaj gönderilmedi. Kod: <strong className="tracking-widest">{testKodu}</strong>
         </p>
       )}
       <div>
@@ -564,7 +564,7 @@ export function TelefonDogrulama({ dogrulanmisTelefon }: { dogrulanmisTelefon: s
   );
 }
 
-/** Her plan: kampanya/duyuru SMS ve e-postasi (ticari elektronik ileti) onayi. */
+/** Her plan: kampanya/duyuru WhatsApp ve e-postasi (ticari elektronik ileti) onayi. */
 export function TicariIletiTercihi({ ilk }: { ilk: boolean }) {
   const [onay, setOnay] = useState(ilk);
   const [kaydediliyor, setKaydediliyor] = useState(false);
@@ -597,9 +597,9 @@ export function TicariIletiTercihi({ ilk }: { ilk: boolean }) {
         className="mt-0.5 h-4 w-4 rounded border-primary/30 accent-primary"
       />
       <span>
-        <span className="block text-sm font-semibold text-slate-800">SMS ve e-posta ile haberdar et</span>
+        <span className="block text-sm font-semibold text-slate-800">WhatsApp ve e-posta ile haberdar et</span>
         <span className="block text-xs text-muted-foreground">
-          İndirim, kampanya ve yeni özelliklerden SMS ve e-posta ile haberdar olmak istiyorum. Onayını istediğin an buradan geri
+          İndirim, kampanya ve yeni özelliklerden WhatsApp ve e-posta ile haberdar olmak istiyorum. Onayını istediğin an buradan geri
           çekebilirsin. Hesap ve güvenlik e-postaları ile açtığın ilan bildirimleri bundan etkilenmez.
         </span>
       </span>
@@ -607,24 +607,24 @@ export function TicariIletiTercihi({ ilk }: { ilk: boolean }) {
   );
 }
 
-const SMS_SECENEKLERI = [
-  { alan: "smsIlanBildirimi", baslik: "Bölümüne uygun yeni ilanlar", aciklama: "Taramalardan sonra yeni ilanlar tek SMS'te toplanır; günde en fazla 3 SMS." },
-  { alan: "smsBecayisBildirimi", baslik: "Becayiş mesajları", aciklama: "Becayiş ilanlarında sana yeni bir mesaj geldiğinde (30 dakikada en fazla 1 SMS)." },
+const WHATSAPP_SECENEKLERI = [
+  { alan: "whatsappIlanBildirimi", baslik: "Bölümüne uygun yeni ilanlar", aciklama: "Taramalardan sonra yeni ilanlar tek WhatsApp mesajında toplanır; günde en fazla 3 mesaj." },
+  { alan: "whatsappBecayisBildirimi", baslik: "Becayiş mesajları", aciklama: "Becayiş ilanlarında sana yeni bir mesaj geldiğinde (30 dakikada en fazla 1 mesaj)." },
 ] as const;
 
-type SmsAlani = (typeof SMS_SECENEKLERI)[number]["alan"];
+type WhatsappAlani = (typeof WHATSAPP_SECENEKLERI)[number]["alan"];
 
-/** Pro: hangi bildirimler SMS ile gelsin. Telefon dogrulanmadan acilamaz. */
-export function SmsTercihleri({ ilk, telefonDogrulandi }: { ilk: Record<SmsAlani, boolean>; telefonDogrulandi: boolean }) {
+/** Pro: hangi bildirimler WhatsApp ile gelsin. Telefon dogrulanmadan acilamaz. */
+export function WhatsappTercihleri({ ilk, telefonDogrulandi }: { ilk: Record<WhatsappAlani, boolean>; telefonDogrulandi: boolean }) {
   const [tercih, setTercih] = useState(ilk);
-  const [kaydediliyor, setKaydediliyor] = useState<SmsAlani | null>(null);
+  const [kaydediliyor, setKaydediliyor] = useState<WhatsappAlani | null>(null);
 
-  async function degistir(alan: SmsAlani, deger: boolean) {
+  async function degistir(alan: WhatsappAlani, deger: boolean) {
     // Iyimser guncelleme: kutu hemen degisir, sunucu reddederse geri alinir.
     setTercih((t) => ({ ...t, [alan]: deger }));
     setKaydediliyor(alan);
     try {
-      const res = await fetch("/api/profil/sms-tercihleri", {
+      const res = await fetch("/api/profil/whatsapp-tercihleri", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ [alan]: deger }),
@@ -640,7 +640,7 @@ export function SmsTercihleri({ ilk, telefonDogrulandi }: { ilk: Record<SmsAlani
 
   return (
     <div className="space-y-3">
-      {SMS_SECENEKLERI.map((s) => (
+      {WHATSAPP_SECENEKLERI.map((s) => (
         <label
           key={s.alan}
           className={cn("flex items-start gap-3 rounded-xl border border-primary/15 p-4", !telefonDogrulandi && "opacity-60")}
@@ -660,8 +660,8 @@ export function SmsTercihleri({ ilk, telefonDogrulandi }: { ilk: Record<SmsAlani
       ))}
       <p className="text-xs text-muted-foreground">
         {telefonDogrulandi
-          ? "İşaretlediğin bildirimlerin doğrulanmış numarana SMS ile gönderilmesine izin vermiş olursun; istediğin an kapatabilirsin. SMS'ler 09:00-21:00 arasında gönderilir."
-          : "SMS bildirimlerini açmak için önce yukarıdan telefon numaranı doğrula."}
+          ? "İşaretlediğin bildirimlerin doğrulanmış numarana WhatsApp ile gönderilmesine izin vermiş olursun; istediğin an kapatabilirsin. Mesajlar 09:00-21:00 arasında gönderilir."
+          : "WhatsApp bildirimlerini açmak için önce yukarıdan telefon numaranı doğrula."}
       </p>
     </div>
   );

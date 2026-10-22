@@ -38,7 +38,7 @@ const MENU = [
   { href: "/admin/destek", ad: "Destek kutusu", ikon: LifeBuoy },
   { href: "/admin/ayarlar", ad: "Site ayarları", ikon: Settings },
   { href: "/admin/islem-kaydi", ad: "İşlem kaydı", ikon: History },
-  { href: "/admin/sms", ad: "SMS kayıtları", ikon: MessageSquareText },
+  { href: "/admin/whatsapp", ad: "WhatsApp kayıtları", ikon: MessageSquareText },
 ];
 
 /** Admin yan menusu; dar ekranda ustte yatay kaydirilan sekmeler. */

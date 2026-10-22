@@ -2,7 +2,7 @@ import Link from "next/link";
 import { AlertTriangle, BadgePercent, Bell, CheckCircle2, Crown, GraduationCap, Inbox, Newspaper, Radar, Rocket, UserPlus, Users } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { adminSayfasi } from "@/lib/admin";
-import { aktifProKosulu } from "@/lib/sms";
+import { aktifProKosulu } from "@/lib/whatsapp";
 import { buHaftakiDenemeSayisi } from "@/lib/kpssDeneme";
 import { taramaKaynaklari } from "@/lib/adminIlan";
 import { AdminBaslik, AdminKart, IstatistikKutusu } from "@/components/admin/AdminUI";

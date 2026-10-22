@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { deleteTumBildirimler, getBanaOzelBildirimler, getOkunmamisBildirimSayisi, kullaniciDuyurulari } from "@/lib/notifications";
-import { proAktifMi } from "@/lib/sms";
+import { proAktifMi } from "@/lib/whatsapp";
 import { bolumHaftalikYeni } from "@/lib/kisiselOzet";
 
 export async function GET() {

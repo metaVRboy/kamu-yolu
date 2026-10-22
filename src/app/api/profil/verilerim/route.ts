@@ -11,7 +11,7 @@ export async function GET() {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Giriş yapmalısınız." }, { status: 401 });
 
-  const [bolum, becayisTalepleri, gonderilenMesajlar, denemeler, bildirimler, oturumlar, fotograf, beklemeListesi, destekMesajlari, smsGonderimleri, soruBildirimleri] = await Promise.all([
+  const [bolum, becayisTalepleri, gonderilenMesajlar, denemeler, bildirimler, oturumlar, fotograf, beklemeListesi, destekMesajlari, whatsappGonderimleri, soruBildirimleri] = await Promise.all([
     user.departmentId ? prisma.department.findUnique({ where: { id: user.departmentId }, select: { name: true } }) : null,
     prisma.becayisTalep.findMany({ where: { userId: user.id }, omit: { userId: true } }),
     prisma.becayisMesaj.findMany({ where: { gonderenId: user.id }, select: { talepId: true, mesaj: true, createdAt: true } }),
@@ -33,7 +33,7 @@ export async function GET() {
     prisma.profilFotografi.findUnique({ where: { userId: user.id }, select: { guncellenme: true } }),
     prisma.yukseltmeTalebi.findUnique({ where: { userId: user.id }, select: { plan: true, yillik: true, kaynak: true, olusturma: true, guncelleme: true } }),
     prisma.destekMesaji.findMany({ where: { userId: user.id }, select: { konu: true, mesaj: true, yanit: true, createdAt: true, yanitlandi: true } }),
-    prisma.smsGonderim.findMany({ where: { userId: user.id }, select: { telefon: true, metin: true, tur: true, durum: true, olusturma: true } }),
+    prisma.whatsappGonderim.findMany({ where: { userId: user.id }, select: { telefon: true, metin: true, tur: true, durum: true, olusturma: true } }),
     prisma.soruHataBildirimi.findMany({ where: { userId: user.id }, select: { aciklama: true, createdAt: true } }),
   ]);
   const [gunlukSorular, takipEdilenIlanlar, proHediyeleri, tarayiciBildirimleri, davetEttikleri, takipEdilenKurumlar, seriDondurmalari] = await Promise.all([
@@ -63,9 +63,9 @@ export async function GET() {
       googleHesabiBagli: !!user.googleId,
       sifreTanimli: !!user.passwordHash,
       kvkkOnayTarihi: user.kvkkOnayTarihi,
-      smsIlanBildirimi: user.smsIlanBildirimi,
-      smsBecayisBildirimi: user.smsBecayisBildirimi,
-      smsIzinTarihi: user.smsIzinTarihi,
+      whatsappIlanBildirimi: user.whatsappIlanBildirimi,
+      whatsappBecayisBildirimi: user.whatsappBecayisBildirimi,
+      whatsappIzinTarihi: user.whatsappIzinTarihi,
       ticariIletiOnay: user.ticariIletiOnay,
       ticariIletiOnayTarihi: user.ticariIletiOnayTarihi,
       ticariIletiRetTarihi: user.ticariIletiRetTarihi,
@@ -80,7 +80,7 @@ export async function GET() {
     oturumlar,
     beklemeListesi,
     destekMesajlari,
-    smsGonderimleri,
+    whatsappGonderimleri,
     soruHataBildirimleri: soruBildirimleri,
     gunlukSorular,
     takipEdilenIlanlar,

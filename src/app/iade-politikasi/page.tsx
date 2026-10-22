@@ -50,7 +50,7 @@ export default async function IadePolitikasiPage() {
             <li>
               <strong>Hiç kullanılmayan abonelik:</strong> Satın alma tarihinden itibaren 14 gün içinde talep eder ve bu sürede Pro/Pro+&apos;a özel
               hiçbir özelliği kullanmamış olursanız (ör. ücretli KPSS denemesi çözmediyseniz, ders karnesi açmadıysanız, becayiş mesajı
-              göndermediyseniz, SMS bildirimi almadıysanız) ücretin tamamı iade edilir.
+              göndermediyseniz, WhatsApp bildirimi almadıysanız) ücretin tamamı iade edilir.
             </li>
             <li>
               <strong>Mükerrer veya hatalı tahsilat:</strong> Aynı abonelik için birden fazla ya da yanlış tutarda çekim yapıldıysa fazla tutar

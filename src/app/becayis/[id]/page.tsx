@@ -65,7 +65,7 @@ export default async function BecayisDetayPage({
                 gerekenPlan="PRO"
                 kaynak="becayis-mesaj"
                 baslik="Becayiş mesajlaşması Pro'da"
-                ozellikler={["Talep sahibine site içinden mesaj gönder", "Cevap gelince bildirim ve SMS ile haberdar ol"]}
+                ozellikler={["Talep sahibine site içinden mesaj gönder", "Cevap gelince bildirim ve WhatsApp ile haberdar ol"]}
               >
                 <div className="flex min-h-64 items-center justify-center">
                   <span className={buttonVariants({ className: "w-full sm:w-auto sm:px-8" })}>

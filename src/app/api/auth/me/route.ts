@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { proAktifMi } from "@/lib/sms";
+import { proAktifMi } from "@/lib/whatsapp";
 
 export async function GET() {
   const user = await getCurrentUser();

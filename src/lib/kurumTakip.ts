@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { createBildirim } from "@/lib/notifications";
-import { aktifProKosulu } from "@/lib/sms";
+import { aktifProKosulu } from "@/lib/whatsapp";
 import { pushGonder } from "@/lib/push";
 import { slugify } from "@/lib/slug";
 

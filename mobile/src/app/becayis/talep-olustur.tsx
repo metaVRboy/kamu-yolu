@@ -32,7 +32,7 @@ export default function TalepOlustur() {
           kaynak="becayis-talep"
           uzun
           baslik="Becayiş talebi oluşturmak Pro'da"
-          ozellikler={["Talebin herkese açık listelenir, iletişim bilgilerin gizli kalır", "İlgilenenlerle site içinden mesajlaş", "Yeni mesaj gelince bildirim ve SMS al"]}
+          ozellikler={["Talebin herkese açık listelenir, iletişim bilgilerin gizli kalır", "İlgilenenlerle site içinden mesajlaş", "Yeni mesaj gelince bildirim ve WhatsApp mesajı al"]}
         >
           <TalepFormu />
         </KilitliOzellik>

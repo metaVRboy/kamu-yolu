@@ -1,6 +1,6 @@
 import { after } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { proAktifMi, sessizSaatMi, smsGonder, sonSmsSayisi } from "@/lib/sms";
+import { proAktifMi, sessizSaatMi, sonMesajSayisi, whatsappGonder } from "@/lib/whatsapp";
 import { createBildirim } from "@/lib/notifications";
 import { yasalKayitYaz } from "@/lib/yasalKayit";
 
@@ -222,8 +222,8 @@ export async function sendMesaj(params: {
       link,
     });
   }
-  // Yanit bekletilmesin diye SMS yanit gonderildikten sonra denenir.
-  after(() => becayisSmsGonder(aliciId));
+  // Yanit bekletilmesin diye WhatsApp mesaji yanit gonderildikten sonra denenir.
+  after(() => becayisWhatsappGonder(aliciId, link));
 
   return created;
 }
@@ -253,18 +253,18 @@ export async function deleteTalep(talepId: string, userId: string) {
   else await prisma.becayisTalep.deleteMany({ where: { id: talepId, userId } });
 }
 
-const BECAYIS_SMS_ARALIGI_MS = 30 * 60 * 1000;
+const BECAYIS_MESAJ_ARALIGI_MS = 30 * 60 * 1000;
 
 /**
- * Pro + telefonu dogrulanmis + becayis SMS'ini acmis aliciya kisa bildirim.
- * Gece (21-09) ve son 30 dk icinde zaten SMS gittiyse atlanir - site ici bildirim yine durur.
+ * Pro + telefonu dogrulanmis + becayis WhatsApp bildirimini acmis aliciya kisa bildirim.
+ * Gece (21-09) ve son 30 dk icinde zaten mesaj gittiyse atlanir - site ici bildirim yine durur.
  */
-async function becayisSmsGonder(aliciId: string) {
+async function becayisWhatsappGonder(aliciId: string, link: string) {
   const alici = await prisma.user.findUnique({
     where: { id: aliciId },
-    select: { abonelikPlani: true, abonelikBitis: true, telefon: true, telefonDogrulandi: true, smsBecayisBildirimi: true },
+    select: { abonelikPlani: true, abonelikBitis: true, telefon: true, telefonDogrulandi: true, whatsappBecayisBildirimi: true },
   });
-  if (!alici?.telefon || !alici.telefonDogrulandi || !alici.smsBecayisBildirimi || !proAktifMi(alici) || sessizSaatMi()) return;
-  if (await sonSmsSayisi(aliciId, "BECAYIS", BECAYIS_SMS_ARALIGI_MS)) return;
-  await smsGonder({ userId: aliciId, telefon: alici.telefon, tur: "BECAYIS", metin: "Kamu Yolu: Yeni bir becayiş mesajın var. Siteye girip yanıtlayabilirsin." });
+  if (!alici?.telefon || !alici.telefonDogrulandi || !alici.whatsappBecayisBildirimi || !proAktifMi(alici) || sessizSaatMi()) return;
+  if (await sonMesajSayisi(aliciId, "BECAYIS", BECAYIS_MESAJ_ARALIGI_MS)) return;
+  await whatsappGonder({ userId: aliciId, telefon: alici.telefon, tur: "BECAYIS", yol: link.slice(1) });
 }

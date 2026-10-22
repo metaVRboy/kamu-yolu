@@ -37,7 +37,7 @@ export default function KullanimKosullariPage() {
               becayiş ilanlarını görüntüleme hizmeti sunar.
             </li>
             <li>
-              <strong>Pro ve Pro+</strong> ücretli planlarıyla SMS ile ilan bildirimi, bölüme özel ilan
+              <strong>Pro ve Pro+</strong> ücretli planlarıyla WhatsApp ile ilan bildirimi, bölüme özel ilan
               listesi, becayiş talebi ve mesajlaşma, sınırsız deneme ve öncelikli destek gibi ek
               özellikler sunması planlanmaktadır. <strong>Ücretli planlar henüz satışta değildir</strong>;
               &quot;Açılınca haber ver&quot; seçeneği bir satın alma veya ön sipariş değil, yalnızca bilgilendirme

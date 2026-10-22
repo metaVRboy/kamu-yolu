@@ -404,7 +404,7 @@ export function AuthForm({
               className="mt-0.5 h-3.5 w-3.5 accent-primary"
             />
             <span>
-              Kampanya, indirim ve duyurulardan SMS ve e-posta ile haberdar olmak için ticari elektronik ileti almayı kabul
+              Kampanya, indirim ve duyurulardan WhatsApp ve e-posta ile haberdar olmak için ticari elektronik ileti almayı kabul
               ediyorum. <span className="text-muted-foreground">(İsteğe bağlı)</span>
             </span>
           </label>

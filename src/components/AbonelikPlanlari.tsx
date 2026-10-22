@@ -31,7 +31,7 @@ const PLANLAR: {
       "Standart'taki her şey",
       "Kişisel bildirimler: yeni ilan ve becayiş mesajı",
       "Bana özel ilanlar",
-      "SMS ile anlık ilan bildirimi",
+      "WhatsApp ile anlık ilan bildirimi",
       "Becayiş talebi oluşturma",
       "Becayiş için site içi mesajlaşma",
       "Haftada toplam 3 KPSS denemesi, ders karnesi ve soru çözümleri",

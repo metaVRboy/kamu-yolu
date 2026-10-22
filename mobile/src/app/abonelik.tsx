@@ -29,7 +29,7 @@ const PLANLAR: { key: Plan; aciklama: string; populer?: boolean; ozellikler: str
       "Standart'taki her şey",
       "Kişisel bildirimler: yeni ilan ve becayiş mesajı",
       "Bana özel ilanlar",
-      "SMS ile anlık ilan bildirimi",
+      "WhatsApp ile anlık ilan bildirimi",
       "Becayiş talebi oluşturma",
       "Becayiş için site içi mesajlaşma",
       "Haftada toplam 3 KPSS denemesi, ders karnesi ve soru çözümleri",
@@ -76,7 +76,7 @@ export default function Abonelik() {
           </View>
           <T style={{ marginTop: 4, color: renk.yaziIkincil, lineHeight: 20 }}>
             {!ucretli
-              ? "Ücretsiz plandasın. Pro ile SMS bildirimleri, becayiş mesajlaşması ve KPSS ders karnesi açılır."
+              ? "Ücretsiz plandasın. Pro ile WhatsApp bildirimleri, becayiş mesajlaşması ve KPSS ders karnesi açılır."
               : veri.bitis
                 ? `${veri.bitis} tarihine kadar geçerli (${veri.kalanGun} gün kaldı).`
                 : "Süresiz (yönetici tarafından tanımlandı)."}

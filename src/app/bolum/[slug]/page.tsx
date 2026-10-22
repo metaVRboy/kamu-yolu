@@ -69,7 +69,7 @@ export default async function DepartmentResultsPage({
   const bolumler = bolumSatirlari.map((d) => ({ slug: d.slug, name: d.name, level: d.level, ilanSayisi: bolumIlanSayilari.get(d.id) ?? 0 }));
   const seviyeSlug = Object.entries(LEVEL_SLUG_TO_ENUM).find(([, v]) => v === department.level)?.[0];
   const logolar = await kurumLogolari(postings);
-  // SMS ile anlik ilan bildirimi Pro ozelligi (bkz. AbonelikPlanlari) - bu
+  // WhatsApp ile anlik ilan bildirimi Pro ozelligi (bkz. AbonelikPlanlari) - bu
   // yuzden Pro/Pro+ uyelere yukseltme kartini gostermiyoruz.
   const yukseltmeKartiGoster = user?.abonelikPlani !== "PRO" && user?.abonelikPlani !== "PRO_PLUS";
 
@@ -92,7 +92,7 @@ export default async function DepartmentResultsPage({
             // Giris yapmamis kullaniciya da pencere acilir; pencere once hesap olusturmaya yonlendirir.
             <YukseltButonu
               plan="PRO"
-              kaynak="sms"
+              kaynak="whatsapp"
               className="group/zil inline-flex h-9 items-center rounded-full bg-primary px-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
             >
               <Bell aria-hidden className="h-4 w-4 shrink-0 transition-transform group-hover/zil:-rotate-12" />

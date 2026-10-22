@@ -36,8 +36,8 @@ const ISLEMELER: { veri: string; amac: string; sebep: string; sure: string }[] =
     sure: "Hesap açık kaldığı sürece",
   },
   {
-    veri: "Telefon numarası ve gönderilen SMS kayıtları (yalnızca SMS bildirimini açanlarda)",
-    amac: "Numara doğrulama ve açtığınız ilan / becayiş mesajı bildirimlerini SMS ile iletme",
+    veri: "Telefon numarası ve gönderilen WhatsApp mesajı kayıtları (yalnızca WhatsApp bildirimini açanlarda)",
+    amac: "Numara doğrulama ve açtığınız ilan / becayiş mesajı bildirimlerini WhatsApp ile iletme",
     sebep: "Sözleşmenin ifası (m.5/2-c)",
     sure: "Hesap açık kaldığı sürece; numara değişince doğrulama sıfırlanır",
   },
@@ -128,7 +128,7 @@ const ALICILAR: { kim: string; ne: string; ulke: string }[] = [
   { kim: "Google LLC", ne: "Google ile giriş, kurumsal e-posta ve — onay verirseniz ve etkinse — ziyaret ölçümü", ulke: "ABD" },
   { kim: "Cloudflare Inc.", ne: "Robot doğrulaması (Turnstile) için tarayıcı ve IP bilgisi", ulke: "ABD" },
   { kim: "Meta Platforms / TikTok", ne: "Yalnızca çerez onayı verirseniz ve ilgili piksel etkinse reklam ölçümü", ulke: "ABD / İrlanda" },
-  { kim: "SMS hizmet sağlayıcısı", ne: "SMS bildirimini açtıysanız telefon numaranız ve ileti metni (sağlayıcı bağlandığında)", ulke: "Türkiye" },
+  { kim: "Meta Platforms (WhatsApp Business)", ne: "WhatsApp bildirimini açtıysanız telefon numaranız ve ileti metni (doğrulama kodu ve bildirim mesajları)", ulke: "İrlanda / ABD" },
   {
     kim: "Tarayıcınızın bildirim servisi (ör. Google, Mozilla, Apple)",
     ne: "Tarayıcı bildirimini açtıysanız bildirimin cihazınıza iletilmesi; içerik uçtan uca şifreli gider",
@@ -215,7 +215,7 @@ export default function KvkkPage() {
         <section>
           <h2 className="font-sans text-base font-semibold text-primary">4. Ticari Elektronik İleti</h2>
           <p>
-            Şu anda kampanya, indirim veya tanıtım içerikli SMS ya da e-posta (ticari elektronik ileti) gönderilmemektedir ve bunun
+            Şu anda kampanya, indirim veya tanıtım içerikli WhatsApp mesajı ya da e-posta (ticari elektronik ileti) gönderilmemektedir ve bunun
             için onay toplanmamaktadır. İleride gönderilmesi halinde, 6563 sayılı Kanun uyarınca önceden, ayrı ve isteğe bağlı onayınız
             alınacak ve İleti Yönetim Sistemi&apos;ne (İYS) kaydedilecektir. Hesap güvenliği e-postaları ile kendi açtığınız ilan ve mesaj
             bildirimleri ticari ileti değildir. Bekleme listesine katıldığınız plan için ödeme açıldığında yalnızca site ve uygulama

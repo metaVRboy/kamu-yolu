@@ -80,7 +80,7 @@ export type YukseltmeKaynagi =
   | "rapor"
   | "gelisim"
   | "deneme-hakki"
-  | "sms"
+  | "whatsapp"
   | "bildirim"
   | "becayis-mesaj"
   | "becayis-talep"
@@ -104,12 +104,12 @@ export const KAYNAK_METNI: Record<YukseltmeKaynagi, { baslik: string; alt: strin
   rapor: { baslik: "Ders karneni ve çözümleri aç", alt: "Her dersteki netini ve her sorunun doğru cevabını, açıklamasıyla gör." },
   gelisim: { baslik: "Konu konu nerede olduğunu gör", alt: "Hangi konuyu çalışman gerektiğini ve önceki denemene göre gelişimini adım adım izle." },
   "deneme-hakki": { baslik: "Bu hafta durma, çözmeye devam et", alt: "Haftalık hakkın doldu; yükselt, KPSS hazırlığın yarıda kalmasın." },
-  sms: { baslik: "Yeni ilanı herkesten önce öğren", alt: "Bölümüne uygun ilan çıktığı an telefonuna SMS gelsin." },
+  whatsapp: { baslik: "Yeni ilanı herkesten önce öğren", alt: "Bölümüne uygun ilan çıktığı an WhatsApp'tan mesaj gelsin." },
   bildirim: { baslik: "Önemli hiçbir şeyi kaçırma", alt: "Bölümüne uygun yeni ilan çıkınca ya da becayiş mesajı gelince anında haberin olsun." },
   "becayis-mesaj": { baslik: "Becayiş eşini bul, hemen yaz", alt: "Talep sahipleriyle site içinden doğrudan mesajlaş." },
   "becayis-talep": { baslik: "Becayiş talebini yayımla", alt: "Talebin herkese açık listelensin, yer değiştirmek isteyenler sana ulaşsın." },
   "ozel-ilanlar": { baslik: "Sana özel ilanları gör", alt: "Bölümüne ve öğrenim düzeyine uygun ilanlar tek listede." },
-  "tanitim-ilan": { baslik: "Yeni ilanı herkesten önce öğren", alt: "Bölümüne uygun ilan çıktığı an SMS ve bildirimle haberin olsun." },
+  "tanitim-ilan": { baslik: "Yeni ilanı herkesten önce öğren", alt: "Bölümüne uygun ilan çıktığı an WhatsApp ve bildirimle haberin olsun." },
   "tanitim-kpss": { baslik: "KPSS'ye her gün daha güçlü hazırlan", alt: "Ders karnen, soru çözümlerin ve gelişimin tek ekranda." },
   "tanitim-becayis": { baslik: "Becayiş eşini bul, hemen yaz", alt: "Talebini yayımla, ilgilenenlerle site içinden mesajlaş." },
   "tanitim-proplus": { baslik: "Sınırsız hazırlığa geç", alt: "Sınırsız deneme, konu bazlı değerlendirme ve öncelikli destek." },
@@ -128,7 +128,7 @@ export const KARSILASTIRMA: { ozellik: string; kaynak?: YukseltmeKaynagi; degerl
   { ozellik: "Ders karnesi ve soru çözümleri", kaynak: "rapor", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
   { ozellik: "Konu bazlı değerlendirme ve gelişim", kaynak: "gelisim", degerler: { UCRETSIZ: false, PRO: false, PRO_PLUS: true } },
   { ozellik: "Kişisel bildirimler", kaynak: "bildirim", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
-  { ozellik: "SMS ile anlık ilan bildirimi", kaynak: "sms", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
+  { ozellik: "WhatsApp ile anlık ilan bildirimi", kaynak: "whatsapp", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
   { ozellik: "Becayiş talebi oluşturma", kaynak: "becayis-talep", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
   { ozellik: "Becayiş mesajlaşması", kaynak: "becayis-mesaj", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },
   { ozellik: "Bana özel ilanlar", kaynak: "ozel-ilanlar", degerler: { UCRETSIZ: false, PRO: true, PRO_PLUS: true } },

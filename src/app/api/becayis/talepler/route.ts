@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 
 const AZAMI_ACIK_TALEP = 3;
 import { createTalep, deleteTalep } from "@/lib/becayis";
-import { proAktifMi } from "@/lib/sms";
+import { proAktifMi } from "@/lib/whatsapp";
 import { TURKIYE_ILLERI } from "@/lib/iller";
 import { ilceSecenekleri } from "@/lib/ilceler";
 import { KURUM_TURLERI } from "@/lib/kurumMeslek";

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { getTaleplerim, karsilikliEslesmeler } from "@/lib/becayis";
-import { proAktifMi } from "@/lib/sms";
+import { proAktifMi } from "@/lib/whatsapp";
 
 /** Mobil "Mevcut Taleplerim": kullanicinin talepleri ve her talepteki sohbetler. */
 export async function GET() {

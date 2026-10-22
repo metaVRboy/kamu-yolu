@@ -472,19 +472,19 @@ function OturumListesi({ oturumlar, degisti }: { oturumlar: OturumSatiri[]; degi
   );
 }
 
-/* ---------------- Bildirimler (SMS) ---------------- */
+/* ---------------- Bildirimler (WhatsApp) ---------------- */
 
-const SMS_SECENEKLERI = [
-  { alan: "smsIlanBildirimi", baslik: "Bölümüne uygun yeni ilanlar", aciklama: "Taramalardan sonra yeni ilanlar tek SMS'te toplanır; günde en fazla 3 SMS." },
-  { alan: "smsBecayisBildirimi", baslik: "Becayiş mesajları", aciklama: "Becayiş ilanlarında sana yeni bir mesaj geldiğinde (30 dakikada en fazla 1 SMS)." },
+const WHATSAPP_SECENEKLERI = [
+  { alan: "whatsappIlanBildirimi", baslik: "Bölümüne uygun yeni ilanlar", aciklama: "Taramalardan sonra yeni ilanlar tek WhatsApp mesajında toplanır; günde en fazla 3 mesaj." },
+  { alan: "whatsappBecayisBildirimi", baslik: "Becayiş mesajları", aciklama: "Becayiş ilanlarında sana yeni bir mesaj geldiğinde (30 dakikada en fazla 1 mesaj)." },
 ] as const;
-type SmsAlani = (typeof SMS_SECENEKLERI)[number]["alan"];
+type WhatsappAlani = (typeof WHATSAPP_SECENEKLERI)[number]["alan"];
 
 function BildirimSekmesi({ v, degisti }: { v: AyarlarVeri; degisti: () => void }) {
   // Kampanya/duyuru onayi plan kilidinin disinda: her uyenin hakki.
   return (
     <View style={{ gap: 16 }}>
-      <SmsKartlari v={v} degisti={degisti} />
+      <WhatsappKartlari v={v} degisti={degisti} />
       {TICARI_ILETI_ACIK && (
         <AyarKarti baslik="Kampanya ve duyurular" aciklama="Ticari elektronik ileti onayı; vermek zorunlu değildir.">
           <TicariIletiTercihi ilk={v.ticariIletiOnay} />
@@ -514,55 +514,55 @@ function TicariIletiTercihi({ ilk }: { ilk: boolean }) {
   return (
     <View style={s.tercih} pointerEvents={kaydediliyor ? "none" : "auto"}>
       <Onay secili={onay} degistir={degistir}>
-        <T w="yariKalin">SMS ve e-posta ile haberdar et</T>
+        <T w="yariKalin">WhatsApp ve e-posta ile haberdar et</T>
         <T style={{ fontSize: 12, color: renk.soluk, lineHeight: 17 }}>
-          İndirim, kampanya ve yeni özelliklerden SMS ve e-posta ile haberdar olmak istiyorum. Onayını istediğin an buradan geri çekebilirsin. Hesap ve güvenlik e-postaları ile açtığın ilan bildirimleri bundan etkilenmez.
+          İndirim, kampanya ve yeni özelliklerden WhatsApp ve e-posta ile haberdar olmak istiyorum. Onayını istediğin an buradan geri çekebilirsin. Hesap ve güvenlik e-postaları ile açtığın ilan bildirimleri bundan etkilenmez.
         </T>
       </Onay>
     </View>
   );
 }
 
-function SmsKartlari({ v, degisti }: { v: AyarlarVeri; degisti: () => void }) {
+function WhatsappKartlari({ v, degisti }: { v: AyarlarVeri; degisti: () => void }) {
   const kartlar = (telefon: ReactNode, tercihler: ReactNode) => (
     <View style={{ gap: 16 }}>
-      <AyarKarti baslik="Telefon numarası" aciklama="SMS bildirimleri yalnızca doğrulanmış numarana gönderilir.">
+      <AyarKarti baslik="Telefon numarası" aciklama="WhatsApp kullandığın numarayı gir; bildirimler yalnızca doğrulanmış numarana gönderilir.">
         {telefon}
       </AyarKarti>
-      <AyarKarti baslik="SMS bildirimleri" aciklama="Hangi bildirimlerin SMS ile gelmesini istediğini seç. Site içi bildirimler her zaman açık.">
+      <AyarKarti baslik="WhatsApp bildirimleri" aciklama="Hangi bildirimlerin WhatsApp ile gelmesini istediğini seç. Site içi bildirimler her zaman açık.">
         {tercihler}
       </AyarKarti>
     </View>
   );
 
-  if (!v.sms.pro) {
+  if (!v.whatsapp.pro) {
     // Ekran ayni kalir, bulanik ve dokunulamaz; API'ler de Pro kontrolu yapar.
     return (
       <KilitliOzellik
         mevcutPlan={v.plan}
         gerekenPlan="PRO"
-        kaynak="sms"
-        baslik="SMS bildirimleri Pro'da"
-        ozellikler={["Bölümüne uygun yeni ilan çıkınca anında SMS", "Becayiş talebine mesaj gelince SMS", "Kişisel site içi bildirimler de Pro ile açılır", "Genel duyurular her planda açık"]}
+        kaynak="whatsapp"
+        baslik="WhatsApp bildirimleri Pro'da"
+        ozellikler={["Bölümüne uygun yeni ilan çıkınca anında WhatsApp mesajı", "Becayiş talebine mesaj gelince WhatsApp mesajı", "Kişisel site içi bildirimler de Pro ile açılır", "Genel duyurular her planda açık"]}
       >
-        {kartlar(<TelefonDogrulama dogrulanmis={null} degisti={degisti} />, <SmsTercihleri ilk={{ smsIlanBildirimi: true, smsBecayisBildirimi: true }} telefonDogrulandi={false} />)}
+        {kartlar(<TelefonDogrulama dogrulanmis={null} degisti={degisti} />, <WhatsappTercihleri ilk={{ whatsappIlanBildirimi: true, whatsappBecayisBildirimi: true }} telefonDogrulandi={false} />)}
       </KilitliOzellik>
     );
   }
-  if (v.sms.hazirDegil) {
+  if (v.whatsapp.hazirDegil) {
     return (
-      <AyarKarti baslik="SMS bildirimleri">
-        <T style={{ color: "#334155", lineHeight: 20 }}>SMS altyapımızı kuruyoruz. Çok yakında bu sayfadan telefonunu doğrulayıp SMS bildirimlerini açabileceksin.</T>
+      <AyarKarti baslik="WhatsApp bildirimleri">
+        <T style={{ color: "#334155", lineHeight: 20 }}>WhatsApp bildirimlerini kuruyoruz. Çok yakında bu sayfadan telefonunu doğrulayıp WhatsApp bildirimlerini açabileceksin.</T>
       </AyarKarti>
     );
   }
   return kartlar(
-    <TelefonDogrulama dogrulanmis={v.sms.dogrulanmisTelefon} degisti={degisti} />,
-    <SmsTercihleri ilk={{ smsIlanBildirimi: v.sms.smsIlanBildirimi, smsBecayisBildirimi: v.sms.smsBecayisBildirimi }} telefonDogrulandi={!!v.sms.dogrulanmisTelefon} />,
+    <TelefonDogrulama dogrulanmis={v.whatsapp.dogrulanmisTelefon} degisti={degisti} />,
+    <WhatsappTercihleri ilk={{ whatsappIlanBildirimi: v.whatsapp.whatsappIlanBildirimi, whatsappBecayisBildirimi: v.whatsapp.whatsappBecayisBildirimi }} telefonDogrulandi={!!v.whatsapp.dogrulanmisTelefon} />,
   );
 }
 
-/** Telefonu SMS koduyla dogrular. Test modunda (saglayici yok) kod admine ekranda gosterilir. */
+/** Telefonu WhatsApp koduyla dogrular. Test modunda (saglayici yok) kod admine ekranda gosterilir. */
 function TelefonDogrulama({ dogrulanmis, degisti }: { dogrulanmis: string | null; degisti: () => void }) {
   const [adim, setAdim] = useState<"bos" | "numara" | "kod">(dogrulanmis ? "bos" : "numara");
   const [telefon, setTelefon] = useState("");
@@ -602,11 +602,11 @@ function TelefonDogrulama({ dogrulanmis, degisti }: { dogrulanmis: string | null
   if (adim === "kod") {
     return (
       <View style={{ gap: 14 }}>
-        <T style={{ color: renk.soluk }}>Numarana 6 haneli bir kod gönderdik. Kod 10 dakika geçerli.</T>
+        <T style={{ color: renk.soluk }}>{"WhatsApp'ına 6 haneli bir kod gönderdik. Kod 10 dakika geçerli."}</T>
         {!!testKodu && (
           <View style={{ borderWidth: 1, borderColor: "#fde68a", backgroundColor: renk.amberZemin, borderRadius: 12, padding: 12 }}>
             <T style={{ color: "#78350f", lineHeight: 20 }}>
-              <T w="kalin">Test modu:</T> SMS sağlayıcısı henüz bağlı değil, gerçek SMS gönderilmedi. Kod: <T w="kalin">{testKodu}</T>
+              <T w="kalin">Test modu:</T> WhatsApp henüz bağlı değil, gerçek mesaj gönderilmedi. Kod: <T w="kalin">{testKodu}</T>
             </T>
           </View>
         )}
@@ -655,16 +655,16 @@ function TelefonDogrulama({ dogrulanmis, degisti }: { dogrulanmis: string | null
   );
 }
 
-function SmsTercihleri({ ilk, telefonDogrulandi }: { ilk: Record<SmsAlani, boolean>; telefonDogrulandi: boolean }) {
+function WhatsappTercihleri({ ilk, telefonDogrulandi }: { ilk: Record<WhatsappAlani, boolean>; telefonDogrulandi: boolean }) {
   const [tercih, setTercih] = useState(ilk);
-  const [kaydediliyor, setKaydediliyor] = useState<SmsAlani | null>(null);
+  const [kaydediliyor, setKaydediliyor] = useState<WhatsappAlani | null>(null);
 
-  async function degistir(alan: SmsAlani, deger: boolean) {
+  async function degistir(alan: WhatsappAlani, deger: boolean) {
     // Iyimser guncelleme: kutu hemen degisir, sunucu reddederse geri alinir.
     setTercih((t) => ({ ...t, [alan]: deger }));
     setKaydediliyor(alan);
     try {
-      await api("/api/profil/sms-tercihleri", { method: "PATCH", govde: { [alan]: deger } });
+      await api("/api/profil/whatsapp-tercihleri", { method: "PATCH", govde: { [alan]: deger } });
     } catch (e) {
       setTercih((t) => ({ ...t, [alan]: !deger }));
       Alert.alert("Tercih kaydedilemedi.", hataMetni(e));
@@ -675,7 +675,7 @@ function SmsTercihleri({ ilk, telefonDogrulandi }: { ilk: Record<SmsAlani, boole
 
   return (
     <View style={{ gap: 10 }}>
-      {SMS_SECENEKLERI.map((o) => (
+      {WHATSAPP_SECENEKLERI.map((o) => (
         <View key={o.alan} style={[s.tercih, !telefonDogrulandi && { opacity: 0.6 }]} pointerEvents={!telefonDogrulandi || kaydediliyor === o.alan ? "none" : "auto"}>
           <Onay secili={tercih[o.alan]} degistir={(d) => degistir(o.alan, d)}>
             <T w="yariKalin">{o.baslik}</T>
@@ -685,8 +685,8 @@ function SmsTercihleri({ ilk, telefonDogrulandi }: { ilk: Record<SmsAlani, boole
       ))}
       <T style={{ fontSize: 12, color: renk.soluk, lineHeight: 17 }}>
         {telefonDogrulandi
-          ? "İşaretlediğin bildirimlerin doğrulanmış numarana SMS ile gönderilmesine izin vermiş olursun; istediğin an kapatabilirsin. SMS'ler 09:00-21:00 arasında gönderilir."
-          : "SMS bildirimlerini açmak için önce yukarıdan telefon numaranı doğrula."}
+          ? "İşaretlediğin bildirimlerin doğrulanmış numarana WhatsApp ile gönderilmesine izin vermiş olursun; istediğin an kapatabilirsin. Mesajlar 09:00-21:00 arasında gönderilir."
+          : "WhatsApp bildirimlerini açmak için önce yukarıdan telefon numaranı doğrula."}
       </T>
     </View>
   );

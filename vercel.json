@@ -24,7 +24,7 @@
       "schedule": "0 */2 * * *"
     },
     {
-      "path": "/api/sms-ilan-bildirimi",
+      "path": "/api/whatsapp-ilan-bildirimi",
       "schedule": "30 6,9,12,15 * * *"
     },
     {

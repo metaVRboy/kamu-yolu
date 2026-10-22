@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createBildirim } from "@/lib/notifications";
-import { aktifProKosulu, sessizSaatMi, smsGonder } from "@/lib/sms";
+import { aktifProKosulu, sessizSaatMi, whatsappGonder } from "@/lib/whatsapp";
 import { pushGonder } from "@/lib/push";
 import { bugununTarihi } from "@/lib/kpssDeneme";
 import { slugify } from "@/lib/slug";
@@ -17,7 +17,7 @@ function yetkili(req: NextRequest) {
 
 /**
  * Gunluk hatirlatmalar (vercel.json): ?tur=ilan 10:00 TR, takip edilen ilanlarin son basvurusuna 3 gun ve 1 gun
- * kala (Pro: site bildirimi + tarayici bildirimi + SMS izni varsa SMS; her esik bir kez). ?tur=seri 19:00 TR,
+ * kala (Pro: site bildirimi + tarayici bildirimi + WhatsApp izni varsa WhatsApp; her esik bir kez). ?tur=seri 19:00 TR,
  * bugun gunun sorularini cozmemis tarayici bildirimi abonelerine hatirlatma. Sonuc Taramalar sayfasina yazilir.
  */
 export async function GET(req: NextRequest) {
@@ -50,7 +50,7 @@ async function ilanHatirlat() {
       },
       include: {
         posting: { select: { id: true, title: true, institutionName: true, applicationEnd: true } },
-        user: { select: { id: true, telefon: true, telefonDogrulandi: true, smsIlanBildirimi: true, pushAbonelikleri: true } },
+        user: { select: { id: true, telefon: true, telefonDogrulandi: true, whatsappIlanBildirimi: true, pushAbonelikleri: true } },
       },
     });
     for (const t of takipler) {
@@ -62,8 +62,8 @@ async function ilanHatirlat() {
       const link = `/ilan/${t.posting.id}/${slugify(t.posting.title)}`;
       await createBildirim({ userId: t.userId, tur: "ILAN_HATIRLATMA", baslik, icerik: t.posting.title, link });
       await pushGonder(t.user.pushAbonelikleri, { baslik, govde: t.posting.title, link });
-      if (t.user.smsIlanBildirimi && t.user.telefonDogrulandi && t.user.telefon && !sessizSaatMi()) {
-        await smsGonder({ userId: t.userId, telefon: t.user.telefon, tur: "HATIRLATMA", metin: `Kamu Yolu: Takip ettiğin "${t.posting.title.slice(0, 60)}" ilanının son başvurusuna ${kalan} gün kaldı.` });
+      if (t.user.whatsappIlanBildirimi && t.user.telefonDogrulandi && t.user.telefon && !sessizSaatMi()) {
+        await whatsappGonder({ userId: t.userId, telefon: t.user.telefon, tur: "HATIRLATMA", degerler: [t.posting.title.slice(0, 60), String(kalan)], yol: link.slice(1) });
       }
       gonderilen++;
     }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { SABLONLAR } from "@/lib/whatsappSablonlari";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
@@ -220,31 +221,32 @@ function slaytlar(v: Veri): Slayt[] {
     ];
   }
 
-  // Ornek SMS: metin sms-ilan-bildirimi'ndeki sablonun aynisi; sayi bolumun bu haftaki gercek ilan sayisi.
+  // Ornek mesaj: metin whatsapp.ts'teki ILAN sablonunun aynisi; sayi bolumun bu haftaki gercek ilan sayisi.
   const ornekSayi = b && b.buHafta > 0 ? b.buHafta : 1;
   return [
     {
       kaynak: "tanitim-ilan",
       ikon: MessageSquareText,
-      ust: "SMS ile ilan bildirimi",
-      baslik: <>Yeni ilan çıktığı an {vurgu("telefonuna SMS")} gelsin</>,
+      ust: "WhatsApp ile ilan bildirimi",
+      baslik: <>Yeni ilan çıktığı an {vurgu("WhatsApp'tan")} haberin olsun</>,
       alt: "Bölümüne uygun bir ilan yayımlandığında siteye girmeni beklemeden haber veririz; başvuru süresini kaçırmazsın.",
       cipler: [
-        { ikon: Smartphone, metin: "Uygulama gerekmez, düz SMS" },
+        { ikon: Smartphone, metin: "Zaten kullandığın WhatsApp'a gelir" },
         { ikon: BellRing, metin: "Site içi bildirim de gelir" },
       ],
       gorsel: (
         <div className="w-full max-w-xs rounded-2xl bg-white/95 p-3 text-slate-800 shadow-xl shadow-indigo-950/30 ring-1 ring-white/60">
           <div className="flex items-center gap-2 text-[11px] text-slate-500">
-            <span className="flex h-5 w-5 items-center justify-center rounded-md bg-emerald-500 text-white">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#25D366] text-white">
               <MessageSquareText className="h-3 w-3" />
             </span>
-            <b className="text-slate-700">Mesajlar</b>
+            <b className="text-slate-700">Kamu Yolu</b>
             <span className="ml-auto">örnek</span>
           </div>
           <p className="mt-1.5 text-[13px] leading-snug">
-            <b>Kamu Yolu:</b> Bölümüne uygun {ornekSayi} yeni ilan yayımlandı. Profilindeki Bana Özel İlanlar bölümüne göz at.
+            {SABLONLAR.ILAN.govde.replace("{{1}}", String(ornekSayi))}
           </p>
+          <p className="mt-2 border-t border-slate-200 pt-1.5 text-center text-[13px] font-semibold text-[#027eb5]">{SABLONLAR.ILAN.buton.metin}</p>
         </div>
       ),
     },
@@ -289,7 +291,7 @@ function slaytlar(v: Veri): Slayt[] {
       alt: "Talebini yayımla, ilgilenenlerle iletişim bilgin gizli kalarak site içinden mesajlaş.",
       cipler: [
         { ikon: ArrowLeftRight, metin: "Talep oluştur ve mesajlaş" },
-        { ikon: BellRing, metin: "Mesaj gelince bildirim ve SMS" },
+        { ikon: BellRing, metin: "Mesaj gelince bildirim ve WhatsApp" },
       ],
     },
     konu,
@@ -301,7 +303,7 @@ const PLAN_KART: Record<UcretliPlan, { ad: string; rozet: string; maddeler: stri
   PRO: {
     ad: "Pro",
     rozet: "Önerilen", // satis yokken "en populer" ispatlanamaz bir iddia
-    maddeler: ["Bölümüne uygun yeni ilan çıkınca anında SMS", "Sana özel ilanlar tek listede", "Becayiş talebi oluştur ve mesajlaş", "Haftada 3 KPSS denemesi + ders karnesi ve çözümler"],
+    maddeler: ["Bölümüne uygun yeni ilan çıkınca anında WhatsApp mesajı", "Sana özel ilanlar tek listede", "Becayiş talebi oluştur ve mesajlaş", "Haftada 3 KPSS denemesi + ders karnesi ve çözümler"],
     kart: "border-blue-200 bg-gradient-to-b from-blue-50/80 to-white",
     buton: "from-blue-600 to-indigo-600 shadow-blue-600/30",
     vurgu: "text-blue-700",

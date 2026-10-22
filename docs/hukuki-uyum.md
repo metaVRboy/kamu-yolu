@@ -16,7 +16,7 @@ Google/Meta/TikTok politika sayfaları.
 | Haber fotoğrafları (FSEK) | Kaynak sitelerin fotoğrafları kullanılmıyor; 100 eski kayıt temizlendi (27'si kurum logosu, 73'ü görselsiz). |
 | Basın Kanunu (5187) | Bölüm adı kullanıcı kararıyla "Haberler" (2026-10-13 "Duyurular" yapılmıştı, 2026-10-22 geri alındı; ad tek başına statüyü belirlemez); her özet kaynağa bağlantılı, "yapay zekâ ile özetlenmiştir" notu; detay sayfaları noindex. Beyanname verilmedi (internet haber sitesi statüsü istenmiyor). |
 | 5651 yer sağlayıcı | Becayiş ilanı/mesajı ve girişte IP + zaman kaydı, satır başına HMAC (bütünlük), 2 yıl sonra otomatik silme (`/api/bakim` cron). İlanlarda "Uygunsuz içeriği bildir", mesajlarda şikâyet. Footer'da yer sağlayıcı unvan/adresi. |
-| Ticari ileti (6563, İYS) | İYS kaydı olmadığı için kampanya onayı toplanmıyor (`TICARI_ILETI_ACIK=false`); bekleme listesine e-posta değil yalnız site/uygulama içi bildirim; ilan SMS'leri saf bilgilendirme. |
+| Ticari ileti (6563, İYS) | İYS kaydı olmadığı için kampanya onayı toplanmıyor (`TICARI_ILETI_ACIK=false`); bekleme listesine e-posta değil yalnız site/uygulama içi bildirim; ilan WhatsApp mesajları saf bilgilendirme (Meta "utility" şablonu). |
 | Satış (6502, Ticari Reklam Yön.) | `SATIS_ACIK=false`: kampanya/geri sayım/üstü çizili fiyat yok, satış sözleşmeleri yayında değil, "En Popüler" yok. |
 | 6563 m.3 | Kullanım Koşulları'nda sözleşmenin kurulma adımları, düzeltme, metnin erişimi. |
 | Hesap silme | Destek kayıtları anonimleşiyor; silme kaydı 3 yıl (Silme Yön. m.7/3). |
@@ -37,11 +37,13 @@ Google/Meta/TikTok politika sayfaları.
    - Google Workspace: Google, fatura adresi Türkiye olan müşteriye "Turkish SCCs" sunuyor (Cloud DPA App.3 Turkey).
      Admin konsolunda/Google desteğinden kabul et → imza tarihinden itibaren **5 iş günü** içinde
      standartsozlesme.kvkk.gov.tr (e-Devlet ile giriş) üzerinden bildir. Bildirmemenin cezası 2026'da 90.308–1.806.377 TL.
+   - Meta (WhatsApp Business Platform, 2026-10-22): Türkiye standart sözleşmesi sunup sunmadığı doğrulanmadı.
+     Meta Business ayarlarında/DPA'da kontrol et; sunuyorsa kabul + 5 iş günü bildirimi, sunmuyorsa aşağıdaki e-posta.
    - Vercel, Neon (Databricks), Resend, Cloudflare: KVKK sözleşmesi sunmuyorlar. Aşağıdaki e-postayı gönder,
      cevaplarını sakla (iyi niyet kanıtı). Kabul eden olursa aynı 5 iş günü bildirimi.
 5. **Satıştan veya kampanya iletisinden önce (sırayla)** — ~~vergi kaydı ya da şirket~~ (19.10.2026: şahıs işletmesi,
    gerçek usul, Ankara Cumhuriyet V.D. 5671298061; künye, satış sözleşmeleri, KVKK ve Koşullar güncellendi, adres
-   faaliyet adresi oldu) → KEP adresi → İYS kaydı → ETBİS kaydı → SMS başlığı (marka tescili/şirket unvanı). Sonra `SATIS_ACIK` / `TICARI_ILETI_ACIK` açılır,
+   faaliyet adresi oldu) → KEP adresi → İYS kaydı → ETBİS kaydı → WhatsApp Business Platform (2026-10-22: SMS kaldırıldı, başlık için marka tescili 6 ay sürüyordu). Sonra `SATIS_ACIK` / `TICARI_ILETI_ACIK` açılır,
    satış sözleşmeleri doldurulur ve onaylar **yeniden** toplanır (şahıs adına toplanan onay şirkete devredilemez).
 6. **Reklam hesapları**
    - Meta: Türkiye için "Özel Reklam Kategorisi" zorunlu değil (NONE seçilebilir); arayüz isterse İstihdam seç, ülke Türkiye.

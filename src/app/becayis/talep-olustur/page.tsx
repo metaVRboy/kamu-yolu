@@ -6,7 +6,7 @@ import { getOkunmamisIlgilendiklerimSayisi, getOkunmamisMesajSayisi } from "@/li
 import { BecayisTalepForm } from "@/components/BecayisTalepForm";
 import { ProfilLayout } from "@/components/ProfilLayout";
 import { KilitliOzellik } from "@/components/KilitliOzellik";
-import { proAktifMi } from "@/lib/sms";
+import { proAktifMi } from "@/lib/whatsapp";
 
 export const metadata = { title: "Becayiş Talebi Oluştur — Kamu Yolu" };
 
@@ -44,7 +44,7 @@ export default async function BecayisTalepOlusturPage() {
             ozellikler={[
               "Talebin herkese açık listelenir, iletişim bilgilerin gizli kalır",
               "İlgilenenlerle site içinden mesajlaş",
-              "Yeni mesaj gelince bildirim ve SMS al",
+              "Yeni mesaj gelince bildirim ve WhatsApp mesajı al",
             ]}
           >
             <BecayisTalepForm />

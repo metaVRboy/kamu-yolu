@@ -1,9 +1,9 @@
 import { adminSayfasi } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
-import { smsSaglayiciTanimli, telefonMaskele } from "@/lib/sms";
+import { whatsappTanimli, telefonMaskele } from "@/lib/whatsapp";
 import { cn } from "@/lib/utils";
 
-export const metadata = { title: "SMS Kayıtları — Kamu Yolu" };
+export const metadata = { title: "WhatsApp Kayıtları — Kamu Yolu" };
 
 const TARIH = new Intl.DateTimeFormat("tr-TR", { dateStyle: "short", timeStyle: "short", timeZone: "Europe/Istanbul" });
 const TUR_ADI: Record<string, string> = { DOGRULAMA: "Doğrulama", ILAN: "İlan", BECAYIS: "Becayiş" };
@@ -13,12 +13,12 @@ const DURUM_RENGI: Record<string, string> = {
   HATA: "bg-red-50 text-red-700",
 };
 
-export default async function AdminSmsPage() {
+export default async function AdminWhatsappPage() {
   await adminSayfasi();
 
   const [kayitlar, ozet] = await Promise.all([
-    prisma.smsGonderim.findMany({ orderBy: { olusturma: "desc" }, take: 100 }),
-    prisma.smsGonderim.groupBy({
+    prisma.whatsappGonderim.findMany({ orderBy: { olusturma: "desc" }, take: 100 }),
+    prisma.whatsappGonderim.groupBy({
       by: ["durum"],
       // eslint-disable-next-line react-hooks/purity -- sunucu bileseni, istek basina bir kez calisir
       where: { olusturma: { gt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } },
@@ -28,12 +28,12 @@ export default async function AdminSmsPage() {
 
   return (
     <div className="max-w-5xl">
-      <h1 className="font-sans text-2xl font-bold tracking-tight text-slate-900">SMS Kayıtları</h1>
-      <p className="mt-1 text-sm text-muted-foreground">Son 100 SMS. Numaralar maskelidir.</p>
+      <h1 className="font-sans text-2xl font-bold tracking-tight text-slate-900">WhatsApp Kayıtları</h1>
+      <p className="mt-1 text-sm text-muted-foreground">Son 100 WhatsApp mesajı. Numaralar maskelidir.</p>
 
-      {!smsSaglayiciTanimli() && (
+      {!whatsappTanimli() && (
         <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
-          <strong>Test modu:</strong> SMS sağlayıcısı henüz bağlı değil. Hiçbir SMS gerçekten gönderilmiyor; gönderilecek mesajlar
+          <strong>Test modu:</strong> WhatsApp anahtarları henüz tanımlı değil. Hiçbir mesaj gerçekten gönderilmiyor; gönderilecek mesajlar
           yalnızca buraya “TEST” olarak yazılıyor.
         </p>
       )}
@@ -77,7 +77,7 @@ export default async function AdminSmsPage() {
             {kayitlar.length === 0 && (
               <tr>
                 <td colSpan={5} className="px-3 py-6 text-center text-muted-foreground">
-                  Henüz SMS kaydı yok.
+                  Henüz mesaj kaydı yok.
                 </td>
               </tr>
             )}

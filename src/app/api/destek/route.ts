@@ -3,7 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { verifyTurnstileToken } from "@/lib/turnstile";
-import { proAktifMi } from "@/lib/sms";
+import { proAktifMi } from "@/lib/whatsapp";
 import { DESTEK_KONULARI } from "@/lib/destek";
 
 const bodySchema = z.object({

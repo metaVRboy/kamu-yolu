@@ -18,8 +18,8 @@ export type BantMesaji = {
 const GUN_MS = 86_400_000;
 
 /**
- * Header altindaki Pro bandinin mesaji, uyenin gercek durumundan. Iddialar dogrulanabilir olmali: SMS saglayicisi
- * canliya alinana kadar "SMS" vaat edilmez ("anında haberin olur" = site/uygulama bildirimi). Pro+ uyeye bant yok.
+ * Header altindaki Pro bandinin mesaji, uyenin gercek durumundan. Iddialar dogrulanabilir olmali: WhatsApp
+ * canliya alinana kadar "WhatsApp" vaat edilmez ("anında haberin olur" = site/uygulama bildirimi). Pro+ uyeye bant yok.
  */
 export async function GET() {
   const user = await getCurrentUser();

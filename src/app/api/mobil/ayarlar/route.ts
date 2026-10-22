@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getAktifOturumId, getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { profilFotografiUrl } from "@/lib/profil";
-import { proAktifMi, smsSaglayiciTanimli, telefonGoster } from "@/lib/sms";
+import { proAktifMi, whatsappTanimli, telefonGoster } from "@/lib/whatsapp";
 
 const TARIH = new Intl.DateTimeFormat("tr-TR", { dateStyle: "long", timeStyle: "short", timeZone: "Europe/Istanbul" });
 const OTURUM_OMRU_MS = 30 * 24 * 60 * 60 * 1000; // JWT suresi; daha eski oturumlar zaten gecersiz
@@ -39,13 +39,13 @@ export async function GET() {
     sifreVar: !!user.passwordHash,
     googleBagli: !!user.googleId,
     oturumlar: oturumlar.map((o) => ({ id: o.id, cihaz: o.cihaz, olusturma: TARIH.format(o.olusturma), sonGorulme: TARIH.format(o.sonGorulme), buCihaz: o.id === aktifOturumId })),
-    sms: {
+    whatsapp: {
       pro,
       // Saglayici baglanana kadar yalniz admin test edebilir (kod ekranda gosterilir).
-      hazirDegil: !smsSaglayiciTanimli() && !user.isAdmin,
+      hazirDegil: !whatsappTanimli() && !user.isAdmin,
       dogrulanmisTelefon: telefonDogrulandi && user.telefon ? telefonGoster(user.telefon) : null,
-      smsIlanBildirimi: user.smsIlanBildirimi,
-      smsBecayisBildirimi: user.smsBecayisBildirimi,
+      whatsappIlanBildirimi: user.whatsappIlanBildirimi,
+      whatsappBecayisBildirimi: user.whatsappBecayisBildirimi,
     },
     kvkkOnayTarihi: user.kvkkOnayTarihi ? TARIH.format(user.kvkkOnayTarihi) : null,
     ticariIletiOnay: user.ticariIletiOnay,

@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { Prisma, type DenemeDers, type EducationLevel } from "@/generated/prisma/client";
 import { bugununTarihi, getBugununDenemesi } from "@/lib/kpssDeneme";
 import { proHediyeEt } from "@/lib/proHediye";
-import { proAktifMi } from "@/lib/sms";
+import { proAktifMi } from "@/lib/whatsapp";
 
 const GUN_MS = 86_400_000;
 /** Her gun her dersten bir soru (Guncel Bilgiler havuzu kucuk ve cabuk eskiyor: dahil degil). */
