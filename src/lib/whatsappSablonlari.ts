@@ -4,7 +4,7 @@
 export type MesajTuru = "DOGRULAMA" | "ILAN" | "BECAYIS";
 
 /**
- * Meta onayli WhatsApp sablonlari (isletme baslatan mesaj serbest metin olamaz). scripts/whatsappSablonlari.ts
+ * Meta onayli WhatsApp sablonlari (isletme baslatan mesaj serbest metin olamaz). scripts/whatsappKurulum.ts
  * bunlari Meta'da olusturur; `govde` hem sablon metni hem kayitta/test modunda gosterilen acik metin.
  * Fayda (UTILITY) sablonlarinda tek dinamik URL butonu var: SITE_URL/{{1}}, gonderirken `yol` verilir.
  * Kurallar: degisken govdenin basinda/sonunda olamaz; degerde satir sonu olamaz (degerTemizle).
