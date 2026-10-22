@@ -105,7 +105,6 @@ export function FotoKredisi({ kredi, acik = false, style }: { kredi: HaberKartiV
     );
   return (
     <View style={[{ flexDirection: "row" }, !acik && s.kredi, style]}>
-      <T style={yazi}>Fotoğraf: </T>
       <T style={yazi} onPress={() => Linking.openURL(kredi.profil)}>
         {kredi.ad}
       </T>

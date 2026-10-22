@@ -145,7 +145,6 @@ export function FotoKredisi({ kredi, acik = false, className }: { kredi: unknown
   if (!k?.ad || !k.profil || !k.sayfa) return null;
   const metin = (
     <>
-      Fotoğraf:{" "}
       <a href={k.profil} target="_blank" rel="noopener noreferrer" className="underline-offset-2 hover:underline">
         {k.ad}
       </a>{" "}
