@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from "rea
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { ArrowRight, CalendarDays, Landmark } from "lucide-react-native";
+import { ArrowRight, CalendarDays } from "lucide-react-native";
 import { T } from "@/bilesenler/ui";
 import { golge, renk } from "@/lib/tema";
 import { tarihUzun } from "@/lib/bicim";
@@ -13,24 +13,73 @@ import type { HaberKartiVeri } from "@/lib/tipler";
  * Sitedeki HaberGorsel: gorsel yoksa simgeli yer tutucu, kurum logosuysa ortalanmis;
  * altta beyaza donen serit + Kamu Yolu logosu (markaGizli: kucuk onizlemelerde yok).
  */
-export function HaberGorsel({ h, style, markaGizli = false }: { h: Pick<HaberKartiVeri, "gorselUrl" | "gorselLogoMu">; style?: StyleProp<ViewStyle>; markaGizli?: boolean }) {
+const DOLGU_KELIME = new Set(["t.c.", "tc", "ve", "ile", "türkiye", "cumhuriyeti"]);
+/** "Sağlık Bakanlığı" -> "SB"; kurum yoksa basliktan. */
+const basHarfler = (metin: string) =>
+  metin
+    .split(/\s+/)
+    .filter((k) => k && !DOLGU_KELIME.has(k.toLocaleLowerCase("tr")) && /\p{L}/u.test(k))
+    .slice(0, 2)
+    .map((k) => k.match(/\p{L}/u)![0].toLocaleUpperCase("tr"))
+    .join("");
+
+/**
+ * Sitedeki HaberKapak: gorseli olmayan haberde acik zeminde marka gradyanli monogram karosu, kurum adi ve kategori.
+ * kapakUstte: yalniz karo, ustte (kaydirmada metin altta; kucuk onizlemede sigsin).
+ */
+function HaberKapak({ h, kapakUstte }: { h: Pick<HaberKartiVeri, "baslik" | "kurumAdi" | "kategori">; kapakUstte: boolean }) {
+  const ad = h.kurumAdi?.trim() || null;
+  const harf = basHarfler(ad ?? h.baslik) || "KY";
+  return (
+    <LinearGradient colors={["#f8fafc", "#ffffff", "#eff6ff"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[{ flex: 1, alignItems: "center", gap: 8 }, kapakUstte ? { justifyContent: "flex-start", paddingTop: "10%" } : { justifyContent: "center" }]}>
+      <LinearGradient colors={[renk.birincil, "#4f46e5"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[s.monogram, kapakUstte && { width: 44, height: 44, borderRadius: 12 }]}>
+        <T w="kalin" style={{ color: "#fff", fontSize: kapakUstte ? 15 : 19, letterSpacing: 0.5 }}>
+          {harf}
+        </T>
+      </LinearGradient>
+      {!kapakUstte && !!ad && (
+        <T w="yariKalin" numberOfLines={2} style={{ maxWidth: "80%", textAlign: "center", color: "#1e293b", fontSize: 14 }}>
+          {ad}
+        </T>
+      )}
+      {!kapakUstte && !!h.kategori && (
+        <View style={s.kategori}>
+          <T w="kalin" style={{ fontSize: 10, letterSpacing: 0.6, color: renk.birincil }}>
+            {h.kategori.toLocaleUpperCase("tr")}
+          </T>
+        </View>
+      )}
+    </LinearGradient>
+  );
+}
+
+export function HaberGorsel({
+  h,
+  style,
+  markaGizli = false,
+  kapakUstte = false,
+}: {
+  h: Pick<HaberKartiVeri, "gorselUrl" | "gorselLogoMu" | "baslik" | "kurumAdi" | "kategori">;
+  style?: StyleProp<ViewStyle>;
+  markaGizli?: boolean;
+  kapakUstte?: boolean;
+}) {
   const [hata, setHata] = useState(false);
+  const kapak = !h.gorselUrl || hata;
   return (
     <View style={[{ aspectRatio: 16 / 9, borderRadius: 12, overflow: "hidden", backgroundColor: renk.birincilZemin }, style]}>
-      {!h.gorselUrl || hata ? (
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-          <Landmark size={40} color="rgba(36,102,195,0.4)" />
-        </View>
+      {kapak ? (
+        <HaberKapak h={h} kapakUstte={kapakUstte} />
       ) : (
         <Image
-          source={{ uri: h.gorselUrl }}
+          source={{ uri: h.gorselUrl ?? undefined }}
           contentFit={h.gorselLogoMu ? "contain" : "cover"}
           style={[{ flex: 1 }, h.gorselLogoMu && { margin: 24 }]}
           onError={() => setHata(true)}
           transition={150}
         />
       )}
-      {!markaGizli && (
+      {!markaGizli && !kapak && (
         <>
           <LinearGradient colors={["transparent", "rgba(255,255,255,0.7)", "#ffffff"]} style={s.serit} pointerEvents="none" />
           <Image source={require("../../assets/logo.png")} style={s.marka} contentFit="contain" />
@@ -83,7 +132,7 @@ export function HaberKarti({ h }: { h: HaberKartiVeri }) {
 export function HaberSatiri({ h }: { h: HaberKartiVeri }) {
   return (
     <Pressable onPress={() => router.push({ pathname: "/haber/[slug]", params: { slug: h.slug } })} style={{ flexDirection: "row", gap: 12, paddingVertical: 6 }}>
-      <HaberGorsel h={h} markaGizli style={{ width: 80, height: 56, aspectRatio: undefined, borderRadius: 8 }} />
+      <HaberGorsel h={h} markaGizli kapakUstte style={{ width: 80, height: 56, aspectRatio: undefined, borderRadius: 8 }} />
       <View style={{ flex: 1 }}>
         <T w="yariKalin" numberOfLines={2}>
           {h.baslik}
@@ -99,5 +148,7 @@ const s = StyleSheet.create({
   yeni: { position: "absolute", top: 8, right: 8, backgroundColor: "#dc2626", borderRadius: 999, paddingHorizontal: 8, paddingVertical: 2 },
   devam: { flexDirection: "row", alignItems: "center", gap: 4, borderWidth: 1, borderColor: "rgba(36,102,195,0.25)", borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6 },
   serit: { position: "absolute", left: 0, right: 0, bottom: 0, height: "40%" },
+  monogram: { width: 60, height: 60, borderRadius: 16, alignItems: "center", justifyContent: "center", borderWidth: 3, borderColor: "#fff", shadowColor: "#2563eb", shadowOpacity: 0.35, shadowRadius: 10, shadowOffset: { width: 0, height: 6 }, elevation: 4 },
+  kategori: { borderRadius: 999, borderWidth: 1, borderColor: "rgba(36,102,195,0.15)", backgroundColor: "rgba(255,255,255,0.85)", paddingHorizontal: 10, paddingVertical: 3 },
   marka: { position: "absolute", bottom: "3%", alignSelf: "center", width: 64, height: 40 },
 });

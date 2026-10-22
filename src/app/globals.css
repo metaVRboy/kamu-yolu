@@ -364,6 +364,34 @@
 }
 
 /*
+ * Ana sayfa haber kaydirmasi (genis ekran): koyu metin alanindan acik logo alanina tek gradyan. Dogrusal gecis koyu
+ * uca yaklasirken "birden koyulasiyor" gorunur; bu yuzden yavas baslayip yavas biten (smoothstep) cok duraklı egri,
+ * uzun mesafe (yuzde 26 -> 68) ve siyah yerine yumusak lacivert.
+ */
+.haber-kaydir-zemin { background: #fff; }
+@media (min-width: 640px) {
+  .haber-kaydir-zemin {
+    background: linear-gradient(
+      to right,
+      #111a2e 0%,
+      #111a2e 26%,
+      #141d31 30%,
+      #1c2538 34%,
+      #2b3446 38%,
+      #414a5b 42%,
+      #5e6676 46%,
+      #7e8594 50%,
+      #9da4b1 54%,
+      #bac0cb 58%,
+      #d2d7df 62%,
+      #e3e7ed 65%,
+      #eef2f7 68%,
+      #f1f4f9 100%
+    );
+  }
+}
+
+/*
  * Pro tesvik kartlari (TesvikKarti): "su an kotu" sahnesi; ana butonun uzerine gelince (dokunmatikte kart ekrana
  * girince bir kez) "Pro ile iyi" sahnesine doner. .on = iyi hal (Pro sahibinde hep acik). Temalar: sis (kacirilan
  * ilan), sinyal (bildirim cagrisi), gece (seri koruma). Kart kendi genisligine gore dizilir (container query).

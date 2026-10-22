@@ -26,6 +26,7 @@ export type HaberKartiVeri = {
   gorselUrl: string | null;
   gorselLogoMu: boolean;
   kategori: string | null;
+  kurumAdi: string | null;
   yayinTarihi: string;
   yeni: boolean;
 };

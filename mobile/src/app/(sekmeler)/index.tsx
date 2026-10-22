@@ -242,7 +242,7 @@ function HaberKaruseli({ haberler }: { haberler: HaberKartiVeri[] }) {
       >
         {haberler.map((h) => (
           <Pressable key={h.slug} onPress={() => router.push({ pathname: "/haber/[slug]", params: { slug: h.slug } })} style={{ width: genislik, height: 380 }}>
-            <HaberGorsel h={h} markaGizli style={[StyleSheet.absoluteFill, { aspectRatio: undefined, borderRadius: 0 }]} />
+            <HaberGorsel h={h} markaGizli kapakUstte style={[StyleSheet.absoluteFill, { aspectRatio: undefined, borderRadius: 0 }]} />
             <LinearGradient colors={["rgba(0,0,0,0.1)", "rgba(0,0,0,0.35)", "rgba(0,0,0,0.85)"]} style={StyleSheet.absoluteFill} />
             <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, padding: 24, gap: 12 }}>
               {h.yeni && (

@@ -16,10 +16,25 @@ async function ozetGorseliniGetir(baslik: string): Promise<string | null> {
   if (!res) return null;
 
   const data = (await res.json()) as {
+    type?: string;
     thumbnail?: { source?: string };
     originalimage?: { source?: string };
   };
+  // Anlam ayrimi sayfasinin gorseli yok ("Adalet Bakanligi" -> asil sayfa "Adalet Bakanligi (Turkiye)").
+  if (data.type === "disambiguation") return null;
   return data.thumbnail?.source ?? data.originalimage?.source ?? null;
+}
+
+/**
+ * Kurum adindan denenecek sayfa basliklari: tam ad, "T.C." ve parantez ayiklanmis ad, parantez icindeki kisaltma
+ * (TUBITAK, KOSGEB), coklu kurum listesinde ilki; her biri ayrica "(Türkiye)" ekiyle (bakanliklar boyle).
+ */
+function baslikAdaylari(kurumAdi: string): string[] {
+  const ilk = kurumAdi.split(/[,;]/)[0].replace(/^T\.?\s?C\.?\s+/i, "").trim();
+  const parantezsiz = ilk.replace(/\s*\([^)]*\)\s*/g, " ").replace(/\s+/g, " ").trim();
+  const kisaltma = ilk.match(/\(([^)]+)\)/)?.[1]?.trim();
+  const temel = [...new Set([kurumAdi.trim(), ilk, parantezsiz, kisaltma].filter((x): x is string => !!x && x.length > 1))];
+  return [...new Set(temel.flatMap((b) => [b, `${b} (Türkiye)`]))];
 }
 
 const JENERIK_KELIMELER = new Set([
@@ -60,16 +75,17 @@ function turKelimeleriniAl(metin: string): Set<string> {
   return new Set(TUR_KELIMELERI.filter((k) => kucuk.includes(k)));
 }
 
-/** Tam baslik eslesmesi basarisiz olursa en yakin sayfa basligini bulur. */
-async function enYakinBasligiBul(kurumAdi: string): Promise<string | null> {
+/** Tam baslik eslesmesi basarisiz olursa aramadaki ilk uygun sayfa basliklarini (en fazla 5) doner. */
+async function yakinBasliklariBul(kurumAdi: string): Promise<string[]> {
   const res = await wikiGetir(
-    `https://tr.wikipedia.org/w/api.php?action=query&list=search&srlimit=1&format=json&origin=*&srsearch=${encodeURIComponent(kurumAdi)}`,
+    `https://tr.wikipedia.org/w/api.php?action=query&list=search&srlimit=5&format=json&origin=*&srsearch=${encodeURIComponent(kurumAdi)}`,
   );
-  if (!res) return null;
-
+  if (!res) return [];
   const data = (await res.json()) as { query?: { search?: { title?: string }[] } };
-  const bulunanBaslik = data.query?.search?.[0]?.title;
-  if (!bulunanBaslik) return null;
+  return (data.query?.search ?? []).map((s) => s.title).filter((b): b is string => !!b && uygunBaslik(kurumAdi, b));
+}
+
+function uygunBaslik(kurumAdi: string, bulunanBaslik: string): boolean {
 
   // Arama, kucuk/az bilinen kurumlar icin alakasiz bir sayfaya (ör.
   // belediye yerine ilin genel sayfasi) dusebiliyor - kurum adiyla en az
@@ -85,20 +101,26 @@ async function enYakinBasligiBul(kurumAdi: string): Promise<string | null> {
   const baslikTurler = turKelimeleriniAl(bulunanBaslik);
   const turUyuyorMu = turKelimeleri.size === 0 || [...turKelimeleri].some((k) => baslikTurler.has(k));
 
-  return ortusuyorMu && turUyuyorMu ? bulunanBaslik : null;
+  // Baslikta kurum adinda olmayan anlamli kelime varsa baska bir sayfadir: "Cumhurbaskanligi" aramasi
+  // "Cumhurbaskanligi Turkiye Bisiklet Turu" logosunu getiriyordu.
+  const fazlaKelimeYok = [...baslikKelimeleri].every((k) => kurumKelimeleri.has(k) || k === "türkiye");
+
+  return ortusuyorMu && turUyuyorMu && fazlaKelimeYok;
 }
 
 async function gorselAra(kurumAdi: string): Promise<string | null> {
-  const tamEslesme = await ozetGorseliniGetir(kurumAdi);
-  if (tamEslesme) return tamEslesme;
-
-  // Model bazen kurum adini Wikipedia'daki sayfa basligiyla birebir
-  // ayni yazmayabilir (ör. "T.C. Adalet Bakanligi" vs "Adalet Bakanligi") -
-  // arama ile en yakin sayfayi bulup tekrar dene.
-  const enYakinBaslik = await enYakinBasligiBul(kurumAdi);
-  if (!enYakinBaslik) return null;
-
-  return ozetGorseliniGetir(enYakinBaslik);
+  // Once dogrudan baslik adaylari (anlam ayrimi atlanir, "(Türkiye)" denenir).
+  for (const baslik of baslikAdaylari(kurumAdi)) {
+    const gorsel = await ozetGorseliniGetir(baslik);
+    if (gorsel) return gorsel;
+  }
+  // Model kurum adini Wikipedia basligiyla birebir yazmayabilir: aramadaki uygun sayfalari sirayla dene.
+  const sade = baslikAdaylari(kurumAdi)[1] ?? kurumAdi;
+  for (const baslik of await yakinBasliklariBul(sade)) {
+    const gorsel = await ozetGorseliniGetir(baslik);
+    if (gorsel) return gorsel;
+  }
+  return null;
 }
 
 /**
@@ -116,7 +138,7 @@ export async function findInstitutionImage(kurumAdi: string): Promise<string | n
   }
 }
 
-const gorselAraOnbellekli = unstable_cache(gorselAra, ["institution-image-v3"], { revalidate: 60 * 60 * 24 * 7 });
+const gorselAraOnbellekli = unstable_cache(gorselAra, ["institution-image-v4"], { revalidate: 60 * 60 * 24 * 7 });
 
 /**
  * findInstitutionImage'in onbellekli hali - ilanlar sayfalarda tekrar

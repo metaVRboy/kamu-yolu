@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, ChevronLeft, ChevronRight, Landmark } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { HaberGorsel } from "@/components/HaberGorsel";
 import { Badge } from "@/components/ui/badge";
 import { isYeni, type HaberItem } from "@/components/HaberlerSection";
@@ -85,31 +85,23 @@ export function HeroHaberCarousel({ haberler }: { haberler: HaberItem[] }) {
       >
         {slaytlar.map((haber, i) => (
           // Kopya slaytlar ekran okuyucudan ve klavye sirasindan gizli; gorunen yalniz aktif haber.
-          // Telefonda gorsel tam kaplar, metin alttan koyulasan zeminde. Genis ekranda metin soldaki koyu alanda; gorsel
-          // paneli sagda ve sol kenari maskeyle yumusakca koyu zemine erir (sert gecis yok). Kaydirmada marka damgasi yok.
-          <div key={`${haber.id}-${i}`} className="relative h-full w-full shrink-0 bg-white sm:bg-slate-950" aria-hidden={i !== konum} inert={i !== konum}>
-            <div className="absolute inset-y-0 right-0 w-full sm:w-[64%] sm:[mask-image:linear-gradient(to_right,transparent,black_40%)]">
-              {haber.gorselUrl ? (
-                <div className="absolute inset-0 bg-white">
-                  <HaberGorsel
-                    src={haber.gorselUrl}
-                    alt={haber.baslik}
-                    logoMu={haber.gorselLogoMu}
-                    markaGizli
-                    hemenYukle
-                    className="absolute inset-0 h-full w-full sm:[&>div]:pl-[36%]"
-                  />
-                </div>
-              ) : (
-                // Gorseli olmayan haber: soluk yer tutucu yerine marka renginde panel.
-                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary via-blue-600 to-indigo-700 sm:justify-end sm:pr-[12%]">
-                  <Landmark className="h-24 w-24 text-white/25" aria-hidden />
-                </div>
-              )}
-            </div>
+          // Telefonda gorsel tam kaplar, metin alttan koyulasan zeminde. Genis ekranda tek zemin gradyani (globals.css
+          // .haber-kaydir-zemin): soldaki koyu metin alanindan sagdaki acik logo alanina yumusak, egrili gecis. Damga yok.
+          <div key={`${haber.id}-${i}`} className="haber-kaydir-zemin relative h-full w-full shrink-0" aria-hidden={i !== konum} inert={i !== konum}>
+            {/* Gorselsiz haberde de ayni yerlesim: sagdaki acik alanda tipografik kapak (monogram + kurum). */}
+            <HaberGorsel
+              src={haber.gorselUrl}
+              alt={haber.baslik}
+              logoMu={haber.gorselLogoMu}
+              kurum={haber.kurumAdi}
+              kategori={haber.kategori}
+              markaGizli
+              hemenYukle
+              className="absolute inset-0 h-full w-full max-sm:[&>div]:items-start max-sm:[&>div]:pt-10 max-sm:[&_.kapak-detay]:hidden sm:[&>div]:bg-none sm:[&>div]:pl-[54%]"
+            />
             <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10 sm:hidden" />
 
-            <div className="absolute inset-x-0 bottom-0 flex flex-col gap-3 p-6 sm:right-auto sm:w-[46%] sm:p-8">
+            <div className="absolute inset-x-0 bottom-0 flex flex-col gap-3 p-6 sm:right-auto sm:w-[42%] sm:p-8">
               {isYeni(haber.yayinTarihi) && (
                 <Badge className="w-fit border-transparent bg-red-600 text-white shadow">YENİ</Badge>
               )}

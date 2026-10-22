@@ -3,6 +3,7 @@ import { suresiDolanYasalKayitlariSil } from "@/lib/yasalKayit";
 import { tazelikKaydet } from "@/lib/kpssTazelik";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
+import { eksikHaberLogolariniDoldur } from "@/lib/haberLogo";
 import { ILETISIM_EPOSTA, SITE_URL } from "@/lib/site";
 
 /**
@@ -19,7 +20,9 @@ export async function GET(req: NextRequest) {
   const temizlenen = await gereksizKayitlariSil();
   const tazelik = await tazelikKaydet().catch((e) => String(e).slice(0, 300));
   const btk = await btkHatirlatmasi().catch((e) => String(e).slice(0, 300));
-  return NextResponse.json({ ok: true, silinen, temizlenen, tazelik, btk });
+  // Olusturulurken bulunamayan haber logolari her gun yeniden denenir (gecici Wikipedia hatasi kalici olmasin).
+  const haberLogo = await eksikHaberLogolariniDoldur().catch((e) => String(e).slice(0, 300));
+  return NextResponse.json({ ok: true, silinen, temizlenen, tazelik, btk, haberLogo });
 }
 
 /**

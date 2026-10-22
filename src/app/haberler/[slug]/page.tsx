@@ -209,6 +209,8 @@ export default async function HaberDetayPage({
             src={haber.gorselUrl}
             alt={haber.baslik}
             logoMu={haber.gorselLogoMu}
+            kurum={haber.kurumAdi}
+            kategori={haber.kategori}
             className="mt-6 aspect-[16/9] w-full rounded-2xl"
           />
 
@@ -341,6 +343,7 @@ export default async function HaberDetayPage({
                       src={h.gorselUrl}
                       alt={h.baslik}
                       logoMu={h.gorselLogoMu}
+                      kurum={h.kurumAdi}
                       markaGizli
                       className="h-14 w-20 shrink-0 rounded-lg"
                     />

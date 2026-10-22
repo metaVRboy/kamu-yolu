@@ -16,6 +16,8 @@ export type HaberItem = {
   gorselUrl: string | null;
   gorselLogoMu: boolean;
   yayinTarihi: string;
+  kurumAdi?: string | null;
+  kategori?: string | null;
 };
 
 const YENI_ESIGI_GUN = 3;
@@ -67,7 +69,7 @@ export function HaberlerSection({
             className="gap-3 overflow-hidden border-primary/20 bg-white p-3 shadow-sm"
           >
             <Link href={`/haberler/${h.slug}`} className="relative block">
-              <HaberGorsel src={h.gorselUrl} alt={h.baslik} logoMu={h.gorselLogoMu} />
+              <HaberGorsel src={h.gorselUrl} alt={h.baslik} logoMu={h.gorselLogoMu} kurum={h.kurumAdi} kategori={h.kategori} />
               {isYeni(h.yayinTarihi) && (
                 <Badge className="absolute right-2 top-2 border-transparent bg-red-600 text-white shadow">
                   YENİ
