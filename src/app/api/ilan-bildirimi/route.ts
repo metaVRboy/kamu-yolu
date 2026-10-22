@@ -51,10 +51,13 @@ export async function GET(req: NextRequest) {
 
   let whatsapp = 0;
   let eposta = 0;
+  // ponytail: kullanici basina sirali dongu; ~300 alicidan sonra maxDuration'a yaklasir. O zaman: e-posta Resend
+  // batch (100/istek) + WhatsApp esanli havuz (Meta 80 mesaj/sn) ya da kuyruk.
   for (const k of kullanicilar) {
     if (k.whatsappIlanBildirimi && k.telefonDogrulandi && k.telefon && (await sonMesajSayisi(k.id, "ILAN", GUN_MS)) < GUNLUK_ILAN_MESAJ_SINIRI) {
+      // Isaret yalniz Meta'nin kabul ettigi mesajdan: HATA (ör. gunluk alici siniri) olan ilanlar sonraki turda yeniden denenir.
       const sonMesaj = await prisma.whatsappGonderim.findFirst({
-        where: { userId: k.id, tur: "ILAN", kapsamSonu: { not: null } },
+        where: { userId: k.id, tur: "ILAN", kapsamSonu: { not: null }, durum: { not: "HATA" } },
         orderBy: { olusturma: "desc" },
         select: { kapsamSonu: true },
       });
