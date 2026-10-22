@@ -132,3 +132,26 @@ export function HaberGorsel({
     </div>
   );
 }
+
+export type FotoKredi = { ad: string; profil: string; sayfa: string };
+
+/**
+ * Unsplash fotograf kunyesi (API kosulu: fotografci ve Unsplash baglantisi). `acik`: acik zeminde duz metin
+ * (detay sayfasi); varsayilan: gorsel ustunde yari saydam etiket.
+ */
+export function FotoKredisi({ kredi, acik = false, className }: { kredi: unknown; acik?: boolean; className?: string }) {
+  const k = kredi as Partial<FotoKredi> | null;
+  if (!k?.ad || !k.profil || !k.sayfa) return null;
+  return (
+    <p className={cn(acik ? "text-xs text-muted-foreground" : "z-10 rounded-full bg-black/45 px-2.5 py-0.5 text-[10px] text-white/90 backdrop-blur-sm", className)}>
+      Fotoğraf:{" "}
+      <a href={k.profil} target="_blank" rel="noopener noreferrer" className="underline-offset-2 hover:underline">
+        {k.ad}
+      </a>{" "}
+      /{" "}
+      <a href={k.sayfa} target="_blank" rel="noopener noreferrer" className="underline-offset-2 hover:underline">
+        Unsplash
+      </a>
+    </p>
+  );
+}

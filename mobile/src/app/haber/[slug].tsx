@@ -3,7 +3,7 @@ import * as WebBrowser from "expo-web-browser";
 import { router, useLocalSearchParams } from "expo-router";
 import { ArrowUpRight, Building2, CalendarClock, CalendarDays, GraduationCap, ListChecks, Share2, Users, type LucideIcon } from "lucide-react-native";
 import { Buton, HataKutusu, Kart, T, Yukleniyor } from "@/bilesenler/ui";
-import { HaberGorsel, HaberSatiri } from "@/bilesenler/HaberKarti";
+import { FotoKredisi, HaberGorsel, HaberSatiri } from "@/bilesenler/HaberKarti";
 import { KurumTakipKarti } from "@/bilesenler/ProTesvik";
 import { useVeri } from "@/lib/api";
 import { tarihUzun } from "@/lib/bicim";
@@ -60,6 +60,7 @@ export default function HaberDetay() {
         )}
 
         <HaberGorsel h={h} style={{ marginTop: 20, borderRadius: 16 }} />
+        <FotoKredisi kredi={h.gorselKredi} acik style={{ marginTop: 6, alignSelf: "flex-end" }} />
 
         {h.bilgiKutulari.length > 0 && (
           <View style={{ marginTop: 20, flexDirection: "row", flexWrap: "wrap", gap: 10 }}>

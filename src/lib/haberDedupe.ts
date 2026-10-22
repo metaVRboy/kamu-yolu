@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { gemini, GEMINI_MODEL } from "@/lib/gemini";
 import { toGeminiSchema, parseGeminiJson } from "@/lib/geminiSchema";
 import { buildHaberSlug } from "@/lib/slug";
+import { haberFotografiBul } from "@/lib/haberFoto";
 import type { HaberDetayExtract } from "@/lib/haberDetayCikar";
 import { EducationLevel } from "@/generated/prisma/enums";
 
@@ -67,11 +68,27 @@ export async function haberleriEkleVeTekillestir(
 
   let eklenen = 0;
   let degistirilen = 0;
+  // Unsplash arama sonuclari bu calismada paylasilir (saatte 50 istek siniri).
+  const fotoArama = new Map();
 
   for (const { departmentIds, detay, ...aday } of adaylar) {
     const eslesenId = await ayniHaberIdBul(aday, mevcutlar);
+    // Gorsel onceligi: konuya uygun telifsiz fotograf -> kurum logosu (aday.gorselUrl) -> kapak. Guncellenen haberin
+    // zaten fotografi varsa o korunur (link paylasilmis olabilir, gorsel her guncellemede degismesin).
+    const eskiFoto = eslesenId
+      ? await prisma.haber.findUnique({ where: { id: eslesenId }, select: { gorselUrl: true, gorselKredi: true } })
+      : null;
+    const foto = eskiFoto?.gorselKredi
+      ? null
+      : await haberFotografiBul({ baslik: aday.baslik, ozet: aday.ozet, kategori: detay?.kategori, kurumAdi: detay?.kurumAdi }, fotoArama);
+    const gorsel = eskiFoto?.gorselKredi
+      ? { gorselUrl: eskiFoto.gorselUrl, gorselLogoMu: false, gorselKredi: eskiFoto.gorselKredi as object }
+      : foto
+        ? { gorselUrl: foto.url, gorselLogoMu: false, gorselKredi: foto.kredi }
+        : {};
     const veri = {
       ...aday,
+      ...gorsel,
       kurumAdi: detay?.kurumAdi ?? null,
       kadroPozisyon: detay?.kadroPozisyon ?? null,
       kontenjan: detay?.kontenjan ?? null,

@@ -16,7 +16,7 @@ import { getHaberBySlug, getLatestHaberler } from "@/lib/haberler";
 import { haberSuresiGectiMi } from "@/lib/haberYayin";
 import { getLatestPostings } from "@/lib/matching";
 import { findInstitutionImageCached } from "@/lib/findInstitutionImage";
-import { HaberGorsel } from "@/components/HaberGorsel";
+import { FotoKredisi, HaberGorsel } from "@/components/HaberGorsel";
 import { isYeni } from "@/components/HaberlerSection";
 import { HaberPaylas } from "@/components/HaberPaylas";
 import { KurumLogo } from "@/components/KurumLogo";
@@ -213,6 +213,7 @@ export default async function HaberDetayPage({
             kategori={haber.kategori}
             className="mt-6 aspect-[16/9] w-full rounded-2xl"
           />
+          <FotoKredisi kredi={haber.gorselKredi} acik className="mt-1.5 text-right" />
 
           {bilgiKutulari.length > 0 && (
             <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">

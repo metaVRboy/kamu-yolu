@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
+import { Linking, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
@@ -89,6 +89,24 @@ export function HaberGorsel({
   );
 }
 
+/** Sitedeki FotoKredisi: Unsplash kunyesi (API kosulu). acik: acik zeminde duz metin; varsayilan: gorsel ustunde etiket. */
+export function FotoKredisi({ kredi, acik = false, style }: { kredi: HaberKartiVeri["gorselKredi"]; acik?: boolean; style?: StyleProp<ViewStyle> }) {
+  if (!kredi) return null;
+  const yazi = { fontSize: acik ? 12 : 10, color: acik ? renk.soluk : "rgba(255,255,255,0.9)" };
+  return (
+    <View style={[{ flexDirection: "row" }, !acik && s.kredi, style]}>
+      <T style={yazi}>Fotoğraf: </T>
+      <T style={yazi} onPress={() => Linking.openURL(kredi.profil)}>
+        {kredi.ad}
+      </T>
+      <T style={yazi}> / </T>
+      <T style={yazi} onPress={() => Linking.openURL(kredi.sayfa)}>
+        Unsplash
+      </T>
+    </View>
+  );
+}
+
 /** Sitedeki HaberlerSection karti. */
 export function HaberKarti({ h }: { h: HaberKartiVeri }) {
   const ac = () => router.push({ pathname: "/haber/[slug]", params: { slug: h.slug } });
@@ -151,4 +169,5 @@ const s = StyleSheet.create({
   monogram: { width: 60, height: 60, borderRadius: 16, alignItems: "center", justifyContent: "center", borderWidth: 3, borderColor: "#fff", shadowColor: "#2563eb", shadowOpacity: 0.35, shadowRadius: 10, shadowOffset: { width: 0, height: 6 }, elevation: 4 },
   kategori: { borderRadius: 999, borderWidth: 1, borderColor: "rgba(36,102,195,0.15)", backgroundColor: "rgba(255,255,255,0.85)", paddingHorizontal: 10, paddingVertical: 3 },
   marka: { position: "absolute", bottom: "3%", alignSelf: "center", width: 64, height: 40 },
+  kredi: { borderRadius: 999, backgroundColor: "rgba(0,0,0,0.45)", paddingHorizontal: 10, paddingVertical: 2 },
 });

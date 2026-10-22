@@ -39,7 +39,7 @@ export async function ilanKartlari(ilanlar: Posting[]) {
   return tekIlanKartlari(ilanlar).map((g) => ilanKarti(g, logolar.get(g.ilk.institutionName) ?? null));
 }
 
-export function haberKarti(h: Pick<Haber, "id" | "slug" | "baslik" | "ozet" | "gorselUrl" | "gorselLogoMu" | "yayinTarihi" | "kategori" | "kurumAdi">) {
+export function haberKarti(h: Pick<Haber, "id" | "slug" | "baslik" | "ozet" | "gorselUrl" | "gorselLogoMu" | "yayinTarihi" | "kategori" | "kurumAdi" | "gorselKredi">) {
   return {
     slug: h.slug,
     baslik: h.baslik,
@@ -48,6 +48,8 @@ export function haberKarti(h: Pick<Haber, "id" | "slug" | "baslik" | "ozet" | "g
     gorselLogoMu: h.gorselLogoMu,
     kategori: h.kategori,
     kurumAdi: h.kurumAdi || null,
+    // Unsplash fotografi ise { ad, profil, sayfa }: uygulama kunyeyi gosterir (API kosulu).
+    gorselKredi: (h.gorselKredi as { ad: string; profil: string; sayfa: string } | null) ?? null,
     yayinTarihi: h.yayinTarihi.toISOString(),
     // Sitedeki isYeni ile ayni esik: 3 gun.
     yeni: Date.now() - h.yayinTarihi.getTime() < 3 * 86_400_000,

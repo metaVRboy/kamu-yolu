@@ -8,7 +8,7 @@ import { ArrowRight, ArrowUpRight, Bell, Briefcase, Building2, GraduationCap } f
 import { BolumBasligi, HataKutusu, Kart, T, Yukleniyor } from "@/bilesenler/ui";
 import { BolumArama } from "@/bilesenler/BolumArama";
 import { IlanKarti } from "@/bilesenler/IlanKarti";
-import { HaberGorsel, HaberKarti } from "@/bilesenler/HaberKarti";
+import { FotoKredisi, HaberGorsel, HaberKarti } from "@/bilesenler/HaberKarti";
 import { useVeri } from "@/lib/api";
 import { sayi } from "@/lib/bicim";
 import { useOturum } from "@/lib/oturum";
@@ -244,6 +244,7 @@ function HaberKaruseli({ haberler }: { haberler: HaberKartiVeri[] }) {
           <Pressable key={h.slug} onPress={() => router.push({ pathname: "/haber/[slug]", params: { slug: h.slug } })} style={{ width: genislik, height: 380 }}>
             <HaberGorsel h={h} markaGizli kapakUstte style={[StyleSheet.absoluteFill, { aspectRatio: undefined, borderRadius: 0 }]} />
             <LinearGradient colors={["rgba(0,0,0,0.1)", "rgba(0,0,0,0.35)", "rgba(0,0,0,0.85)"]} style={StyleSheet.absoluteFill} />
+            <FotoKredisi kredi={h.gorselKredi} style={{ position: "absolute", top: 12, right: 12 }} />
             <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, padding: 24, gap: 12 }}>
               {h.yeni && (
                 <View style={{ alignSelf: "flex-start", backgroundColor: "#dc2626", borderRadius: 999, paddingHorizontal: 10, paddingVertical: 3 }}>

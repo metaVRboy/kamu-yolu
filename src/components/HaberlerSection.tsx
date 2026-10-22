@@ -18,6 +18,7 @@ export type HaberItem = {
   yayinTarihi: string;
   kurumAdi?: string | null;
   kategori?: string | null;
+  gorselKredi?: unknown;
 };
 
 const YENI_ESIGI_GUN = 3;

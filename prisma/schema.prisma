@@ -617,6 +617,8 @@ model Haber {
   // logolari kucuk/kare oldugu icin arayuzde farkli gosterilir - tam
   // kaplama yerine ortalanmis/dolgu ile).
   gorselLogoMu Boolean  @default(false)
+  // Gorsel Unsplash fotografi ise kunye { ad, profil, sayfa } (Unsplash kosulu: fotografci + Unsplash baglantisi).
+  gorselKredi  Json?
   yayinTarihi  DateTime @default(now())
   createdAt    DateTime @default(now())
 

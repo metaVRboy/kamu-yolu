@@ -406,6 +406,21 @@
       #f1f4f9 100%
     );
   }
+  /* Fotografli slayt: fotograf sag 3/5'te; sol kenari ayni smoothstep egrisiyle koyu zemine erir. */
+  .haber-kaydir-foto {
+    mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      rgba(0, 0, 0, 0.03) 8%,
+      rgba(0, 0, 0, 0.1) 16%,
+      rgba(0, 0, 0, 0.24) 24%,
+      rgba(0, 0, 0, 0.44) 32%,
+      rgba(0, 0, 0, 0.66) 40%,
+      rgba(0, 0, 0, 0.84) 48%,
+      rgba(0, 0, 0, 0.95) 56%,
+      #000 64%
+    );
+  }
 }
 
 /*

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
-import { HaberGorsel } from "@/components/HaberGorsel";
+import { FotoKredisi, HaberGorsel } from "@/components/HaberGorsel";
 import { Badge } from "@/components/ui/badge";
 import { isYeni, type HaberItem } from "@/components/HaberlerSection";
 import { cn } from "@/lib/utils";
@@ -88,18 +88,26 @@ export function HeroHaberCarousel({ haberler }: { haberler: HaberItem[] }) {
           // Telefonda gorsel tam kaplar, metin alttan koyulasan zeminde. Genis ekranda tek zemin gradyani (globals.css
           // .haber-kaydir-zemin): soldaki koyu metin alanindan sagdaki acik logo alanina yumusak, egrili gecis. Damga yok.
           <div key={`${haber.id}-${i}`} className="haber-kaydir-zemin relative h-full w-full shrink-0" aria-hidden={i !== konum} inert={i !== konum}>
-            {/* Gorselsiz haberde de ayni yerlesim: sagdaki acik alanda tipografik kapak (monogram + kurum). */}
-            <HaberGorsel
-              src={haber.gorselUrl}
-              alt={haber.baslik}
-              logoMu={haber.gorselLogoMu}
-              kurum={haber.kurumAdi}
-              kategori={haber.kategori}
-              markaGizli
-              hemenYukle
-              className="absolute inset-0 h-full w-full max-sm:[&>div]:items-start max-sm:[&>div]:pt-10 max-sm:[&_.kapak-detay]:hidden sm:[&>div]:bg-none sm:[&>div]:pl-[54%]"
-            />
+            {haber.gorselUrl && !haber.gorselLogoMu ? (
+              // Fotograf: genis ekranda sag 3/5'e yerlesir, sol kenari ayni egriyle koyu metin alanina erir.
+              <div className="haber-kaydir-foto absolute inset-0 sm:left-auto sm:w-[62%]">
+                <HaberGorsel src={haber.gorselUrl} alt={haber.baslik} markaGizli hemenYukle className="h-full w-full" />
+              </div>
+            ) : (
+              // Logo ya da gorselsiz haber: sagdaki acik alanda logo / tipografik kapak.
+              <HaberGorsel
+                src={haber.gorselUrl}
+                alt={haber.baslik}
+                logoMu={haber.gorselLogoMu}
+                kurum={haber.kurumAdi}
+                kategori={haber.kategori}
+                markaGizli
+                hemenYukle
+                className="absolute inset-0 h-full w-full max-sm:[&>div]:items-start max-sm:[&>div]:pt-10 max-sm:[&_.kapak-detay]:hidden sm:[&>div]:bg-none sm:[&>div]:pl-[54%]"
+              />
+            )}
             <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10 sm:hidden" />
+            {!!haber.gorselKredi && <FotoKredisi kredi={haber.gorselKredi} className="absolute top-3 right-3" />}
 
             <div className="absolute inset-x-0 bottom-0 flex flex-col gap-3 p-6 sm:right-auto sm:w-[42%] sm:p-8">
               {isYeni(haber.yayinTarihi) && (
