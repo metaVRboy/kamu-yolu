@@ -3,7 +3,7 @@ import { Linking, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } 
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { ArrowRight, CalendarDays } from "lucide-react-native";
+import { ArrowRight, CalendarDays, Camera } from "lucide-react-native";
 import { T } from "@/bilesenler/ui";
 import { golge, renk } from "@/lib/tema";
 import { tarihUzun } from "@/lib/bicim";
@@ -89,10 +89,20 @@ export function HaberGorsel({
   );
 }
 
-/** Sitedeki FotoKredisi: Unsplash kunyesi (API kosulu). acik: acik zeminde duz metin; varsayilan: gorsel ustunde etiket. */
+/**
+ * Sitedeki FotoKredisi: Unsplash kunyesi (API kosulu). acik: acik zeminde duz metin; varsayilan: gorsel ustunde
+ * yalniz soluk kamera simgesi, dokununca kunye acilir.
+ */
 export function FotoKredisi({ kredi, acik = false, style }: { kredi: HaberKartiVeri["gorselKredi"]; acik?: boolean; style?: StyleProp<ViewStyle> }) {
+  const [acildi, setAcildi] = useState(false);
   if (!kredi) return null;
   const yazi = { fontSize: acik ? 12 : 10, color: acik ? renk.soluk : "rgba(255,255,255,0.9)" };
+  if (!acik && !acildi)
+    return (
+      <Pressable onPress={() => setAcildi(true)} hitSlop={10} accessibilityLabel="Fotoğraf künyesi" style={[{ padding: 4 }, style]}>
+        <Camera size={14} color="rgba(255,255,255,0.5)" />
+      </Pressable>
+    );
   return (
     <View style={[{ flexDirection: "row" }, !acik && s.kredi, style]}>
       <T style={yazi}>Fotoğraf: </T>

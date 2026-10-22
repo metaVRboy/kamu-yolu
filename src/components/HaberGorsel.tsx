@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Camera } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const DOLGU_KELIME = new Set(["t.c.", "tc", "ve", "ile", "türkiye", "cumhuriyeti", "the", "of"]);
@@ -137,13 +138,13 @@ export type FotoKredi = { ad: string; profil: string; sayfa: string };
 
 /**
  * Unsplash fotograf kunyesi (API kosulu: fotografci ve Unsplash baglantisi). `acik`: acik zeminde duz metin
- * (detay sayfasi); varsayilan: gorsel ustunde yari saydam etiket.
+ * (detay sayfasi); varsayilan: gorsel ustunde yalniz soluk kamera simgesi, uzerine gelince/dokununca kunye acilir.
  */
 export function FotoKredisi({ kredi, acik = false, className }: { kredi: unknown; acik?: boolean; className?: string }) {
   const k = kredi as Partial<FotoKredi> | null;
   if (!k?.ad || !k.profil || !k.sayfa) return null;
-  return (
-    <p className={cn(acik ? "text-xs text-muted-foreground" : "z-10 rounded-full bg-black/45 px-2.5 py-0.5 text-[10px] text-white/90 backdrop-blur-sm", className)}>
+  const metin = (
+    <>
       Fotoğraf:{" "}
       <a href={k.profil} target="_blank" rel="noopener noreferrer" className="underline-offset-2 hover:underline">
         {k.ad}
@@ -152,6 +153,15 @@ export function FotoKredisi({ kredi, acik = false, className }: { kredi: unknown
       <a href={k.sayfa} target="_blank" rel="noopener noreferrer" className="underline-offset-2 hover:underline">
         Unsplash
       </a>
-    </p>
+    </>
+  );
+  if (acik) return <p className={cn("text-xs text-muted-foreground", className)}>{metin}</p>;
+  return (
+    <div className={cn("group/kredi z-10 flex items-center gap-1.5 rounded-full p-1 text-[10px] text-white/90 transition hover:bg-black/45 focus-within:bg-black/45", className)}>
+      <span className="hidden pl-1.5 group-hover/kredi:inline group-focus-within/kredi:inline">{metin}</span>
+      <button type="button" aria-label="Fotoğraf künyesi" className="flex h-5 w-5 items-center justify-center rounded-full text-white/50 transition group-hover/kredi:text-white/90">
+        <Camera className="h-3.5 w-3.5" />
+      </button>
+    </div>
   );
 }
