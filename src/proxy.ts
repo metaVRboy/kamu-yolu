@@ -23,7 +23,8 @@ export function proxy(req: NextRequest) {
     h.set("x-giris-sayfasi", gizliOzet("giris-sayfasi", "1"));
     return NextResponse.next({ request: { headers: h } });
   }
-  if (gorevMi(req)) return NextResponse.next();
+  // Meta webhook'u: her istek rotada imzayla (WHATSAPP_APP_SECRET) dogrulanir; yogun anda hiz sinirina takilmasin.
+  if (gorevMi(req) || req.nextUrl.pathname === "/api/whatsapp/webhook") return NextResponse.next();
   if (botMu(req.headers.get("user-agent"))) {
     return NextResponse.json({ error: "Otomatik erişime izin verilmiyor." }, { status: 403 });
   }

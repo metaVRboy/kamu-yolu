@@ -229,6 +229,7 @@ model User {
   kaynak                   Json?
   telefonDogrulama         TelefonDogrulamaKodu?
   whatsappGonderimleri     WhatsappGonderim[]
+  whatsappMesajlari        WhatsappMesaj[]
   yukseltmeTalebi          YukseltmeTalebi?
   destekMesajlari          DestekMesaji[]
   soruHataBildirimleri     SoruHataBildirimi[]
@@ -371,8 +372,9 @@ model WhatsappGonderim {
   metin       String
   // DOGRULAMA | ILAN | BECAYIS
   tur         String
-  // TEST (saglayici tanimsiz) | GONDERILDI | HATA
+  // TEST (saglayici tanimsiz) | GONDERILDI | TESLIM | OKUNDU | HATA (son ucu webhook gunceller)
   durum       String
+  // Meta mesaj kimligi (wamid): webhook teslim durumunu bununla bulur.
   saglayiciId String?
   hata        String?
   // ILAN mesajinin kapsadigi en son bildirimin createdAt'i. Sonraki tarama bundan
@@ -382,7 +384,32 @@ model WhatsappGonderim {
 
   @@index([userId, tur, olusturma])
   @@index([olusturma])
+  @@index([saglayiciId])
   @@map("SmsGonderim")
+}
+
+// WhatsApp sohbeti: kullanicilarin isletme numarasina yazdiklari (webhook) ve adminin serbest metin cevaplari.
+// Bildirim sablonlari WhatsappGonderim'de. 1 yil sonra /api/bakim siler; hesap silinince de silinir.
+model WhatsappMesaj {
+  id        String   @id @default(cuid())
+  // "+905321234567"; dogrulanmis numarasi eslesen uye varsa userId dolar.
+  telefon   String
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String?
+  // GELEN | GIDEN
+  yon       String
+  metin     String
+  // Meta mesaj kimligi: ayni webhook iki kez gelirse ikinci kez yazilmaz; GIDEN'in durumu bununla guncellenir.
+  waId      String?  @unique
+  // GIDEN: GONDERILDI | TESLIM | OKUNDU | HATA
+  durum     String?
+  hata      String?
+  // GELEN: admin sohbeti actiginda true.
+  okundu    Boolean  @default(false)
+  olusturma DateTime @default(now())
+
+  @@index([telefon, olusturma])
+  @@index([olusturma])
 }
 
 // Cihaz bazli oturum: JWT icindeki oturumId buraya bakar. Ayarlar > Guvenlik

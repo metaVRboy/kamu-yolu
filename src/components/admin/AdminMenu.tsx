@@ -38,11 +38,11 @@ const MENU = [
   { href: "/admin/destek", ad: "Destek kutusu", ikon: LifeBuoy },
   { href: "/admin/ayarlar", ad: "Site ayarları", ikon: Settings },
   { href: "/admin/islem-kaydi", ad: "İşlem kaydı", ikon: History },
-  { href: "/admin/whatsapp", ad: "WhatsApp kayıtları", ikon: MessageSquareText },
+  { href: "/admin/whatsapp", ad: "WhatsApp", ikon: MessageSquareText },
 ];
 
-/** Admin yan menusu; dar ekranda ustte yatay kaydirilan sekmeler. */
-export function AdminMenu() {
+/** Admin yan menusu; dar ekranda ustte yatay kaydirilan sekmeler. rozetler: sayfa -> bekleyen is sayisi. */
+export function AdminMenu({ rozetler = {} }: { rozetler?: Record<string, number> }) {
   const pathname = usePathname();
   // Ic ice yollarda (/admin/uyeler ve /admin/uyeler/pro-plus) yalniz en uzun eslesen aktif.
   const aktifHref = MENU.map((m) => m.href)
@@ -64,6 +64,7 @@ export function AdminMenu() {
           >
             <Ikon className="h-4 w-4" />
             {ad}
+            {!!rozetler[href] && <span className="ml-auto rounded-full bg-emerald-500 px-1.5 text-[11px] font-bold text-white">{rozetler[href]}</span>}
           </Link>
         );
       })}

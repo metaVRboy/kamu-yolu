@@ -11,7 +11,7 @@ export async function GET() {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Giriş yapmalısınız." }, { status: 401 });
 
-  const [bolum, becayisTalepleri, gonderilenMesajlar, denemeler, bildirimler, oturumlar, fotograf, beklemeListesi, destekMesajlari, whatsappGonderimleri, soruBildirimleri] = await Promise.all([
+  const [bolum, becayisTalepleri, gonderilenMesajlar, denemeler, bildirimler, oturumlar, fotograf, beklemeListesi, destekMesajlari, whatsappGonderimleri, soruBildirimleri, whatsappMesajlari] = await Promise.all([
     user.departmentId ? prisma.department.findUnique({ where: { id: user.departmentId }, select: { name: true } }) : null,
     prisma.becayisTalep.findMany({ where: { userId: user.id }, omit: { userId: true } }),
     prisma.becayisMesaj.findMany({ where: { gonderenId: user.id }, select: { talepId: true, mesaj: true, createdAt: true } }),
@@ -35,6 +35,7 @@ export async function GET() {
     prisma.destekMesaji.findMany({ where: { userId: user.id }, select: { konu: true, mesaj: true, yanit: true, createdAt: true, yanitlandi: true } }),
     prisma.whatsappGonderim.findMany({ where: { userId: user.id }, select: { telefon: true, metin: true, tur: true, durum: true, olusturma: true } }),
     prisma.soruHataBildirimi.findMany({ where: { userId: user.id }, select: { aciklama: true, createdAt: true } }),
+    prisma.whatsappMesaj.findMany({ where: { userId: user.id }, select: { telefon: true, yon: true, metin: true, olusturma: true } }),
   ]);
   const [gunlukSorular, takipEdilenIlanlar, proHediyeleri, tarayiciBildirimleri, davetEttikleri, takipEdilenKurumlar, seriDondurmalari] = await Promise.all([
     prisma.gunlukSoruCevap.findMany({ where: { userId: user.id }, select: { tarih: true, dogru: true, cevaplar: true, olusturma: true } }),
@@ -81,6 +82,7 @@ export async function GET() {
     beklemeListesi,
     destekMesajlari,
     whatsappGonderimleri,
+    whatsappMesajlari,
     soruHataBildirimleri: soruBildirimleri,
     gunlukSorular,
     takipEdilenIlanlar,

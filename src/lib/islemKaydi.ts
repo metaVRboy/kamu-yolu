@@ -43,6 +43,7 @@ export const ISLEM_ADI = {
   "kpss.bildirim-coz": "Soru hata bildirimini kapattı",
   "destek.yanitla": "Destek mesajını yanıtladı",
   "destek.kapat": "Destek mesajını kapattı",
+  "whatsapp.cevap": "WhatsApp mesajını yanıtladı",
   "ayar.guncelle": "Site ayarlarını güncelledi",
 } as const;
 export type IslemTuru = keyof typeof ISLEM_ADI;

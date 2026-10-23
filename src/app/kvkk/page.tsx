@@ -42,6 +42,12 @@ const ISLEMELER: { veri: string; amac: string; sebep: string; sure: string }[] =
     sure: "Hesap açık kaldığı sürece; numara değişince doğrulama sıfırlanır",
   },
   {
+    veri: "WhatsApp işletme numaramıza yazdığınız mesajlar, telefon numaranız ve size verdiğimiz cevaplar",
+    amac: "Sorunuzun ya da talebinizin yanıtlanması",
+    sebep: "Sözleşmenin kurulması/ifası ve meşru menfaat (m.5/2-c, m.5/2-f)",
+    sure: "1 yıl; hesap silinince derhal",
+  },
+  {
     veri: "Becayiş talebi (meslek, mevcut il/ilçe, istenen iller, açıklama) ve becayiş mesajları",
     amac: "Talebin yayımlanması, kullanıcılar arası site içi mesajlaşma",
     sebep: "Sözleşmenin ifası (m.5/2-c)",

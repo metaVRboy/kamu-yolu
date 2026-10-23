@@ -60,8 +60,8 @@ export async function whatsappGonder(params: { userId: string | null; telefon: s
 }
 
 /**
- * Cloud API sablon mesaji. 200 = Meta kabul etti (teslim degil; numarada WhatsApp yoksa sonradan duser).
- * ponytail: teslim durumu webhook'u yok; teslim istatistigi gerekince eklenir.
+ * Cloud API sablon mesaji. 200 = Meta kabul etti (teslim degil); teslim/okundu/hata sonradan webhook'la gelir
+ * (/api/whatsapp/webhook, numarada WhatsApp yoksa HATA olur).
  */
 async function metayaGonder(telefon: string, tur: MesajTuru, degerler: string[], yol?: string): Promise<string> {
   const metin = (text: string) => ({ type: "text", text });
@@ -69,16 +69,26 @@ async function metayaGonder(telefon: string, tur: MesajTuru, degerler: string[],
   // Dogrulama: "kodu kopyala" butonu da kodu parametre olarak ister.
   if (tur === "DOGRULAMA") components.push({ type: "button", sub_type: "url", index: "0", parameters: [metin(degerler[0])] });
   else if (yol) components.push({ type: "button", sub_type: "url", index: "0", parameters: [metin(yol)] });
+  return mesajGonder(telefon, { type: "template", template: { name: SABLONLAR[tur].ad, language: { code: "tr" }, components } });
+}
+
+/**
+ * Admin cevabi: serbest metin yalniz kullanicinin son mesajindan sonraki 24 saatte gider (Meta kurali);
+ * pencere kontrolu cagiranda. Basarida Meta mesaj kimligi (wamid).
+ */
+/** Kullanicinin son mesajindan sonra serbest metin cevap suresi (Meta musteri hizmeti penceresi). */
+export const CEVAP_PENCERESI_MS = 24 * 3_600_000;
+
+export function metinGonder(telefon: string, metin: string) {
+  return mesajGonder(telefon, { type: "text", text: { body: metin } });
+}
+
+async function mesajGonder(telefon: string, icerik: object): Promise<string> {
   const res = await fetch(`${GRAPH}/${process.env.WHATSAPP_TELEFON_ID}/messages`, {
     method: "POST",
     headers: { Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}`, "Content-Type": "application/json" },
     signal: AbortSignal.timeout(10_000),
-    body: JSON.stringify({
-      messaging_product: "whatsapp",
-      to: telefon.replace(/^\+/, ""),
-      type: "template",
-      template: { name: SABLONLAR[tur].ad, language: { code: "tr" }, components },
-    }),
+    body: JSON.stringify({ messaging_product: "whatsapp", to: telefon.replace(/^\+/, ""), ...icerik }),
   });
   const data = await res.json().catch(() => null);
   const id = data?.messages?.[0]?.id;

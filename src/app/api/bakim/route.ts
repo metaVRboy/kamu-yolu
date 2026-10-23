@@ -43,7 +43,8 @@ async function btkHatirlatmasi() {
 
 /**
  * KVKK m.4/2-d (gerektigi kadar saklama): yarim kalmis kayitlar (ad, e-posta, sifre ozeti), suresi dolmus
- * kod/jetonlar, 30 gunden eski kilit/sayac kayitlari (e-posta icerir) ve 90 gunden eski kapali oturumlar.
+ * kod/jetonlar, 30 gunden eski kilit/sayac kayitlari (e-posta icerir), 90 gunden eski kapali oturumlar ve 1 yildan eski
+ * WhatsApp sohbet mesajlari.
  */
 async function gereksizKayitlariSil() {
   const once = (gun: number) => new Date(Date.now() - gun * 86_400_000);
@@ -55,6 +56,7 @@ async function gereksizKayitlariSil() {
     prisma.epostaDegisiklikKodu.deleteMany({ where: { expiresAt: { lt: simdi } } }),
     prisma.authAbuse.deleteMany({ where: { lastFailAt: { lt: once(30) }, OR: [{ lockedUntil: null }, { lockedUntil: { lt: simdi } }] } }),
     prisma.oturum.deleteMany({ where: { kapatildi: { lt: once(90) } } }),
+    prisma.whatsappMesaj.deleteMany({ where: { olusturma: { lt: once(365) } } }),
   ]);
   return r.reduce((t, x) => t + x.count, 0);
 }
