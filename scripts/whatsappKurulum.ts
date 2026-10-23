@@ -2,7 +2,7 @@
  * WhatsApp Cloud API kurulumu (anahtarlar .env.prod'da; degerleri ekrana yazilmaz):
  *   npx tsx --env-file=.env.prod scripts/whatsappKurulum.ts durum            numara + sablon durumu
  *   npx tsx --env-file=.env.prod scripts/whatsappKurulum.ts kaydet           numarayi Cloud API'ye kaydet (WHATSAPP_PIN, 6 hane)
- *   npx tsx --env-file=.env.prod scripts/whatsappKurulum.ts sablonlar        src/lib/whatsappSablonlari.ts -> Meta (onay: dakikalar-saatler)
+ *   npx tsx --env-file=.env.prod scripts/whatsappKurulum.ts sablonlar [ad]   src/lib/whatsappSablonlari.ts -> Meta (onay: dakikalar-saatler)
  *   npx tsx --env-file=.env.prod scripts/whatsappKurulum.ts test 05XXXXXXXXX dogrulama sablonu ile tek test mesaji
  * Gerekli: WHATSAPP_TOKEN, WHATSAPP_TELEFON_ID, WHATSAPP_WABA_ID.
  */
@@ -40,8 +40,10 @@ const komutlar: Record<string, () => Promise<void>> = {
     console.log("Numara Cloud API'ye kaydedildi.");
   },
 
+  // sablonlar [ad]: yalniz o sablon (onaylanmis olanlari yeniden gondermeden).
   async sablonlar() {
     for (const s of Object.values(SABLONLAR)) {
+      if (process.argv[3] && s.ad !== process.argv[3]) continue;
       const components =
         s.kategori === "AUTHENTICATION"
           ? [
@@ -51,7 +53,7 @@ const komutlar: Record<string, () => Promise<void>> = {
             ]
           : [
               { type: "BODY", text: s.govde, ...(s.ornek.length ? { example: { body_text: [s.ornek] } } : {}) },
-              { type: "BUTTONS", buttons: [{ type: "URL", text: s.buton.metin, url: `${SITE_URL}/{{1}}`, example: [`${SITE_URL}/${s.buton.ornekYol}`] }] },
+              ...("buton" in s ? [{ type: "BUTTONS", buttons: [{ type: "URL", text: s.buton.metin, url: `${SITE_URL}/{{1}}`, example: [`${SITE_URL}/${s.buton.ornekYol}`] }] }] : []),
             ];
       try {
         const r = await graph(`${waba}/message_templates`, { name: s.ad, language: "tr", category: s.kategori, components });
