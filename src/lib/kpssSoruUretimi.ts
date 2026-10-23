@@ -22,7 +22,7 @@ export const GECE_ADET = 10;
 const TAVAN_GUN = 30;
 // Uretim ucuz Flash ile; dogrulama daha guclu Pro ile (Flash kendi hatalarini yakalayamadi:
 // iki dogru sikli "hangisi yoktur" sorusu ve uydurma alinti testte gecmisti).
-const DOGRULAMA_MODEL = "gemini-pro-latest";
+export const DOGRULAMA_MODEL = "gemini-pro-latest";
 const HARF = ["A", "B", "C", "D", "E"];
 const soruAlanlari = {
   soruMetni: z.string(),
@@ -169,7 +169,7 @@ export function gorseliCiz(tur: GorselTur, g: unknown): { svg: string; tarif: st
   };
 }
 
-type Aday = {
+export type Aday = {
   duzey: Duzey;
   ders: DenemeDers;
   konu: string;
@@ -180,9 +180,9 @@ type Aday = {
   // Gorselin ham verisi saklanir (SVG eklenirken yeniden cizilir; harita SVG'leri buyuk).
   gorsel: { tur: GorselTur; veri: unknown; tarif: string } | null;
 };
-type UretimHedefi = Hedef & { duzey: Duzey; harfler: number[] };
+export type UretimHedefi = Hedef & { duzey: Duzey; harfler: number[] };
 
-async function uretimIstegi(h: UretimHedefi): Promise<InlinedRequest> {
+export async function uretimIstegi(h: UretimHedefi): Promise<InlinedRequest> {
   const mevcut = await prisma.denemeSoru.findMany({
     where: { duzey: h.duzey, ders: h.ders, konu: h.konu },
     select: { soruMetni: true, secenekler: true, dogruCevap: true, aciklama: true, gorselSvg: true },
@@ -217,7 +217,7 @@ async function uretimIstegi(h: UretimHedefi): Promise<InlinedRequest> {
 }
 
 /** Uretim yanitindan gecerli adaylar: bicim, soru koku ve gorsel tutarliligi kontrolu. */
-function adaylariAyikla(h: UretimHedefi, metin: string): Aday[] {
+export function adaylariAyikla(h: UretimHedefi, metin: string): Aday[] {
   const parsed = uretimSemasi(h.gorsel).safeParse(parseGeminiJson(metin));
   if (!parsed.success) throw new Error(`${h.konu}: üretim yanıtı okunamadı`);
   return parsed.data.sorular.flatMap((s): Aday[] => {
@@ -235,7 +235,7 @@ function adaylariAyikla(h: UretimHedefi, metin: string): Aday[] {
 }
 
 /** Cevap anahtari gosterilmeden, her sik ayri ayri degerlendirilerek cozdurme istegi. */
-function dogrulamaIstegi(a: Aday): InlinedRequest {
+export function dogrulamaIstegi(a: Aday): InlinedRequest {
   return {
     contents:
       `KPSS ${DUZEY_LABEL[a.duzey]} / ${DERS_LABEL[a.ders]} sorusu:\n\n${a.gorsel ? `[Soruyla verilen görsel] ${a.gorsel.tarif}\n\n` : ""}` +
@@ -255,7 +255,7 @@ function dogrulamaIstegi(a: Aday): InlinedRequest {
 }
 
 /** Kabul: tam olarak bir sik "dogru" isaretli, o sik verilen cevap ve anahtarla ayni, gercek kisiye atif yok. */
-function dogrulandi(a: Aday, metin: string) {
+export function dogrulandi(a: Aday, metin: string) {
   const k = KontrolSchema.safeParse(parseGeminiJson(metin));
   if (!k.success) return false;
   const dogrular = k.data.siklar.flatMap((x, i) => (x.dogruMu ? [i] : []));
