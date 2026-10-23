@@ -1,5 +1,5 @@
 /**
- * KPSS soru yazari / kontrolcu karsilastirmasi (veritabanina YAZMAZ). Her yazar ayni 12 Lisans hedefini ayni istemle
+ * KPSS soru yazari / kontrolcu karsilastirmasi (veritabanina YAZMAZ). Her yazar ayni 12 Lisans hedefini ayni istemle (canlidaki uretimIstemi)
  * yazar; her soru + tuzak sorular (kpssTuzakSorular.ts) 3 kontrolcuden gecer. Maliyet: OpenRouter'in bildirdigi gercek
  * tutar, Gemini icin token x liste fiyati. Cikti: <klasor>/karsilastirma.json + .md
  * Calistirma: npx tsx --env-file=.env scripts/kpssYazarKarsilastir.ts <klasor>
@@ -10,7 +10,7 @@ import { gemini, GEMINI_MODEL } from "../src/lib/gemini";
 import { parseGeminiJson } from "../src/lib/geminiSchema";
 import { prisma } from "../src/lib/prisma";
 import { DERS_LABEL, DUZEY_LABEL } from "../src/lib/kpssDenemeSabitler";
-import { adaylariAyikla, DOGRULAMA_MODEL, uretimIstegi, type Aday, type UretimHedefi } from "../src/lib/kpssSoruUretimi";
+import { adaylariAyikla, DOGRULAMA_MODEL, uretimIstemi, type Aday, type UretimHedefi } from "../src/lib/kpssSoruUretimi";
 import { TUZAKLAR } from "./kpssTuzakSorular";
 
 const YAZARLAR = [
@@ -40,13 +40,6 @@ const HEDEFLER: Omit<UretimHedefi, "harfler">[] = [
   { duzey: "LISANS", ders: "MATEMATIK", konu: "Sayısal Mantık", adet: 1 },
 ];
 
-// Ilk denemede sorular cok kolay cikti (cevap = parcadaki cumle, sacma celdirici): yazara eklenen zorluk talimati.
-const ZORLUK_TALIMATI =
-  "\n\nKPSS ZORLUĞU (çok önemli): Paragraf soruları 5-8 cümlelik, soyut ya da eleştirel üsluplu parçalar olsun; doğru cevap " +
-  "parçadaki bir cümlenin aynısı olmasın, yorum ve çıkarım gerektirsin. Çeldiriciler parçadaki kavramları kullanan, ilk bakışta " +
-  "doğru görünen ama kesin yanlış ifadeler olsun; saçma ya da konuyla ilgisiz çeldirici yazma. Bilgi soruları öncüllü (I, II, III) " +
-  "ya da kavramlar arası ilişki kuran türde olsun; tek adımlı ezber sorusu yazma. Mevzuat bilgisi 2026'daki güncel hâline göre olsun. " +
-  "Yazım ve noktalamada TDK kurallarına uy; yabancı sözcük ya da bozuk Türkçe kullanma.";
 const JSON_TALIMATI =
   '\n\nYalnız geçerli JSON döndür, başka metin yazma: {"sorular":[{"soruMetni":"...","secenekler":["...","...","...","...","..."],"dogruCevap":0,"aciklama":"..."}]} (dogruCevap 0-4 arası şık indeksi).';
 
@@ -135,7 +128,7 @@ async function kontrolEt(model: string, a: Pick<Aday, "duzey" | "ders" | "soruMe
   if (!klasor) throw new Error("klasor gerekli");
   let harf = 0;
   const hedefler: UretimHedefi[] = HEDEFLER.map((h) => ({ ...h, harfler: Array.from({ length: h.adet }, () => harf++ % 5) }));
-  const istekler = await Promise.all(hedefler.map(uretimIstegi));
+  const istekler = await Promise.all(hedefler.map(uretimIstemi));
 
   // 1) Yazarlar (her yazar kendi icinde 4 esanli istek).
   const yazilanlar = await Promise.all(
@@ -145,7 +138,7 @@ async function kontrolEt(model: string, a: Pick<Aday, "duzey" | "ders" | "soruMe
       const t0 = Date.now();
       const parcalar = await sinirli(hedefler.map((h, i) => [h, i] as const), 4, async ([h, i]) => {
         try {
-          const r = await cagir(yazar, String(istekler[i].config?.systemInstruction) + ZORLUK_TALIMATI + JSON_TALIMATI, String(istekler[i].contents));
+          const r = await cagir(yazar, istekler[i].sistem + JSON_TALIMATI, istekler[i].icerik);
           maliyet += r.maliyet;
           return adaylariAyikla(h, r.metin);
         } catch (e) {

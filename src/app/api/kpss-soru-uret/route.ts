@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { topluDongu } from "@/lib/kpssSoruUretimi";
+import { GUNCEL_KAYNAK, guncelUret, topluDongu } from "@/lib/kpssSoruUretimi";
 import { sablonGunluk } from "@/lib/kpssSablon";
 
 export const maxDuration = 300;
@@ -8,7 +8,8 @@ export const maxDuration = 300;
 const KAYNAK = "KPSS soru üretimi";
 
 /**
- * KPSS soru uretimi (Vercel Cron, 2 saatte bir): Gemini Batch islerini ilerletir (bkz. topluDongu).
+ * KPSS soru uretimi (Vercel Cron, 2 saatte bir): gunde bir sablon sorulari, OpenRouter/Gemini batch islerini ilerletir
+ * (bkz. topluDongu) ve gunde bir Guncel Bilgiler sorulari (zaman kalirsa; yoksa sonraki calismada).
  * Bir sey olduysa (is gonderildi/bitti ya da hata) Taramalar sayfasinda gorunsun diye ScrapeRun
  * kaydi tutar: postingsFound = dogrulamaya giden aday, positionsProcessed = eklenen. Bos calisma kaydedilmez.
  */
@@ -35,10 +36,20 @@ export async function GET(req: NextRequest) {
   try {
     ozet = await topluDongu();
   } catch (e) {
-    ozet = { uretilen: 0, eklenen: 0, gonderilen: 0, hatalar: [String(e).slice(0, 300)], tokenlar: [] };
+    ozet = { uretilen: 0, eklenen: 0, gonderilen: 0, hatalar: [String(e).slice(0, 300)], olcumler: [] };
   }
-  const { uretilen, eklenen, gonderilen, hatalar, tokenlar } = ozet;
-  if (!uretilen && !eklenen && !gonderilen && !hatalar.length && !tokenlar.length) return NextResponse.json({ ok: true, bos: true });
+  // Guncel uretimi aramali iki tur (~1-3 dk): batch isleri uzun surduyse sure sinirina takilmasin diye sonraki calismaya kalir.
+  if (Date.now() - baslangic.getTime() < 60_000) {
+    const guncelBaslangic = new Date();
+    const g = await guncelUret();
+    if (g) {
+      await prisma.scrapeRun.create({
+        data: { sourceName: GUNCEL_KAYNAK, status: g.hata ? "FAILED" : "SUCCESS", startedAt: guncelBaslangic, finishedAt: new Date(), positionsProcessed: g.eklenen, errorMessage: g.hata ?? null },
+      });
+    }
+  }
+  const { uretilen, eklenen, gonderilen, hatalar, olcumler } = ozet;
+  if (!uretilen && !eklenen && !gonderilen && !hatalar.length && !olcumler.length) return NextResponse.json({ ok: true, bos: true });
   const basarisiz = hatalar.length > 0 && !eklenen && !uretilen && !gonderilen;
   await prisma.scrapeRun.create({
     data: {

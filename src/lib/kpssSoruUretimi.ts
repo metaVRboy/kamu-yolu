@@ -6,22 +6,23 @@ import { parseGeminiJson, toGeminiResponseSchema } from "@/lib/geminiSchema";
 import { KONU_DAGILIMI } from "@/lib/kpssDenemeKonular";
 import { DERS_LABEL, DUZEY_LABEL } from "@/lib/kpssDenemeSabitler";
 import { geometriSekli, geometriSorunu, iklimGrafigi, IKLIM_ISTASYONLARI, IL_ADLARI, sutunGrafigi, sutunVerisiTutarli, turkiyeHaritasi, type GeometriSekli } from "@/lib/kpssGorsel";
-import { SABLONLAR } from "@/lib/kpssSablon";
+import { KONTROL_MODEL, topluGonder, topluSonuc, YAZAR_MODEL, type SohbetIstegi } from "@/lib/openrouter";
 import type { DenemeDers, EducationLevel, Prisma } from "@/generated/prisma/client";
 
 /**
- * Gece KPSS soru uretimi (Gemini Batch API, yari fiyat): her duzeyde havuzu en zayif konulara GECE_ADET soru ekler.
- * Her soru ayri bir istekle cevap anahtari gosterilmeden cozulur; cevap tutmazsa ya da tek
- * dogru sik yoksa atilir. Gorselli sorularda model SVG cizmez, yalniz veri verir (sekil koordinatlari,
- * grafik degerleri, il adlari, MGM istasyonu); veri tutarlilik kontrolunden gecer, gorsel kpssGorsel.ts
- * cizicileriyle cizilir ve dogrulayiciya gorselin metin tarifi verilir. Guncel Bilgiler uretilmez (eskiyen bilgi).
+ * Gunluk KPSS soru uretimi: her duzeyde gunluk denemenin tum konulari icin (gercek sinav dagilimi x FAZLA) yeni soru
+ * yazilir; boylece her gun 120 sorunun hepsi ilk kez cikar (Guncel Bilgiler guncelUret ile). Matematik de yazdirilir:
+ * sablonlarin sayisi konu adedi kadar, her gun ayni kaliplar donerdi (dunku sorunun sayilari degismis hali secilmez);
+ * sablonlar yedek havuz. Yazar ve dogrulayici DeepSeek V4.1 Flash, OpenRouter Batch API (yari fiyat); OpenRouter
+ * gonderemezse o gece Gemini Batch (Flash yazar, Pro dogrular). Her soru ayri bir istekle cevap anahtari
+ * gosterilmeden cozulur; cevap tutmazsa, tek dogru sik yoksa, dil hatasi varsa ya da cok kolaysa atilir.
+ * Gorselli sorularda model SVG cizmez, yalniz veri verir; veri kontrol edilip kpssGorsel.ts ile cizilir.
  */
-export const GECE_ADET = 10;
-// Konu basina havuz tavani: soru sayisi / denemedeki adet >= bu deger olan konuya uretilmez (sablonlar
-// ve gonderilen sorularla dolan konular Gemini maliyetini sifira indirir).
-const TAVAN_GUN = 30;
-// Uretim ucuz Flash ile; dogrulama daha guclu Pro ile (Flash kendi hatalarini yakalayamadi:
-// iki dogru sikli "hangisi yoktur" sorusu ve uydurma alinti testte gecmisti).
+// Reddedilenler icin fazladan yazdirma (2026-10-23 tam hacim denemesi: adaylarin %72si kontrolden gecti).
+const FAZLA = 1.4;
+// Tek istekte en fazla bu kadar soru (uzun yanit kesilmesin).
+const PARCA = 5;
+// OpenRouter yokken (yedek yol) dogrulama Gemini Pro ile: Flash kendi sorularini fazla gecirdi (11/11).
 export const DOGRULAMA_MODEL = "gemini-pro-latest";
 const HARF = ["A", "B", "C", "D", "E"];
 const soruAlanlari = {
@@ -55,8 +56,11 @@ const KontrolSchema = z.object({
   siklar: z.array(z.object({ dogruMu: z.boolean(), gerekce: z.string() })).length(5),
   cevap: z.number().int().min(0).max(4),
   gercekKisiyeAtif: z.boolean(),
+  dilHatalari: z.string(),
+  zorluk: z.number().int().min(1).max(5),
   sorun: z.string(),
 });
+const jsonSemasi = (s: z.ZodType) => JSON.stringify(z.toJSONSchema(s));
 
 type Duzey = keyof typeof KONU_DAGILIMI;
 type Hedef = { ders: DenemeDers; konu: string; adet: number; gorsel?: GorselTur };
@@ -72,31 +76,26 @@ function gorselTuru(ders: DenemeDers, konu: string): [GorselTur, number] | null 
   return null;
 }
 
-/** Havuzu konu agirligina gore en zayif (soru sayisi / denemedeki adet en dusuk) konular; gorselli pay eksikse gorselli. */
-export async function hedefKonular(duzey: Duzey): Promise<Hedef[]> {
-  const sorular = await prisma.denemeSoru.findMany({ where: { duzey }, select: { ders: true, konu: true, gorselSvg: true, geometri: true } });
-  const adaylar = Object.entries(KONU_DAGILIMI[duzey]).flatMap(([ders, konular]) =>
-    konular
-      .filter(() => ders !== "GUNCEL")
-      .map(([konu, adet]) => ({ ders: ders as DenemeDers, konu, adet, sayi: sorular.filter((s) => s.ders === ders && s.konu === konu).length }))
-      // Sablonu olan konuyu kod bedava doldurur; tavandaki konu (sorulari ortalama TAVAN_GUN'de bir cikiyor) da uretilmez.
-      .filter((a) => !SABLONLAR.some((s) => s.duzey === duzey && (s.ders ?? "MATEMATIK") === a.ders && s.konu === a.konu) && a.sayi / a.adet < TAVAN_GUN),
-  );
-  const secim = new Map<string, Hedef>();
-  for (let i = 0; i < GECE_ADET && adaylar.length; i++) {
-    const a = adaylar.reduce((m, x) => (x.sayi / x.adet < m.sayi / m.adet ? x : m));
-    a.sayi++;
-    const k = `${a.ders}|${a.konu}`;
-    secim.set(k, { ders: a.ders, konu: a.konu, adet: (secim.get(k)?.adet ?? 0) + 1 });
+/**
+ * Gunun uretim hedefleri: her konu icin denemedeki adet x FAZLA; gorselli pay ayri istek; istekler PARCA'lik.
+ * Guncel Bilgiler burada degil (arama gerektirir, guncelUret).
+ */
+export function gunlukHedefler(duzey: Duzey): Hedef[] {
+  const hedefler: Hedef[] = [];
+  const parcala = (h: Omit<Hedef, "adet">, adet: number) => {
+    for (let k = adet; k > 0; k -= PARCA) hedefler.push({ ...h, adet: Math.min(PARCA, k) });
+  };
+  for (const [ders, konular] of Object.entries(KONU_DAGILIMI[duzey]) as [DenemeDers, [string, number][]][]) {
+    if (ders === "GUNCEL") continue;
+    for (const [konu, adet] of konular) {
+      const gerek = Math.round(adet * FAZLA);
+      const tur = gorselTuru(ders, konu);
+      const gorselli = tur ? Math.round(gerek * tur[1]) : 0;
+      parcala({ ders, konu }, gerek - gorselli);
+      if (tur) parcala({ ders, konu, gorsel: tur[0] }, gorselli);
+    }
   }
-  return [...secim.values()].flatMap((h) => {
-    const tur = gorselTuru(h.ders, h.konu);
-    if (!tur) return [h];
-    const konununki = sorular.filter((s) => s.ders === h.ders && s.konu === h.konu);
-    const gorselli = konununki.filter((s) => s.gorselSvg || s.geometri).length;
-    const g = Math.min(h.adet, Math.max(0, Math.ceil(tur[1] * (konununki.length + h.adet)) - gorselli));
-    return [{ ...h, adet: h.adet - g }, { ...h, adet: g, gorsel: tur[0] }].filter((x) => x.adet > 0);
-  });
+  return hedefler;
 }
 
 const iklimVerisi = (i: string) => `sıcaklık (°C, Ocak→Aralık) ${IKLIM_ISTASYONLARI[i].sicaklik.join(" ")}; yağış (mm) ${IKLIM_ISTASYONLARI[i].yagis.join(" ")}`;
@@ -182,7 +181,17 @@ export type Aday = {
 };
 export type UretimHedefi = Hedef & { duzey: Duzey; harfler: number[] };
 
-export async function uretimIstegi(h: UretimHedefi): Promise<InlinedRequest> {
+// Ilk OpenRouter denemesinde sorular cok kolaydi (cevap = parcadaki cumle, sacma celdirici); bu talimatla
+// DeepSeek'in 12 sorusu KPSS ayarinda cikti (2026-10-23).
+const ZORLUK_TALIMATI =
+  "KPSS ZORLUĞU (çok önemli): Paragraf soruları 5-8 cümlelik, soyut ya da eleştirel üsluplu parçalar olsun; doğru cevap " +
+  "parçadaki bir cümlenin aynısı olmasın, yorum ve çıkarım gerektirsin. Çeldiriciler parçadaki kavramları kullanan, ilk bakışta " +
+  "doğru görünen ama kesin yanlış ifadeler olsun; saçma ya da konuyla ilgisiz çeldirici yazma. Bilgi soruları öncüllü (I, II, III) " +
+  "ya da kavramlar arası ilişki kuran türde olsun; tek adımlı ezber sorusu yazma. Mevzuat bilgisi güncel hâline göre olsun. " +
+  "Yazım ve noktalamada TDK kurallarına uy; yabancı sözcük ya da bozuk Türkçe kullanma.";
+
+/** Yazar istemi (saglayicidan bagimsiz): havuzdan 2 ornek + benzeri yazilmasin diye mevcut sorular. */
+export async function uretimIstemi(h: UretimHedefi): Promise<SohbetIstegi> {
   const mevcut = await prisma.denemeSoru.findMany({
     where: { duzey: h.duzey, ders: h.ders, konu: h.konu },
     select: { soruMetni: true, secenekler: true, dogruCevap: true, aciklama: true, gorselSvg: true },
@@ -190,31 +199,36 @@ export async function uretimIstegi(h: UretimHedefi): Promise<InlinedRequest> {
   const benzer = mevcut.filter((m) => !!m.gorselSvg === !!h.gorsel);
   const ornekler = [...(benzer.length ? benzer : mevcut)].sort(() => Math.random() - 0.5).slice(0, 2);
   return {
-    contents:
+    icerik:
       `Düzey: KPSS ${DUZEY_LABEL[h.duzey]}. Ders: ${DERS_LABEL[h.ders]}. Konu: ${h.konu}.\n` +
       `${h.adet} yeni ${h.gorsel ? "görselli " : ""}soru yaz. Doğru cevaplar sırasıyla şu şıklarda olsun: ${h.harfler.map((i) => HARF[i]).join(", ")}.\n\n` +
       `Üslup ve zorluk için örnekler (bunları tekrar etme):\n${ornekler
         .map((o) => `---\n${o.soruMetni}\n${o.secenekler.map((s, i) => `${HARF[i]}) ${s}`).join("\n")}\nCevap: ${HARF[o.dogruCevap]}\nAçıklama: ${o.aciklama ?? ""}`)
         .join("\n")}\n\n` +
-      `Havuzda zaten olan sorular (benzerini yazma):\n${mevcut.slice(0, 25).map((m) => `- ${m.soruMetni.replace(/\s+/g, " ").slice(0, 140)}`).join("\n")}`,
-    config: {
-      systemInstruction:
-        "ÖSYM KPSS sınavı için özgün çoktan seçmeli soru yazarısın. Kurallar: Türkçe ve ÖSYM üslubunda yaz; gerçek ÖSYM sorularını " +
-        "kopyalama. soruMetni parçayı/öncülleri VE soru kökünü içerir ve soru işaretiyle (?) biter. Her sorunun 5 şıkkı olur ve " +
-        "yalnız BİR şık kesin doğrudur; çeldiriciler makul ama kesin yanlıştır. 'Hangisi yoktur / değildir / yanlıştır' türünde " +
-        "diğer dört şıkkın gerçekten doğru olduğunu tek tek kontrol et. Şıklara 'A)' gibi harf yazma. Soru metnine soru numarası koyma. " +
-        (h.gorsel ? "" : "Görsel, tablo ya da şekil gerektiren ifade koyma. ") +
-        "Gerçek kişilere söz, alıntı ya da görüş atfetme. Bilgi soruları yalnız " +
-        "kesin ve tartışmasız bilgiye dayanır; tarih, sayı ve isimlerden emin değilsen o soruyu yazma. Zorluk örneklerdeki düzeyde " +
-        "olsun (çok adımlı, gerçek sınav kadar). Açıklama, doğru cevabın neden doğru olduğunu kısaca gösterir. " +
-        "Matematik yazımı (sitede üst simge/kesir olarak çizilir): üs her zaman süslü parantezle 2^{x+1} ya da x^{2}; kök " +
-        "√{x − 8}; bileşik kesir {pay|payda}; eksi işareti −. ^ işaretini parantezsiz ya da (…) ile yazma." +
-        (h.gorsel ? `\n\n${GORSEL_TALIMATI[h.gorsel]}` : ""),
-      responseMimeType: "application/json",
-      responseSchema: toGeminiResponseSchema(uretimSemasi(h.gorsel)),
-    },
+      `Havuzda zaten olan sorular (benzerini yazma):\n${[...mevcut].sort(() => Math.random() - 0.5).slice(0, 25).map((m) => `- ${m.soruMetni.replace(/\s+/g, " ").slice(0, 140)}`).join("\n")}`,
+    sistem:
+      "ÖSYM KPSS sınavı için özgün çoktan seçmeli soru yazarısın. Kurallar: Türkçe ve ÖSYM üslubunda yaz; gerçek ÖSYM sorularını " +
+      "kopyalama. soruMetni parçayı/öncülleri VE soru kökünü içerir ve soru işaretiyle (?) biter. Her sorunun 5 şıkkı olur ve " +
+      "yalnız BİR şık kesin doğrudur; çeldiriciler makul ama kesin yanlıştır. 'Hangisi yoktur / değildir / yanlıştır' türünde " +
+      "diğer dört şıkkın gerçekten doğru olduğunu tek tek kontrol et. Şıklara 'A)' gibi harf yazma. Soru metnine soru numarası koyma. " +
+      (h.gorsel ? "" : "Görsel, tablo ya da şekil gerektiren ifade koyma. ") +
+      "Gerçek kişilere söz, alıntı ya da görüş atfetme. Bilgi soruları yalnız " +
+      "kesin ve tartışmasız bilgiye dayanır; tarih, sayı ve isimlerden emin değilsen o soruyu yazma. Açıklama, doğru cevabın neden " +
+      "doğru olduğunu kısaca gösterir. Matematik yazımı (sitede üst simge/kesir olarak çizilir): üs her zaman süslü parantezle " +
+      "2^{x+1} ya da x^{2}; kök √{x − 8}; bileşik kesir {pay|payda}; eksi işareti −. ^ işaretini parantezsiz ya da (…) ile yazma.\n\n" +
+      ZORLUK_TALIMATI +
+      (h.gorsel ? `\n\n${GORSEL_TALIMATI[h.gorsel]}` : ""),
   };
 }
+
+export const uretimIstegiOR = async (h: UretimHedefi): Promise<SohbetIstegi> => {
+  const i = await uretimIstemi(h);
+  return { ...i, sistem: `${i.sistem}\n\nYalnız bu JSON şemasına uyan JSON döndür, başka metin yazma: ${jsonSemasi(uretimSemasi(h.gorsel))}` };
+};
+const uretimIstegiGemini = async (h: UretimHedefi): Promise<InlinedRequest> => {
+  const i = await uretimIstemi(h);
+  return { contents: i.icerik, config: { systemInstruction: i.sistem, responseMimeType: "application/json", responseSchema: toGeminiResponseSchema(uretimSemasi(h.gorsel)) } };
+};
 
 /** Uretim yanitindan gecerli adaylar: bicim, soru koku ve gorsel tutarliligi kontrolu. */
 export function adaylariAyikla(h: UretimHedefi, metin: string): Aday[] {
@@ -234,32 +248,70 @@ export function adaylariAyikla(h: UretimHedefi, metin: string): Aday[] {
   });
 }
 
-/** Cevap anahtari gosterilmeden, her sik ayri ayri degerlendirilerek cozdurme istegi. */
-export function dogrulamaIstegi(a: Aday): InlinedRequest {
+// Dil ve zorluk alanlari 2026-10-23'te eklendi: dogrulayicilar yalniz dogruluga bakiyordu, bozuk Turkce ("océanı",
+// "diplomasik") ve cok kolay sorular geciyordu. Zorluk esigi 2: gercek KPSS ayarindaki sorulara bile 2 verildi.
+const KONTROL_TALIMATI =
+  "Bu bir KPSS sorusu; titiz bir soru denetçisisin. Soruyu adım adım çöz, sonra her şıkkı AYRI AYRI değerlendir: siklar[i].dogruMu " +
+  "o şık sorunun istediği cevapsa true. 'Hangisi yoktur/değildir/yanlıştır' türünde diğer şıkların gerçekten doğru olduğunu tek tek kanıtla. " +
+  "cevap: doğru şıkkın indeksi (A=0 ... E=4). gercekKisiyeAtif: soruda gerçek bir kişiye söz, alıntı ya da görüş atfediliyorsa true. " +
+  "dilHatalari: yazım, noktalama, dil bilgisi hataları, yabancı ya da uydurma sözcükler (yoksa boş). zorluk: gerçek ÖSYM KPSS sorusuna " +
+  "göre 1 (çok kolay, cevap parçada aynen yazıyor ya da çeldiriciler saçma) ... 5 (çok zor). sorun: soru kökü eksikse, öncülde ya da " +
+  "seçeneklerde bilgi yanlışsa, bilgi eskimişse (güncel mevzuata göre), veri yetersizse ya da birden fazla/hiç doğru şık varsa kısaca nedeni; " +
+  "yoksa boş. Soruyla bir görsel verildiyse tarifi başta yazar: yalnız öğrencinin görselde görebileceği bilgiyi kullan; soru görselle " +
+  "çözülemiyorsa ya da görselle çelişiyorsa sorun yaz.";
+
+/** Cevap anahtari gosterilmeden, her sik ayri ayri degerlendirilerek cozdurme istemi. */
+export function dogrulamaIstemi(a: Pick<Aday, "duzey" | "ders" | "soruMetni" | "secenekler" | "gorsel">): SohbetIstegi {
   return {
-    contents:
+    icerik:
       `KPSS ${DUZEY_LABEL[a.duzey]} / ${DERS_LABEL[a.ders]} sorusu:\n\n${a.gorsel ? `[Soruyla verilen görsel] ${a.gorsel.tarif}\n\n` : ""}` +
       `${a.soruMetni}\n\n${a.secenekler.map((x, i) => `${HARF[i]}) ${x}`).join("\n")}`,
-    config: {
-      systemInstruction:
-        "Bu bir KPSS sorusu; titiz bir soru denetçisisin. Soruyu adım adım çöz, sonra her şıkkı AYRI AYRI değerlendir: siklar[i].dogruMu " +
-        "o şık sorunun istediği cevapsa true. 'Hangisi yoktur/değildir/yanlıştır' türünde, diğer şıkların metinde gerçekten " +
-        "bulunduğunu/doğru olduğunu tek tek kanıtla. cevap: doğru şıkkın indeksi (A=0 ... E=4). gercekKisiyeAtif: soruda gerçek " +
-        "bir kişiye söz, alıntı ya da görüş atfediliyorsa true. sorun: soru kökü eksikse, bilgi yanlışsa, veri yetersizse ya da " +
-        "birden fazla/hiç doğru şık varsa kısaca nedeni; yoksa boş. Soruyla bir görsel verildiyse tarifi başta yazar: yalnız öğrencinin " +
-        "görselde görebileceği bilgiyi kullan; soru görselle çözülemiyorsa ya da görselle çelişiyorsa sorun yaz.",
-      responseMimeType: "application/json",
-      responseSchema: toGeminiResponseSchema(KontrolSchema),
-    },
+    sistem: KONTROL_TALIMATI,
   };
 }
+export const dogrulamaIstegiOR = (a: Aday): SohbetIstegi => {
+  const i = dogrulamaIstemi(a);
+  return { ...i, sistem: `${i.sistem}\n\nYalnız bu JSON şemasına uyan JSON döndür: ${jsonSemasi(KontrolSchema)}` };
+};
+const dogrulamaIstegiGemini = (a: Aday): InlinedRequest => {
+  const i = dogrulamaIstemi(a);
+  return { contents: i.icerik, config: { systemInstruction: i.sistem, responseMimeType: "application/json", responseSchema: toGeminiResponseSchema(KontrolSchema) } };
+};
 
-/** Kabul: tam olarak bir sik "dogru" isaretli, o sik verilen cevap ve anahtarla ayni, gercek kisiye atif yok. */
-export function dogrulandi(a: Aday, metin: string) {
+/** Kabul: tek dogru sik, o sik anahtarla ayni, gercek kisiye atif yok, dil hatasi yok, cok kolay degil, sorun yok. */
+export function dogrulandi(a: Pick<Aday, "dogruCevap">, metin: string) {
   const k = KontrolSchema.safeParse(parseGeminiJson(metin));
   if (!k.success) return false;
   const dogrular = k.data.siklar.flatMap((x, i) => (x.dogruMu ? [i] : []));
-  return dogrular.length === 1 && dogrular[0] === k.data.cevap && k.data.cevap === a.dogruCevap && !k.data.gercekKisiyeAtif && !k.data.sorun.trim();
+  return (
+    dogrular.length === 1 && dogrular[0] === k.data.cevap && k.data.cevap === a.dogruCevap && !k.data.gercekKisiyeAtif && !k.data.dilHatalari.trim() && k.data.zorluk >= 2 && !k.data.sorun.trim()
+  );
+}
+
+const kelimeler = (s: { soruMetni: string; secenekler: string[] }) => new Set([s.soruMetni, ...s.secenekler].join(" ").toLocaleLowerCase("tr").match(/\p{L}{3,}/gu) ?? []);
+/** Kelime kumesi benzerligi (Jaccard): havuzdaki bir soruyla %60'tan fazla ortak kelime = ayni sorunun benzeri. */
+function benzerMi(a: Set<string>, b: Set<string>) {
+  let ortak = 0;
+  for (const k of a) if (b.has(k)) ortak++;
+  return ortak / (a.size + b.size - ortak || 1) > 0.6;
+}
+
+/** Benzerini havuzda ya da ayni partide bulunan adaylari atar (ayni konu + duzey icinde). */
+async function benzerleriAt(adaylar: Aday[]): Promise<Aday[]> {
+  const havuz = new Map<string, Set<string>[]>();
+  const kalan: Aday[] = [];
+  for (const a of adaylar) {
+    const k = `${a.duzey}|${a.konu}`;
+    if (!havuz.has(k)) {
+      const mevcut = await prisma.denemeSoru.findMany({ where: { duzey: a.duzey as EducationLevel, konu: a.konu }, select: { soruMetni: true, secenekler: true } });
+      havuz.set(k, mevcut.map(kelimeler));
+    }
+    const ka = kelimeler(a);
+    if (havuz.get(k)!.some((m) => benzerMi(ka, m))) continue;
+    havuz.get(k)!.push(ka);
+    kalan.push(a);
+  }
+  return kalan;
 }
 
 // Batch yanitlari duz nesne gelir (.text getter'i yok): dusunce olmayan parcalar birlestirilir.
@@ -277,85 +329,184 @@ const tokenlar = (yanitlar: InlinedResponse[]) =>
 
 const SURUYOR = new Set(["JOB_STATE_QUEUED", "JOB_STATE_PENDING", "JOB_STATE_RUNNING", "JOB_STATE_UPDATING", "JOB_STATE_PAUSED"]);
 const DUZEYLER: Duzey[] = ["LISANS", "ONLISANS", "LISE"];
+// OpenRouter batch kimlikleri "batch-" ile, Gemini'ninkiler "batches/" ile baslar.
+const openRouterMu = (ad: string) => ad.startsWith("batch-");
+
+/** Bir isin sonucu: metinler (istek sirasiyla) + maliyet bilgisi; suruyorsa null. */
+async function isSonucu(ad: string): Promise<{ metinler: string[]; olcum: Record<string, number> } | { hata: string } | null> {
+  if (openRouterMu(ad)) {
+    const r = await topluSonuc(ad);
+    if (r.durum === "suruyor") return null;
+    return r.durum === "hata" ? { hata: r.mesaj } : { metinler: r.metinler, olcum: { maliyet: r.maliyet } };
+  }
+  const job = await gemini.batches.get({ name: ad });
+  if (SURUYOR.has(job.state ?? "")) return null;
+  if (job.state !== "JOB_STATE_SUCCEEDED") return { hata: `${job.state}: ${job.error?.message ?? ""}`.slice(0, 200) };
+  const yanitlar = job.dest?.inlinedResponses ?? [];
+  return { metinler: yanitlar.map(yanitMetni), olcum: tokenlar(yanitlar) };
+}
+
+/** Dogrulama isi: uretim hangi saglayicidaysa orada; OpenRouter gonderemezse Gemini. */
+async function dogrulamaGonder(adaylar: Aday[], openRouter: boolean, hatalar: string[]) {
+  if (openRouter) {
+    try {
+      return await topluGonder(KONTROL_MODEL, adaylar.map(dogrulamaIstegiOR));
+    } catch (e) {
+      hatalar.push(`OpenRouter doğrulama gönderilemedi, Gemini'ye geçildi: ${String(e).slice(0, 150)}`);
+    }
+  }
+  const d = await gemini.batches.create({ model: DOGRULAMA_MODEL, src: adaylar.map(dogrulamaIstegiGemini), config: { displayName: "kpss-dogrulama" } });
+  return d.name!;
+}
 
 /**
- * Cron'un her calismasi (2 saatte bir): biten batch islerini isler (uretim -> adaylar dogrulama isine,
- * dogrulama -> gecenler havuza), son uretim isi 23 saatten eskiyse yenisini gonderir.
+ * Cron'un her calismasi (2 saatte bir): biten batch islerini isler (uretim -> benzer olmayan adaylar dogrulamaya,
+ * dogrulama -> gecenler havuza), son uretim isi 23 saatten eskiyse (ya da zorla) gunun hedeflerini gonderir.
  */
-export async function topluDongu() {
-  const ozet = { uretilen: 0, eklenen: 0, gonderilen: 0, hatalar: [] as string[], tokenlar: [] as { tur: string; giris: number; cikis: number }[] };
+export async function topluDongu(zorla = false) {
+  const ozet = { uretilen: 0, eklenen: 0, gonderilen: 0, hatalar: [] as string[], olcumler: [] as Record<string, number | string>[] };
   for (const is of await prisma.kpssTopluIs.findMany({ where: { durum: "BEKLIYOR" }, orderBy: { olusturma: "asc" } })) {
-    const job = await gemini.batches.get({ name: is.ad });
-    if (SURUYOR.has(job.state ?? "")) continue;
+    // Saglayici 48 saatte bitirmediyse (OpenRouter en gec 24 saat soyler) is kapatilir; ertesi gun yenisi gider.
+    const sonuc = (await isSonucu(is.ad)) ?? (Date.now() - is.olusturma.getTime() > 48 * 3600_000 ? { hata: "48 saatte bitmedi" } : null);
+    if (!sonuc) continue;
     // Ust uste binen iki calisma ayni isi iki kez islemesin.
     if ((await prisma.kpssTopluIs.updateMany({ where: { id: is.id, durum: "BEKLIYOR" }, data: { durum: "ISLENIYOR" } })).count !== 1) continue;
-    if (job.state !== "JOB_STATE_SUCCEEDED") {
-      ozet.hatalar.push(`${is.tur} işi ${job.state}: ${job.error?.message ?? ""}`.slice(0, 200));
-      await prisma.kpssTopluIs.update({ where: { id: is.id }, data: { durum: "HATA", bitis: new Date(), sonuc: { durum: job.state ?? null } } });
+    if ("hata" in sonuc) {
+      ozet.hatalar.push(`${is.tur} işi ${sonuc.hata}`);
+      await prisma.kpssTopluIs.update({ where: { id: is.id }, data: { durum: "HATA", bitis: new Date(), sonuc: { durum: sonuc.hata } } });
       continue;
     }
-    const yanitlar = job.dest?.inlinedResponses ?? [];
-    const t = tokenlar(yanitlar);
-    ozet.tokenlar.push({ tur: is.tur, ...t });
-    let sonuc: Record<string, number>;
+    ozet.olcumler.push({ tur: is.tur, ...sonuc.olcum });
+    let ozetIs: Record<string, number>;
     if (is.tur === "uretim") {
-      const adaylar = (is.veri as unknown as UretimHedefi[]).flatMap((h, i) => {
+      const ham = (is.veri as unknown as UretimHedefi[]).flatMap((h, i) => {
         try {
-          return adaylariAyikla(h, yanitMetni(yanitlar[i]));
+          return adaylariAyikla(h, sonuc.metinler[i] ?? "");
         } catch (e) {
           ozet.hatalar.push(String(e).slice(0, 200));
           return [];
         }
       });
+      const adaylar = await benzerleriAt(ham);
       ozet.uretilen += adaylar.length;
       if (adaylar.length) {
-        const d = await gemini.batches.create({ model: DOGRULAMA_MODEL, src: adaylar.map(dogrulamaIstegi), config: { displayName: "kpss-dogrulama" } });
-        await prisma.kpssTopluIs.create({ data: { ad: d.name!, tur: "dogrulama", veri: adaylar as unknown as Prisma.InputJsonValue } });
+        const ad = await dogrulamaGonder(adaylar, openRouterMu(is.ad), ozet.hatalar);
+        await prisma.kpssTopluIs.create({ data: { ad, tur: "dogrulama", veri: adaylar as unknown as Prisma.InputJsonValue } });
       }
-      sonuc = { aday: adaylar.length };
+      ozetIs = { aday: ham.length, benzerAtilan: ham.length - adaylar.length };
     } else {
       const adaylar = is.veri as unknown as Aday[];
-      let eklenen = 0;
-      for (const [i, a] of adaylar.entries()) {
-        if (!dogrulandi(a, yanitMetni(yanitlar[i]))) continue;
-        if (await prisma.denemeSoru.findFirst({ where: { duzey: a.duzey, soruMetni: a.soruMetni }, select: { id: true } })) continue;
-        await prisma.denemeSoru.create({
-          data: {
-            duzey: a.duzey as EducationLevel,
-            ders: a.ders,
-            konu: a.konu,
-            soruMetni: a.soruMetni,
-            secenekler: a.secenekler,
-            dogruCevap: a.dogruCevap,
-            aciklama: a.aciklama,
-            gorselSvg: a.gorsel ? gorseliCiz(a.gorsel.tur, a.gorsel.veri)!.svg : null,
-            geometri: GEOMETRI_KONULARI.has(a.konu),
-            uretim: "gemini",
-            sira: 99_999,
-          },
-        });
-        eklenen++;
-      }
-      ozet.eklenen += eklenen;
-      sonuc = { aday: adaylar.length, eklenen };
+      const gecenler = adaylar.filter((a, i) => dogrulandi(a, sonuc.metinler[i] ?? ""));
+      const varOlan = new Set(
+        (await prisma.denemeSoru.findMany({ where: { soruMetni: { in: gecenler.map((a) => a.soruMetni) } }, select: { duzey: true, soruMetni: true } })).map((s) => `${s.duzey}|${s.soruMetni}`),
+      );
+      const yeni = gecenler.filter((a) => !varOlan.has(`${a.duzey}|${a.soruMetni}`));
+      await prisma.denemeSoru.createMany({
+        data: yeni.map((a) => ({
+          duzey: a.duzey as EducationLevel,
+          ders: a.ders,
+          konu: a.konu,
+          soruMetni: a.soruMetni,
+          secenekler: a.secenekler,
+          dogruCevap: a.dogruCevap,
+          aciklama: a.aciklama,
+          gorselSvg: a.gorsel ? gorseliCiz(a.gorsel.tur, a.gorsel.veri)!.svg : null,
+          geometri: GEOMETRI_KONULARI.has(a.konu),
+          uretim: openRouterMu(is.ad) ? "deepseek" : "gemini",
+          sira: 99_999,
+        })),
+      });
+      ozet.eklenen += yeni.length;
+      ozetIs = { aday: adaylar.length, eklenen: yeni.length };
     }
-    await prisma.kpssTopluIs.update({ where: { id: is.id }, data: { durum: "BITTI", bitis: new Date(), sonuc: { ...sonuc, ...t } } });
+    await prisma.kpssTopluIs.update({ where: { id: is.id }, data: { durum: "BITTI", bitis: new Date(), sonuc: { ...ozetIs, ...sonuc.olcum } } });
   }
 
   const son = await prisma.kpssTopluIs.findFirst({ where: { tur: "uretim" }, orderBy: { olusturma: "desc" }, select: { olusturma: true } });
-  if (!son || Date.now() - son.olusturma.getTime() > 23 * 3600_000) {
+  if (zorla || !son || Date.now() - son.olusturma.getTime() > 23 * 3600_000) {
     const hedefler: UretimHedefi[] = [];
     for (const duzey of DUZEYLER) {
-      // Dogru sik harfleri dengeli dagilsin: bugune kadarki gemini sorulari uzerinden sirayla.
-      let harf = await prisma.denemeSoru.count({ where: { duzey, uretim: "gemini" } });
-      for (const h of await hedefKonular(duzey)) hedefler.push({ ...h, duzey, harfler: Array.from({ length: h.adet }, () => harf++ % 5) });
+      // Dogru sik harfleri dengeli dagilsin: bugune kadarki uretilen sorular uzerinden sirayla.
+      let harf = await prisma.denemeSoru.count({ where: { duzey, uretim: { in: ["gemini", "deepseek"] } } });
+      for (const h of gunlukHedefler(duzey)) hedefler.push({ ...h, duzey, harfler: Array.from({ length: h.adet }, () => harf++ % 5) });
     }
-    // Butun konular tavandaysa is gonderilmez (bos batch API'de hata verir).
     if (hedefler.length) {
-      const u = await gemini.batches.create({ model: GEMINI_MODEL, src: await Promise.all(hedefler.map(uretimIstegi)), config: { displayName: "kpss-uretim" } });
-      await prisma.kpssTopluIs.create({ data: { ad: u.name!, tur: "uretim", veri: hedefler as unknown as Prisma.InputJsonValue } });
+      let ad: string;
+      try {
+        ad = await topluGonder(YAZAR_MODEL, await Promise.all(hedefler.map(uretimIstegiOR)));
+      } catch (e) {
+        ozet.hatalar.push(`OpenRouter üretim gönderilemedi, Gemini'ye geçildi: ${String(e).slice(0, 150)}`);
+        ad = (await gemini.batches.create({ model: GEMINI_MODEL, src: await Promise.all(hedefler.map(uretimIstegiGemini)), config: { displayName: "kpss-uretim" } })).name!;
+      }
+      await prisma.kpssTopluIs.create({ data: { ad, tur: "uretim", veri: hedefler as unknown as Prisma.InputJsonValue } });
       ozet.gonderilen = hedefler.reduce((t, h) => t + h.adet, 0);
     }
   }
   return ozet;
+}
+
+const GUNCEL_ADET = 8;
+const GuncelSchema = z.object({ sorular: z.array(z.object(soruAlanlari)) });
+
+/**
+ * Gunluk Guncel Bilgiler sorulari (her duzeye ayni GUNCEL_ADET soru): Gemini Google aramasiyla son 3 ayin dogrulanmis
+ * olaylarindan yazar, her soru ayrica aramayla kontrol edilir (uydurma/eskimis bilgi riski diger derslerden yuksek).
+ * 23 saatte bir (basarisiz olsa da gunde bir deneme); arama Gemini 3'te ayda 5.000 istege kadar ucretsiz (gunde ~9 istek).
+ */
+export const GUNCEL_KAYNAK = "KPSS güncel soruları";
+
+/** null: bugun zaten denendi (basarisiz deneme de sayilir; ScrapeRun kaydi cagiranda). */
+export async function guncelUret(): Promise<{ eklenen: number; hata?: string } | null> {
+  if (await prisma.scrapeRun.findFirst({ where: { sourceName: GUNCEL_KAYNAK, startedAt: { gt: new Date(Date.now() - 23 * 3600_000) } }, select: { id: true } })) return null;
+  const bugun = new Intl.DateTimeFormat("tr-TR", { dateStyle: "long", timeZone: "Europe/Istanbul" }).format(new Date());
+  const mevcut = await prisma.denemeSoru.findMany({ where: { ders: "GUNCEL", duzey: "LISANS" }, orderBy: { olusturmaTarihi: "desc" }, take: 40, select: { soruMetni: true } });
+  const ara = { tools: [{ googleSearch: {} }], abortSignal: AbortSignal.timeout(110_000) };
+  try {
+    const r = await gemini.models.generateContent({
+      model: GEMINI_MODEL,
+      contents:
+        `Bugün ${bugun}. Son 3 ayda Türkiye'de ve dünyada gerçekleşmiş, KPSS Güncel Bilgiler sorusu olabilecek ${GUNCEL_ADET} farklı olayı ` +
+        "(uluslararası kuruluşlar, zirveler, anlaşmalar, ödüller, spor, bilim, kültür, Türkiye'deki önemli kurumsal gelişmeler) Google'da " +
+        `doğrulayarak ${GUNCEL_ADET} soru yaz. Her bilgiyi en az bir güvenilir kaynakta doğrula; emin olmadığın olayı kullanma. ` +
+        `Daha önce sorulanlar (tekrarlama):\n${mevcut.map((m) => `- ${m.soruMetni.slice(0, 120)}`).join("\n")}\n\n` +
+        `5 şık, tek doğru; soru metni soru işaretiyle biter; şıklara harf yazma. Yalnız JSON döndür: ${jsonSemasi(GuncelSchema)}`,
+      config: { ...ara, systemInstruction: "ÖSYM KPSS Güncel Bilgiler soru yazarısın. Siyasi görüş, parti ve tartışmalı konu sorma." },
+    });
+    const parsed = GuncelSchema.safeParse(parseGeminiJson(r.text));
+    if (!parsed.success) return { eklenen: 0, hata: "Güncel: üretim yanıtı okunamadı" };
+    const adaylar = parsed.data.sorular.filter((s) => /\?\s*$/.test(s.soruMetni.trim()) && new Set(s.secenekler).size === 5);
+    const kontroller = await Promise.all(
+      adaylar.map(async (s) => {
+        const i = dogrulamaIstemi({ duzey: "LISANS", ders: "GUNCEL", soruMetni: s.soruMetni, secenekler: s.secenekler, gorsel: null });
+        try {
+          const k = await gemini.models.generateContent({
+            model: GEMINI_MODEL,
+            contents: i.icerik,
+            config: { ...ara, systemInstruction: `${i.sistem} Bilgileri Google aramasıyla doğrula (bugün ${bugun}). Yalnız JSON döndür: ${jsonSemasi(KontrolSchema)}` },
+          });
+          return dogrulandi(s, k.text ?? "");
+        } catch {
+          return false;
+        }
+      }),
+    );
+    // Model dogru cevabi hep A'ya koyuyor (2026-10-23: 7/7): sorudan soruya A..E sirayla, dogru sik o yere tasinir.
+    let harf = await prisma.denemeSoru.count({ where: { duzey: "LISANS", uretim: "guncel" } });
+    const gecenler = adaylar
+      .filter((_, i) => kontroller[i])
+      .map((s) => {
+        const hedef = harf++ % 5;
+        const secenekler = [...s.secenekler];
+        [secenekler[s.dogruCevap], secenekler[hedef]] = [secenekler[hedef], secenekler[s.dogruCevap]];
+        return { ...s, secenekler, dogruCevap: hedef };
+      });
+    await prisma.denemeSoru.createMany({
+      data: DUZEYLER.flatMap((duzey) =>
+        gecenler.map((s) => ({ duzey: duzey as EducationLevel, ders: "GUNCEL" as const, konu: "Güncel Bilgiler", soruMetni: s.soruMetni.trim(), secenekler: s.secenekler.map((x) => x.trim()), dogruCevap: s.dogruCevap, aciklama: s.aciklama.trim(), uretim: "guncel", sira: 99_999 })),
+      ),
+    });
+    return { eklenen: gecenler.length * DUZEYLER.length };
+  } catch (e) {
+    return { eklenen: 0, hata: `Güncel: ${String(e).slice(0, 200)}` };
+  }
 }

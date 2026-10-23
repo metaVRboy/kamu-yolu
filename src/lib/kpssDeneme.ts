@@ -4,6 +4,8 @@ import { dersKarnesi, konuAnalizi, type KonuDurumu } from "@/lib/kpssDenemeAnali
 import { DERS_SIRASI, DERS_DAGILIMI, DERS_LABEL, DUZEY_LABEL, SINAV_SURESI_DK, type ExamSoru } from "@/lib/kpssDenemeSabitler";
 import { KONU_DAGILIMI } from "@/lib/kpssDenemeKonular";
 
+const GUNCEL_TAZE_GUN = 120;
+
 /** Turkiye takvim gunu (sunucu hangi saat diliminde calisirsa calissin). */
 export function bugununTarihi(): Date {
   const parcalar = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Istanbul" }).formatToParts(new Date());
@@ -13,8 +15,8 @@ export function bugununTarihi(): Date {
   return new Date(`${y}-${m}-${d}T00:00:00.000Z`);
 }
 
-// sonKullanim: sorunun en son ciktigi gunun zamani (hic cikmadiysa 0).
-type Aday = { id: string; sira: number; grupId: string | null; konu: string | null; kalip?: string | null; sonKullanim: number };
+// sonKullanim: sorunun (kalibinin) en son ciktigi gunun zamani (hic cikmadiysa 0); kendi: sorunun kendisinin.
+type Aday = { id: string; sira: number; grupId: string | null; konu: string | null; kalip?: string | null; sonKullanim: number; kendi?: number };
 
 /**
  * Sorunun kalibi: sablon kimligi ya da sayilari silinmis metin + siklar. Yalniz sayilari farkli iki soru (sablon
@@ -36,8 +38,9 @@ export function enAzKullanilanlar(adaylar: Aday[], adet: number): Aday[] {
   const birimMap = new Map<string, Aday[]>();
   for (const a of adaylar) birimMap.set(a.grupId ?? a.id, [...(birimMap.get(a.grupId ?? a.id) ?? []), a]);
   const birimler = [...birimMap.values()]
-    .map((b) => ({ b, kullanim: Math.max(...b.map((x) => x.sonKullanim)), r: Math.random() }))
-    .sort((x, y) => x.kullanim - y.kullanim || x.r - y.r)
+    // Ayni kaliptaki sorular (sablonun varyantlari) esit kalir; aralarinda hic cikmamis yeni varyant once gelir.
+    .map((b) => ({ b, kullanim: Math.max(...b.map((x) => x.sonKullanim)), kendi: Math.max(...b.map((x) => x.kendi ?? 0)), r: Math.random() }))
+    .sort((x, y) => x.kullanim - y.kullanim || x.kendi - y.kendi || x.r - y.r)
     .map((x) => x.b);
   const secim: Aday[][] = [];
   const kaliplar = new Set<string>();
@@ -83,14 +86,19 @@ export async function getBugununDenemesi(duzey: EducationLevel) {
     const ham = (
       await prisma.denemeSoru.findMany({
         where: { duzey, ders },
-        select: { id: true, sira: true, grupId: true, konu: true, sablon: true, soruMetni: true, secenekler: true },
+        select: { id: true, sira: true, grupId: true, konu: true, sablon: true, soruMetni: true, secenekler: true, olusturmaTarihi: true },
       })
-    ).map(({ id, sira, grupId, konu, ...m }) => ({ id, sira, grupId, konu, kalip: kalipAnahtari(m) }));
+    ).map(({ id, sira, grupId, konu, olusturmaTarihi, ...m }) => ({ id, sira, grupId, konu, olusturmaTarihi, kalip: kalipAnahtari(m) }));
     // Bir kaliptan herhangi bir soru yakinda ciktiysa kaliptaki her soru o kadar yeni sayilir (dunku sorunun
     // sayilari degismis hali bugun gelmesin).
     const kalipSon = new Map<string, number>();
     for (const a of ham) kalipSon.set(a.kalip, Math.max(kalipSon.get(a.kalip) ?? 0, sonKullanim.get(a.id) ?? 0));
-    const adaylar = ham.map((a) => ({ ...a, sonKullanim: kalipSon.get(a.kalip)! }));
+    let adaylar = ham.map((a) => ({ ...a, sonKullanim: kalipSon.get(a.kalip)!, kendi: sonKullanim.get(a.id) ?? 0 }));
+    // Guncel Bilgiler eskir: yeterince yeni (GUNCEL_TAZE_GUN) soru varsa eskiler secilmez.
+    if (ders === "GUNCEL") {
+      const taze = adaylar.filter((a) => tarih.getTime() - a.olusturmaTarihi.getTime() < GUNCEL_TAZE_GUN * 86_400_000);
+      if (taze.length >= DERS_DAGILIMI[ders]) adaylar = taze;
+    }
     const secilen = dagilim[ders].flatMap(([konu, adet]) => enAzKullanilanlar(adaylar.filter((a) => a.konu === konu), adet));
     // Bir konunun havuzu eksikse ders yine tam sayida olsun: dersin kalan en az kullanilanlariyla tamamlanir.
     const eksik = DERS_DAGILIMI[ders] - secilen.length;
