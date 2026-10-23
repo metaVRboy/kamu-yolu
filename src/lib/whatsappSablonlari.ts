@@ -12,11 +12,13 @@ export type MesajTuru = "DOGRULAMA" | "ILAN" | "BECAYIS";
 export const SABLONLAR = {
   // Dogrulama govdesini Meta hazir verir (kod + guvenlik uyarisi); buradaki yalniz kayit/test metni.
   DOGRULAMA: { ad: "kamuyolu_dogrulama", kategori: "AUTHENTICATION", govde: "{{1}} doğrulama kodunuzdur. Güvenliğiniz için bu kodu kimseyle paylaşmayın.", ornek: ["123456"] },
+  // Ilk surum (kamuyolu_yeni_ilan, "Sana ozel ilanlarin...") Meta'ca PAZARLAMA sayildi (~10 kat pahali, siklik siniri,
+  // ticari ileti riski). Bu surum kullanicinin actigi bildirimin islemsel bildirimi: bolum adi + kapatma yolu.
   ILAN: {
-    ad: "kamuyolu_yeni_ilan",
+    ad: "kamuyolu_ilan_bildirimi",
     kategori: "UTILITY",
-    govde: "Bölümüne uygun {{1}} yeni kamu ilanı yayımlandı. Sana özel ilanların Kamu Yolu profilinde.",
-    ornek: ["3"],
+    govde: "Kamu Yolu ilan bildirimin: Takip ettiğin {{1}} bölümüne uygun {{2}} yeni ilan eklendi. Bu bildirimi hesap ayarlarından istediğin zaman kapatabilirsin.",
+    ornek: ["Hemşirelik", "3"],
     buton: { metin: "İlanları gör", ornekYol: "profilim" },
   },
   BECAYIS: {

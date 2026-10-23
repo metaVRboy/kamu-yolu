@@ -39,6 +39,7 @@ export async function GET(req: NextRequest) {
       whatsappIzinTarihi: true,
       epostaIlanBildirimi: true,
       epostaIlanKapsam: true,
+      department: { select: { name: true } },
     },
   });
 
@@ -64,7 +65,7 @@ export async function GET(req: NextRequest) {
       // Izinden onceki ilanlar WhatsApp'tan gelmez.
       const yeni = await yeniIlanlar(k.id, Math.max(sonMesaj?.kapsamSonu?.getTime() ?? 0, k.whatsappIzinTarihi?.getTime() ?? 0));
       if (yeni.length) {
-        await whatsappGonder({ userId: k.id, telefon: k.telefon, tur: "ILAN", kapsamSonu: yeni[0].createdAt, degerler: [String(yeni.length)], yol: "profilim" });
+        await whatsappGonder({ userId: k.id, telefon: k.telefon, tur: "ILAN", kapsamSonu: yeni[0].createdAt, degerler: [k.department?.name ?? "seçtiğin", String(yeni.length)], yol: "profilim" });
         whatsapp++;
       }
     }
