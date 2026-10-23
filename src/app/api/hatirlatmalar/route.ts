@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createBildirim } from "@/lib/notifications";
-import { aktifProKosulu } from "@/lib/whatsapp";
+import { aktifProKosulu, faydaSablonuOnayli, whatsappGonder } from "@/lib/whatsapp";
+import { SABLONLAR } from "@/lib/whatsappSablonlari";
 import { pushGonder } from "@/lib/push";
 import { bugununTarihi } from "@/lib/kpssDeneme";
 import { slugify } from "@/lib/slug";
@@ -9,6 +10,7 @@ import { slugify } from "@/lib/slug";
 export const maxDuration = 120;
 
 const GUN_MS = 86_400_000;
+const TARIH = new Intl.DateTimeFormat("tr-TR", { dateStyle: "long", timeZone: "Europe/Istanbul" });
 
 function yetkili(req: NextRequest) {
   const secret = process.env.CRON_SECRET;
@@ -17,7 +19,7 @@ function yetkili(req: NextRequest) {
 
 /**
  * Gunluk hatirlatmalar (vercel.json): ?tur=ilan 10:00 TR, takip edilen ilanlarin son basvurusuna 3 gun ve 1 gun
- * kala (Pro: site bildirimi + tarayici bildirimi; her esik bir kez; WhatsApp yalniz ilan eslesmesi + becayis icin). ?tur=seri 19:00 TR,
+ * kala (Pro: site bildirimi + tarayici bildirimi + WhatsApp izni varsa WhatsApp; her esik bir kez). ?tur=seri 19:00 TR,
  * bugun gunun sorularini cozmemis tarayici bildirimi abonelerine hatirlatma. Sonuc Taramalar sayfasina yazilir.
  */
 export async function GET(req: NextRequest) {
@@ -41,6 +43,8 @@ export async function GET(req: NextRequest) {
 async function ilanHatirlat() {
   const simdi = Date.now();
   let gonderilen = 0;
+  // WhatsApp hatirlatmasi yalniz sablon Meta'da fayda olarak onayliysa (pazarlama ucreti odenmez); sabah 10:00, sessiz saat disi.
+  const whatsappUygun = await faydaSablonuOnayli(SABLONLAR.HATIRLATMA.ad);
   for (const [alan, gun] of [["hatirlatma1", 1], ["hatirlatma3", 3]] as const) {
     const takipler = await prisma.ilanTakip.findMany({
       where: {
@@ -50,7 +54,7 @@ async function ilanHatirlat() {
       },
       include: {
         posting: { select: { id: true, title: true, institutionName: true, applicationEnd: true } },
-        user: { select: { id: true, pushAbonelikleri: true } },
+        user: { select: { id: true, pushAbonelikleri: true, telefon: true, telefonDogrulandi: true, whatsappIlanBildirimi: true } },
       },
     });
     for (const t of takipler) {
@@ -62,6 +66,10 @@ async function ilanHatirlat() {
       const link = `/ilan/${t.posting.id}/${slugify(t.posting.title)}`;
       await createBildirim({ userId: t.userId, tur: "ILAN_HATIRLATMA", baslik, icerik: t.posting.title, link });
       await pushGonder(t.user.pushAbonelikleri, { baslik, govde: t.posting.title, link });
+      if (whatsappUygun && t.user.whatsappIlanBildirimi && t.user.telefonDogrulandi && t.user.telefon) {
+        const tarih = TARIH.format(t.posting.applicationEnd!);
+        await whatsappGonder({ userId: t.userId, telefon: t.user.telefon, tur: "HATIRLATMA", degerler: [t.posting.title.slice(0, 80), tarih, String(kalan)], yol: link.slice(1) });
+      }
       gonderilen++;
     }
   }

@@ -96,6 +96,24 @@ async function mesajGonder(telefon: string, icerik: object): Promise<string> {
   return String(id);
 }
 
+/**
+ * Sablon Meta'da FAYDA olarak onayli mi. Meta turu kendisi belirler (ilan sablonunu pazarlama saydi): pazarlama
+ * ucretiyle gonderilmesin diye gondermeden once sorulur. Anahtar yoksa (test modu) true: kayit TEST olarak yazilir.
+ */
+export async function faydaSablonuOnayli(ad: string): Promise<boolean> {
+  if (!whatsappTanimli()) return true;
+  try {
+    const res = await fetch(`${GRAPH}/${process.env.WHATSAPP_WABA_ID}/message_templates?name=${ad}&fields=name,status,category`, {
+      headers: { Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}` },
+      signal: AbortSignal.timeout(10_000),
+    });
+    const s = (await res.json())?.data?.find((t: { name: string }) => t.name === ad);
+    return s?.status === "APPROVED" && s?.category === "UTILITY";
+  } catch {
+    return false;
+  }
+}
+
 /** Bu kullaniciya bu turde son `ms` icinde kac mesaj kaydi olustu (limitler icin). */
 export async function sonMesajSayisi(userId: string, tur: MesajTuru, ms: number): Promise<number> {
   return prisma.whatsappGonderim.count({ where: { userId, tur, olusturma: { gt: new Date(Date.now() - ms) } } });

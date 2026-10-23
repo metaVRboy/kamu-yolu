@@ -1,7 +1,7 @@
 // Istemci bilesenleri de kullanir (ornek mesaj): prisma iceren whatsapp.ts'ten ayri.
 
-// WhatsApp yalniz kisiye ozel ilan + becayis bildirimi (kullanici karari 2026-10-22); DOGRULAMA numara icin sart.
-export type MesajTuru = "DOGRULAMA" | "ILAN" | "BECAYIS";
+// WhatsApp: yeni ilan bildirimi + takip edilen ilanin son basvuru hatirlatmasi + becayis mesaji; DOGRULAMA numara icin.
+export type MesajTuru = "DOGRULAMA" | "ILAN" | "HATIRLATMA" | "BECAYIS";
 
 /**
  * Meta onayli WhatsApp sablonlari (isletme baslatan mesaj serbest metin olamaz). scripts/whatsappKurulum.ts
@@ -12,14 +12,23 @@ export type MesajTuru = "DOGRULAMA" | "ILAN" | "BECAYIS";
 export const SABLONLAR = {
   // Dogrulama govdesini Meta hazir verir (kod + guvenlik uyarisi); buradaki yalniz kayit/test metni.
   DOGRULAMA: { ad: "kamuyolu_dogrulama", kategori: "AUTHENTICATION", govde: "{{1}} doğrulama kodunuzdur. Güvenliğiniz için bu kodu kimseyle paylaşmayın.", ornek: ["123456"] },
-  // Ilk surum (kamuyolu_yeni_ilan, "Sana ozel ilanlarin...") Meta'ca PAZARLAMA sayildi (~10 kat pahali, siklik siniri,
-  // ticari ileti riski). Bu surum kullanicinin actigi bildirimin islemsel bildirimi: bolum adi + kapatma yolu.
+  // Kullanici karari: pazarlama OLMAYACAK, fayda (bilgilendirme). Meta iki metni pazarlama saydi (2026-10-23); bu ucuncu
+  // metin "talebin uzerine" ile basliyor. Meta yine pazarlama derse gonderilmez: ilan-bildirimi sablonun Meta'daki
+  // turunu sorar, UTILITY + APPROVED degilse WhatsApp atlanir (e-posta + site devam).
   ILAN: {
-    ad: "kamuyolu_ilan_bildirimi",
+    ad: "kamuyolu_yeni_ilan_bildirimi",
     kategori: "UTILITY",
-    govde: "Kamu Yolu ilan bildirimin: Takip ettiğin {{1}} bölümüne uygun {{2}} yeni ilan eklendi. Bu bildirimi hesap ayarlarından istediğin zaman kapatabilirsin.",
-    ornek: ["Hemşirelik", "3"],
+    govde: "Merhaba {{1}}, talebin üzerine Kamu Yolu ilan bildirimini gönderiyoruz: Takip ettiğin {{2}} bölümüne uygun {{3}} yeni ilan eklendi. Bu bildirimi hesap ayarlarından istediğin zaman kapatabilirsin.",
+    ornek: ["Ayşe", "Hemşirelik", "3"],
     buton: { metin: "İlanları gör", ornekYol: "profilim" },
+  },
+  // Hesaba ozel hatirlatma (Meta'nin fayda ornegi: "odemeniz su tarihte..." hatirlatmasina benzer); yeni icerik duyurmaz.
+  HATIRLATMA: {
+    ad: "kamuyolu_son_basvuru_hatirlatma",
+    kategori: "UTILITY",
+    govde: "Hatırlatma: Kamu Yolu'nda takip ettiğin \"{{1}}\" ilanının son başvuru tarihi {{2}}. Kalan süre: {{3}} gün.",
+    ornek: ["Sağlık Bakanlığı Sözleşmeli Personel Alımı", "26 Ekim 2026", "3"],
+    buton: { metin: "İlana git", ornekYol: "ilan/ornek" },
   },
   BECAYIS: {
     ad: "kamuyolu_becayis_mesaji",

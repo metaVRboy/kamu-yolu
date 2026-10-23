@@ -2,16 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { kacis, sendEmail } from "@/lib/email";
 import { SITE_URL } from "@/lib/site";
-import { aktifProKosulu, sessizSaatMi, sonMesajSayisi, whatsappGonder } from "@/lib/whatsapp";
+import { aktifProKosulu, faydaSablonuOnayli, sessizSaatMi, sonMesajSayisi, whatsappGonder } from "@/lib/whatsapp";
+import { SABLONLAR } from "@/lib/whatsappSablonlari";
 
 export const maxDuration = 120;
 
 const GUN_MS = 24 * 60 * 60 * 1000;
 const GUNLUK_ILAN_MESAJ_SINIRI = 3;
 const EPOSTA_ILAN_SINIRI = 10;
-// Meta ilan sablonunu (iki metinle de) PAZARLAMA saydi: ~10 kat pahali + ticari ileti riski. Kullanici itiraz etti
-// (2026-10-23, son tarih 23.12.2026); FAYDA olarak onaylanana kadar ilan bildirimi yalniz e-posta + site.
-const WHATSAPP_ILAN_ACIK = false;
 
 function isAuthorized(req: NextRequest): boolean {
   const secret = process.env.CRON_SECRET ?? process.env.SCRAPE_SECRET;
@@ -53,12 +51,14 @@ export async function GET(req: NextRequest) {
       select: { icerik: true, createdAt: true },
     });
 
+  // Ilan bildirimi pazarlama ucretiyle gitmez (kullanici karari): sablon Meta'da fayda olarak onayli degilse WhatsApp atlanir.
+  const whatsappIlanUygun = await faydaSablonuOnayli(SABLONLAR.ILAN.ad);
   let whatsapp = 0;
   let eposta = 0;
   // ponytail: kullanici basina sirali dongu; ~300 alicidan sonra maxDuration'a yaklasir. O zaman: e-posta Resend
   // batch (100/istek) + WhatsApp esanli havuz (Meta 80 mesaj/sn) ya da kuyruk.
   for (const k of kullanicilar) {
-    if (WHATSAPP_ILAN_ACIK && k.whatsappIlanBildirimi && k.telefonDogrulandi && k.telefon && (await sonMesajSayisi(k.id, "ILAN", GUN_MS)) < GUNLUK_ILAN_MESAJ_SINIRI) {
+    if (whatsappIlanUygun && k.whatsappIlanBildirimi && k.telefonDogrulandi && k.telefon && (await sonMesajSayisi(k.id, "ILAN", GUN_MS)) < GUNLUK_ILAN_MESAJ_SINIRI) {
       // Isaret yalniz Meta'nin kabul ettigi mesajdan: HATA (ör. gunluk alici siniri) olan ilanlar sonraki turda yeniden denenir.
       const sonMesaj = await prisma.whatsappGonderim.findFirst({
         where: { userId: k.id, tur: "ILAN", kapsamSonu: { not: null }, durum: { not: "HATA" } },
@@ -68,7 +68,7 @@ export async function GET(req: NextRequest) {
       // Izinden onceki ilanlar WhatsApp'tan gelmez.
       const yeni = await yeniIlanlar(k.id, Math.max(sonMesaj?.kapsamSonu?.getTime() ?? 0, k.whatsappIzinTarihi?.getTime() ?? 0));
       if (yeni.length) {
-        await whatsappGonder({ userId: k.id, telefon: k.telefon, tur: "ILAN", kapsamSonu: yeni[0].createdAt, degerler: [k.department?.name ?? "seçtiğin", String(yeni.length)], yol: "profilim" });
+        await whatsappGonder({ userId: k.id, telefon: k.telefon, tur: "ILAN", kapsamSonu: yeni[0].createdAt, degerler: [k.adSoyad.trim().split(/\s+/)[0], k.department?.name ?? "seçtiğin", String(yeni.length)], yol: "profilim" });
         whatsapp++;
       }
     }

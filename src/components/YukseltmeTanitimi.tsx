@@ -244,7 +244,7 @@ function slaytlar(v: Veri): Slayt[] {
             <span className="ml-auto">örnek</span>
           </div>
           <p className="mt-1.5 text-[13px] leading-snug">
-            {SABLONLAR.ILAN.govde.replace("{{1}}", b?.ad ?? "Hemşirelik").replace("{{2}}", String(ornekSayi))}
+            {SABLONLAR.ILAN.govde.replace("{{1}}", "Ayşe").replace("{{2}}", b?.ad ?? "Hemşirelik").replace("{{3}}", String(ornekSayi))}
           </p>
           <p className="mt-2 border-t border-slate-200 pt-1.5 text-center text-[13px] font-semibold text-[#027eb5]">{SABLONLAR.ILAN.buton.metin}</p>
         </div>
