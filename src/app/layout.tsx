@@ -52,7 +52,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: "Kamu Yolu — Bölümüne Göre Kamu İlanları",
   description:
-    "Mezun olduğun bölümü seç, o bölüme uygun ve bölüm şartı olmayan güncel kamu personeli/memur ilanlarını listele.",
+    "Mezun olduğun bölümü seç; o bölüme uygun ve bölüm şartı olmayan güncel kamu personeli, memur ve sözleşmeli personel ilanlarını listele.",
   // Gorsel: app/opengraph-image.png (dosya kurali, tum sayfalara uygulanir).
   openGraph: { siteName: "Kamu Yolu", locale: "tr_TR", type: "website" },
   twitter: { card: "summary_large_image" },

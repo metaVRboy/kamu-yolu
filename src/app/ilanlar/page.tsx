@@ -10,7 +10,7 @@ export const revalidate = 300;
 
 export const metadata = {
   title: "Tüm İlanlar — Kamu Yolu",
-  description: "Sistemdeki tüm güncel kamu personeli/memur ilanları.",
+  description: "Sistemdeki tüm güncel kamu personeli, memur ve sözleşmeli personel ilanları.",
 };
 
 export default async function TumIlanlarPage({
